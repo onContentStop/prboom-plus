@@ -1055,6 +1055,7 @@ static void R_DrawPSprite (pspdef_t *psp)
   else
     // e6y: original code is restored
     vis->colormap = spritelights[MAXLIGHTSCALE-1];  // local light
+  vis->translation = NULL;
 
   //e6y: interpolation for weapon bobbing
   if (movement_smooth)
