@@ -43,6 +43,7 @@
 #include "p_pspr.h"
 #include "lprintf.h"
 #include "e6y.h"//e6y
+#include "v_trans.h"
 
 #define BASEYCENTER 100
 
@@ -543,6 +544,11 @@ static void R_DrawVisSprite(vissprite_t *vis)
         dcvars.translation = translationtables - 256 +
           ((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
       }
+	else if (vis->translation)
+	{
+      colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, filter, filterz);
+	  dcvars.translation = vis->translation;
+	}
     else
       if (vis->mobjflags & MF_TRANSLUCENT && general_translucency) // phares
         {
@@ -790,6 +796,7 @@ static void R_ProjectSprite (mobj_t* thing, int lightlevel)
 
   // killough 3/27/98: save sector for special clipping later
   vis->heightsec = heightsec;
+  vis->translation = NULL;
 
   vis->mobjflags = thing->flags;
 // proff 11/06/98: Changed for high-res
@@ -831,6 +838,17 @@ static void R_ProjectSprite (mobj_t* thing, int lightlevel)
         index = MAXLIGHTSCALE - 1;
       vis->colormap = spritelights[index];
     }
+  if ((thing->type == MT_BLOOD || thing->state - states == S_GIBS) && thing->target)
+  {
+	if (thing->target->type == MT_BRUISER || thing->target->type == MT_KNIGHT)
+	{
+	  vis->translation = cr[CR_RED2GREEN];
+	}
+	else if (thing->target->type == MT_HEAD)
+	{
+	  vis->translation = cr[CR_RED2BLUE];
+	}
+  }
 }
 
 //

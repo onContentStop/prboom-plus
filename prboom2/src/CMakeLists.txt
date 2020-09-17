@@ -160,6 +160,8 @@ set(COMMON_SRC
     umapinfo.h
     version.c
     version.h
+    v_trans.c
+    v_trans.h
     v_video.c
     v_video.h
     wi_stuff.c

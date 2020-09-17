@@ -904,6 +904,8 @@ mobj_t* P_SpawnMobj(fixed_t x,fixed_t y,fixed_t z,mobjtype_t type)
   else
     if (type == MT_PLAYER)         // Except in old demos, players
       mobj->flags |= MF_FRIEND;    // are always friends.
+  if (type == MT_SKULL)
+	mobj->flags |= MF_NOBLOOD;
 
   mobj->health = info->spawnhealth;
 
@@ -1449,6 +1451,9 @@ spawnit:
   if (options & MTF_AMBUSH)
     mobj->flags |= MF_AMBUSH;
 
+  if (i == MT_SKULL)
+	mobj->flags |= MF_NOBLOOD;
+
   // RjY
   // Print a warning when a solid hanging body is used in a sector where
   // the player can walk under it, to help people with map debugging
@@ -1498,15 +1503,20 @@ void P_SpawnPuff(fixed_t x,fixed_t y,fixed_t z)
 //
 // P_SpawnBlood
 //
-void P_SpawnBlood(fixed_t x,fixed_t y,fixed_t z,int damage)
+void P_SpawnBlood(fixed_t x,fixed_t y,fixed_t z,int damage, mobj_t* target)
 {
   mobj_t* th;
-  // killough 5/5/98: remove dependence on order of evaluation:
   int t = P_Random(pr_spawnblood);
+  // killough 5/5/98: remove dependence on order of evaluation:
   z += (t - P_Random(pr_spawnblood))<<10;
+  if (target->type == MT_SKULL)
+	return;
   th = P_SpawnMobj(x,y,z, MT_BLOOD);
   th->momz = FRACUNIT*2;
   th->tics -= P_Random(pr_spawnblood)&3;
+  th->target = target;
+  if (target->type == MT_SHADOWS)
+	th->flags |= MF_SHADOW;
 
   if (th->tics < 1)
     th->tics = 1;

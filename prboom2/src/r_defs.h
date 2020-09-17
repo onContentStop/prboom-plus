@@ -401,6 +401,7 @@ typedef struct vissprite_s
 
   // killough 3/27/98: height sector for underwater/fake ceiling support
   int heightsec;
+  byte* translation;
 } vissprite_t;
 
 //
