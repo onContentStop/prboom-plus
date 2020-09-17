@@ -4,3 +4,7 @@ prboom2/data/prboom.wad
 prboom2/release
 /build*
 /dependencies*
+# my build dir
+prboom2/build
+# temp files
+*~
