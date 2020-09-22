@@ -46,15 +46,15 @@
 
 #include <math.h>
 
-#include "v_video.h"
-#include "r_main.h"
-#include "gl_intern.h"
-#include "w_wad.h"
-#include "lprintf.h"
-#include "p_spec.h"
-#include "m_misc.h"
-#include "sc_man.h"
 #include "e6y.h"
+#include "gl_intern.h"
+#include "lprintf.h"
+#include "m_misc.h"
+#include "p_spec.h"
+#include "r_main.h"
+#include "sc_man.h"
+#include "v_video.h"
+#include "w_wad.h"
 
 int render_usedetail;
 int gl_allow_detail_textures;
@@ -68,34 +68,27 @@ int scene_has_details;
 int scene_has_wall_details;
 int scene_has_flat_details;
 
-typedef enum
-{
+typedef enum {
   TAG_DETAIL_WALL,
   TAG_DETAIL_FLAT,
   TAG_DETAIL_MAX,
 } tag_detail_e;
 
-static const char *DetailItem_Keywords[TAG_DETAIL_MAX + 1] =
-{
-  "walls",
-  "flats",
-  NULL
-};
+static const char *DetailItem_Keywords[TAG_DETAIL_MAX + 1] = {"walls", "flats",
+                                                              NULL};
 
 static GLuint last_detail_texid = -1;
 
-float xCamera,yCamera,zCamera;
+float xCamera, yCamera, zCamera;
 TAnimItemParam *anim_flats = NULL;
 TAnimItemParam *anim_textures = NULL;
 
 void gld_ShutdownDetail(void);
 
-void M_ChangeUseDetail(void)
-{
+void M_ChangeUseDetail(void) {
   render_usedetail = false;
 
-  if (V_GetMode() == VID_MODEGL)
-  {
+  if (V_GetMode() == VID_MODEGL) {
     render_usedetail = gl_allow_detail_textures;
     gld_EnableDetail(true);
     gld_EnableDetail(false);
@@ -103,8 +96,8 @@ void M_ChangeUseDetail(void)
   }
 }
 
-float distance2piece(float x0, float y0, float x1, float y1, float x2, float y2)
-{
+float distance2piece(float x0, float y0, float x1, float y1, float x2,
+                     float y2) {
   float t, w;
   float x01 = x0 - x1;
   float x02 = x0 - x2;
@@ -113,14 +106,12 @@ float distance2piece(float x0, float y0, float x1, float y1, float x2, float y2)
   float y02 = y0 - y2;
   float y21 = y2 - y1;
 
-  if((x01 * x21 + y01 * y21) * (x02 * x21 + y02 * y21) > 0.0001f)
-  {
+  if ((x01 * x21 + y01 * y21) * (x02 * x21 + y02 * y21) > 0.0001f) {
     t = x01 * x01 + y01 * y01;
     w = x02 * x02 + y02 * y02;
-    if (w < t) t = w;
-  }
-  else
-  {
+    if (w < t)
+      t = w;
+  } else {
     float i1 = x01 * y21 - y01 * x21;
     float i2 = x21 * x21 + y21 * y21;
     t = (i1 * i1) / i2;
@@ -129,34 +120,27 @@ float distance2piece(float x0, float y0, float x1, float y1, float x2, float y2)
   return t;
 }
 
-int gld_IsDetailVisible(float x0, float y0, float x1, float y1, float x2, float y2)
-{
-  if (gl_detail_maxdist_sqrt == 0)
-  {
+int gld_IsDetailVisible(float x0, float y0, float x1, float y1, float x2,
+                        float y2) {
+  if (gl_detail_maxdist_sqrt == 0) {
     return true;
-  }
-  else
-  {
+  } else {
     return (distance2piece(x0, y0, x1, y1, x2, y2) < gl_detail_maxdist_sqrt);
   }
 }
 
-void gld_InitDetail(void)
-{
+void gld_InitDetail(void) {
   gl_detail_maxdist_sqrt = (float)sqrt((float)gl_detail_maxdist);
 
   atexit(gld_ShutdownDetail);
   M_ChangeUseDetail();
 }
 
-void gld_ShutdownDetail(void)
-{
+void gld_ShutdownDetail(void) {
   int i;
 
-  if (details)
-  {
-    for (i = 0; i < details_count; i++)
-    {
+  if (details) {
+    for (i = 0; i < details_count; i++) {
       glDeleteTextures(1, &details[i].texid);
     }
 
@@ -167,45 +151,43 @@ void gld_ShutdownDetail(void)
   }
 }
 
-void gld_DrawTriangleStripARB(GLWall *wall, gl_strip_coords_t *c1, gl_strip_coords_t *c2)
-{
+void gld_DrawTriangleStripARB(GLWall *wall, gl_strip_coords_t *c1,
+                              gl_strip_coords_t *c2) {
   glBegin(GL_TRIANGLE_STRIP);
 
   // lower left corner
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB,(const GLfloat*)&c1->t[0]); 
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB,(const GLfloat*)&c2->t[0]);
-  glVertex3fv((const GLfloat*)&c1->v[0]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, (const GLfloat *)&c1->t[0]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, (const GLfloat *)&c2->t[0]);
+  glVertex3fv((const GLfloat *)&c1->v[0]);
 
   // split left edge of wall
-  //if (!wall->glseg->fracleft)
+  // if (!wall->glseg->fracleft)
   //  gld_SplitLeftEdge(wall, true);
 
   // upper left corner
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB,(const GLfloat*)&c1->t[1]);
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB,(const GLfloat*)&c2->t[1]);
-  glVertex3fv((const GLfloat*)&c1->v[1]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, (const GLfloat *)&c1->t[1]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, (const GLfloat *)&c2->t[1]);
+  glVertex3fv((const GLfloat *)&c1->v[1]);
 
   // upper right corner
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB,(const GLfloat*)&c1->t[2]); 
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB,(const GLfloat*)&c2->t[2]);
-  glVertex3fv((const GLfloat*)&c1->v[2]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, (const GLfloat *)&c1->t[2]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, (const GLfloat *)&c2->t[2]);
+  glVertex3fv((const GLfloat *)&c1->v[2]);
 
   // split right edge of wall
-  //if (!wall->glseg->fracright)
+  // if (!wall->glseg->fracright)
   //  gld_SplitRightEdge(wall, true);
 
   // lower right corner
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB,(const GLfloat*)&c1->t[3]); 
-  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB,(const GLfloat*)&c2->t[3]);
-  glVertex3fv((const GLfloat*)&c1->v[3]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, (const GLfloat *)&c1->t[3]);
+  GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, (const GLfloat *)&c2->t[3]);
+  glVertex3fv((const GLfloat *)&c1->v[3]);
 
   glEnd();
 }
 
-void gld_PreprocessDetail(void)
-{
-  if (gl_arb_multitexture)
-  {
+void gld_PreprocessDetail(void) {
+  if (gl_arb_multitexture) {
     GLEXT_glClientActiveTextureARB(GL_TEXTURE0_ARB);
 #if defined(USE_VERTEX_ARRAYS) || defined(USE_VBO)
     glTexCoordPointer(2, GL_FLOAT, sizeof(flats_vbo[0]), flats_vbo_u);
@@ -224,9 +206,7 @@ void gld_PreprocessDetail(void)
   }
 }
 
-
-void gld_EnableDetail(int enable)
-{
+void gld_EnableDetail(int enable) {
   if (!gl_arb_multitexture || !render_usedetail)
     return;
 
@@ -234,19 +214,18 @@ void gld_EnableDetail(int enable)
   gld_EnableClientCoordArray(GL_TEXTURE1_ARB, enable);
 }
 
-void gld_DrawWallWithDetail(GLWall *wall)
-{
+void gld_DrawWallWithDetail(GLWall *wall) {
   float w, h, dx, dy;
-  dboolean fake = (wall->flag == GLDWF_TOPFLUD) || (wall->flag == GLDWF_BOTFLUD);
+  dboolean fake =
+      (wall->flag == GLDWF_TOPFLUD) || (wall->flag == GLDWF_BOTFLUD);
   detail_t *detail = wall->gltexture->detail;
-  
+
   w = wall->gltexture->detail_width;
   h = wall->gltexture->detail_height;
   dx = detail->offsetx;
   dy = detail->offsety;
 
-  if (fake)
-  {
+  if (fake) {
     int i;
     gl_strip_coords_t c1;
     gl_strip_coords_t c2;
@@ -256,8 +235,7 @@ void gld_DrawWallWithDetail(GLWall *wall)
     gld_SetupFloodStencil(wall);
     gld_SetupFloodedPlaneLight(wall);
     gld_SetupFloodedPlaneCoords(wall, &c1);
-    for (i = 0; i < 4; i++)
-    {
+    for (i = 0; i < 4; i++) {
       c2.t[i][0] = c1.t[i][0] * w + dx;
       c2.t[i][1] = c1.t[i][1] * h + dy;
     }
@@ -267,79 +245,77 @@ void gld_DrawWallWithDetail(GLWall *wall)
     gld_EnableTexture2D(GL_TEXTURE1_ARB, false);
 
     gld_ClearFloodStencil(wall);
-  }
-  else
-  {
+  } else {
     gld_StaticLightAlpha(wall->light, wall->alpha);
     glBegin(GL_TRIANGLE_FAN);
 
     // lower left corner
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB,wall->ul,wall->vb); 
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB,wall->ul*w+dx,wall->vb*h+dy);
-    glVertex3f(wall->glseg->x1,wall->ybottom,wall->glseg->z1);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, wall->ul, wall->vb);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, wall->ul * w + dx,
+                               wall->vb * h + dy);
+    glVertex3f(wall->glseg->x1, wall->ybottom, wall->glseg->z1);
 
     // split left edge of wall
     if (!wall->glseg->fracleft)
       gld_SplitLeftEdge(wall, true);
 
     // upper left corner
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB,wall->ul,wall->vt);
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB,wall->ul*w+dx,wall->vt*h+dy);
-    glVertex3f(wall->glseg->x1,wall->ytop,wall->glseg->z1);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, wall->ul, wall->vt);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, wall->ul * w + dx,
+                               wall->vt * h + dy);
+    glVertex3f(wall->glseg->x1, wall->ytop, wall->glseg->z1);
 
     // upper right corner
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB,wall->ur,wall->vt); 
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB,wall->ur*w+dx,wall->vt*h+dy);
-    glVertex3f(wall->glseg->x2,wall->ytop,wall->glseg->z2);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, wall->ur, wall->vt);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, wall->ur * w + dx,
+                               wall->vt * h + dy);
+    glVertex3f(wall->glseg->x2, wall->ytop, wall->glseg->z2);
 
     // split right edge of wall
     if (!wall->glseg->fracright)
       gld_SplitRightEdge(wall, true);
 
     // lower right corner
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB,wall->ur,wall->vb); 
-    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB,wall->ur*w+dx,wall->vb*h+dy);
-    glVertex3f(wall->glseg->x2,wall->ybottom,wall->glseg->z2);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, wall->ur, wall->vb);
+    GLEXT_glMultiTexCoord2fARB(GL_TEXTURE1_ARB, wall->ur * w + dx,
+                               wall->vb * h + dy);
+    glVertex3f(wall->glseg->x2, wall->ybottom, wall->glseg->z2);
 
     glEnd();
   }
 }
 
-void gld_DrawWallDetail_NoARB(GLWall *wall)
-{
+void gld_DrawWallDetail_NoARB(GLWall *wall) {
   if (!wall->gltexture->detail)
     return;
 
   if (wall->flag >= GLDWF_SKY)
     return;
 
-  if (gld_IsDetailVisible(xCamera, yCamera, 
-      wall->glseg->x1, wall->glseg->z1,
-      wall->glseg->x2, wall->glseg->z2))
-  {
+  if (gld_IsDetailVisible(xCamera, yCamera, wall->glseg->x1, wall->glseg->z1,
+                          wall->glseg->x2, wall->glseg->z2)) {
     float w, h, dx, dy;
-    dboolean fake = (wall->flag == GLDWF_TOPFLUD) || (wall->flag == GLDWF_BOTFLUD);
+    dboolean fake =
+        (wall->flag == GLDWF_TOPFLUD) || (wall->flag == GLDWF_BOTFLUD);
     detail_t *detail = wall->gltexture->detail;
 
     w = wall->gltexture->detail_width;
     h = wall->gltexture->detail_height;
-    dx = detail->offsetx; 
+    dx = detail->offsetx;
     dy = detail->offsety;
 
     gld_BindDetail(wall->gltexture, detail->texid);
 
-    if (fake)
-    {
+    if (fake) {
       int i;
       gl_strip_coords_t c;
 
-      if (gl_use_fog)
-      {
+      if (gl_use_fog) {
         // calculation of fog density for flooded walls
-        if (wall->seg->backsector)
-        {
-          wall->fogdensity = gld_CalcFogDensity(wall->seg->frontsector,
-            wall->seg->backsector->lightlevel, GLDIT_FWALL);
+        if (wall->seg->backsector) {
+          wall->fogdensity = gld_CalcFogDensity(
+              wall->seg->frontsector, wall->seg->backsector->lightlevel,
+              GLDIT_FWALL);
         }
         gld_SetFog(wall->fogdensity);
       }
@@ -347,50 +323,46 @@ void gld_DrawWallDetail_NoARB(GLWall *wall)
       gld_SetupFloodStencil(wall);
       gld_SetupFloodedPlaneLight(wall);
       gld_SetupFloodedPlaneCoords(wall, &c);
-      for (i = 0; i < 4; i++)
-      {
+      for (i = 0; i < 4; i++) {
         c.t[i][0] = c.t[i][0] * w + dx;
         c.t[i][1] = c.t[i][1] * h + dy;
       }
       gld_DrawTriangleStrip(wall, &c);
       gld_ClearFloodStencil(wall);
-    }
-    else
-    {
+    } else {
       gld_StaticLightAlpha(wall->light, wall->alpha);
       glBegin(GL_TRIANGLE_FAN);
 
       // lower left corner
-      glTexCoord2f(wall->ul*w+dx,wall->vb*h+dy);
-      glVertex3f(wall->glseg->x1,wall->ybottom,wall->glseg->z1);
+      glTexCoord2f(wall->ul * w + dx, wall->vb * h + dy);
+      glVertex3f(wall->glseg->x1, wall->ybottom, wall->glseg->z1);
 
       // split left edge of wall
       if (!wall->glseg->fracleft)
         gld_SplitLeftEdge(wall, true);
 
       // upper left corner
-      glTexCoord2f(wall->ul*w+dx,wall->vt*h+dy);
-      glVertex3f(wall->glseg->x1,wall->ytop,wall->glseg->z1);
+      glTexCoord2f(wall->ul * w + dx, wall->vt * h + dy);
+      glVertex3f(wall->glseg->x1, wall->ytop, wall->glseg->z1);
 
       // upper right corner
-      glTexCoord2f(wall->ur*w+dx,wall->vt*h+dy);
-      glVertex3f(wall->glseg->x2,wall->ytop,wall->glseg->z2);
+      glTexCoord2f(wall->ur * w + dx, wall->vt * h + dy);
+      glVertex3f(wall->glseg->x2, wall->ytop, wall->glseg->z2);
 
       // split right edge of wall
       if (!wall->glseg->fracright)
         gld_SplitRightEdge(wall, true);
 
       // lower right corner
-      glTexCoord2f(wall->ur*w+dx,wall->vb*h+dy);
-      glVertex3f(wall->glseg->x2,wall->ybottom,wall->glseg->z2);
+      glTexCoord2f(wall->ur * w + dx, wall->vb * h + dy);
+      glVertex3f(wall->glseg->x2, wall->ybottom, wall->glseg->z2);
 
       glEnd();
     }
   }
 }
 
-void gld_DrawFlatDetail_NoARB(GLFlat *flat)
-{
+void gld_DrawFlatDetail_NoARB(GLFlat *flat) {
   float w, h, dx, dy;
   int loopnum;
   GLLoopDef *currentloop;
@@ -405,7 +377,7 @@ void gld_DrawFlatDetail_NoARB(GLFlat *flat)
   gld_StaticLightAlpha(flat->light, flat->alpha);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glTranslatef(0.0f,flat->z,0.0f);
+  glTranslatef(0.0f, flat->z, 0.0f);
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
 
@@ -414,54 +386,50 @@ void gld_DrawFlatDetail_NoARB(GLFlat *flat)
   dx = detail->offsetx;
   dy = detail->offsety;
 
-  if ((flat->flags & GLFLAT_HAVE_OFFSET) || dx || dy)
-  {
+  if ((flat->flags & GLFLAT_HAVE_OFFSET) || dx || dy) {
     glTranslatef(flat->uoffs * w + dx, flat->voffs * h + dy, 0.0f);
   }
 
   glScalef(w, h, 1.0f);
 
-  if (flat->sectornum>=0)
-  {
+  if (flat->sectornum >= 0) {
     // go through all loops of this sector
 #if defined(USE_VERTEX_ARRAYS) || defined(USE_VBO)
-    if (gl_use_display_lists)
-    {
+    if (gl_use_display_lists) {
       glCallList(flats_display_list + flat->sectornum);
-    }
-    else
-    {
-      for (loopnum=0; loopnum<sectorloops[flat->sectornum].loopcount; loopnum++)
-      {
-        currentloop=&sectorloops[flat->sectornum].loops[loopnum];
-        glDrawArrays(currentloop->mode,currentloop->vertexindex,currentloop->vertexcount);
+    } else {
+      for (loopnum = 0; loopnum < sectorloops[flat->sectornum].loopcount;
+           loopnum++) {
+        currentloop = &sectorloops[flat->sectornum].loops[loopnum];
+        glDrawArrays(currentloop->mode, currentloop->vertexindex,
+                     currentloop->vertexcount);
       }
     }
 #else
-    for (loopnum=0; loopnum<sectorloops[flat->sectornum].loopcount; loopnum++)
-    {
+    for (loopnum = 0; loopnum < sectorloops[flat->sectornum].loopcount;
+         loopnum++) {
       int vertexnum;
       // set the current loop
-      currentloop=&sectorloops[flat->sectornum].loops[loopnum];
+      currentloop = &sectorloops[flat->sectornum].loops[loopnum];
       if (!currentloop)
         continue;
       // set the mode (GL_TRIANGLES, GL_TRIANGLE_STRIP or GL_TRIANGLE_FAN)
       glBegin(currentloop->mode);
       // go through all vertexes of this loop
-      for (vertexnum=currentloop->vertexindex; vertexnum<(currentloop->vertexindex+currentloop->vertexcount); vertexnum++)
-      {
+      for (vertexnum = currentloop->vertexindex;
+           vertexnum < (currentloop->vertexindex + currentloop->vertexcount);
+           vertexnum++) {
         // set texture coordinate of this vertex
-        if (true)
-        {
-          GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, (GLfloat*)&flats_vbo[vertexnum].u);
-          GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, (GLfloat*)&flats_vbo[vertexnum].u);
-        }
-        else
-        {
-          glTexCoord2fv((GLfloat*)&flats_vbo[vertexnum].u);
+        if (true) {
+          GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE0_ARB,
+                                      (GLfloat *)&flats_vbo[vertexnum].u);
+          GLEXT_glMultiTexCoord2fvARB(GL_TEXTURE1_ARB,
+                                      (GLfloat *)&flats_vbo[vertexnum].u);
+        } else {
+          glTexCoord2fv((GLfloat *)&flats_vbo[vertexnum].u);
         }
         // set vertex coordinate
-        glVertex3fv((GLfloat*)&flats_vbo[vertexnum].x);
+        glVertex3fv((GLfloat *)&flats_vbo[vertexnum].x);
       }
       // end of loop
       glEnd();
@@ -473,73 +441,74 @@ void gld_DrawFlatDetail_NoARB(GLFlat *flat)
   glPopMatrix();
 }
 
-static int C_DECL dicmp_wall_detail(const void *a, const void *b)
-{
+static int C_DECL dicmp_wall_detail(const void *a, const void *b) {
   detail_t *d1 = ((const GLDrawItem *)a)->item.wall->gltexture->detail;
   detail_t *d2 = ((const GLDrawItem *)b)->item.wall->gltexture->detail;
   return d1 - d2;
 }
 
-static int C_DECL dicmp_flat_detail(const void *a, const void *b)
-{
+static int C_DECL dicmp_flat_detail(const void *a, const void *b) {
   detail_t *d1 = ((const GLDrawItem *)a)->item.flat->gltexture->detail;
   detail_t *d2 = ((const GLDrawItem *)b)->item.flat->gltexture->detail;
   return d1 - d2;
 }
 
-void gld_DrawItemsSortByDetail(GLDrawItemType itemtype)
-{
-  typedef int(C_DECL *DICMP_ITEM)(const void *a, const void *b);
+void gld_DrawItemsSortByDetail(GLDrawItemType itemtype) {
+  typedef int(C_DECL * DICMP_ITEM)(const void *a, const void *b);
 
   static DICMP_ITEM itemfuncs[GLDIT_TYPES] = {
-    0,
-    dicmp_wall_detail, dicmp_wall_detail, dicmp_wall_detail, dicmp_wall_detail, dicmp_wall_detail,
-    dicmp_wall_detail, dicmp_wall_detail,
-    dicmp_flat_detail, dicmp_flat_detail,
-    dicmp_flat_detail, dicmp_flat_detail,
-    0, 0, 0,
-    0,
+      0,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_wall_detail,
+      dicmp_flat_detail,
+      dicmp_flat_detail,
+      dicmp_flat_detail,
+      dicmp_flat_detail,
+      0,
+      0,
+      0,
+      0,
   };
 
-  if (itemfuncs[itemtype] && gld_drawinfo.num_items[itemtype] > 1)
-  {
+  if (itemfuncs[itemtype] && gld_drawinfo.num_items[itemtype] > 1) {
     qsort(gld_drawinfo.items[itemtype], gld_drawinfo.num_items[itemtype],
-      sizeof(gld_drawinfo.items[itemtype]), itemfuncs[itemtype]);
+          sizeof(gld_drawinfo.items[itemtype]), itemfuncs[itemtype]);
   }
 }
 
-void gld_DrawDetail_NoARB(void)
-{
+void gld_DrawDetail_NoARB(void) {
   int i;
 
   if (!scene_has_wall_details && !scene_has_flat_details)
     return;
 
-  glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-  glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+  glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
 
   last_detail_texid = -1;
 
   // detail flats
 
-  if (scene_has_flat_details)
-  {
+  if (scene_has_flat_details) {
     // enable backside removing
     glEnable(GL_CULL_FACE);
 
     // floors
     glCullFace(GL_FRONT);
     gld_DrawItemsSortByDetail(GLDIT_FLOOR);
-    for (i = gld_drawinfo.num_items[GLDIT_FLOOR] - 1; i >= 0; i--)
-    {
+    for (i = gld_drawinfo.num_items[GLDIT_FLOOR] - 1; i >= 0; i--) {
       gld_SetFog(gld_drawinfo.items[GLDIT_FLOOR][i].item.flat->fogdensity);
       gld_DrawFlatDetail_NoARB(gld_drawinfo.items[GLDIT_FLOOR][i].item.flat);
     }
     // ceilings
     glCullFace(GL_BACK);
     gld_DrawItemsSortByDetail(GLDIT_CEILING);
-    for (i = gld_drawinfo.num_items[GLDIT_CEILING] - 1; i >= 0; i--)
-    {
+    for (i = gld_drawinfo.num_items[GLDIT_CEILING] - 1; i >= 0; i--) {
       gld_SetFog(gld_drawinfo.items[GLDIT_CEILING][i].item.flat->fogdensity);
       gld_DrawFlatDetail_NoARB(gld_drawinfo.items[GLDIT_CEILING][i].item.flat);
     }
@@ -547,47 +516,37 @@ void gld_DrawDetail_NoARB(void)
   }
 
   // detail walls
-  if (scene_has_wall_details)
-  {
+  if (scene_has_wall_details) {
     gld_DrawItemsSortByDetail(GLDIT_WALL);
-    for (i = gld_drawinfo.num_items[GLDIT_WALL] - 1; i >= 0; i--)
-    {
+    for (i = gld_drawinfo.num_items[GLDIT_WALL] - 1; i >= 0; i--) {
       gld_SetFog(gld_drawinfo.items[GLDIT_WALL][i].item.wall->fogdensity);
       gld_DrawWallDetail_NoARB(gld_drawinfo.items[GLDIT_WALL][i].item.wall);
     }
 
-    if (!gl_use_stencil)
-    {
+    if (!gl_use_stencil) {
       gld_DrawItemsSortByDetail(GLDIT_MWALL);
     }
 
-    for (i = gld_drawinfo.num_items[GLDIT_MWALL] - 1; i >= 0; i--)
-    {
+    for (i = gld_drawinfo.num_items[GLDIT_MWALL] - 1; i >= 0; i--) {
       GLWall *wall = gld_drawinfo.items[GLDIT_MWALL][i].item.wall;
-      if (gl_use_stencil)
-      {
-        if (!(wall->gltexture->flags & GLTEXTURE_HASHOLES))
-        {
+      if (gl_use_stencil) {
+        if (!(wall->gltexture->flags & GLTEXTURE_HASHOLES)) {
           gld_SetFog(wall->fogdensity);
           gld_DrawWallDetail_NoARB(wall);
         }
-      }
-      else
-      {
+      } else {
         gld_SetFog(wall->fogdensity);
         gld_DrawWallDetail_NoARB(wall);
       }
     }
 
-    if (gld_drawinfo.num_items[GLDIT_FWALL] > 0)
-    {
+    if (gld_drawinfo.num_items[GLDIT_FWALL] > 0) {
       glPolygonOffset(1.0f, 128.0f);
       glEnable(GL_POLYGON_OFFSET_FILL);
       glEnable(GL_STENCIL_TEST);
 
       gld_DrawItemsSortByDetail(GLDIT_FWALL);
-      for (i = gld_drawinfo.num_items[GLDIT_FWALL] - 1; i >= 0; i--)
-      {
+      for (i = gld_drawinfo.num_items[GLDIT_FWALL] - 1; i >= 0; i--) {
         gld_DrawWallDetail_NoARB(gld_drawinfo.items[GLDIT_FWALL][i].item.wall);
       }
 
@@ -597,38 +556,31 @@ void gld_DrawDetail_NoARB(void)
     }
 
     gld_DrawItemsSortByDetail(GLDIT_TWALL);
-    for (i = gld_drawinfo.num_items[GLDIT_TWALL] - 1; i >= 0; i--)
-    {
+    for (i = gld_drawinfo.num_items[GLDIT_TWALL] - 1; i >= 0; i--) {
       gld_SetFog(gld_drawinfo.items[GLDIT_TWALL][i].item.wall->fogdensity);
       gld_DrawWallDetail_NoARB(gld_drawinfo.items[GLDIT_TWALL][i].item.wall);
     }
   }
 
   // restore
-  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void gld_InitFrameDetails(void)
-{
+void gld_InitFrameDetails(void) {
   last_detail_texid = -1;
 
   scene_has_details =
-    (render_usedetail) &&
-    (scene_has_wall_details || scene_has_flat_details);
+      (render_usedetail) && (scene_has_wall_details || scene_has_flat_details);
 }
 
-void gld_BindDetailARB(GLTexture *gltexture, int enable)
-{
-  if (scene_has_details)
-  {
+void gld_BindDetailARB(GLTexture *gltexture, int enable) {
+  if (scene_has_details) {
     gld_EnableTexture2D(GL_TEXTURE1_ARB, enable);
     gld_EnableClientCoordArray(GL_TEXTURE1_ARB, enable);
 
-    if (enable &&
-      gltexture->detail &&
-      gltexture->detail->texid != last_detail_texid)
-    {
+    if (enable && gltexture->detail &&
+        gltexture->detail->texid != last_detail_texid) {
       last_detail_texid = gltexture->detail->texid;
 
       GLEXT_glActiveTextureARB(GL_TEXTURE1_ARB);
@@ -638,42 +590,32 @@ void gld_BindDetailARB(GLTexture *gltexture, int enable)
   }
 }
 
-void gld_BindDetail(GLTexture *gltexture, int enable)
-{
-  if (scene_has_details)
-  {
-    if (enable &&
-        gltexture->detail &&
-        gltexture->detail->texid != last_detail_texid)
-    {
+void gld_BindDetail(GLTexture *gltexture, int enable) {
+  if (scene_has_details) {
+    if (enable && gltexture->detail &&
+        gltexture->detail->texid != last_detail_texid) {
       last_detail_texid = gltexture->detail->texid;
       glBindTexture(GL_TEXTURE_2D, gltexture->detail->texid);
     }
   }
 }
 
-void gld_SetTexDetail(GLTexture *gltexture)
-{
+void gld_SetTexDetail(GLTexture *gltexture) {
   int i;
 
   gltexture->detail = NULL;
 
-  if (details_count > 0)
-  {
+  if (details_count > 0) {
     // linear search
-    for (i = 0; i < details_count; i++)
-    {
-      if (gltexture->index == details[i].texture_num)
-      {
+    for (i = 0; i < details_count; i++) {
+      if (gltexture->index == details[i].texture_num) {
         gltexture->detail = &details[i];
         break;
       }
     }
 
-    if (!gltexture->detail)
-    {
-      switch (gltexture->textype)
-      {
+    if (!gltexture->detail) {
+      switch (gltexture->textype) {
       case GLDT_TEXTURE:
         if (details[TAG_DETAIL_WALL].texid > 0)
           gltexture->detail = &details[TAG_DETAIL_WALL];
@@ -685,61 +627,61 @@ void gld_SetTexDetail(GLTexture *gltexture)
       }
     }
 
-    if (gltexture->detail)
-    {
-      gltexture->detail_width  = (float)gltexture->realtexwidth  / gltexture->detail->width;
-      gltexture->detail_height = (float)gltexture->realtexheight / gltexture->detail->height;
+    if (gltexture->detail) {
+      gltexture->detail_width =
+          (float)gltexture->realtexwidth / gltexture->detail->width;
+      gltexture->detail_height =
+          (float)gltexture->realtexheight / gltexture->detail->height;
     }
   }
 }
 
-GLuint gld_LoadDetailName(const char *name)
-{
+GLuint gld_LoadDetailName(const char *name) {
   GLuint texid = 0;
   int lump;
 
   lump = (W_CheckNumForName)(name, ns_hires);
 
-  if (lump != -1)
-  {
+  if (lump != -1) {
     SDL_PixelFormat fmt;
     SDL_Surface *surf = NULL;
     SDL_Surface *surf_raw;
-    
+
 #ifdef HAVE_LIBSDL2_IMAGE
-    surf_raw = IMG_Load_RW(SDL_RWFromConstMem(W_CacheLumpNum(lump), W_LumpLength(lump)), 1);
+    surf_raw = IMG_Load_RW(
+        SDL_RWFromConstMem(W_CacheLumpNum(lump), W_LumpLength(lump)), 1);
 #else
-    surf_raw = SDL_LoadBMP_RW(SDL_RWFromConstMem(W_CacheLumpNum(lump), W_LumpLength(lump)), 1);
+    surf_raw = SDL_LoadBMP_RW(
+        SDL_RWFromConstMem(W_CacheLumpNum(lump), W_LumpLength(lump)), 1);
 #endif
 
     W_UnlockLumpNum(lump);
 
-    if (surf_raw)
-    {
+    if (surf_raw) {
       fmt = *surf_raw->format;
       fmt.BitsPerPixel = 24;
       fmt.BytesPerPixel = 3;
       surf = SDL_ConvertSurface(surf_raw, &fmt, surf_raw->flags);
       SDL_FreeSurface(surf_raw);
-      if (surf)
-      {
+      if (surf) {
         if (gl_arb_multitexture)
           GLEXT_glActiveTextureARB(GL_TEXTURE1_ARB);
         glGenTextures(1, &texid);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glBindTexture(GL_TEXTURE_2D, texid);
 
-        gluBuild2DMipmaps(GL_TEXTURE_2D, gl_tex_format,
-          surf->w, surf->h, 
-          imageformats[surf->format->BytesPerPixel], 
-          GL_UNSIGNED_BYTE, surf->pixels);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, gl_tex_format, surf->w, surf->h,
+                          imageformats[surf->format->BytesPerPixel],
+                          GL_UNSIGNED_BYTE, surf->pixels);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                        GL_LINEAR_MIPMAP_LINEAR);
         if (gl_ext_texture_filter_anisotropic)
-          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, (GLfloat)(1<<gl_texture_filter_anisotropic));
+          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                          (GLfloat)(1 << gl_texture_filter_anisotropic));
 
         if (gl_arb_multitexture)
           GLEXT_glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -752,20 +694,16 @@ GLuint gld_LoadDetailName(const char *name)
   return texid;
 }
 
-int gld_ReadDetailParams(tag_detail_e item, detail_t *detail)
-{
+int gld_ReadDetailParams(tag_detail_e item, detail_t *detail) {
   int result = false;
-  if (SC_Check())
-  {
+  if (SC_Check()) {
     // get detail texture name
     SC_GetString();
 
-    if (strlen(sc_String) < 9)
-    {
+    if (strlen(sc_String) < 9) {
       detail->texid = gld_LoadDetailName(sc_String);
 
-      if (detail->texid > 0)
-      {
+      if (detail->texid > 0) {
         float f;
 
         if (SC_Check() && SC_GetString() && M_StrToFloat(sc_String, &f))
@@ -789,36 +727,30 @@ int gld_ReadDetailParams(tag_detail_e item, detail_t *detail)
   return result;
 }
 
-void gld_ParseDetailItem(tag_detail_e item)
-{
+void gld_ParseDetailItem(tag_detail_e item) {
   // item's default values
   details[item].width = 16.0f;
   details[item].height = 16.0f;
   details[item].offsetx = 0.0f;
   details[item].offsety = 0.0f;
-  if (SC_Check() && !SC_Compare("{"))
-  {
+  if (SC_Check() && !SC_Compare("{")) {
     gld_ReadDetailParams(item, &details[item]);
   }
 
-  if (SC_GetString() && SC_Compare("{"))
-  {
-    while (SC_GetString() && !SC_Compare("}"))
-    {
+  if (SC_GetString() && SC_Compare("{")) {
+    while (SC_GetString() && !SC_Compare("}")) {
       int result;
       detail_t detail;
 
       // reset fields for next iteration
-      detail.texid   = 0;
-      detail.width   = 16.0f;
-      detail.height  = 16.0f;
+      detail.texid = 0;
+      detail.width = 16.0f;
+      detail.height = 16.0f;
       detail.offsetx = 0.0f;
       detail.offsety = 0.0f;
 
-      if (strlen(sc_String) < 9)
-      {
-        switch (item)
-        {
+      if (strlen(sc_String) < 9) {
+        switch (item) {
         case TAG_DETAIL_WALL:
           detail.texture_num = R_CheckTextureNumForName(sc_String);
           break;
@@ -829,10 +761,8 @@ void gld_ParseDetailItem(tag_detail_e item)
 
         result = gld_ReadDetailParams(item, &detail);
 
-        if (result || details[item].texid > 0)
-        {
-          if (details_count + 1 > details_size)
-          {
+        if (result || details[item].texid > 0) {
+          if (details_count + 1 > details_size) {
             details_size = (details_size == 0 ? 128 : details_size * 2);
             details = realloc(details, details_size * sizeof(details[0]));
           }
@@ -844,8 +774,7 @@ void gld_ParseDetailItem(tag_detail_e item)
   }
 }
 
-void gld_ParseDetail(void)
-{
+void gld_ParseDetail(void) {
   gld_ShutdownDetail();
 
   details_count = 2; // reserved for default wall and flat
@@ -856,12 +785,9 @@ void gld_ParseDetail(void)
   while (SC_Check() && !SC_Compare("{"))
     SC_GetString();
 
-  if (SC_GetString() && SC_Compare("{"))
-  {
-    while (SC_GetString() && !SC_Compare("}"))
-    {
-      switch (SC_MatchString(DetailItem_Keywords))
-      {
+  if (SC_GetString() && SC_Compare("{")) {
+    while (SC_GetString() && !SC_Compare("}")) {
+      switch (SC_MatchString(DetailItem_Keywords)) {
       case TAG_DETAIL_WALL:
         gld_ParseDetailItem(TAG_DETAIL_WALL);
         break;

@@ -50,13 +50,12 @@ struct _MEMFILE {
 
 // Open a memory area for reading
 
-MEMFILE *mem_fopen_read(const void *buf, size_t buflen)
-{
+MEMFILE *mem_fopen_read(const void *buf, size_t buflen) {
   MEMFILE *file;
 
   file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
 
-  file->buf = (unsigned char *) buf;
+  file->buf = (unsigned char *)buf;
   file->buflen = buflen;
   file->position = 0;
   file->mode = MODE_READ;
@@ -66,12 +65,10 @@ MEMFILE *mem_fopen_read(const void *buf, size_t buflen)
 
 // Read bytes
 
-size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
-{
+size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream) {
   size_t items;
 
-  if (stream->mode != MODE_READ)
-  {
+  if (stream->mode != MODE_READ) {
     printf("not a read stream\n");
     return -1;
   }
@@ -80,8 +77,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 
   items = nmemb;
 
-  if (items * size > stream->buflen - stream->position)
-  {
+  if (items * size > stream->buflen - stream->position) {
     items = (stream->buflen - stream->position) / size;
   }
 
@@ -98,8 +94,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 
 // Open a memory area for writing
 
-MEMFILE *mem_fopen_write(void)
-{
+MEMFILE *mem_fopen_write(void) {
   MEMFILE *file;
 
   file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
@@ -115,12 +110,10 @@ MEMFILE *mem_fopen_write(void)
 
 // Write bytes to stream
 
-size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
-{
+size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream) {
   size_t bytes;
 
-  if (stream->mode != MODE_WRITE)
-  {
+  if (stream->mode != MODE_WRITE) {
     return -1;
   }
 
@@ -129,8 +122,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 
   bytes = size * nmemb;
 
-  while (bytes > stream->alloced - stream->position)
-  {
+  while (bytes > stream->alloced - stream->position) {
     unsigned char *newbuf;
 
     newbuf = Z_Malloc(stream->alloced * 2, PU_STATIC, 0);
@@ -151,55 +143,44 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
   return nmemb;
 }
 
-void mem_get_buf(MEMFILE *stream, void **buf, size_t *buflen)
-{
+void mem_get_buf(MEMFILE *stream, void **buf, size_t *buflen) {
   *buf = stream->buf;
   *buflen = stream->buflen;
 }
 
-void mem_fclose(MEMFILE *stream)
-{
-  if (stream->mode == MODE_WRITE)
-  {
+void mem_fclose(MEMFILE *stream) {
+  if (stream->mode == MODE_WRITE) {
     Z_Free(stream->buf);
   }
 
   Z_Free(stream);
 }
 
-long mem_ftell(MEMFILE *stream)
-{
-  return stream->position;
-}
+long mem_ftell(MEMFILE *stream) { return stream->position; }
 
-int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
-{
+int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence) {
   unsigned int newpos;
 
-  switch (whence)
-  {
-    case MEM_SEEK_SET:
-      newpos = (int) position;
-      break;
+  switch (whence) {
+  case MEM_SEEK_SET:
+    newpos = (int)position;
+    break;
 
-    case MEM_SEEK_CUR:
-      newpos = (int) (stream->position + position);
-      break;
+  case MEM_SEEK_CUR:
+    newpos = (int)(stream->position + position);
+    break;
 
-    case MEM_SEEK_END:
-      newpos = (int) (stream->buflen + position);
-      break;
-    default:
-      return -1;
+  case MEM_SEEK_END:
+    newpos = (int)(stream->buflen + position);
+    break;
+  default:
+    return -1;
   }
 
-  if (newpos < stream->buflen)
-  {
+  if (newpos < stream->buflen) {
     stream->position = newpos;
     return 0;
-  }
-  else
-  {
+  } else {
     printf("Error seeking to %i\n", newpos);
     return -1;
   }

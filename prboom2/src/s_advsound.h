@@ -41,13 +41,12 @@
 #endif
 
 //
-//MUSINFO lump
+// MUSINFO lump
 //
 
 #define MAX_MUS_ENTRIES 64
 
-typedef struct musinfo_s
-{
+typedef struct musinfo_s {
   mobj_t *mapthing;
   mobj_t *lastmapthing;
   int tics;

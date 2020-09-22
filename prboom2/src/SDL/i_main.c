@@ -45,7 +45,7 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
+typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 #else
 #include <sched.h>
 #endif
@@ -54,22 +54,21 @@ typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 
 #include "TEXTSCREEN/txt_main.h"
 
-#include "doomdef.h"
-#include "m_argv.h"
 #include "d_main.h"
-#include "m_fixed.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "z_zone.h"
-#include "lprintf.h"
-#include "m_random.h"
+#include "doomdef.h"
 #include "doomstat.h"
 #include "g_game.h"
-#include "m_misc.h"
-#include "i_sound.h"
 #include "i_main.h"
-#include "r_fps.h"
+#include "i_sound.h"
+#include "i_system.h"
+#include "i_video.h"
 #include "lprintf.h"
+#include "m_argv.h"
+#include "m_fixed.h"
+#include "m_misc.h"
+#include "m_random.h"
+#include "r_fps.h"
+#include "z_zone.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -85,46 +84,33 @@ typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
  */
 
 int realtic_clock_rate = 100;
-static int_64_t I_GetTime_Scale = 1<<24;
+static int_64_t I_GetTime_Scale = 1 << 24;
 
-static int I_GetTime_Scaled(void)
-{
-  return (int)( (int_64_t) I_GetTime_RealTime() * I_GetTime_Scale >> 24);
+static int I_GetTime_Scaled(void) {
+  return (int)((int_64_t)I_GetTime_RealTime() * I_GetTime_Scale >> 24);
 }
 
-
-
-static int  I_GetTime_FastDemo(void)
-{
+static int I_GetTime_FastDemo(void) {
   static int fasttic;
   return fasttic++;
 }
 
-
-
-static int I_GetTime_Error(void)
-{
+static int I_GetTime_Error(void) {
   I_Error("I_GetTime_Error: GetTime() used before initialization");
   return 0;
 }
 
-
-
 int (*I_GetTime)(void) = I_GetTime_Error;
 
-void I_Init(void)
-{
+void I_Init(void) {
   /* killough 4/14/98: Adjustable speedup based on realtic_clock_rate */
   if (fastdemo)
     I_GetTime = I_GetTime_FastDemo;
-  else
-    if (realtic_clock_rate != 100)
-      {
-        I_GetTime_Scale = ((int_64_t) realtic_clock_rate << 24) / 100;
-        I_GetTime = I_GetTime_Scaled;
-      }
-    else
-      I_GetTime = I_GetTime_RealTime;
+  else if (realtic_clock_rate != 100) {
+    I_GetTime_Scale = ((int_64_t)realtic_clock_rate << 24) / 100;
+    I_GetTime = I_GetTime_Scaled;
+  } else
+    I_GetTime = I_GetTime_RealTime;
 
   {
     /* killough 2/21/98: avoid sound initialization if no sound & no music */
@@ -135,19 +121,15 @@ void I_Init(void)
   R_InitInterpolation();
 }
 
-//e6y
-void I_Init2(void)
-{
+// e6y
+void I_Init2(void) {
   if (fastdemo)
     I_GetTime = I_GetTime_FastDemo;
-  else
-  {
-    if (realtic_clock_rate != 100)
-      {
-        I_GetTime_Scale = ((int_64_t) realtic_clock_rate << 24) / 100;
-        I_GetTime = I_GetTime_Scaled;
-      }
-    else
+  else {
+    if (realtic_clock_rate != 100) {
+      I_GetTime_Scale = ((int_64_t)realtic_clock_rate << 24) / 100;
+      I_GetTime = I_GetTime_Scaled;
+    } else
       I_GetTime = I_GetTime_RealTime;
   }
   R_InitInterpolation();
@@ -156,21 +138,20 @@ void I_Init2(void)
 
 /* cleanup handling -- killough:
  */
-static void I_SignalHandler(int s)
-{
+static void I_SignalHandler(int s) {
   char buf[2048];
 
-  signal(s,SIG_IGN);  /* Ignore future instances of this signal.*/
+  signal(s, SIG_IGN); /* Ignore future instances of this signal.*/
 
-  I_ExeptionProcess(); //e6y
+  I_ExeptionProcess(); // e6y
 
-  strcpy(buf,"Exiting on signal: ");
-  I_SigString(buf+strlen(buf),2000-strlen(buf),s);
+  strcpy(buf, "Exiting on signal: ");
+  I_SigString(buf + strlen(buf), 2000 - strlen(buf), s);
 
   /* If corrupted memory could cause crash, dump memory
    * allocation history, which points out probable causes
    */
-  if (s==SIGSEGV || s==SIGILL || s==SIGFPE)
+  if (s == SIGSEGV || s == SIGILL || s == SIGFPE)
     Z_DumpHistory(buf);
 
   I_Error("I_SignalHandler: %s", buf);
@@ -182,40 +163,30 @@ static void I_SignalHandler(int s)
 
 static ExeptionsList_t current_exception_index;
 
-ExeptionParam_t ExeptionsParams[EXEPTION_MAX + 1] =
-{
-  {NULL},
-  {"gld_CreateScreenSizeFBO: Access violation in glFramebufferTexture2DEXT.\n\n"
-    "Are you using ATI graphics? Try to update your drivers "
-    "or change gl_compatibility variable in cfg to 1.\n"},
-  {NULL}
-};
+ExeptionParam_t ExeptionsParams[EXEPTION_MAX + 1] = {
+    {NULL},
+    {"gld_CreateScreenSizeFBO: Access violation in "
+     "glFramebufferTexture2DEXT.\n\n"
+     "Are you using ATI graphics? Try to update your drivers "
+     "or change gl_compatibility variable in cfg to 1.\n"},
+    {NULL}};
 
-void I_ExeptionBegin(ExeptionsList_t exception_index)
-{
-  if (current_exception_index == EXEPTION_NONE)
-  {
+void I_ExeptionBegin(ExeptionsList_t exception_index) {
+  if (current_exception_index == EXEPTION_NONE) {
     current_exception_index = exception_index;
-  }
-  else
-  {
+  } else {
     I_Error("I_SignalStateSet: signal_state set!");
   }
 }
 
-void I_ExeptionEnd(void)
-{
-  current_exception_index = EXEPTION_NONE;
-}
+void I_ExeptionEnd(void) { current_exception_index = EXEPTION_NONE; }
 
-void I_ExeptionProcess(void)
-{
-  if (current_exception_index > EXEPTION_NONE && current_exception_index < EXEPTION_MAX)
-  {
+void I_ExeptionProcess(void) {
+  if (current_exception_index > EXEPTION_NONE &&
+      current_exception_index < EXEPTION_MAX) {
     I_Error("%s", ExeptionsParams[current_exception_index].error_message);
   }
 }
-
 
 /* killough 2/22/98: Add support for ENDBOOM, which is PC-specific
  *
@@ -224,8 +195,7 @@ void I_ExeptionProcess(void)
  * CPhipps - made static
  */
 
-inline static int convert(int color, int *bold)
-{
+inline static int convert(int color, int *bold) {
   if (color > 7) {
     color -= 8;
     *bold = 1;
@@ -252,25 +222,19 @@ inline static int convert(int color, int *bold)
 }
 
 /* CPhipps - flags controlling ENDOOM behaviour */
-enum {
-  endoom_colours = 1,
-  endoom_nonasciichars = 2,
-  endoom_droplastline = 4
-};
+enum { endoom_colours = 1, endoom_nonasciichars = 2, endoom_droplastline = 4 };
 
 int endoom_mode;
 
-static void PrintVer(void)
-{
+static void PrintVer(void) {
   char vbuf[200];
-  lprintf(LO_INFO,"%s\n",I_GetVersionString(vbuf,200));
+  lprintf(LO_INFO, "%s\n", I_GetVersionString(vbuf, 200));
 }
 
 //
 // ENDOOM support using text mode emulation
 //
-static void I_EndDoom(void)
-{
+static void I_EndDoom(void) {
   int lump_eb, lump_ed, lump = -1;
 
   const unsigned char *endoom_data;
@@ -280,24 +244,23 @@ static void I_EndDoom(void)
   PrintVer();
 #endif
 
-  if (!showendoom || demorecording)
-  {
+  if (!showendoom || demorecording) {
     return;
   }
 
   /* CPhipps - ENDOOM/ENDBOOM selection */
-  lump_eb = W_CheckNumForName("ENDBOOM");/* jff 4/1/98 sign our work    */
-  lump_ed = W_CheckNumForName("ENDOOM"); /* CPhipps - also maybe ENDOOM */
+  lump_eb = W_CheckNumForName("ENDBOOM"); /* jff 4/1/98 sign our work    */
+  lump_ed = W_CheckNumForName("ENDOOM");  /* CPhipps - also maybe ENDOOM */
 
   if (lump_eb == -1)
     lump = lump_ed;
   else if (lump_ed == -1)
     lump = lump_eb;
-  else
-  { /* Both ENDOOM and ENDBOOM are present */
-#define LUMP_IS_NEW(num) (!((lumpinfo[num].source == source_iwad) || (lumpinfo[num].source == source_auto_load)))
-    switch ((LUMP_IS_NEW(lump_ed) ? 1 : 0 ) |
-      (LUMP_IS_NEW(lump_eb) ? 2 : 0)) {
+  else { /* Both ENDOOM and ENDBOOM are present */
+#define LUMP_IS_NEW(num)                                                       \
+  (!((lumpinfo[num].source == source_iwad) ||                                  \
+     (lumpinfo[num].source == source_auto_load)))
+    switch ((LUMP_IS_NEW(lump_ed) ? 1 : 0) | (LUMP_IS_NEW(lump_eb) ? 2 : 0)) {
     case 1:
       lump = lump_ed;
       break;
@@ -311,34 +274,31 @@ static void I_EndDoom(void)
     }
   }
 
-  if (lump != -1)
-  {
+  if (lump != -1) {
     endoom_data = (const unsigned char *)W_CacheLumpNum(lump);
-    
+
     // Set up text mode screen
     TXT_Init();
-    
+
     // Make sure the new window has the right title and icon
     I_SetWindowCaption();
     I_SetWindowIcon();
-    
+
     // Write the data to the screen memory
     screendata = TXT_GetScreenData();
     memcpy(screendata, endoom_data, 4000);
-    
+
     // Wait for a keypress
-    while (true)
-    {
+    while (true) {
       TXT_UpdateScreen();
-      
-      if (TXT_GetChar() > 0)
-      {
+
+      if (TXT_GetChar() > 0) {
         break;
       }
-      
+
       TXT_Sleep(0);
     }
-    
+
     // Shut down text mode screen
     TXT_Shutdown();
   }
@@ -352,26 +312,24 @@ static int has_exited;
  * Prevent infinitely recursive exits -- killough
  */
 
-void I_SafeExit(int rc)
-{
-  if (!has_exited)    /* If it hasn't exited yet, exit now -- killough */
-    {
-      has_exited=rc ? 2 : 1;
-      exit(rc);
-    }
+void I_SafeExit(int rc) {
+  if (!has_exited) /* If it hasn't exited yet, exit now -- killough */
+  {
+    has_exited = rc ? 2 : 1;
+    exit(rc);
+  }
 }
 
-static void I_Quit (void)
-{
+static void I_Quit(void) {
   if (!has_exited)
-    has_exited=1;   /* Prevent infinitely recursive exits -- killough */
+    has_exited = 1; /* Prevent infinitely recursive exits -- killough */
 
   if (has_exited == 1) {
     if (!demorecording)
       I_EndDoom();
     if (demorecording)
       G_CheckDemoStatus();
-    M_SaveDefaults ();
+    M_SaveDefaults();
     I_DemoExShutdown();
   }
 }
@@ -384,20 +342,17 @@ uid_t stored_euid = -1;
 // Ability to use only the allowed CPUs
 //
 
-static void I_SetAffinityMask(void)
-{
+static void I_SetAffinityMask(void) {
   // Forcing single core only for "SDL MIDI Player"
   process_affinity_mask = 0;
-  if (!strcasecmp(snd_midiplayer, midiplayers[midi_player_sdl]))
-  {
+  if (!strcasecmp(snd_midiplayer, midiplayers[midi_player_sdl])) {
     process_affinity_mask = 1;
   }
 
   // Set the process affinity mask so that all threads
-  // run on the same processor.  This is a workaround for a bug in 
+  // run on the same processor.  This is a workaround for a bug in
   // SDL_mixer that causes occasional crashes.
-  if (process_affinity_mask)
-  {
+  if (process_affinity_mask) {
     const char *errbuf = NULL;
 #ifdef _WIN32
     HMODULE kernel32_dll;
@@ -407,23 +362,21 @@ static void I_SetAffinityMask(void)
     // Find the kernel interface DLL.
     kernel32_dll = LoadLibrary("kernel32.dll");
 
-    if (kernel32_dll)
-    {
+    if (kernel32_dll) {
       // Find the SetProcessAffinityMask function.
-      SetAffinity = (SetAffinityFunc)GetProcAddress(kernel32_dll, "SetProcessAffinityMask");
+      SetAffinity = (SetAffinityFunc)GetProcAddress(kernel32_dll,
+                                                    "SetProcessAffinityMask");
 
       // If the function was not found, we are on an old (Win9x) system
       // that doesn't have this function.  That's no problem, because
       // those systems don't support SMP anyway.
 
-      if (SetAffinity)
-      {
+      if (SetAffinity) {
         ok = SetAffinity(GetCurrentProcess(), process_affinity_mask);
       }
     }
 
-    if (!ok)
-    {
+    if (!ok) {
       errbuf = WINError();
     }
 #elif defined(HAVE_SCHED_SETAFFINITY)
@@ -434,13 +387,11 @@ static void I_SetAffinityMask(void)
 
       CPU_ZERO(&set);
 
-      for(i = 0; i < 16; i++)
-      {
-        CPU_SET((process_affinity_mask>>i)&1, &set);
+      for (i = 0; i < 16; i++) {
+        CPU_SET((process_affinity_mask >> i) & 1, &set);
       }
 
-      if (sched_setaffinity(getpid(), sizeof(set), &set) == -1)
-      {
+      if (sched_setaffinity(getpid(), sizeof(set), &set) == -1) {
         errbuf = strerror(errno);
       }
     }
@@ -448,13 +399,13 @@ static void I_SetAffinityMask(void)
     return;
 #endif
 
-    if (errbuf == NULL)
-    {
-      lprintf(LO_INFO, "I_SetAffinityMask: manual affinity mask is %d\n", process_affinity_mask);
-    }
-    else
-    {
-      lprintf(LO_ERROR, "I_SetAffinityMask: failed to set process affinity mask (%s)\n", errbuf);
+    if (errbuf == NULL) {
+      lprintf(LO_INFO, "I_SetAffinityMask: manual affinity mask is %d\n",
+              process_affinity_mask);
+    } else {
+      lprintf(LO_ERROR,
+              "I_SetAffinityMask: failed to set process affinity mask (%s)\n",
+              errbuf);
     }
   }
 }
@@ -463,10 +414,8 @@ static void I_SetAffinityMask(void)
 // Sets the priority class for the prboom-plus process
 //
 
-void I_SetProcessPriority(void)
-{
-  if (process_priority)
-  {
+void I_SetProcessPriority(void) {
+  if (process_priority) {
     const char *errbuf = NULL;
 
 #ifdef _WIN32
@@ -478,8 +427,7 @@ void I_SetProcessPriority(void)
       else if (process_priority == 2)
         dwPriorityClass = REALTIME_PRIORITY_CLASS;
 
-      if (SetPriorityClass(GetCurrentProcess(), dwPriorityClass) == 0)
-      {
+      if (SetPriorityClass(GetCurrentProcess(), dwPriorityClass) == 0) {
         errbuf = WINError();
       }
     }
@@ -487,20 +435,20 @@ void I_SetProcessPriority(void)
     return;
 #endif
 
-    if (errbuf == NULL)
-    {
-      lprintf(LO_INFO, "I_SetProcessPriority: priority for the process is %d\n", process_priority);
-    }
-    else
-    {
-      lprintf(LO_ERROR, "I_SetProcessPriority: failed to set priority for the process (%s)\n", errbuf);
+    if (errbuf == NULL) {
+      lprintf(LO_INFO, "I_SetProcessPriority: priority for the process is %d\n",
+              process_priority);
+    } else {
+      lprintf(
+          LO_ERROR,
+          "I_SetProcessPriority: failed to set priority for the process (%s)\n",
+          errbuf);
     }
   }
 }
 
-//int main(int argc, const char * const * argv)
-int main(int argc, char **argv)
-{
+// int main(int argc, const char * const * argv)
+int main(int argc, char **argv) {
 #ifdef SECURE_UID
   /* First thing, revoke setuid status (if any) */
   stored_euid = geteuid();
@@ -508,27 +456,27 @@ int main(int argc, char **argv)
     if (seteuid(getuid()) < 0)
       fprintf(stderr, "Failed to revoke setuid\n");
     else
-      fprintf(stderr, "Revoked uid %d\n",stored_euid);
+      fprintf(stderr, "Revoked uid %d\n", stored_euid);
 #endif
 
   myargc = argc;
-  myargv = (char**)malloc(sizeof(myargv[0]) * myargc);
+  myargv = (char **)malloc(sizeof(myargv[0]) * myargc);
   memcpy(myargv, argv, sizeof(myargv[0]) * myargc);
 
   // e6y: Check for conflicts.
-  // Conflicting command-line parameters could cause the engine to be confused 
+  // Conflicting command-line parameters could cause the engine to be confused
   // in some cases. Added checks to prevent this.
   // Example: glboom.exe -record mydemo -playdemo demoname
   ParamsMatchingCheck();
 
   // e6y: was moved from D_DoomMainSetup
   // init subsystems
-  //jff 9/3/98 use logical output routine
-  lprintf(LO_INFO,"M_LoadDefaults: Load system defaults.\n");
-  M_LoadDefaults();              // load before initing other systems
+  // jff 9/3/98 use logical output routine
+  lprintf(LO_INFO, "M_LoadDefaults: Load system defaults.\n");
+  M_LoadDefaults(); // load before initing other systems
 
   /* Version info */
-  lprintf(LO_INFO,"\n");
+  lprintf(LO_INFO, "\n");
   PrintVer();
 
   /* cph - Z_Close must be done after I_Quit, so we register it first. */
@@ -549,18 +497,18 @@ int main(int argc, char **argv)
      left in an unstable state.
   */
 
-  Z_Init();                  /* 1/18/98 killough: start up memory stuff first */
+  Z_Init(); /* 1/18/98 killough: start up memory stuff first */
 
   atexit(I_Quit);
 #ifndef PRBOOM_DEBUG
-  if (!M_CheckParm("-devparm"))
-  {
+  if (!M_CheckParm("-devparm")) {
     signal(SIGSEGV, I_SignalHandler);
   }
   signal(SIGTERM, I_SignalHandler);
-  signal(SIGFPE,  I_SignalHandler);
-  signal(SIGILL,  I_SignalHandler);
-  signal(SIGINT,  I_SignalHandler);  /* killough 3/6/98: allow CTRL-BRK during init */
+  signal(SIGFPE, I_SignalHandler);
+  signal(SIGILL, I_SignalHandler);
+  signal(SIGINT,
+         I_SignalHandler); /* killough 3/6/98: allow CTRL-BRK during init */
   signal(SIGABRT, I_SignalHandler);
 #endif
 
@@ -573,6 +521,6 @@ int main(int argc, char **argv)
   /* cphipps - call to video specific startup code */
   I_PreInitGraphics();
 
-  D_DoomMain ();
+  D_DoomMain();
   return 0;
 }

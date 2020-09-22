@@ -37,8 +37,7 @@
 
 #define MAXTRACEITEMS 8
 
-typedef enum
-{
+typedef enum {
   TRACE_HEALTH,
   TRACE_PICKUP,
   TRACE_CROSS,
@@ -47,16 +46,14 @@ typedef enum
   NUMTRACES
 } tracertype_t;
 
-typedef struct
-{
+typedef struct {
   int index;
   char value[16];
   int data1;
 } traceitem_t;
 
 typedef void (*TRACERFUNC)(tracertype_t index);
-typedef struct traceslist_s
-{
+typedef struct traceslist_s {
   traceitem_t items[MAXTRACEITEMS];
   int count;
 
@@ -67,8 +64,7 @@ typedef struct traceslist_s
   TRACERFUNC ResetFunc;
 } traceslist_t;
 
-typedef struct traceslistinit_s
-{
+typedef struct traceslistinit_s {
   char cmd[32];
   char prefix[32];
   TRACERFUNC ApplyFunc;

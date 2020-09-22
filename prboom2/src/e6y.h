@@ -40,26 +40,26 @@
 #include "r_demo.h"
 
 #define HU_HUDADDX (HU_HUDX)
-#define HU_HUDADDY (HU_HUDY+(-1)*HU_GAPY)
-#define HU_CENTERMSGX (320/2)
-#define HU_CENTERMSGY ((200-ST_HEIGHT)/2 - 1 - LittleShort(hu_font[0].height))
+#define HU_HUDADDY (HU_HUDY + (-1) * HU_GAPY)
+#define HU_CENTERMSGX (320 / 2)
+#define HU_CENTERMSGY                                                          \
+  ((200 - ST_HEIGHT) / 2 - 1 - LittleShort(hu_font[0].height))
 
 #define HU_HUDADDX_D (HU_HUDX_LL)
-#define HU_HUDADDY_D (HU_HUDY_LL+(-1)*HU_GAPY)
+#define HU_HUDADDY_D (HU_HUDY_LL + (-1) * HU_GAPY)
 
-#define STSTR_SECRETFOUND   "A secret is revealed!"
+#define STSTR_SECRETFOUND "A secret is revealed!"
 
 #define S_CANT_GL_ARB_MULTITEXTURE 0x10000000
-#define S_CANT_GL_ARB_MULTISAMPLEFACTOR  0x20000000
+#define S_CANT_GL_ARB_MULTISAMPLEFACTOR 0x20000000
 
-#define GL_COMBINE_ARB                    0x8570
-#define GL_RGB_SCALE_ARB                  0x8573
+#define GL_COMBINE_ARB 0x8570
+#define GL_RGB_SCALE_ARB 0x8573
 
 #define FOV_CORRECTION_FACTOR (1.13776f)
 #define FOV90 (90)
 
-typedef struct camera_s
-{
+typedef struct camera_s {
   long x;
   long y;
   long z;
@@ -164,9 +164,9 @@ extern float skyXShift;
 extern float skyYShift;
 extern dboolean mlook_or_fov;
 
-extern hu_textline_t  w_hudadd;
-extern hu_textline_t  w_centermsg;
-extern hu_textline_t  w_precache;
+extern hu_textline_t w_hudadd;
+extern hu_textline_t w_centermsg;
+extern hu_textline_t w_precache;
 extern char hud_add[80];
 extern char hud_centermsg[80];
 
@@ -175,7 +175,7 @@ void e6y_assert(const char *format, ...);
 void ParamsMatchingCheck();
 void e6y_InitCommandLine(void);
 
-void P_WalkTicker ();
+void P_WalkTicker();
 void P_SyncWalkcam(dboolean sync_coords, dboolean sync_sight);
 void P_ResetWalkcam(void);
 
@@ -216,19 +216,17 @@ dboolean HaveMouseLook(void);
 extern float viewPitch;
 extern dboolean transparentpresent;
 
-void R_ClearClipSegs (void);
+void R_ClearClipSegs(void);
 void R_RenderBSPNode(int bspnum);
 
-typedef struct prboom_comp_s
-{
+typedef struct prboom_comp_s {
   unsigned int minver;
   unsigned int maxver;
   dboolean state;
   const char *cmd;
 } prboom_comp_t;
 
-enum
-{
+enum {
   PC_MONSTER_AVOID_HAZARDS,
   PC_REMOVE_SLIME_TRAILS,
   PC_NO_DROPOFF,
@@ -258,10 +256,10 @@ enum
 
 extern prboom_comp_t prboom_comp[];
 
-int StepwiseSum(int value, int direction, int step, int minval, int maxval, int defval);
+int StepwiseSum(int value, int direction, int step, int minval, int maxval,
+                int defval);
 
-enum
-{
+enum {
   TT_ALLKILL,
   TT_ALLITEM,
   TT_ALLSECRET,
@@ -275,19 +273,18 @@ enum
   TT_MAX
 };
 
-typedef struct timetable_s
-{
+typedef struct timetable_s {
   char map[16];
 
   int kill[MAXPLAYERS];
   int item[MAXPLAYERS];
   int secret[MAXPLAYERS];
-  
+
   int stat[TT_MAX];
 } timetable_t;
 
 #ifdef _WIN32
-const char* WINError(void);
+const char *WINError(void);
 #endif
 
 extern int stats_level;
@@ -310,14 +307,15 @@ void e6y_G_Compatibility(void);
 
 extern dboolean zerotag_manual;
 
-dboolean ProcessNoTagLines(line_t* line, sector_t **sec, int *secnum);
+dboolean ProcessNoTagLines(line_t *line, sector_t **sec, int *secnum);
 
-char* PathFindFileName(const char* pPath);
+char *PathFindFileName(const char *pPath);
 void NormalizeSlashes2(char *str);
-unsigned int AfxGetFileName(const char* lpszPathName, char* lpszTitle, unsigned int nMax);
-void AbbreviateName(char* lpszCanon, int cchMax, int bAtLeastName);
+unsigned int AfxGetFileName(const char *lpszPathName, char *lpszTitle,
+                            unsigned int nMax);
+void AbbreviateName(char *lpszCanon, int cchMax, int bAtLeastName);
 
-//extern int viewMaxY;
+// extern int viewMaxY;
 
 extern dboolean isskytexture;
 
@@ -328,31 +326,32 @@ extern int force_singletics_to;
 int HU_DrawDemoProgress(int force);
 
 #ifdef _WIN32
-int GetFullPath(const char* FileName, const char* ext, char *Buffer, size_t BufferLength);
+int GetFullPath(const char *FileName, const char *ext, char *Buffer,
+                size_t BufferLength);
 #endif
 
 void I_vWarning(const char *message, va_list argList);
 void I_Warning(const char *message, ...);
 
-#define PRB_MB_OK                       0x00000000
-#define PRB_MB_OKCANCEL                 0x00000001
-#define PRB_MB_ABORTRETRYIGNORE         0x00000002
-#define PRB_MB_YESNOCANCEL              0x00000003
-#define PRB_MB_YESNO                    0x00000004
-#define PRB_MB_RETRYCANCEL              0x00000005
-#define PRB_MB_DEFBUTTON1               0x00000000
-#define PRB_MB_DEFBUTTON2               0x00000100
-#define PRB_MB_DEFBUTTON3               0x00000200
-#define PRB_IDOK                1
-#define PRB_IDCANCEL            2
-#define PRB_IDABORT             3
-#define PRB_IDRETRY             4
-#define PRB_IDIGNORE            5
-#define PRB_IDYES               6
-#define PRB_IDNO                7
-int I_MessageBox(const char* text, unsigned int type);
+#define PRB_MB_OK 0x00000000
+#define PRB_MB_OKCANCEL 0x00000001
+#define PRB_MB_ABORTRETRYIGNORE 0x00000002
+#define PRB_MB_YESNOCANCEL 0x00000003
+#define PRB_MB_YESNO 0x00000004
+#define PRB_MB_RETRYCANCEL 0x00000005
+#define PRB_MB_DEFBUTTON1 0x00000000
+#define PRB_MB_DEFBUTTON2 0x00000100
+#define PRB_MB_DEFBUTTON3 0x00000200
+#define PRB_IDOK 1
+#define PRB_IDCANCEL 2
+#define PRB_IDABORT 3
+#define PRB_IDRETRY 4
+#define PRB_IDIGNORE 5
+#define PRB_IDYES 6
+#define PRB_IDNO 7
+int I_MessageBox(const char *text, unsigned int type);
 
-dboolean SmoothEdges(unsigned char * buffer,int w, int h);
+dboolean SmoothEdges(unsigned char *buffer, int w, int h);
 
 #ifdef _WIN32
 extern int mus_extend_volume;

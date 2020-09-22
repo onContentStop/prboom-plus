@@ -5,16 +5,15 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "rd_util.h"
 #include "rd_output.h"
+#include "rd_util.h"
 
-struct lump
-{
+struct lump {
   const char *name;
   const void *data;
   size_t size;
@@ -28,8 +27,7 @@ static struct lump *dir;
 // extract_lumpname
 //
 
-static char *extract_lumpname(const char *filename)
-{
+static char *extract_lumpname(const char *filename) {
   const char *base;
   char *lumpname, *suffix, *c;
 
@@ -60,13 +58,11 @@ static char *extract_lumpname(const char *filename)
 // output_add - add lump to wad
 //
 
-void output_add(const char *filename, const void *data, size_t size)
-{
+void output_add(const char *filename, const void *data, size_t size) {
   struct lump *newlump;
 
-  if (numlumps >= dirsize)
-  {
-    dirsize = dirsize ? 2*dirsize : 256;
+  if (numlumps >= dirsize) {
+    dirsize = dirsize ? 2 * dirsize : 256;
     dir = xrealloc(dir, dirsize * sizeof(*dir));
   }
 
@@ -82,16 +78,14 @@ void output_add(const char *filename, const void *data, size_t size)
 //
 
 // write a uint32_t, byteswapping if necessary
-static void write_u32(FILE *f, unsigned int n)
-{
+static void write_u32(FILE *f, unsigned int n) {
   n = LONG(n);
 
   fwrite(&n, 4, 1, f);
 }
 
 // write a lump name (8 byte string)
-static void write_ch8(FILE *f, const char *s)
-{
+static void write_ch8(FILE *f, const char *s) {
   char buffer[9];
 
   memset(buffer, 0, sizeof(buffer));
@@ -104,16 +98,14 @@ static void write_ch8(FILE *f, const char *s)
 // output_write - write wad to file
 //
 
-void output_write(const char *filename)
-{
+void output_write(const char *filename) {
   unsigned int i;
   struct lump *lump;
   unsigned int pos = 12;
   FILE *out;
 
   // calculate wad directory offsets
-  for (i = numlumps, lump = dir; i; i--, lump++)
-  {
+  for (i = numlumps, lump = dir; i; i--, lump++) {
     lump->offset = pos;
     pos += lump->size;
   }
@@ -132,8 +124,7 @@ void output_write(const char *filename)
     fwrite(lump->data, lump->size, 1, out);
 
   // write wad directory
-  for (i = numlumps, lump = dir; i; i--, lump++)
-  {
+  for (i = numlumps, lump = dir; i; i--, lump++) {
     write_u32(out, lump->offset);
     write_u32(out, lump->size);
     write_ch8(out, lump->name);

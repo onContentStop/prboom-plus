@@ -31,24 +31,23 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include "st_lib.h"
 #include "doomdef.h"
 #include "doomstat.h"
+#include "lprintf.h"
+#include "r_main.h"
+#include "st_stuff.h"
 #include "v_video.h"
 #include "w_wad.h"
-#include "st_stuff.h"
-#include "st_lib.h"
-#include "r_main.h"
-#include "lprintf.h"
 
-int sts_always_red;      //jff 2/18/98 control to disable status color changes
+int sts_always_red;      // jff 2/18/98 control to disable status color changes
 int sts_pct_always_gray; // killough 2/21/98: always gray %'s? bug or feature?
 int sts_armorcolor_type; // control to enable armor color depending on type
 
 //
 // STlib_init()
 //
-void STlib_init(void)
-{
+void STlib_init(void) {
   // cph - no longer hold STMINUS pointer
 }
 
@@ -61,22 +60,15 @@ void STlib_init(void)
 // to the value displayed, a pointer to the on/off control, and the width
 // Returns nothing
 //
-void STlib_initNum
-( st_number_t* n,
-  int x,
-  int y,
-  const patchnum_t* pl,
-  int* num,
-  dboolean* on,
-  int     width )
-{
-  n->x  = x;
-  n->y  = y;
+void STlib_initNum(st_number_t *n, int x, int y, const patchnum_t *pl, int *num,
+                   dboolean *on, int width) {
+  n->x = x;
+  n->y = y;
   n->oldnum = 0;
-  n->width  = width;
-  n->num  = num;
+  n->width = width;
+  n->num = num;
   n->on = on;
-  n->p  = pl;
+  n->p = pl;
 }
 
 /*
@@ -92,32 +84,27 @@ void STlib_initNum
  * jff 2/16/98 add color translation to digit output
  * cphipps 10/99 - const pointer to colour trans table, made function static
  */
-static void STlib_drawNum
-( st_number_t*  n,
-  int cm,
-  dboolean refresh )
-{
+static void STlib_drawNum(st_number_t *n, int cm, dboolean refresh) {
 
-  int   numdigits = n->width;
-  int   num = *n->num;
+  int numdigits = n->width;
+  int num = *n->num;
 
-  int   w = n->p[0].width;
-  int   h = n->p[0].height;
-  int   x = n->x;
+  int w = n->p[0].width;
+  int h = n->p[0].height;
+  int x = n->x;
 
-  int   neg;
+  int neg;
 
   // leban 1/20/99:
   // strange that somebody went through all the work to draw only the
   // differences, and then went and constantly redrew all the numbers.
   // return without drawing if the number didn't change and the bar
   // isn't refreshing.
-  if(n->oldnum == num && !refresh)
+  if (n->oldnum == num && !refresh)
     return;
 
   // CPhipps - compact some code, use num instead of *n->num
-  if ((neg = (n->oldnum = num) < 0))
-  {
+  if ((neg = (n->oldnum = num) < 0)) {
     if (numdigits == 2 && num < -9)
       num = -9;
     else if (numdigits == 3 && num < -99)
@@ -127,7 +114,7 @@ static void STlib_drawNum
   }
 
   // clear the area
-  x = n->x - numdigits*w;
+  x = n->x - numdigits * w;
 
 #ifdef RANGECHECK
   if (n->y - ST_Y < 0)
@@ -142,29 +129,36 @@ static void STlib_drawNum
 
   x = n->x;
 
-  //jff 2/16/98 add color translation to digit output
+  // jff 2/16/98 add color translation to digit output
   // in the special case of 0, you draw 0
   if (!num)
     // CPhipps - patch drawing updated, reformatted
-    V_DrawNumPatch(x - w, n->y, FG, n->p[0].lumpnum, cm,
-       (((cm!=CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+    V_DrawNumPatch(
+        x - w, n->y, FG, n->p[0].lumpnum, cm,
+        (((cm != CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) |
+            VPT_ALIGN_BOTTOM);
 
   // draw the new number
-  //jff 2/16/98 add color translation to digit output
+  // jff 2/16/98 add color translation to digit output
   while (num && numdigits--) {
     // CPhipps - patch drawing updated, reformatted
     x -= w;
-    V_DrawNumPatch(x, n->y, FG, n->p[num % 10].lumpnum, cm,
-       (((cm!=CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+    V_DrawNumPatch(
+        x, n->y, FG, n->p[num % 10].lumpnum, cm,
+        (((cm != CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) |
+            VPT_ALIGN_BOTTOM);
     num /= 10;
   }
 
   // draw a minus sign if necessary
-  //jff 2/16/98 add color translation to digit output
-  // cph - patch drawing updated, load by name instead of acquiring pointer earlier
+  // jff 2/16/98 add color translation to digit output
+  // cph - patch drawing updated, load by name instead of acquiring pointer
+  // earlier
   if (neg)
-    V_DrawNamePatch(x - w, n->y, FG, "STTMINUS", cm,
-       (((cm!=CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+    V_DrawNamePatch(
+        x - w, n->y, FG, "STTMINUS", cm,
+        (((cm != CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) |
+            VPT_ALIGN_BOTTOM);
 }
 
 /*
@@ -178,12 +172,9 @@ static void STlib_drawNum
  * jff 2/16/98 add color translation to digit output
  * cphipps 10/99 - make that pointer const
  */
-void STlib_updateNum
-( st_number_t*    n,
-  int cm,
-  dboolean   refresh )
-{
-  if (*n->on) STlib_drawNum(n, cm, refresh);
+void STlib_updateNum(st_number_t *n, int cm, dboolean refresh) {
+  if (*n->on)
+    STlib_drawNum(n, cm, refresh);
 }
 
 //
@@ -196,15 +187,8 @@ void STlib_updateNum
 // for the percent sign.
 // Returns nothing.
 //
-void STlib_initPercent
-( st_percent_t* p,
-  int x,
-  int y,
-  const patchnum_t* pl,
-  int* num,
-  dboolean* on,
-  const patchnum_t* percent )
-{
+void STlib_initPercent(st_percent_t *p, int x, int y, const patchnum_t *pl,
+                       int *num, dboolean *on, const patchnum_t *percent) {
   STlib_initNum(&p->n, x, y, pl, num, on, 3);
   p->p = percent;
 }
@@ -221,18 +205,14 @@ void STlib_initPercent
  * cphipps - const for pointer to the colour translation table
  */
 
-void STlib_updatePercent
-( st_percent_t*   per,
-  int cm,
-  int refresh )
-{
+void STlib_updatePercent(st_percent_t *per, int cm, int refresh) {
   if (*per->n.on && (refresh || (per->n.oldnum != *per->n.num))) {
     // killough 2/21/98: fix percents not updated;
     /* CPhipps - make %'s only be updated if number changed */
     // CPhipps - patch drawing updated
     V_DrawNumPatch(per->n.x, per->n.y, FG, per->p->lumpnum,
-       sts_pct_always_gray ? CR_GRAY : cm,
-       (sts_always_red ? VPT_NONE : VPT_TRANS) | VPT_ALIGN_BOTTOM);
+                   sts_pct_always_gray ? CR_GRAY : cm,
+                   (sts_always_red ? VPT_NONE : VPT_TRANS) | VPT_ALIGN_BOTTOM);
   }
 
   STlib_updateNum(&per->n, cm, refresh);
@@ -248,20 +228,14 @@ void STlib_updatePercent
 // to the numbers representing what to display, and pointer to the enable flag
 // Returns nothing.
 //
-void STlib_initMultIcon
-( st_multicon_t* i,
-  int x,
-  int y,
-  const patchnum_t* il,
-  int* inum,
-  dboolean* on )
-{
-  i->x  = x;
-  i->y  = y;
-  i->oldinum  = -1;
+void STlib_initMultIcon(st_multicon_t *i, int x, int y, const patchnum_t *il,
+                        int *inum, dboolean *on) {
+  i->x = x;
+  i->y = y;
+  i->oldinum = -1;
   i->inum = inum;
   i->on = on;
-  i->p  = il;
+  i->p = il;
 }
 
 //
@@ -274,19 +248,14 @@ void STlib_initMultIcon
 // Passed a st_multicon_t widget, and a refresh flag
 // Returns nothing.
 //
-void STlib_updateMultIcon
-( st_multicon_t*  mi,
-  dboolean   refresh )
-{
+void STlib_updateMultIcon(st_multicon_t *mi, dboolean refresh) {
   int w;
   int h;
   int x;
   int y;
 
-  if (*mi->on && (mi->oldinum != *mi->inum || refresh))
-  {
-    if (mi->oldinum != -1)
-    {
+  if (*mi->on && (mi->oldinum != *mi->inum || refresh)) {
+    if (mi->oldinum != -1) {
       x = mi->x - mi->p[mi->oldinum].leftoffset;
       y = mi->y - mi->p[mi->oldinum].topoffset;
       w = mi->p[mi->oldinum].width;
@@ -299,8 +268,9 @@ void STlib_updateMultIcon
 
       V_CopyRect(BG, FG, x, y, w, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
     }
-    if (*mi->inum != -1)  // killough 2/16/98: redraw only if != -1
-      V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT, VPT_ALIGN_BOTTOM);
+    if (*mi->inum != -1) // killough 2/16/98: redraw only if != -1
+      V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT,
+                     VPT_ALIGN_BOTTOM);
     mi->oldinum = *mi->inum;
   }
 }
@@ -315,20 +285,14 @@ void STlib_updateMultIcon
 // to the flags representing what is displayed, and pointer to the enable flag
 // Returns nothing.
 //
-void STlib_initBinIcon
-( st_binicon_t* b,
-  int x,
-  int y,
-  const patchnum_t* i,
-  dboolean* val,
-  dboolean* on )
-{
-  b->x  = x;
-  b->y  = y;
+void STlib_initBinIcon(st_binicon_t *b, int x, int y, const patchnum_t *i,
+                       dboolean *val, dboolean *on) {
+  b->x = x;
+  b->y = y;
   b->oldval = 0;
-  b->val  = val;
+  b->val = val;
   b->on = on;
-  b->p  = i;
+  b->p = i;
 }
 
 //
@@ -344,17 +308,13 @@ void STlib_initBinIcon
 // Passed a st_binicon_t widget, and a refresh flag
 // Returns nothing.
 //
-void STlib_updateBinIcon
-( st_binicon_t*   bi,
-  dboolean   refresh )
-{
-  int     x;
-  int     y;
-  int     w;
-  int     h;
+void STlib_updateBinIcon(st_binicon_t *bi, dboolean refresh) {
+  int x;
+  int y;
+  int w;
+  int h;
 
-  if (*bi->on && (bi->oldval != *bi->val || refresh))
-  {
+  if (*bi->on && (bi->oldval != *bi->val || refresh)) {
     x = bi->x - bi->p->leftoffset;
     y = bi->y - bi->p->topoffset;
     w = bi->p->width;

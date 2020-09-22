@@ -34,20 +34,22 @@
 #ifndef __M_CHEAT__
 #define __M_CHEAT__
 
-#define CHEAT(cheat, deh_cheat, when, func, arg) \
-  { cheat, deh_cheat, when, func, arg, 0, 0, \
-    sizeof(cheat) - 1, 0, 0, 0, "" }
+#include "d_ticcmd.h"
+#include <stddef.h>
 
-#define CHEAT_ARGS_MAX 8  /* Maximum number of args at end of cheats */
+#define CHEAT(cheat, deh_cheat, when, func, arg)                               \
+  { cheat, deh_cheat, when, func, arg, 0, 0, sizeof(cheat) - 1, 0, 0, 0, "" }
+
+#define CHEAT_ARGS_MAX 8 /* Maximum number of args at end of cheats */
 
 /* killough 4/16/98: Cheat table structure */
 
 typedef struct cheatseq_s {
-  const char *	cheat;
+  const char *cheat;
   const char *const deh_cheat;
   enum {
-    always   = 0,
-    not_dm   = 1,
+    always = 0,
+    not_dm = 1,
     not_coop = 2,
     not_demo = 4,
     not_menu = 8,

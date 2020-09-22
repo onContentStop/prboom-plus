@@ -35,8 +35,7 @@
 #include "memio.h"
 
 // Structure to hold MUS file header
-typedef struct
-{
+typedef struct {
   byte id[4];
   unsigned short scorelength;
   unsigned short scorestart;

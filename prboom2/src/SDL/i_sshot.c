@@ -44,48 +44,43 @@
 #include <SDL_image.h>
 #endif
 
-#include "doomstat.h"
 #include "doomdef.h"
+#include "doomstat.h"
 #include "doomtype.h"
-#include "v_video.h"
 #include "i_video.h"
-#include "z_zone.h"
 #include "lprintf.h"
+#include "v_video.h"
+#include "z_zone.h"
 
 int renderW;
 int renderH;
 
-void I_UpdateRenderSize(void)
-{
-	if (V_GetMode() == VID_MODEGL)
-	{
-		renderW = REAL_SCREENWIDTH;
-		renderH = REAL_SCREENHEIGHT;
-	}
-	else
-	{
-		SDL_GetRendererOutputSize(sdl_renderer, &renderW, &renderH);
-	}
+void I_UpdateRenderSize(void) {
+  if (V_GetMode() == VID_MODEGL) {
+    renderW = REAL_SCREENWIDTH;
+    renderH = REAL_SCREENHEIGHT;
+  } else {
+    SDL_GetRendererOutputSize(sdl_renderer, &renderW, &renderH);
+  }
 }
 
 //
-// I_ScreenShot // Modified to work with SDL2 resizeable window and fullscreen desktop - DTIED
+// I_ScreenShot // Modified to work with SDL2 resizeable window and fullscreen
+// desktop - DTIED
 //
 
-int I_ScreenShot(const char *fname)
-{
+int I_ScreenShot(const char *fname) {
   int result = -1;
   unsigned char *pixels = I_GrabScreen();
   SDL_Surface *screenshot = NULL;
 
-  if (pixels)
-  {
-	screenshot = SDL_CreateRGBSurfaceFrom(pixels, renderW, renderH, 24,
-	  renderW * 3, 0x000000ff, 0x0000ff00, 0x00ff0000, 0);
+  if (pixels) {
+    screenshot =
+        SDL_CreateRGBSurfaceFrom(pixels, renderW, renderH, 24, renderW * 3,
+                                 0x000000ff, 0x0000ff00, 0x00ff0000, 0);
   }
 
-  if (screenshot)
-  {
+  if (screenshot) {
 #ifdef HAVE_LIBSDL2_IMAGE
     result = IMG_SavePNG(screenshot, fname);
 #else
@@ -103,32 +98,29 @@ int I_ScreenShot(const char *fname)
 // Modified to work with SDL2 resizeable window and fullscreen desktop - DTIED
 //
 
-unsigned char *I_GrabScreen(void)
-{
+unsigned char *I_GrabScreen(void) {
   static unsigned char *pixels = NULL;
   static int pixels_size = 0;
   int size;
 
   I_UpdateRenderSize();
 
-  #ifdef GL_DOOM
-  if (V_GetMode() == VID_MODEGL)
-  {
+#ifdef GL_DOOM
+  if (V_GetMode() == VID_MODEGL) {
     return gld_ReadScreen();
   }
-  #endif
+#endif
 
   size = renderW * renderH * 3;
-  if (!pixels || size > pixels_size)
-  {
+  if (!pixels || size > pixels_size) {
     pixels_size = size;
-    pixels = (unsigned char*)realloc(pixels, size);
+    pixels = (unsigned char *)realloc(pixels, size);
   }
 
-  if (pixels && size)
-  {
-    SDL_Rect screen = { 0, 0, renderW, renderH };
-    SDL_RenderReadPixels(sdl_renderer, &screen, SDL_PIXELFORMAT_RGB24, pixels, renderW * 3);
+  if (pixels && size) {
+    SDL_Rect screen = {0, 0, renderW, renderH};
+    SDL_RenderReadPixels(sdl_renderer, &screen, SDL_PIXELFORMAT_RGB24, pixels,
+                         renderW * 3);
   }
 
   return pixels;

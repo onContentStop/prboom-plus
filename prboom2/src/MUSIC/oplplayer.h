@@ -24,11 +24,9 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #ifndef OPLPLAYER_H
 #define OPLPLAYER_H
 
 extern const music_player_t opl_synth_player;
-
 
 #endif
