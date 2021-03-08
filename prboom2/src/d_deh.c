@@ -1281,36 +1281,43 @@ char *deh_spritenames[NUMSPRITES + 1];
 char *deh_musicnames[NUMMUSIC + 1];
 char *deh_soundnames[NUMSFX + 1];
 
-void D_BuildBEXTables(void) {
-  int i;
+void D_BuildBEXTables(void)
+{
+   int i;
 
-  // moved from ProcessDehFile, then we don't need the static int i
-  for (i = 0; i < EXTRASTATES; i++) // remember what they start as for deh xref
-    deh_codeptr[i] = states[i].action;
+   // moved from ProcessDehFile, then we don't need the static int i
+   for (i = 0; i < EXTRASTATES; i++)  // remember what they start as for deh xref
+     deh_codeptr[i] = states[i].action;
 
-  // initialize extra dehacked states
-  for (; i < NUMSTATES; i++) {
-    states[i].sprite = SPR_TNT1;
-    states[i].frame = 0;
-    states[i].tics = -1;
-    states[i].action = NULL;
-    states[i].nextstate = i;
-    states[i].misc1 = 0;
-    states[i].misc2 = 0;
-    deh_codeptr[i] = states[i].action;
-  }
+   // initialize extra dehacked states
+   for ( ; i < NUMSTATES; i++)
+   {
+     states[i].sprite = SPR_TNT1;
+     states[i].frame = 0;
+     states[i].tics = -1;
+     states[i].action = NULL;
+     states[i].nextstate = i;
+     states[i].misc1 = 0;
+     states[i].misc2 = 0;
+     deh_codeptr[i] = states[i].action;
+   }
 
-  for (i = 0; i < NUMSPRITES; i++)
-    deh_spritenames[i] = strdup(sprnames[i]);
-  deh_spritenames[NUMSPRITES] = NULL;
+   for(i = 0; i < NUMSPRITES; i++)
+      deh_spritenames[i] = strdup(sprnames[i]);
+   deh_spritenames[NUMSPRITES] = NULL;
 
-  for (i = 1; i < NUMMUSIC; i++)
-    deh_musicnames[i] = strdup(S_music[i].name);
-  deh_musicnames[0] = deh_musicnames[NUMMUSIC] = NULL;
+   for(i = 1; i < NUMMUSIC; i++)
+      deh_musicnames[i] = strdup(S_music[i].name);
+   deh_musicnames[0] = deh_musicnames[NUMMUSIC] = NULL;
 
-  for (i = 1; i < NUMSFX; i++)
-    deh_soundnames[i] = strdup(S_sfx[i].name);
-  deh_soundnames[0] = deh_soundnames[NUMSFX] = NULL;
+   for(i = 1; i < NUMSFX; i++) {
+      if (S_sfx[i].name != NULL) {
+         deh_soundnames[i] = strdup(S_sfx[i].name);
+      } else { // This is possible due to how DEHEXTRA has turned S_sfx into a sparse array
+         deh_soundnames[i] = NULL;
+      }
+   }
+   deh_soundnames[0] = deh_soundnames[NUMSFX] = NULL;
 
   // ferk: initialize Thing extra properties (keeping vanilla props in info.c)
   for (i = 0; i < NUMMOBJTYPES; i++) {
@@ -1427,10 +1434,28 @@ void ProcessDehFile(const char *filename, const char *outfilename,
 
   // killough 10/98: allow DEH files to come from wad lumps
 
-  if (filename) {
-    if (!(infile.f = fopen(filename, "rt"))) {
-      lprintf(LO_WARN, "-deh file %s not found\n", filename);
-      return; // should be checked up front anyway
+  if (filename)
+    {
+      if (!(infile.f = fopen(filename,"rt")))
+        {
+          lprintf(LO_WARN, "-deh file %s not found\n",filename);
+          return;  // should be checked up front anyway
+        }
+      infile.lump = NULL;
+      file_or_lump = "file";
+    }
+  else  // DEH file comes from lump indicated by third argument
+    {
+      infile.size = W_LumpLength(lumpnum);
+      infile.inp = infile.lump = W_CacheLumpNum(lumpnum);
+      // [FG] skip empty DEHACKED lumps
+      if (!infile.inp)
+        {
+          lprintf(LO_WARN, "skipping empty DEHACKED (%d) lump\n",lumpnum);
+          return;
+        }
+      filename = lumpinfo[lumpnum].wadfile->name;
+      file_or_lump = "lump from";
     }
     infile.lump = NULL;
     file_or_lump = "file";
@@ -2628,23 +2653,59 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line) {
     }
   }
 
-  if (!found && fromlen < 7 &&
-      tolen < 7) // lengths of music and sfx are 6 or shorter
-  {
-    usedlen = (fromlen < tolen) ? fromlen : tolen;
-    if (fromlen != tolen)
-      if (fpout)
-        fprintf(fpout, "Warning: Mismatched lengths from=%d, to=%d, used %d\n",
-                fromlen, tolen, usedlen);
-    // Try sound effects entries - see sounds.c
-    for (i = 1; i < NUMSFX; i++) {
-      // avoid short prefix erroneous match
-      if (strlen(S_sfx[i].name) != (size_t)fromlen)
-        continue;
-      if (!strnicmp(S_sfx[i].name, inbuffer, fromlen) && !S_sfx_state[i]) {
-        if (fpout)
-          fprintf(fpout, "Changing name of sfx from %s to %*s\n", S_sfx[i].name,
-                  usedlen, &inbuffer[fromlen]);
+    if (!found && fromlen < 7 && tolen < 7)  // lengths of music and sfx are 6 or shorter
+      {
+        usedlen = (fromlen < tolen) ? fromlen : tolen;
+        if (fromlen != tolen)
+          if (fpout) fprintf(fpout,
+                             "Warning: Mismatched lengths from=%d, to=%d, used %d\n",
+                             fromlen, tolen, usedlen);
+        // Try sound effects entries - see sounds.c
+        for (i=1; i<NUMSFX; i++)
+          {
+            // skip empty dummy entries in S_sfx[]
+            if (!S_sfx[i].name) continue;
+            // avoid short prefix erroneous match
+            if (strlen(S_sfx[i].name) != (size_t)fromlen) continue;
+            if (!strnicmp(S_sfx[i].name,inbuffer,fromlen) && !S_sfx_state[i])
+              {
+                if (fpout) fprintf(fpout,
+                                   "Changing name of sfx from %s to %*s\n",
+                                   S_sfx[i].name,usedlen,&inbuffer[fromlen]);
+
+                S_sfx[i].name = strdup(&inbuffer[fromlen]);
+
+                //e6y: flag the SFX as changed
+                S_sfx_state[i] = true;
+
+                found = TRUE;
+                break;  // only one matches, quit early
+              }
+          }
+        if (!found)  // not yet
+          {
+            // Try music name entries - see sounds.c
+            for (i=1; i<NUMMUSIC; i++)
+              {
+                // avoid short prefix erroneous match
+                if (strlen(S_music[i].name) != (size_t)fromlen) continue;
+                if (!strnicmp(S_music[i].name,inbuffer,fromlen) && !S_music_state[i])
+                  {
+                    if (fpout) fprintf(fpout,
+                                       "Changing name of music from %s to %*s\n",
+                                       S_music[i].name,usedlen,&inbuffer[fromlen]);
+
+                    S_music[i].name = strdup(&inbuffer[fromlen]);
+
+                    //e6y: flag the music as changed
+                    S_music_state[i] = true;
+
+                    found = TRUE;
+                    break;  // only one matches, quit early
+                  }
+              }
+          }  // end !found test
+      }
 
         S_sfx[i].name = strdup(&inbuffer[fromlen]);
 
@@ -2748,41 +2809,44 @@ static void deh_procStrings(DEHFILE *fpin, FILE *fpout, char *line) {
       break;          // killough 11/98
     if (!*holdstring) // first one--get the key
     {
-      if (!deh_GetData(inbuffer, key, &value, &strval,
-                       fpout)) // returns TRUE if ok
-      {
-        if (fpout)
-          fprintf(fpout, "Bad data pair in '%s'\n", inbuffer);
-        continue;
-      }
-    }
-    while (strlen(holdstring) + strlen(inbuffer) >
-           maxstrlen) // Ty03/29/98 - fix stupid error
-    {
-      // killough 11/98: allocate enough the first time
-      maxstrlen = strlen(holdstring) + strlen(inbuffer);
-      if (fpout)
-        fprintf(fpout, "* increased buffer from to %ld for buffer size %d\n",
-                maxstrlen, (int)strlen(inbuffer));
-      holdstring = realloc(holdstring, maxstrlen * sizeof(*holdstring));
-    }
-    // concatenate the whole buffer if continuation or the value iffirst
-    strcat(holdstring, ptr_lstrip(((*holdstring) ? inbuffer : strval)));
-    rstrip(holdstring);
-    // delete any trailing blanks past the backslash
-    // note that blanks before the backslash will be concatenated
-    // but ones at the beginning of the next line will not, allowing
-    // indentation in the file to read well without affecting the
-    // string itself.
-    if (holdstring[strlen(holdstring) - 1] == '\\') {
-      holdstring[strlen(holdstring) - 1] = '\0';
-      continue; // ready to concatenate
-    }
-    if (*holdstring) // didn't have a backslash, trap above would catch that
-    {
-      // go process the current string
-      found = deh_procStringSub(key, NULL, holdstring,
-                                fpout); // supply keyand not search string
+      if (!dehfgets(inbuffer, sizeof(inbuffer), fpin)) break;
+      if (*inbuffer == '#') continue;  // skip comment lines
+      lfstrip(inbuffer);
+      if (!*inbuffer && !*holdstring) break;  // killough 11/98
+      if (!*holdstring) // first one--get the key
+        {
+          if (!deh_GetData(inbuffer,key,&value,&strval,fpout)) // returns TRUE if ok
+            {
+              if (fpout) fprintf(fpout,"Bad data pair in '%s'\n",inbuffer);
+              continue;
+            }
+        }
+      while (strlen(holdstring) + strlen(inbuffer) > maxstrlen) // Ty03/29/98 - fix stupid error
+        {
+    // killough 11/98: allocate enough the first time
+          maxstrlen = strlen(holdstring) + strlen(inbuffer);
+          if (fpout) fprintf(fpout,
+                             "* increased buffer from to %ld for buffer size %d\n",
+                             (long)maxstrlen,(int)strlen(inbuffer));
+          holdstring = realloc(holdstring,maxstrlen*sizeof(*holdstring));
+        }
+      // concatenate the whole buffer if continuation or the value iffirst
+      strcat(holdstring,ptr_lstrip(((*holdstring) ? inbuffer : strval)));
+      rstrip(holdstring);
+      // delete any trailing blanks past the backslash
+      // note that blanks before the backslash will be concatenated
+      // but ones at the beginning of the next line will not, allowing
+      // indentation in the file to read well without affecting the
+      // string itself.
+      if (holdstring[strlen(holdstring)-1] == '\\')
+        {
+          holdstring[strlen(holdstring)-1] = '\0';
+          continue; // ready to concatenate
+        }
+      if (*holdstring) // didn't have a backslash, trap above would catch that
+        {
+          // go process the current string
+          found = deh_procStringSub(key, NULL, holdstring, fpout);  // supply keyand not search string
 
       if (!found)
         if (fpout)

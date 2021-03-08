@@ -86,8 +86,11 @@
 #include "w_wad.h"
 #include "wi_stuff.h"
 
-#define SAVEGAMESIZE 0x20000
-#define SAVESTRINGSIZE 24
+// ano - used for version 255+ demos, like EE or MBF
+static char     prdemosig[] = "PR+UM";
+
+#define SAVEGAMESIZE  0x20000
+#define SAVESTRINGSIZE  24
 
 struct MapEntry *G_LookupMapinfo(int gameepisode, int gamemap);
 
@@ -161,101 +164,114 @@ dboolean done_autoswitch;
 // but without having to be recording every time.
 int shorttics;
 
+// automatic pistol start when advancing from one level to the next
+int pistolstart;
+
 //
 // controls (have defaults)
 //
 
-int key_right;
-int key_left;
-int key_up;
-int key_down;
-int key_mlook;
-int key_menu_right; // phares 3/7/98
-int key_menu_left;  //     |
-int key_menu_up;    //     V
-int key_menu_down;
-int key_menu_backspace; //     ^
-int key_menu_escape;    //     |
-int key_menu_enter;     // phares 3/7/98
-int key_menu_clear;
-int key_strafeleft;
-int key_straferight;
-int key_flyup;
-int key_flydown;
-int key_fire;
-int key_use;
-int key_strafe;
-int key_speed;
-int key_escape = KEYD_ESCAPE; // phares 4/13/98
-int key_savegame;             // phares
-int key_loadgame;             //    |
-int key_autorun;              //    V
-int key_reverse;
-int key_zoomin;
-int key_zoomout;
-int key_chat;
-int key_backspace;
-int key_enter;
-int key_map_right;
-int key_map_left;
-int key_map_up;
-int key_map_down;
-int key_map_zoomin;
-int key_map_zoomout;
-int key_map;
-int key_map_gobig;
-int key_map_follow;
-int key_map_mark;
-int key_map_clear;
-int key_map_grid;
-int key_map_overlay;    // cph - map overlay
-int key_map_rotate;     // cph - map rotation
-int key_map_textured;   // e6y - textured automap
-int key_help = KEYD_F1; // phares 4/13/98
-int key_soundvolume;
-int key_hud;
-int key_quicksave;
-int key_endgame;
-int key_messages;
-int key_quickload;
-int key_quit;
-int key_gamma;
-int key_spy;
-int key_pause;
-int key_setup;
-int destination_keys[MAXPLAYERS];
-int key_weapontoggle;
-int key_weapon1;
-int key_weapon2;
-int key_weapon3;
-int key_weapon4;
-int key_weapon5;
-int key_weapon6;
-int key_weapon7; //    ^
-int key_weapon8; //    |
-int key_weapon9; // phares
-int key_nextweapon;
-int key_prevweapon;
+int     key_right;
+int     key_left;
+int     key_up;
+int     key_down;
+int     key_mlook;
+int     key_novert;
+int     key_menu_right;                                      // phares 3/7/98
+int     key_menu_left;                                       //     |
+int     key_menu_up;                                         //     V
+int     key_menu_down;
+int     key_menu_backspace;                                  //     ^
+int     key_menu_escape;                                     //     |
+int     key_menu_enter;                                      // phares 3/7/98
+int     key_menu_clear;
+int     key_strafeleft;
+int     key_straferight;
+int     key_flyup;
+int     key_flydown;
+int     key_fire;
+int     key_use;
+int     key_strafe;
+int     key_speed;
+int     key_escape = KEYD_ESCAPE;                           // phares 4/13/98
+int     key_savegame;                                               // phares
+int     key_loadgame;                                               //    |
+int     key_autorun;                                                //    V
+int     key_reverse;
+int     key_zoomin;
+int     key_zoomout;
+int     key_chat;
+int     key_backspace;
+int     key_enter;
+int     key_map_right;
+int     key_map_left;
+int     key_map_up;
+int     key_map_down;
+int     key_map_zoomin;
+int     key_map_zoomout;
+int     key_map;
+int     key_map_gobig;
+int     key_map_follow;
+int     key_map_mark;
+int     key_map_clear;
+int     key_map_grid;
+int     key_map_overlay; // cph - map overlay
+int     key_map_rotate;  // cph - map rotation
+int     key_map_textured;  // e6y - textured automap
+int     key_help = KEYD_F1;                                 // phares 4/13/98
+int     key_soundvolume;
+int     key_hud;
+int     key_quicksave;
+int     key_endgame;
+int     key_messages;
+int     key_quickload;
+int     key_quit;
+int     key_gamma;
+int     key_spy;
+int     key_pause;
+int     key_setup;
+int     destination_keys[MAXPLAYERS];
+int     key_weapontoggle;
+int     key_weapon1;
+int     key_weapon2;
+int     key_weapon3;
+int     key_weapon4;
+int     key_weapon5;
+int     key_weapon6;
+int     key_weapon7;                                                //    ^
+int     key_weapon8;                                                //    |
+int     key_weapon9;                                                // phares
+int     key_nextweapon;
+int     key_prevweapon;
 
-int key_screenshot; // killough 2/22/98: screenshot key
-int mousebfire;
-int mousebstrafe;
-int mousebforward;
-int mousebbackward;
-int mousebuse;
-int joybfire;
-int joybstrafe;
-int joybstrafeleft;
-int joybstraferight;
-int joybuse;
-int joybspeed;
+int     mb_weapon1;
+int     mb_weapon2;
+int     mb_weapon3;
+int     mb_weapon4;
+int     mb_weapon5;
+int     mb_weapon6;
+int     mb_weapon7;
+int     mb_weapon8;
+int     mb_weapon9;
 
-#define MAXPLMOVE (forwardmove[1])
-#define TURBOTHRESHOLD 0x32
-#define SLOWTURNTICS 6
-#define QUICKREVERSE                                                           \
-  (short)32768 // 180 degree reverse                    // phares
-#define NUMKEYS 512
+int     key_screenshot;             // killough 2/22/98: screenshot key
+int     mousebfire;
+int     mousebstrafe;
+int     mousebforward;
+int     mousebbackward;
+int     mousebuse;
+int     joybfire;
+int     joybstrafe;
+int     joybstrafeleft;
+int     joybstraferight;
+int     joybuse;
+int     joybspeed;
+
+#define MAXPLMOVE   (forwardmove[1])
+#define TURBOTHRESHOLD  0x32
+#define SLOWTURNTICS  6
+#define QUICKREVERSE (short)32768 // 180 degree reverse                    // phares
+#define NUMKEYS   512
 
 fixed_t forwardmove[2] = {0x19, 0x32};
 fixed_t sidemove[2] = {0x18, 0x28};
@@ -290,8 +306,8 @@ static const struct {
                           {wp_plasma, wp_plasma},
                           {wp_bfg, wp_bfg}};
 
-static int mousearray[6];
-static int *mousebuttons = &mousearray[1]; // allow [-1]
+static int mousearray[MAX_MOUSEB + 1];
+static int *mousebuttons = &mousearray[1];    // allow [-1]
 
 // mouse values are used once
 static int mousex;
@@ -342,7 +358,19 @@ static inline signed char fudgef(signed char b) {
   return b;
 }
 
-void G_SetSpeed(void) {
+static void SetMouseButtons(unsigned int buttons_mask)
+{
+  int i;
+
+  for (i = 0; i < MAX_MOUSEB; ++i)
+  {
+    unsigned int button_on = (buttons_mask & (1 << i)) != 0;
+    mousebuttons[i] = button_on;
+  }
+}
+
+void G_SetSpeed(void)
+{
   int p;
 
   if (movement_strafe50) {
@@ -521,10 +549,10 @@ void G_BuildTiccmd(ticcmd_t *cmd) {
 
   // Make Boom insert only a single weapon change command on autoswitch.
   if ((!demo_compatibility && players[consoleplayer].attackdown && // killough
-       !P_CheckAmmo(&players[consoleplayer])) &&
-          !done_autoswitch && boom_autoswitch ||
-      gamekeydown[key_weapontoggle]) {
-    newweapon = P_SwitchWeapon(&players[consoleplayer]); // phares
+       !P_CheckAmmo(&players[consoleplayer]) && !done_autoswitch && boom_autoswitch) ||
+       gamekeydown[key_weapontoggle])
+  {
+    newweapon = P_SwitchWeapon(&players[consoleplayer]);           // phares
     done_autoswitch = true;
   } else { // phares 02/26/98: Added gamemode checks
     if (next_weapon) {
@@ -532,77 +560,67 @@ void G_BuildTiccmd(ticcmd_t *cmd) {
       next_weapon = 0;
     } else {
       newweapon =
-          gamekeydown[key_weapon1] ? wp_fist : // killough 5/2/98: reformatted
-              gamekeydown[key_weapon2]
-                  ? wp_pistol
-                  : gamekeydown[key_weapon3]
-                        ? wp_shotgun
-                        : gamekeydown[key_weapon4]
-                              ? wp_chaingun
-                              : gamekeydown[key_weapon5]
-                                    ? wp_missile
-                                    : gamekeydown[key_weapon6] &&
-                                              gamemode != shareware
-                                          ? wp_plasma
-                                          : gamekeydown[key_weapon7] &&
-                                                    gamemode != shareware
-                                                ? wp_bfg
-                                                : gamekeydown[key_weapon8]
-                                                      ? wp_chainsaw
-                                                      : (!demo_compatibility &&
-                                                         gamekeydown
-                                                             [key_weapon9] &&
-                                                         gamemode == commercial)
-                                                            ? wp_supershotgun
-                                                            : wp_nochange;
+        (gamekeydown[key_weapon1] || mousebuttons [mb_weapon1]) ? wp_fist :    // killough 5/2/98: reformatted
+        (gamekeydown[key_weapon2] || mousebuttons [mb_weapon2]) ? wp_pistol :
+        (gamekeydown[key_weapon3] || mousebuttons [mb_weapon3]) ? wp_shotgun :
+        (gamekeydown[key_weapon4] || mousebuttons [mb_weapon4]) ? wp_chaingun :
+        (gamekeydown[key_weapon5] || mousebuttons [mb_weapon5]) ? wp_missile :
+        (gamekeydown[key_weapon6] || mousebuttons [mb_weapon6]) && gamemode != shareware ? wp_plasma :
+        (gamekeydown[key_weapon7] || mousebuttons [mb_weapon7]) && gamemode != shareware ? wp_bfg :
+        (gamekeydown[key_weapon8] || mousebuttons [mb_weapon8]) ? wp_chainsaw :
+        (!demo_compatibility && (gamekeydown[key_weapon9] || mousebuttons [mb_weapon9]) && gamemode == commercial) ? wp_supershotgun :
+        wp_nochange;
+      }
+
+      // killough 3/22/98: For network and demo consistency with the
+      // new weapons preferences, we must do the weapons switches here
+      // instead of in p_user.c. But for old demos we must do it in
+      // p_user.c according to the old rules. Therefore demo_compatibility
+      // determines where the weapons switch is made.
+
+      // killough 2/8/98:
+      // Allow user to switch to fist even if they have chainsaw.
+      // Switch to fist or chainsaw based on preferences.
+      // Switch to shotgun or SSG based on preferences.
+
+      if (!demo_compatibility)
+        {
+          const player_t *player = &players[consoleplayer];
+
+          // only select chainsaw from '1' if it's owned, it's
+          // not already in use, and the player prefers it or
+          // the fist is already in use, or the player does not
+          // have the berserker strength.
+
+          if (newweapon==wp_fist && player->weaponowned[wp_chainsaw] &&
+              player->readyweapon!=wp_chainsaw &&
+              (player->readyweapon==wp_fist ||
+               !player->powers[pw_strength] ||
+               P_WeaponPreferred(wp_chainsaw, wp_fist)))
+            newweapon = wp_chainsaw;
+
+          // Select SSG from '3' only if it's owned and the player
+          // does not have a shotgun, or if the shotgun is already
+          // in use, or if the SSG is not already in use and the
+          // player prefers it.
+
+          if (newweapon == wp_shotgun && gamemode == commercial &&
+              player->weaponowned[wp_supershotgun] &&
+              (!player->weaponowned[wp_shotgun] ||
+               player->readyweapon == wp_shotgun ||
+               (player->readyweapon != wp_supershotgun &&
+                P_WeaponPreferred(wp_supershotgun, wp_shotgun))))
+            newweapon = wp_supershotgun;
+        }
+      // killough 2/8/98, 3/22/98 -- end of weapon selection changes
+      //}
     }
 
-    // killough 3/22/98: For network and demo consistency with the
-    // new weapons preferences, we must do the weapons switches here
-    // instead of in p_user.c. But for old demos we must do it in
-    // p_user.c according to the old rules. Therefore demo_compatibility
-    // determines where the weapons switch is made.
-
-    // killough 2/8/98:
-    // Allow user to switch to fist even if they have chainsaw.
-    // Switch to fist or chainsaw based on preferences.
-    // Switch to shotgun or SSG based on preferences.
-
-    if (!demo_compatibility) {
-      const player_t *player = &players[consoleplayer];
-
-      // only select chainsaw from '1' if it's owned, it's
-      // not already in use, and the player prefers it or
-      // the fist is already in use, or the player does not
-      // have the berserker strength.
-
-      if (newweapon == wp_fist && player->weaponowned[wp_chainsaw] &&
-          player->readyweapon != wp_chainsaw &&
-          (player->readyweapon == wp_fist || !player->powers[pw_strength] ||
-           P_WeaponPreferred(wp_chainsaw, wp_fist)))
-        newweapon = wp_chainsaw;
-
-      // Select SSG from '3' only if it's owned and the player
-      // does not have a shotgun, or if the shotgun is already
-      // in use, or if the SSG is not already in use and the
-      // player prefers it.
-
-      if (newweapon == wp_shotgun && gamemode == commercial &&
-          player->weaponowned[wp_supershotgun] &&
-          (!player->weaponowned[wp_shotgun] ||
-           player->readyweapon == wp_shotgun ||
-           (player->readyweapon != wp_supershotgun &&
-            P_WeaponPreferred(wp_supershotgun, wp_shotgun))))
-        newweapon = wp_supershotgun;
+  if (newweapon != wp_nochange)
+    {
+      cmd->buttons |= BT_CHANGE;
+      cmd->buttons |= newweapon<<BT_WEAPONSHIFT;
     }
-    // killough 2/8/98, 3/22/98 -- end of weapon selection changes
-    //}
-  }
-
-  if (newweapon != wp_nochange) {
-    cmd->buttons |= BT_CHANGE;
-    cmd->buttons |= newweapon << BT_WEAPONSHIFT;
-  }
 
   // mouse
   if (mousebuttons[mousebforward])
@@ -646,10 +664,15 @@ void G_BuildTiccmd(ticcmd_t *cmd) {
 
   } // e6y: end if (mouse_doubleclick_as_use)
 
-  forward += mousey;
+  if(!movement_mousenovert)
+  {
+    forward += mousey;
+  }
   if (strafe)
-    side += mousex / movement_mousestrafedivisor; /* mead  Don't want to strafe
-                                                     as fast as turns.*/
+  {
+    side += mousex / movement_mousestrafedivisor; /* mead  Don't want to strafe as fast as turns.*/
+    side = (side / 2) * 2; // only even values are possible
+  }
   else
     cmd->angleturn -= mousex; /* mead now have enough dynamic range 2-10-00 */
 
@@ -787,6 +810,28 @@ static void G_DoLoadLevel(void) {
     memset(players[i].frags, 0, sizeof(players[i].frags));
   }
 
+  // automatic pistol start when advancing from one level to the next
+  if (pistolstart)
+  {
+      if (singleplayer)
+      {
+          G_PlayerReborn(0);
+      }
+      else if ((demoplayback || netdemo) && !singledemo)
+      {
+          // no-op - silently ignore pistolstart when playing demo from the
+          // demo reel
+      }
+      else
+      {
+          const char message[] = "The -pistolstart option is not supported"
+                                 " for demos and\n"
+                                 " network play.";
+          if (!demo_p) demorecording = false;
+          I_Error(message);
+      }
+  }
+
   // initialize the msecnode_t freelist.                     phares 3/25/98
   // any nodes in the freelist are gone by now, cleared
   // by Z_FreeTags() when the previous level ended or player
@@ -907,8 +952,60 @@ dboolean G_Responder(event_t *ev) {
   case ev_keydown:
     if (ev->data1 == key_pause) // phares
     {
-      special_event = BT_SPECIAL | (BTS_PAUSE & BT_SPECIALMASK);
-      return true;
+    case ev_keydown:
+      if (ev->data1 == key_pause)           // phares
+        {
+          special_event = BT_SPECIAL | (BTS_PAUSE & BT_SPECIALMASK);
+          return true;
+        }
+      if (ev->data1 <NUMKEYS)
+        gamekeydown[ev->data1] = true;
+      return true;    // eat key down events
+
+    case ev_keyup:
+      if (ev->data1 <NUMKEYS)
+        gamekeydown[ev->data1] = false;
+      return false;   // always let key up events filter down
+
+    case ev_mouse:
+      SetMouseButtons(ev->data1);
+      /*
+       * bmead@surfree.com
+       * Modified by Barry Mead after adding vastly more resolution
+       * to the Mouse Sensitivity Slider in the options menu 1-9-2000
+       * Removed the mouseSensitivity "*4" to allow more low end
+       * sensitivity resolution especially for lsdoom users.
+       */
+      //e6y mousex += (ev->data2*(mouseSensitivity_horiz))/10;  /* killough */
+      //e6y mousey += (ev->data3*(mouseSensitivity_vert))/10;  /*Mead rm *4 */
+
+      //e6y
+      mousex += (AccelerateMouse(ev->data2)*(mouseSensitivity_horiz))/10;  /* killough */
+      if(GetMouseLook())
+        if (movement_mouseinvert)
+          mlooky += (AccelerateMouse(ev->data3)*(mouseSensitivity_mlook))/10;
+        else
+          mlooky -= (AccelerateMouse(ev->data3)*(mouseSensitivity_mlook))/10;
+      else
+        mousey += (AccelerateMouse(ev->data3)*(mouseSensitivity_vert))/40;
+
+      return true;    // eat events
+
+    case ev_joystick:
+      joybuttons[0] = ev->data1 & 1;
+      joybuttons[1] = ev->data1 & 2;
+      joybuttons[2] = ev->data1 & 4;
+      joybuttons[3] = ev->data1 & 8;
+      joybuttons[4] = ev->data1 & 16;
+      joybuttons[5] = ev->data1 & 32;
+      joybuttons[6] = ev->data1 & 64;
+      joybuttons[7] = ev->data1 & 128;
+      joyxmove = ev->data2;
+      joyymove = ev->data3;
+      return true;    // eat events
+
+    default:
+      break;
     }
     if (ev->data1 < NUMKEYS)
       gamekeydown[ev->data1] = true;
@@ -1888,6 +1985,52 @@ unsigned int GetPackageVersion(void) {
   return PACKAGEVERSION;
 }
 
+// [FG] support named complevels on the command line, e.g. "-complevel boom",
+// names based on the args to Chocolate Doom's "-gameversion" parameter
+// and IWAD file names
+
+int G_GetNamedComplevel (const char *arg)
+{
+  int i;
+
+  const struct {
+    int level;
+    const char *const name;
+  } named_complevel[] = {
+    {2, "1.9"},
+    {2, "doom2"},
+    {3, "ultimate"},
+//  {3, "doom"}, // deemed too ambigious
+    {3, "udoom"},
+    {4, "final"},
+    {4, "tnt"},
+    {4, "plutonia"},
+    {9, "boom"},
+    {11, "mbf"},
+  };
+
+  // choose the complevel based on the IWAD
+  if (!strcasecmp(arg, "vanilla"))
+  {
+    if (gamemode == retail || gamemission == chex)
+      return 3;
+    else if (gamemode == commercial && (gamemission == pack_plut || gamemission == pack_tnt))
+      return 4;
+    else
+      return 2;
+  }
+
+  for (i = 0; i < sizeof(named_complevel)/sizeof(*named_complevel); i++)
+  {
+    if (!strcasecmp(arg, named_complevel[i].name))
+    {
+      return named_complevel[i].level;
+    }
+  }
+
+  return atoi(arg);
+}
+
 //==========================================================================
 //
 // RecalculateDrawnSubsectors
@@ -2314,11 +2457,51 @@ static skill_t d_skill;
 static int d_episode;
 static int d_map;
 
-void G_DeferedInitNew(skill_t skill, int episode, int map) {
+static char *G_NewDemoName(const char *name)
+{
+  size_t demoname_size;
+  char *demoname;
+  FILE *fp = NULL;
+  static unsigned int j = 0;
+
+  demoname_size = strlen(name) + 11; // + 11 for "-00000.lmp\0"
+  demoname = malloc(demoname_size);
+  snprintf(demoname, demoname_size, "%s.lmp", name);
+
+  // prevent overriding demos by adding a file name suffix
+  for ( ; j <= 99999 && (fp = fopen(demoname, "rb")) != NULL; j++)
+  {
+    snprintf(demoname, demoname_size, "%s-%05d.lmp", name, j);
+    fclose(fp);
+  }
+
+  return demoname;
+}
+
+static const char *orig_demoname = NULL;
+
+void G_DeferedInitNew(skill_t skill, int episode, int map)
+{
   d_skill = skill;
   d_episode = episode;
   d_map = map;
   gameaction = ga_newgame;
+
+  // if a new game is started during demo recording, start a new demo
+  if (demorecording && orig_demoname)
+  {
+    extern int ddt_cheating;
+    char *demoname;
+
+    ddt_cheating = 0;
+    G_CheckDemoStatus();
+
+    demoname = G_NewDemoName(orig_demoname);
+    G_RecordDemo(demoname);
+    free(demoname);
+
+    basetic = gametic;
+  }
 }
 
 /* cph -
@@ -2495,11 +2678,9 @@ void G_ReloadDefaults(void) {
   compatibility_level = default_compatibility_level;
   {
     int i = M_CheckParm("-complevel");
-    if (i && (1 + i) < myargc) {
-      int l = atoi(myargv[i + 1]);
-      ;
-      if (l >= -1)
-        compatibility_level = l;
+    if (i && (1+i) < myargc) {
+      int l = G_GetNamedComplevel(myargv[i+1]);;
+      if (l >= -1) compatibility_level = l;
     }
   }
   if (compatibility_level == -1)
@@ -2525,7 +2706,13 @@ void G_DoNewGame(void) {
   G_InitNew(d_skill, d_episode, d_map);
   gameaction = ga_nothing;
 
-  // jff 4/26/98 wake up the status bar in case were coming out of a DM demo
+  // if a new game is started during demo recording, start a new demo
+  if (demorecording && orig_demoname)
+  {
+    G_BeginRecording();
+  }
+
+  //jff 4/26/98 wake up the status bar in case were coming out of a DM demo
   ST_Start();
   walkcamera.type = 0; // e6y
 }
@@ -2785,6 +2972,16 @@ void G_RecordDemo(const char *name) {
   demoname = malloc(strlen(name) + 4 + 1);
   AddDefaultExtension(strcpy(demoname, name), ".lmp"); // 1/18/98 killough
   demorecording = true;
+  
+  // the original name chosen for the demo
+  if (!orig_demoname)
+  {
+    char *ext;
+    orig_demoname = strdup(name);
+    ext = strrchr(orig_demoname, '.');
+    if (ext)
+      *ext = '\0';
+  }
 
   /* cph - Record demos straight to file
    * If file already exists, try to continue existing demo
@@ -3030,12 +3227,92 @@ const byte *G_ReadOptions(const byte *demo_p) {
 void G_BeginRecording(void) {
   int i;
   byte *demostart, *demo_p;
+  int num_extensions = 0;
   demostart = demo_p = malloc(1000);
   longtics = 0;
 
-  if (umapinfo_loaded) {
-    *demo_p++ = 255;
+  // ano - jun2019 - add the extension format if needed
+  if (umapinfo_loaded)
+  {
+    num_extensions++;
   }
+
+  if (num_extensions > 0)
+  {
+    // demover
+    *demo_p++ = 0xFF;
+    // signature
+    *demo_p++ = prdemosig[0]; // 'P'
+    *demo_p++ = prdemosig[1]; // 'R'
+    *demo_p++ = prdemosig[2]; // '+'
+    *demo_p++ = prdemosig[3]; // 'U'
+    *demo_p++ = prdemosig[4]; // 'M'
+    *demo_p++ = '\0';
+    // extension version
+    *demo_p++ = 1;
+    //
+    *demo_p++ =  num_extensions & 0xff;
+    *demo_p++ = (num_extensions >> 8) & 0xff;
+
+    if (umapinfo_loaded)
+    {
+      int mapname_len;
+      // [XA] get the map name from gamemapinfo if the
+      // starting map has a UMAPINFO definition. if not,
+      // fall back to the usual MAPxx/ExMy default.
+      char mapname[9];
+      if (gamemapinfo)
+      {
+        strncpy(mapname, gamemapinfo->mapname, 8);
+      }
+      else if(gamemode == commercial)
+      {
+        snprintf(mapname, 9, "MAP%02d", gamemap);
+      }
+      else
+      {
+        snprintf(mapname, 9, "E%dM%d", gameepisode, gamemap);
+      }
+
+      mapname_len = strnlen(gamemapinfo ? gamemapinfo->mapname : mapname, 9);
+
+      // ano - note that the format has each length by each string
+      // as opposed to a table of lengths
+      *demo_p++ = 0x08;
+      *demo_p++ = 'U';
+      *demo_p++ = 'M';
+      *demo_p++ = 'A';
+      *demo_p++ = 'P';
+      *demo_p++ = 'I';
+      *demo_p++ = 'N';
+      *demo_p++ = 'F';
+      *demo_p++ = 'O';
+
+      // ano - to properly extend this to support other extension strings
+      // we wouldn't just plop this here, but right now we only support the 1
+      // in the future, we should assume that chunks in the header should
+      // follow the order of their appearance in the extensions table.
+      if (mapname_len > 8)
+      {
+        I_Error("Unable to save map lump name %s, too large.", mapname);
+      }
+
+      for (i = 0; i < mapname_len; i++)
+      {
+        // FIXME - the toupper is a hacky workaround for the case insensitivity
+        // in the current UMAPINFO reader. lump names should probably not be
+        // lowercase ever (?)
+        *demo_p++ = toupper(mapname[i]);
+      }
+
+      // lets pad out any spare chars if the length was too short
+      for (; i < 8; i++)
+      {
+        *demo_p++ = 0;
+      }
+    }
+  }
+  // ano - done with the extension format!
 
   /* cph - 3 demo record formats supported: MBF+, BOOM, and Doom v1.9 */
   if (mbf_features) {
@@ -3196,9 +3473,10 @@ static int G_GetOriginalDoomCompatLevel(int ver) {
   {
     int lev;
     int i = M_CheckParm("-complevel");
-    if (i && (i + 1 < myargc)) {
-      lev = atoi(myargv[i + 1]);
-      if (lev >= 0)
+    if (i && (i+1 < myargc))
+    {
+      lev = G_GetNamedComplevel(myargv[i+1]);
+      if (lev>=0)
         return lev;
     }
   }
@@ -3336,7 +3614,9 @@ const byte *G_ReadDemoHeader(const byte *demo_p, size_t size) {
 const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
                                unsigned int params) {
   skill_t skill;
-  int i, episode, map;
+  int i, episode = 1, map = 0, extension_version;
+
+  int using_umapinfo = 0;
 
   // e6y
   // The local variable should be used instead of demobuffer,
@@ -3358,21 +3638,175 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
   demover = *demo_p++;
   longtics = 0;
 
-  if (demover == 255) {
-    // Uses UMAPINFO. The real version will be in the second byte.
-    // This prepended 255 is here to prevent non-UMAPINFO ports from recognizing
-    // the demo.
-    demover = *demo_p++;
-    if (!umapinfo_loaded) {
-      lprintf(
-          LO_ERROR,
-          "UMAPINFO not loaded but trying to play a demo recorded with it\n");
+  // ano - jun2019 - special extensions. originally for UMAPINFO but
+  // designed to be extensible otherwise using the list of strings.
+  // note: i consulted the eternity engine implementation of this function
+  extension_version = -1;
+  if (demover == 255)
+  {
+    int num_extensions;
+    // ano - jun2019
+    // so the format is
+    // demover byte == 255
+    // "PR+UM" signature (w/ ending null terminator)
+    // extension_version byte. for now this should always be "1"
+    // 2 bytes for num_extensions (little-endian)
+
+    // num_extensions *
+    //    1 byte string length
+    //    and length chars (up to 65535 obviously)
+    // note that the format has each length by each string
+    // as opposed to a table of lengths
+
+    // an example extensions string is "UMAPINFO".
+    // In no realistic scenario should num_extensions
+    // ever reach past 65535.
+
+    // so that's a total of 1+6+1+2 + (n * m) bytes + ?? for extensions
+    // or 10 + some ?? bytes + some more ??
+
+    // then finally the "real" demover byte is present here
+
+    if (CheckForOverrun(header_p, demo_p, size, 10, failonerror))
+      return NULL;
+
+    // we check for the PR+UM signature as mentioned.
+    // Eternity Engine also uses 255 demover, with other signatures.
+    if (strncmp((const char *)demo_p, prdemosig, 5) != 0)
+    {
+      I_Error("G_ReadDemoHeader: Extended demo format 255 found, but \"PR+UM\" string not found.");
     }
-  } else if (umapinfo_loaded) {
-    // Q: Should this abort?
-    lprintf(LO_ERROR,
-            "UMAPINFO loaded but trying to play a demo recorded without it\n");
+
+    demo_p += 6;
+    extension_version = *demo_p++;
+
+    if (extension_version != 1)
+    {
+      I_Error("G_ReadDemoHeader: Extended demo format version %d unrecognized.", extension_version);
+    }
+
+    num_extensions  =                 *demo_p++;
+    num_extensions |= ((unsigned int)(*demo_p++)) <<  8;
+
+    if (CheckForOverrun(header_p, demo_p, size, num_extensions, failonerror))
+      return NULL;
+
+    for (i = 0; i < num_extensions; i++)
+    {
+      int r_len = *demo_p++;
+
+      if (CheckForOverrun(header_p, demo_p, size, r_len, failonerror))
+        return NULL;
+
+      // ano - jun2019 - when more potential extension strings get added,
+      // this section can become more complex
+      if (r_len == 8 && strncmp((const char *)demo_p, "UMAPINFO", 8) == 0)
+      {
+        using_umapinfo = 1;
+      }
+      else
+      {
+        // ano - TODO better error handling here?
+        I_Error("G_ReadDemoHeader: Extended demo format extension unrecognized.");
+      }
+
+      demo_p += r_len;
+    }
+
+    // ano - jun2019 - load lump name if we're using umapinfo
+    // this is a bit hacky to just read in episode / map number from string
+    // currently PR+ doesn't support arbitrary mapnames, but one day it may,
+    // so this is for forward compat
+    if(using_umapinfo)
+    {
+      const byte *string_end = demo_p + 8;
+
+      if (CheckForOverrun(header_p, demo_p, size, 8, failonerror))
+        return NULL;
+
+      if (strncmp((const char *)demo_p, "MAP", 3) == 0)
+      {
+        // MAPx form
+        episode = 1;
+        demo_p += 3;
+        map = 0;
+
+        // we're doing hellworld number parsing and i'm sorry
+        // CAPTAIN, WE'RE PICKING UP SOME CODE DUPLICATION IN SECTOR 47
+        for (i = 0; demo_p < string_end; i++)
+        {
+          char cur = *demo_p++;
+          
+          if (cur < '0' || cur > '9')
+          {
+            if (cur != 0)
+            {
+              I_Error("G_ReadDemoHeader: Unable to determine map for UMAPINFO demo.");
+            }
+            break;
+          }
+
+          map = (map * 10) + (cur - '0');
+        }
+      }
+      else if(*demo_p++ == 'E')
+      {
+        // EyMx form
+        episode = 0;
+        map = 0;
+
+        // read in episode #
+        for (i = 0; demo_p < string_end; i++)
+        {
+          char cur = *demo_p++;
+
+          if (cur < '0' || cur > '9')
+          {
+            if (cur == 0 || cur == 'M')
+            {
+              break;
+            }
+
+            I_Error("G_ReadDemoHeader: Unable to determine map for UMAPINFO demo.");
+          }
+
+          episode = (episode * 10) + (cur - '0');
+        }
+
+        // read in map #
+        for (i = 0; demo_p < string_end; i++)
+        {
+          char cur = *demo_p++;
+
+          if (cur < '0' || cur > '9')
+          {
+            if (cur == 0)
+            {
+              break;
+            }
+
+            I_Error("G_ReadDemoHeader: Unable to determine map for UMAPINFO demo.");
+          }
+
+          map = (map * 10) + (cur - '0');
+        }
+      }
+      else
+      {
+        I_Error("G_ReadDemoHeader: Unable to determine map for UMAPINFO demo.");
+      }
+    
+      demo_p = string_end;
+    }
+
+    // ano - jun2019 - this is to support other demovers effectively?
+    // while still having the extended features
+    demover = *demo_p++;
+
   }
+  // ano - okay we are done with most of the 255 extension code past this point
+  // demover has hopefully been set to the new value
+  // the only stuff related to it will be behind extension_version checks past this point
 
   // e6y
   // Handling of unrecognized demo formats
@@ -3421,8 +3855,18 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
 
       compatibility_level = G_GetOriginalDoomCompatLevel(demover);
       skill = *demo_p++;
-      episode = *demo_p++;
-      map = *demo_p++;
+
+      if (!using_umapinfo)
+      {
+        // ano - jun2019 - umapinfo loads mapname earlier
+        episode = *demo_p++;
+        map = *demo_p++;
+      }
+      else
+      {
+        *demo_p++;
+        *demo_p++;
+      }
       deathmatch = *demo_p++;
       respawnparm = *demo_p++;
       fastparm = *demo_p++;
@@ -3653,9 +4097,18 @@ dboolean G_CheckDemoStatus(void) {
 
   P_ChecksumFinal();
 
-  if (demorecording) {
-    demorecording = false;
-    fputc(DEMOMARKER, demofp);
+  if (demorecording)
+    {
+      demorecording = false;
+      fputc(DEMOMARKER, demofp);
+      
+      //e6y
+      G_WriteDemoFooter(demofp);
+      fclose(demofp);
+
+      lprintf(LO_INFO, "G_CheckDemoStatus: Demo recorded\n");
+      return false;  // killough
+    }
 
     // e6y
     G_WriteDemoFooter(demofp);

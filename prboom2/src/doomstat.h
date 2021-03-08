@@ -137,6 +137,9 @@ enum {
 extern int comp[COMP_TOTAL], default_comp[COMP_TOTAL];
 extern int /*comperr[COMPERR_NUM], */ default_comperr[COMPERR_NUM];
 
+// [FG] allow MBF sky transfers in all complevels
+extern int comp_skytransfers;
+
 // -------------------------------------------
 // Language.
 extern Language_t language;
@@ -157,6 +160,7 @@ extern skill_t gameskill;
 extern int gameepisode;
 extern int gamemap;
 extern struct MapEntry *gamemapinfo;
+extern int maplumpnum;
 
 // Nightmare mode flag, single player.
 extern dboolean respawnmonsters;

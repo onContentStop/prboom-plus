@@ -121,6 +121,7 @@ extern int hudadd_crosshair_lock_target;
 extern int movement_strafe50;
 extern int movement_shorttics;
 extern int movement_mouselook;
+extern int movement_mousenovert;
 extern int movement_mouseinvert;
 extern int movement_maxviewpitch;
 extern int movement_mousestrafedivisor;
@@ -185,7 +186,7 @@ void G_SkipDemoStart(void);
 void G_SkipDemoStop(void);
 void G_SkipDemoCheck(void);
 int G_ReloadLevel(void);
-int G_GotoNextLevel(void);
+int G_GotoNextLevel(int *e, int *m);
 
 void M_ChangeMouseLook(void);
 void M_ChangeMaxViewPitch(void);

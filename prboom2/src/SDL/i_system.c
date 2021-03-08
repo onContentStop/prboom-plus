@@ -45,6 +45,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
+#include <signal.h>
+#include <string.h>
 #ifdef _MSC_VER
 #define F_OK 0 /* Check for file existence */
 #define W_OK 2 /* Check for write permission */
@@ -196,19 +198,20 @@ unsigned long I_GetRandomTimeSeed(void) { return (unsigned long)time(NULL); }
 /* cphipps - I_GetVersionString
  * Returns a version string in the given buffer
  */
-const char *I_GetVersionString(char *buf, size_t sz) {
-  snprintf(buf, sz, "%s v%s (http://prboom-plus.sourceforge.net/)",
-           PACKAGE_NAME, PACKAGE_VERSION);
+const char* I_GetVersionString(char* buf, size_t sz)
+{
+  snprintf(buf,sz,"%s v%s (%s)",PACKAGE_NAME,PACKAGE_VERSION,PACKAGE_HOMEPAGE);
   return buf;
 }
 
 /* cphipps - I_SigString
  * Returns a string describing a signal number
  */
-const char *I_SigString(char *buf, size_t sz, int signum) {
-#ifdef HAVE_DECL_SYS_SIGLIST
-  if (strlen(sys_siglist[signum]) < sz)
-    strcpy(buf, sys_siglist[signum]);
+const char* I_SigString(char* buf, size_t sz, int signum)
+{
+#ifdef HAVE_STRSIGNAL
+  if (strsignal(signum) && strlen(strsignal(signum)) < sz)
+    strcpy(buf,strsignal(signum));
   else
 #endif
     snprintf(buf, sz, "signal %d", signum);
@@ -318,20 +321,22 @@ const char *I_DoomExeDir(void) {
   static const char current_dir_dummy[] = {
       "."}; // proff - rem extra slash 8/21/03
   static char *base;
-  if (!base) // cache multiple requests
-  {
-    size_t len = strlen(*myargv);
-    char *p = (base = (char *)malloc(len + 1)) + len - 1;
-    strcpy(base, *myargv);
-    while (p > base && *p != '/' && *p != '\\')
-      *p-- = 0;
-    if (*p == '/' || *p == '\\')
-      *p-- = 0;
-    if (strlen(base) < 2) {
-      free(base);
-      base = (char *)malloc(1024);
-      if (!getcwd(base, 1024))
-        strcpy(base, current_dir_dummy);
+  if (!base)        // cache multiple requests
+    {
+      size_t len = strlen(*myargv);
+      char *p = (base = (char*)malloc(len+1)) + len - 1;
+      strcpy(base,*myargv);
+      while (p > base && *p!='/' && *p!='\\')
+        *p--=0;
+      if (*p=='/' || *p=='\\')
+        *p--=0;
+      if (strlen(base)<2 || access(base, W_OK) != 0)
+      {
+        free(base);
+        base = (char*)malloc(1024);
+        if (!getcwd(base,1024) || access(base, W_OK) != 0)
+          strcpy(base, current_dir_dummy);
+      }
     }
   }
   return base;

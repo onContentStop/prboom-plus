@@ -62,6 +62,7 @@ fixed_t pspriteiscale;
 // proff 11/06/98: Added for high-res
 fixed_t pspritexscale;
 fixed_t pspriteyscale;
+fixed_t pspriteiyscale;
 
 static const lighttable_t **spritelights; // killough 1/25/98 made static
 
@@ -490,27 +491,34 @@ static void R_DrawVisSprite(vissprite_t *vis) {
   // killough 4/11/98: rearrange and handle translucent sprites
   // mixed with translucent/non-translucenct 2s normals
 
-  if (!dcvars.colormap) // NULL colormap = shadow draw
-    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_FUZZ, filter,
-                                  filterz); // killough 3/14/98
-  else if (vis->mobjflags & MF_TRANSLATION) {
-    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, filter, filterz);
-    dcvars.translation =
-        translationtables - 256 +
-        ((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT - 8));
-  } else if (vis->translation) {
-    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, filter, filterz);
-    dcvars.translation = vis->translation;
-  } else if (vis->mobjflags & MF_TRANSLUCENT && general_translucency) // phares
-  {
-    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLUCENT, filter, filterz);
-    tranmap = main_tranmap; // killough 4/11/98
-  } else
-    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, filter,
-                                  filterz); // killough 3/14/98, 4/11/98
+  if (!dcvars.colormap)   // NULL colormap = shadow draw
+    colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_FUZZ, filter, filterz);    // killough 3/14/98
+  else
+    // [FG] colored blood and gibs
+    if (vis->mobjflags & MF_COLOREDBLOOD)
+      {
+        colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, filter, filterz);
+        dcvars.translation = (vis->mobjflags & MF_TRANSLATION1) ?
+                             colrngs[CR_BLUE2] : colrngs[CR_GREEN];
+      }
+  else
+    if (vis->mobjflags & MF_TRANSLATION)
+      {
+        colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, filter, filterz);
+        dcvars.translation = translationtables - 256 +
+          ((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
+      }
+    else
+      if (vis->mobjflags & MF_TRANSLUCENT && general_translucency) // phares
+        {
+          colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLUCENT, filter, filterz);
+          tranmap = main_tranmap;       // killough 4/11/98
+        }
+      else
+        colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, filter, filterz); // killough 3/14/98, 4/11/98
 
-  // proff 11/06/98: Changed for high-res
-  dcvars.iscale = FixedDiv(FRACUNIT, vis->scale);
+// proff 11/06/98: Changed for high-res
+  dcvars.iscale = FixedDiv (FRACUNIT, vis->scale);
   dcvars.texturemid = vis->texturemid;
   frac = vis->startfrac;
   if (filter == RDRAW_FILTER_LINEAR)
@@ -519,10 +527,12 @@ static void R_DrawVisSprite(vissprite_t *vis) {
   sprtopscreen = centeryfrac - FixedMul(dcvars.texturemid, spryscale);
 
   // check to see if weapon is a vissprite
-  if (vis->mobjflags & MF_PLAYERSPRITE) {
-    dcvars.texturemid +=
-        FixedMul(((centery - viewheight / 2) << FRACBITS), dcvars.iscale);
-    sprtopscreen += (viewheight / 2 - centery) << FRACBITS;
+  if(vis->mobjflags & MF_PLAYERSPRITE)
+  {
+    // [FG] fix garbage lines at the top of weapon sprites
+    dcvars.iscale = pspriteiyscale;
+    dcvars.texturemid += FixedMul(((centery - viewheight/2)<<FRACBITS), dcvars.iscale);
+    sprtopscreen += (viewheight/2 - centery)<<FRACBITS;
   }
 
   for (dcvars.x = vis->x1; dcvars.x <= vis->x2;

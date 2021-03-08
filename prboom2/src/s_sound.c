@@ -80,6 +80,7 @@ typedef struct {
 
 // the set of channels available
 static channel_t *channels;
+static degenmobj_t *sobjs;
 
 // These are not used, but should be (menu).
 // Maximum volume of a sound effect.
@@ -142,7 +143,10 @@ void S_Init(int sfxVolume, int musicVolume) {
     // (the maximum numer of sounds rendered
     // simultaneously) within zone memory.
     // CPhipps - calloc
-    channels = (channel_t *)calloc(numChannels, sizeof(channel_t));
+    channels =
+      (channel_t *) calloc(numChannels,sizeof(channel_t));
+    sobjs =
+      (degenmobj_t *) calloc(numChannels, sizeof(degenmobj_t));
 
     // Note that sounds have not been cached (yet).
     for (i = 1; i < NUMSFX; i++)
@@ -337,6 +341,35 @@ void S_StopSound(void *origin) {
       S_StopChannel(cnum);
       break;
     }
+}
+
+// [FG] disable sound cutoffs
+int full_sounds;
+
+void S_UnlinkSound(void *origin)
+{
+  int cnum;
+
+  //jff 1/22/98 return if sound is not enabled
+  if (!snd_card || nosfxparm)
+    return;
+
+  if (origin)
+  {
+    for (cnum = 0; cnum < numChannels; cnum++)
+    {
+      if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
+      {
+        degenmobj_t *const sobj = &sobjs[cnum];
+        const mobj_t *const mobj = (mobj_t *) origin;
+        sobj->x = mobj->x;
+        sobj->y = mobj->y;
+        sobj->z = mobj->z;
+        channels[cnum].origin = (mobj_t *) sobj;
+        break;
+      }
+    }
+  }
 }
 
 //

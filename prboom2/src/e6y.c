@@ -132,6 +132,7 @@ int hudadd_crosshair_lock_target;
 int movement_strafe50;
 int movement_shorttics;
 int movement_mouselook;
+int movement_mousenovert;
 int movement_mouseinvert;
 int movement_maxviewpitch;
 int movement_mousestrafedivisor;
@@ -359,8 +360,17 @@ void G_SkipDemoCheck(void) {
 int G_ReloadLevel(void) {
   int result = false;
 
-  if ((gamestate == GS_LEVEL) && !deathmatch && !netgame && !demorecording &&
-      !demoplayback && !menuactive) {
+  if ((gamestate == GS_LEVEL) &&
+      !deathmatch && !netgame &&
+      !democontinue && !demoplayback &&
+      !menuactive)
+  {
+    // restart demos from the map they were started
+    if (demorecording)
+    {
+      gameepisode = startepisode;
+      gamemap = startmap;
+    }
     G_DeferedInitNew(gameskill, gameepisode, gamemap);
     result = true;
   }
@@ -368,39 +378,95 @@ int G_ReloadLevel(void) {
   return result;
 }
 
-int G_GotoNextLevel(void) {
-  static byte doom2_next[33] = {2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                13, 14, 15, 31, 17, 18, 19, 20, 21, 22, 23,
-                                24, 25, 26, 27, 28, 29, 30, 1,  32, 16, 3};
-  static byte doom_next[4][9] = {{12, 13, 19, 15, 16, 17, 18, 21, 14},
-                                 {22, 23, 24, 25, 29, 27, 28, 31, 26},
-                                 {32, 33, 34, 35, 36, 39, 38, 41, 37},
-                                 {42, 49, 44, 45, 46, 47, 48, 11, 43}};
-  int epsd;
-  int map = -1;
+// [FG] Write the episode and map number of the next level
+//      to the e and m pointers, respectively, or outright
+//      warp to this level if both are NULL.
 
-  int changed = false;
-  if (gamemapinfo != NULL) {
-    const char *n;
-    if (gamemapinfo->nextsecret[0])
-      n = gamemapinfo->nextsecret;
-    else
-      n = gamemapinfo->nextmap;
-    G_ValidateMapName(n, &epsd, &map);
-  }
+int G_GotoNextLevel(int *e, int *m)
+{
+	static byte doom2_next[33] = {
+	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+	  12, 13, 14, 15, 31, 17, 18, 19, 20, 21,
+	  22, 23, 24, 25, 26, 27, 28, 29, 30, 1,
+	  32, 16, 3
+	};
+	static byte doom_next[4][9] = {
+	  {12, 13, 19, 15, 16, 17, 18, 21, 14},
+	  {22, 23, 24, 25, 29, 27, 28, 31, 26},
+	  {32, 33, 34, 35, 36, 39, 38, 41, 37},
+	  {42, 49, 44, 45, 46, 47, 48, 11, 43}
+	};
+	int epsd;
+	int map = -1;
 
-  if (map == -1) {
-    // secret level
-    doom2_next[14] = (haswolflevels ? 31 : 16);
+	int changed = false;
+	if (gamemapinfo != NULL)
+	{
+		const char *n;
+		if (gamemapinfo->nextsecret[0]) n = gamemapinfo->nextsecret;
+		else n = gamemapinfo->nextmap;
+		G_ValidateMapName(n, &epsd, &map);
+	}
 
-    if (bfgedition && singleplayer) {
-      if (gamemission == pack_nerve) {
-        doom2_next[3] = 9;
-        doom2_next[7] = 1;
-        doom2_next[8] = 5;
-      } else
-        doom2_next[1] = 33;
-    }
+	if (map == -1)
+	{
+		// secret level
+		doom2_next[14] = (haswolflevels ? 31 : 16);
+
+		if (bfgedition && singleplayer)
+		{
+			if (gamemission == pack_nerve)
+			{
+				doom2_next[3] = 9;
+				doom2_next[7] = 1;
+				doom2_next[8] = 5;
+			}
+			else
+				doom2_next[1] = 33;
+		}
+
+		// shareware doom has only episode 1
+		doom_next[0][7] = (gamemode == shareware ? 11 : 21);
+
+		doom_next[2][7] = ((gamemode == registered) ||
+			// the fourth episode for pre-ultimate complevels is not allowed.
+			(compatibility_level < ultdoom_compatibility) ?
+			11 : 41);
+
+		//doom2_next and doom_next are 0 based, unlike gameepisode and gamemap
+		epsd = gameepisode - 1;
+		map = gamemap - 1;
+
+		if (gamemode == commercial)
+		{
+			epsd = 1;
+			map = doom2_next[BETWEEN(0, 32, map)];
+		}
+		else
+		{
+			int next = doom_next[BETWEEN(0, 3, epsd)][BETWEEN(0, 9, map)];
+			epsd = next / 10;
+			map = next % 10;
+		}
+	}
+
+	// [FG] report next level without changing
+	if (e || m)
+	{
+		if (e) *e = epsd;
+		if (m) *m = map;
+	}
+	else if ((gamestate == GS_LEVEL) &&
+		!deathmatch && !netgame &&
+		!demorecording && !demoplayback &&
+		!menuactive)
+	{
+		G_DeferedInitNew(gameskill, epsd, map);
+		changed = true;
+	}
+
+	return changed;
+}
 
     // shareware doom has only episode 1
     doom_next[0][7] = (gamemode == shareware ? 11 : 21);
@@ -892,22 +958,22 @@ void e6y_WriteStats(void) {
 
   for (level = 0; level < numlevels; level++) {
     sprintf(str,
-            "%%s - %%%dd:%%05.2f (%%%dd:%%02d)  K: %%%dd/%%-%dd%%%lds  I: "
-            "%%%dd/%%-%dd%%%lds  S: %%%dd/%%-%dd %%%lds\r\n",
-            max.stat[TT_TIME], max.stat[TT_TOTALTIME], max.stat[TT_ALLKILL],
-            max.stat[TT_TOTALKILL], allkills_len, max.stat[TT_ALLITEM],
-            max.stat[TT_TOTALITEM], allitems_len, max.stat[TT_ALLSECRET],
-            max.stat[TT_TOTALSECRET], allsecrets_len);
-
-    fprintf(f, str, stats[level].map, stats[level].stat[TT_TIME] / TICRATE / 60,
-            (float)(stats[level].stat[TT_TIME] % (60 * TICRATE)) / TICRATE,
-            (stats[level].stat[TT_TOTALTIME]) / TICRATE / 60,
-            (stats[level].stat[TT_TOTALTIME] % (60 * TICRATE)) / TICRATE,
-            stats[level].stat[TT_ALLKILL], stats[level].stat[TT_TOTALKILL],
-            all[level].kill, stats[level].stat[TT_ALLITEM],
-            stats[level].stat[TT_TOTALITEM], all[level].item,
-            stats[level].stat[TT_ALLSECRET], stats[level].stat[TT_TOTALSECRET],
-            all[level].secret);
+      "%%s - %%%dd:%%05.2f (%%%dd:%%02d)  K: %%%dd/%%-%dd%%%lds  I: %%%dd/%%-%dd%%%lds  S: %%%dd/%%-%dd %%%lds\r\n",
+      max.stat[TT_TIME],      max.stat[TT_TOTALTIME],
+      max.stat[TT_ALLKILL],   max.stat[TT_TOTALKILL],   (long)allkills_len,
+      max.stat[TT_ALLITEM],   max.stat[TT_TOTALITEM],   (long)allitems_len,
+      max.stat[TT_ALLSECRET], max.stat[TT_TOTALSECRET], (long)allsecrets_len);
+    
+    fprintf(f, str, stats[level].map, 
+      stats[level].stat[TT_TIME]/TICRATE/60,
+      (float)(stats[level].stat[TT_TIME]%(60*TICRATE))/TICRATE,
+      (stats[level].stat[TT_TOTALTIME])/TICRATE/60, 
+      (stats[level].stat[TT_TOTALTIME]%(60*TICRATE))/TICRATE,
+      stats[level].stat[TT_ALLKILL],  stats[level].stat[TT_TOTALKILL],   all[level].kill,
+      stats[level].stat[TT_ALLITEM],  stats[level].stat[TT_TOTALITEM],   all[level].item,
+      stats[level].stat[TT_ALLSECRET],stats[level].stat[TT_TOTALSECRET], all[level].secret
+      );
+    
   }
 
   fclose(f);

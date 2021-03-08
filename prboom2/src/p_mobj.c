@@ -52,6 +52,9 @@
 #include "sounds.h"
 #include "st_stuff.h"
 
+// [FG] colored blood and gibs
+dboolean colored_blood;
+
 //
 // P_SetMobjState
 // Returns true if the mobj is still present.
@@ -922,7 +925,11 @@ void P_RemoveMobj(mobj_t *mobj) {
 
   // stop any playing sound
 
-  S_StopSound(mobj);
+  // [FG] removed map objects may finish their sounds
+  if (full_sounds)
+    S_UnlinkSound(mobj);
+  else
+    S_StopSound (mobj);
 
   // killough 11/98:
   //
@@ -1409,22 +1416,35 @@ void P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z) {
     P_SetMobjState(th, S_PUFF3);
 }
 
+
+// [FG] colored blood and gibs
+uint_64_t P_ColoredBlood (mobj_t* bleeder)
+{
+  if (colored_blood)
+  {
+    // Barons of Hell and Hell Knights bleed green blood
+    if (bleeder->type == MT_BRUISER || bleeder->type == MT_KNIGHT)
+      return MF_COLOREDBLOOD;
+    // Cacodemons bleed blue blood
+    else if (bleeder->type == MT_HEAD)
+      return MF_COLOREDBLOOD | MF_TRANSLATION1;
+  }
+  return 0;
+}
+
 //
 // P_SpawnBlood
 //
-void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage, mobj_t *target) {
-  mobj_t *th;
-  int t = P_Random(pr_spawnblood);
+void P_SpawnBlood(fixed_t x,fixed_t y,fixed_t z,int damage, mobj_t* bleeder)
+{
+  mobj_t* th;
   // killough 5/5/98: remove dependence on order of evaluation:
-  z += (t - P_Random(pr_spawnblood)) << 10;
-  if (target->type == MT_SKULL)
-    return;
-  th = P_SpawnMobj(x, y, z, MT_BLOOD);
-  th->momz = FRACUNIT * 2;
-  th->tics -= P_Random(pr_spawnblood) & 3;
-  th->target = target;
-  if (target->type == MT_SHADOWS)
-    th->flags |= MF_SHADOW;
+  int t = P_Random(pr_spawnblood);
+  z += (t - P_Random(pr_spawnblood))<<10;
+  th = P_SpawnMobj(x,y,z, MT_BLOOD);
+  th->momz = FRACUNIT*2;
+  th->tics -= P_Random(pr_spawnblood)&3;
+  th->flags |= P_ColoredBlood(bleeder);
 
   if (th->tics < 1)
     th->tics = 1;

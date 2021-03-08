@@ -309,7 +309,7 @@ void W_AddLump(wadtbl_t *wadtbl, const char *name, const byte *data,
     wadtbl->lumps =
         realloc(wadtbl->lumps, (lumpnum + 1) * sizeof(wadtbl->lumps[0]));
 
-    strncpy(wadtbl->lumps[lumpnum].name, name, 8);
+    memcpy(wadtbl->lumps[lumpnum].name, name, 8);
     wadtbl->lumps[lumpnum].size = size;
     wadtbl->lumps[lumpnum].filepos = wadtbl->header.infotableofs;
 
@@ -518,9 +518,16 @@ static void R_DemoEx_GetParams(const byte *pwad_p, waddata_t *waddata) {
 
     if (!M_CheckParm("-complevel")) {
       p = M_CheckParmEx("-complevel", params, paramscount);
-      if (p >= 0 && p < (int)paramscount - 1) {
+      if (p >= 0 && p < (int)paramscount - 1)
+      {
+        int level;
+        static char str[4];
+        extern int G_GetNamedComplevel (const char *arg);
         M_AddParam("-complevel");
-        M_AddParam(params[p + 1]);
+        // [FG] only save numeric complevel values
+        level = G_GetNamedComplevel(params[p + 1]);
+        snprintf(str, sizeof(str), "%d", level);
+        M_AddParam(str);
       }
     }
 
@@ -951,9 +958,15 @@ static int G_ReadDemoFooter(const char *filename) {
         strcat(tmp_path, "/");
       }
 
-      doom_snprintf(demoex_filename, sizeof(demoex_filename), template_format,
-                    tmp_path);
+      doom_snprintf(demoex_filename, sizeof(demoex_filename), template_format, tmp_path);
+#ifdef HAVE_MKSTEMP
+      if (mkstemp(demoex_filename) == -1)
+      {
+        demoex_filename[0] = 0;
+      }
+#else
       mktemp(demoex_filename);
+#endif
 
       free(tmp_path);
     }

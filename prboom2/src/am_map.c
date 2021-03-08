@@ -756,10 +756,8 @@ dboolean AM_Responder(event_t *ev) {
     } else if (ch == key_map_overlay) {
       automapmode ^= am_overlay;
       AM_SetPosition();
-      AM_SetScale();
-      AM_initVariables();
-      plr->message =
-          (automapmode & am_overlay) ? s_AMSTR_OVERLAYON : s_AMSTR_OVERLAYOFF;
+      AM_activateNewScale();
+      plr->message = (automapmode & am_overlay) ? s_AMSTR_OVERLAYON : s_AMSTR_OVERLAYOFF;
     }
 #ifdef GL_DOOM
     else if (ch == key_map_textured) {
@@ -1107,7 +1105,17 @@ static void AM_drawGrid(int color) {
   mline_t ml;
   fixed_t minlen, extx, exty;
   fixed_t minx, miny;
-  int gridsize = map_grid_size << MAPBITS;
+  fixed_t gridsize = map_grid_size << MAPBITS;
+  
+  if(map_grid_size == -1)
+  {
+    fixed_t oprtimal_gridsize = m_h / 16;
+    gridsize = 8;
+    while (gridsize < oprtimal_gridsize)
+      gridsize <<= 1;
+    if (gridsize - oprtimal_gridsize > oprtimal_gridsize - (gridsize >> 1))
+      gridsize >>= 1;
+  }
 
   // [RH] Calculate a minimum for how long the grid lines should be so that
   // they cover the screen at any rotation.
@@ -1991,7 +1999,16 @@ static void AM_drawCrosshair(int color) {
   V_DrawLine(&line, color);
 }
 
-void M_ChangeMapTextured(void) {
+void M_ChangeMapGridSize(void)
+{
+  if (map_grid_size > 0)
+  {
+    map_grid_size = MAX(map_grid_size, 8);
+  }
+}
+
+void M_ChangeMapTextured(void)
+{
 #ifdef GL_DOOM
   if (V_GetMode() == VID_MODEGL) {
     gld_ProcessTexturedMap();
@@ -2098,17 +2115,21 @@ void AM_Drawer(void) {
     AM_drawGrid(mapcolor_grid); // jff 1/7/98 grid default color
   AM_drawWalls();
   AM_drawPlayers();
-  AM_drawThings();                 // jff 1/5/98 default double IDDT sprite
-  AM_drawCrosshair(mapcolor_hair); // jff 1/7/98 default crosshair color
-
-#if defined(HAVE_LIBSDL2_IMAGE) && defined(GL_DOOM)
-  if (V_GetMode() == VID_MODEGL) {
+  AM_drawThings(); //jff 1/5/98 default double IDDT sprite
+  AM_drawCrosshair(mapcolor_hair);   //jff 1/7/98 default crosshair color
+  
+#if defined(GL_DOOM)
+  if (V_GetMode() == VID_MODEGL)
+  {
     gld_DrawMapLines();
     M_ArrayClear(&map_lines);
 
-    if (map_things_appearance == map_things_appearance_icon) {
+#if defined(HAVE_LIBSDL2_IMAGE)
+    if (map_things_appearance == map_things_appearance_icon)
+    {
       gld_DrawNiceThings(f_x, f_y, f_w, f_h);
     }
+#endif
   }
 #endif
 

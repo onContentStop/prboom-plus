@@ -46,6 +46,8 @@
 #include "sounds.h"
 /* cph 2006/07/23 - needs direct access to thinkercap */
 #include "p_tick.h"
+#include "e6y.h" // G_GotoNextLevel()
+#include "w_wad.h" // W_GetLumpInfoByNum()
 
 #define plyr (players + consoleplayer) /* the console player */
 
@@ -68,6 +70,7 @@ static void cheat_noclip();
 static void cheat_pw();
 static void cheat_behold();
 static void cheat_clev();
+static void cheat_clev0();
 static void cheat_mypos();
 static void cheat_rate();
 static void cheat_comp();
@@ -91,6 +94,8 @@ static void cheat_megaarmour();
 static void cheat_health();
 static void cheat_notarget();
 static void cheat_fly();
+static void cheat_comp_ext();
+static void cheat_shorttics();
 
 //-----------------------------------------------------------------------------
 //
@@ -114,80 +119,88 @@ static void cheat_fly();
 //-----------------------------------------------------------------------------
 
 cheatseq_t cheat[] = {
-    CHEAT("idmus", "Change music", always, cheat_mus, -2),
-    CHEAT("idchoppers", "Chainsaw", cht_never, cheat_choppers, 0),
-    CHEAT("iddqd", "God mode", cht_never, cheat_god, 0),
-    CHEAT("idkfa", "Ammo & Keys", cht_never, cheat_kfa, 0),
-    CHEAT("idfa", "Ammo", cht_never, cheat_fa, 0),
-    CHEAT("idspispopd", "No Clipping 1", cht_never, cheat_noclip, 0),
-    CHEAT("idclip", "No Clipping 2", cht_never, cheat_noclip, 0),
-    CHEAT("idbeholdh", "Invincibility", cht_never, cheat_health, 0),
-    CHEAT("idbeholdm", "Invincibility", cht_never, cheat_megaarmour, 0),
-    CHEAT("idbeholdv", "Invincibility", cht_never, cheat_pw,
-          pw_invulnerability),
-    CHEAT("idbeholds", "Berserk", cht_never, cheat_pw, pw_strength),
-    CHEAT("idbeholdi", "Invisibility", cht_never, cheat_pw, pw_invisibility),
-    CHEAT("idbeholdr", "Radiation Suit", cht_never, cheat_pw, pw_ironfeet),
-    CHEAT("idbeholda", "Auto-map", not_dm, cheat_pw, pw_allmap),
-    CHEAT("idbeholdl", "Lite-Amp Goggles", not_dm, cheat_pw, pw_infrared),
-    CHEAT("idbehold", "BEHOLD menu", not_dm, cheat_behold, 0),
-    CHEAT("idclev", "Level Warp", cht_never | not_menu, cheat_clev, -2),
-    CHEAT("idmypos", "Player Position", not_dm, cheat_mypos, 0),
-    CHEAT("idrate", "Frame rate", always, cheat_rate, 0),
-    // phares
-    CHEAT("tntcomp", NULL, cht_never, cheat_comp, 0),
-    // jff 2/01/98 kill all monsters
-    CHEAT("tntem", NULL, cht_never, cheat_massacre, 0),
-    // killough 2/07/98: moved from am_map.c
-    CHEAT("iddt", "Map cheat", not_dm, cheat_ddt, 0),
-    // killough 2/07/98: HOM autodetector
-    CHEAT("tnthom", NULL, always, cheat_hom, 0),
-    // killough 2/16/98: generalized key cheats
-    CHEAT("tntkey", NULL, cht_never, cheat_tntkey, 0),
-    CHEAT("tntkeyr", NULL, cht_never, cheat_tntkeyx, 0),
-    CHEAT("tntkeyy", NULL, cht_never, cheat_tntkeyx, 0),
-    CHEAT("tntkeyb", NULL, cht_never, cheat_tntkeyx, 0),
-    CHEAT("tntkeyrc", NULL, cht_never, cheat_tntkeyxx, it_redcard),
-    CHEAT("tntkeyyc", NULL, cht_never, cheat_tntkeyxx, it_yellowcard),
-    CHEAT("tntkeybc", NULL, cht_never, cheat_tntkeyxx, it_bluecard),
-    CHEAT("tntkeyrs", NULL, cht_never, cheat_tntkeyxx, it_redskull),
-    CHEAT("tntkeyys", NULL, cht_never, cheat_tntkeyxx, it_yellowskull),
-    // killough 2/16/98: end generalized keys
-    CHEAT("tntkeybs", NULL, cht_never, cheat_tntkeyxx, it_blueskull),
-    // Ty 04/11/98 - Added TNTKA
-    CHEAT("tntka", NULL, cht_never, cheat_k, 0),
-    // killough 2/16/98: generalized weapon cheats
-    CHEAT("tntweap", NULL, cht_never, cheat_tntweap, 0),
-    CHEAT("tntweap", NULL, cht_never, cheat_tntweapx, -1),
-    CHEAT("tntammo", NULL, cht_never, cheat_tntammo, 0),
-    // killough 2/16/98: end generalized weapons
-    CHEAT("tntammo", NULL, cht_never, cheat_tntammox, -1),
-    // invoke translucency         // phares
-    CHEAT("tnttran", NULL, always, cheat_tnttran, 0),
-    // killough 2/21/98: smart monster toggle
-    CHEAT("tntsmart", NULL, cht_never, cheat_smart, 0),
-    // killough 2/21/98: pitched sound toggle
-    CHEAT("tntpitch", NULL, always, cheat_pitch, 0),
-    // killough 2/21/98: reduce RSI injury by adding simpler alias sequences:
-    // killough 2/21/98: same as tnttran
-    CHEAT("tntran", NULL, always, cheat_tnttran, 0),
-    // killough 2/21/98: same as tntammo
-    CHEAT("tntamo", NULL, cht_never, cheat_tntammo, 0),
-    // killough 2/21/98: same as tntammo
-    CHEAT("tntamo", NULL, cht_never, cheat_tntammox, -1),
-    // killough 3/6/98: -fast toggle
-    CHEAT("tntfast", NULL, cht_never, cheat_fast, 0),
-    // phares 3/10/98: toggle variable friction effects
-    CHEAT("tntice", NULL, cht_never, cheat_friction, 0),
-    // phares 3/10/98: toggle pushers
-    CHEAT("tntpush", NULL, cht_never, cheat_pushers, 0),
+  CHEAT("idmus",      "Change music",     always, cheat_mus, -2),
+  CHEAT("idchoppers", "Chainsaw",         cht_never, cheat_choppers, 0),
+  CHEAT("iddqd",      "God mode",         cht_never, cheat_god, 0),
+  CHEAT("idkfa",      "Ammo & Keys",      cht_never, cheat_kfa, 0),
+  CHEAT("idfa",       "Ammo",             cht_never, cheat_fa, 0),
+  CHEAT("idspispopd", "No Clipping 1",    cht_never, cheat_noclip, 0),
+  CHEAT("idclip",     "No Clipping 2",    cht_never, cheat_noclip, 0),
+  CHEAT("idbeholdh",  "Invincibility",    cht_never, cheat_health, 0),
+  CHEAT("idbeholdm",  "Invincibility",    cht_never, cheat_megaarmour, 0),
+  CHEAT("idbeholdv",  "Invincibility",    cht_never, cheat_pw, pw_invulnerability),
+  CHEAT("idbeholds",  "Berserk",          cht_never, cheat_pw, pw_strength),
+  CHEAT("idbeholdi",  "Invisibility",     cht_never, cheat_pw, pw_invisibility),
+  CHEAT("idbeholdr",  "Radiation Suit",   cht_never, cheat_pw, pw_ironfeet),
+  CHEAT("idbeholda",  "Auto-map",         not_dm, cheat_pw, pw_allmap),
+  CHEAT("idbeholdl",  "Lite-Amp Goggles", not_dm, cheat_pw, pw_infrared),
+  CHEAT("idbehold",   "BEHOLD menu",      not_dm, cheat_behold, 0),
+  CHEAT("idclev",     "Level Warp",       cht_never | not_menu, cheat_clev, -2),
+  CHEAT("idclev",     "Level Warp",       cht_never | not_menu, cheat_clev0, 0),
+  CHEAT("idmypos",    "Player Position",  not_dm, cheat_mypos, 0),
+  CHEAT("idrate",     "Frame rate",       always, cheat_rate, 0),
+  // phares
+  CHEAT("tntcomp",    NULL,               cht_never, cheat_comp, 0),
+  // jff 2/01/98 kill all monsters
+  CHEAT("tntem",      NULL,               cht_never, cheat_massacre, 0),
+  // killough 2/07/98: moved from am_map.c
+  CHEAT("iddt",       "Map cheat",        not_dm, cheat_ddt, 0),
+  // killough 2/07/98: HOM autodetector
+  CHEAT("tnthom",     NULL,               always, cheat_hom, 0),
+  // killough 2/16/98: generalized key cheats
+  CHEAT("tntkey",     NULL,               cht_never, cheat_tntkey, 0),
+  CHEAT("tntkeyr",    NULL,               cht_never, cheat_tntkeyx, 0),
+  CHEAT("tntkeyy",    NULL,               cht_never, cheat_tntkeyx, 0),
+  CHEAT("tntkeyb",    NULL,               cht_never, cheat_tntkeyx, 0),
+  CHEAT("tntkeyrc",   NULL,               cht_never, cheat_tntkeyxx, it_redcard),
+  CHEAT("tntkeyyc",   NULL,               cht_never, cheat_tntkeyxx, it_yellowcard),
+  CHEAT("tntkeybc",   NULL,               cht_never, cheat_tntkeyxx, it_bluecard),
+  CHEAT("tntkeyrs",   NULL,               cht_never, cheat_tntkeyxx, it_redskull),
+  CHEAT("tntkeyys",   NULL,               cht_never, cheat_tntkeyxx, it_yellowskull),
+  // killough 2/16/98: end generalized keys
+  CHEAT("tntkeybs",   NULL,               cht_never, cheat_tntkeyxx, it_blueskull),
+  // Ty 04/11/98 - Added TNTKA
+  CHEAT("tntka",      NULL,               cht_never, cheat_k, 0),
+  // killough 2/16/98: generalized weapon cheats
+  CHEAT("tntweap",    NULL,               cht_never, cheat_tntweap, 0),
+  CHEAT("tntweap",    NULL,               cht_never, cheat_tntweapx, -1),
+  CHEAT("tntammo",    NULL,               cht_never, cheat_tntammo, 0),
+  // killough 2/16/98: end generalized weapons
+  CHEAT("tntammo",    NULL,               cht_never, cheat_tntammox, -1),
+  // invoke translucency         // phares
+  CHEAT("tnttran",    NULL,               always, cheat_tnttran, 0),
+  // killough 2/21/98: smart monster toggle
+  CHEAT("tntsmart",   NULL,               cht_never, cheat_smart, 0),
+  // killough 2/21/98: pitched sound toggle
+  CHEAT("tntpitch",   NULL,               always, cheat_pitch, 0),
+  // killough 2/21/98: reduce RSI injury by adding simpler alias sequences:
+  // killough 2/21/98: same as tnttran
+  CHEAT("tntran",     NULL,               always, cheat_tnttran, 0),
+  // killough 2/21/98: same as tntammo
+  CHEAT("tntamo",     NULL,               cht_never, cheat_tntammo, 0),
+  // killough 2/21/98: same as tntammo
+  CHEAT("tntamo",     NULL,               cht_never, cheat_tntammox, -1),
+  // killough 3/6/98: -fast toggle
+  CHEAT("tntfast",    NULL,               cht_never, cheat_fast, 0),
+  // phares 3/10/98: toggle variable friction effects
+  CHEAT("tntice",     NULL,               cht_never, cheat_friction, 0),
+  // phares 3/10/98: toggle pushers
+  CHEAT("tntpush",    NULL,               cht_never, cheat_pushers, 0),
 
-    // [RH] Monsters don't target
-    CHEAT("notarget", NULL, cht_never, cheat_notarget, 0),
-    // fly mode is active
-    CHEAT("fly", NULL, cht_never, cheat_fly, 0),
-    // end-of-list marker
-    {NULL}};
+  // [RH] Monsters don't target
+  CHEAT("notarget",   NULL,               cht_never, cheat_notarget, 0),
+  // fly mode is active
+  CHEAT("fly",        NULL,               cht_never, cheat_fly, 0),
+
+  // Complevels with parameters
+  CHEAT("tntcl",      NULL,               cht_never, cheat_comp_ext, -2),
+
+  // Enable/disable shorttics in-game
+  CHEAT("tntshort",   NULL,               cht_never, cheat_shorttics, 0),
+
+  // end-of-list marker
+  {NULL}
+};
 
 //-----------------------------------------------------------------------------
 
@@ -234,7 +247,28 @@ static void cheat_choppers() {
   plyr->message = s_STSTR_CHOPPERS; // Ty 03/27/98 - externalized
 }
 
-static void cheat_god() { // 'dqd' cheat for toggleable god mode
+static void cheat_god()
+{                                    // 'dqd' cheat for toggleable god mode
+  // dead players are first respawned at the current position
+  if (plyr->playerstate == PST_DEAD)
+    {
+      signed int an;
+      mapthing_t mt = {0};
+
+      P_MapStart();
+      mt.x = plyr->mo->x >> FRACBITS;
+      mt.y = plyr->mo->y >> FRACBITS;
+      mt.angle = (plyr->mo->angle + ANG45/2)*(uint_64_t)45/ANG45;
+      mt.type = consoleplayer + 1;
+      mt.options = 1; // arbitrary non-zero value
+      P_SpawnPlayer(consoleplayer, &mt);
+
+      // spawn a teleport fog
+      an = plyr->mo->angle >> ANGLETOFINESHIFT;
+      P_SpawnMobj(plyr->mo->x+20*finecosine[an], plyr->mo->y+20*finesine[an], plyr->mo->z, MT_TFOG);
+      S_StartSound(plyr, sfx_slop);
+      P_MapEnd();
+    }
   plyr->cheats ^= CF_GODMODE;
   if (plyr->cheats & CF_GODMODE) {
     if (plyr->mo)
@@ -300,7 +334,7 @@ static void cheat_k() {
 static void cheat_kfa() {
   cheat_k();
   cheat_fa();
-  plyr->message = STSTR_KFAADDED;
+  plyr->message = s_STSTR_KFAADDED;
 }
 
 static void cheat_noclip() {
@@ -333,16 +367,45 @@ extern int EpiCustom;
 struct MapEntry *G_LookupMapinfo(int gameepisode, int gamemap);
 
 // 'clev' change-level cheat
-static void cheat_clev(char buf[3]) {
+static void cheat_clev0()
+{
+  char next[9];
   int epsd, map;
 
-  if (gamemode == commercial) {
-    epsd = 1; // jff was 0, but espd is 1-based
-    map = (buf[0] - '0') * 10 + buf[1] - '0';
-  } else {
-    epsd = buf[0] - '0';
-    map = buf[1] - '0';
+  G_GotoNextLevel(&epsd, &map);
+
+  if (gamemode == commercial)
+  {
+    snprintf(next, 9, "MAP%02d", map);
   }
+  else
+  {
+    snprintf(next, 9, "E%dM%d", epsd, map);
+  }
+
+  doom_printf("Current: %s, Next: %s",  W_GetLumpInfoByNum(maplumpnum)->name, next);
+}
+
+static void cheat_clev(char buf[3])
+{
+  int epsd, map;
+  struct MapEntry* entry;
+
+  if (gamemode == commercial)
+    {
+      epsd = 1; //jff was 0, but espd is 1-based
+      map = (buf[0] - '0')*10 + buf[1] - '0';
+    }
+  else
+    {
+      epsd = buf[0] - '0';
+      map = buf[1] - '0';
+    }
+
+  // First check if we have a mapinfo entry for the requested level. If this is present the remaining checks should be skipped.
+  entry = G_LookupMapinfo(epsd, map);
+  if (!entry)
+  {
 
   // First check if we have a mapinfo entry for the requested level. If this is
   // present the remaining checks should be skipped.
@@ -399,8 +462,7 @@ static void cheat_comp() {
   // must call G_Compatibility after changing compatibility_level
   // (fixes sf bug number 1558738)
   G_Compatibility();
-  doom_printf("New compatibility level:\n%s",
-              comp_lev_str[compatibility_level]);
+  doom_printf("New compatibility level:\n%s (%d)", comp_lev_str[compatibility_level], compatibility_level);
 }
 
 // variable friction cheat
@@ -765,4 +827,32 @@ dboolean M_FindCheats(int key) {
     return M_FindCheats_Boom(key);
   else
     return M_FindCheats_Doom(key);
+}
+
+// Extended compatibility cheat
+static void cheat_comp_ext(char buf[3])
+{
+  int cl = atoi(buf);
+  if(cl == 0 && (buf[0] != '0' || buf[1] != '0')) {
+    return;
+  }
+  if( cl < 0 || cl >= MAX_COMPATIBILITY_LEVEL ) {
+    return;
+  }
+  compatibility_level = cl;
+  G_Compatibility();
+  doom_printf("New compatibility level:\n%s (%d)", comp_lev_str[compatibility_level], compatibility_level);
+}
+
+// Enable/disable shorttics in-game
+static void cheat_shorttics()
+{
+  shorttics = !shorttics;
+  if (shorttics) {
+    angle_t angle = plyr->mo->angle;
+    plyr->mo->angle = (angle >> 24) << 24;
+    doom_printf("Shorttics enabled");
+  } else {
+    doom_printf("Shorttics disabled");
+  }
 }

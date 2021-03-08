@@ -1511,11 +1511,11 @@ static void D_DoomMainSetup(void) {
 
   // proff 11/22/98: Added setting of viewangleoffset
   p = M_CheckParm("-viewangle");
-  if (p && p < myargc - 1) {
-    viewangleoffset = atoi(myargv[p + 1]);
-    viewangleoffset =
-        viewangleoffset < 0 ? 0 : (viewangleoffset > 7 ? 7 : viewangleoffset);
-    viewangleoffset = (8 - viewangleoffset) * ANG45;
+  if (p && p < myargc-1)
+  {
+    viewangleoffset = atoi(myargv[p+1]);
+    viewangleoffset = viewangleoffset<0 ? 0 : (viewangleoffset>7 ? 7 : viewangleoffset);
+    viewangleoffset = (8-viewangleoffset) * ANG45;
   }
 
   // init subsystems
@@ -1672,6 +1672,13 @@ static void D_DoomMainSetup(void) {
       }
     }
   }
+
+  // Automatic pistol start when advancing from one level to the next. At the
+  // beginning of each level, the player's health is reset to 100, their
+  // armor to 0 and their inventory is reduced to the following: pistol,
+  // fists and 50 bullets.
+
+  pistolstart = M_CheckParm("-pistolstart");
 
   if (!M_CheckParm("-noload")) {
     // now do autoloaded dehacked patches, after IWAD patches but before PWAD

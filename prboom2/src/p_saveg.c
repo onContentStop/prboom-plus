@@ -527,11 +527,12 @@ enum {
   tc_flash,
   tc_strobe,
   tc_glow,
-  tc_elevator, // jff 2/22/98 new elevator type thinker
-  tc_scroll,   // killough 3/7/98: new scroll effect thinker
-  tc_pusher,   // phares 3/22/98:  new push/pull effect thinker
-  tc_flicker,  // killough 10/4/98
-  tc_endspecials
+  tc_elevator,    //jff 2/22/98 new elevator type thinker
+  tc_scroll,      // killough 3/7/98: new scroll effect thinker
+  tc_pusher,      // phares 3/22/98:  new push/pull effect thinker
+  tc_flicker,     // killough 10/4/98
+  tc_endspecials,
+  tc_friction // store friction for cl 9
 } specials_e;
 
 //
@@ -575,38 +576,21 @@ void P_ArchiveSpecials(void) {
     end:;
     } else
       size +=
-          th->function == T_MoveCeiling
-              ? 4 + sizeof(ceiling_t)
-              : th->function == T_VerticalDoor
-                    ? 4 + sizeof(vldoor_t)
-                    : th->function == T_MoveFloor
-                          ? 4 + sizeof(floormove_t)
-                          : th->function == T_PlatRaise
-                                ? 4 + sizeof(plat_t)
-                                : th->function == T_LightFlash
-                                      ? 4 + sizeof(lightflash_t)
-                                      : th->function == T_StrobeFlash
-                                            ? 4 + sizeof(strobe_t)
-                                            : th->function == T_Glow
-                                                  ? 4 + sizeof(glow_t)
-                                                  : th->function ==
-                                                            T_MoveElevator
-                                                        ? 4 + sizeof(elevator_t)
-                                                        : th->function ==
-                                                                  T_Scroll
-                                                              ? 4 + sizeof(
-                                                                        scroll_t)
-                                                              : th->function ==
-                                                                        T_Pusher
-                                                                    ? 4 + sizeof(
-                                                                              pusher_t)
-                                                                    : th->function ==
-                                                                              T_FireFlicker
-                                                                          ? 4 + sizeof(
-                                                                                    fireflicker_t)
-                                                                          : 0;
+        th->function==T_MoveCeiling  ? 4+sizeof(ceiling_t) :
+        th->function==T_VerticalDoor ? 4+sizeof(vldoor_t)  :
+        th->function==T_MoveFloor    ? 4+sizeof(floormove_t):
+        th->function==T_PlatRaise    ? 4+sizeof(plat_t)    :
+        th->function==T_LightFlash   ? 4+sizeof(lightflash_t):
+        th->function==T_StrobeFlash  ? 4+sizeof(strobe_t)  :
+        th->function==T_Glow         ? 4+sizeof(glow_t)    :
+        th->function==T_MoveElevator ? 4+sizeof(elevator_t):
+        th->function==T_Scroll       ? 4+sizeof(scroll_t)  :
+        th->function==T_Pusher       ? 4+sizeof(pusher_t)  :
+        th->function==T_FireFlicker? 4+sizeof(fireflicker_t) :
+        th->function==T_Friction     ? 4+sizeof(friction_t) :
+      0;
 
-  CheckSaveGame(size + 1); // killough; cph: +1 for the tc_endspecials
+  CheckSaveGame(size + 1);    // killough; cph: +1 for the tc_endspecials
 
   // save off the current thinkers
   for (th = thinkercap.next; th != &thinkercap; th = th->next) {
@@ -745,11 +729,23 @@ void P_ArchiveSpecials(void) {
 
     // phares 3/22/98: Push/Pull effect thinkers
 
-    if (th->function == T_Pusher) {
-      *save_p++ = tc_pusher;
-      memcpy(save_p, th, sizeof(pusher_t));
-      save_p += sizeof(pusher_t);
-      continue;
+      if (th->function == T_Pusher)
+        {
+          *save_p++ = tc_pusher;
+          memcpy (save_p, th, sizeof(pusher_t));
+          save_p += sizeof(pusher_t);
+          continue;
+        }
+
+      // store friction for cl 9
+      if (th->function == T_Friction)
+        {
+          *save_p++ = tc_friction;
+          PADSAVEP();
+          memcpy (save_p, th, sizeof(friction_t));
+          save_p += sizeof(friction_t);
+          continue;
+        }
     }
   }
 
@@ -915,9 +911,21 @@ void P_UnArchiveSpecials(void) {
       break;
     }
 
-    default:
-      I_Error("P_UnarchiveSpecials: Unknown tclass %i in savegame", tclass);
-    }
+      // load friction for cl 9
+      case tc_friction:
+        PADSAVEP();
+        {
+          friction_t *friction = Z_Malloc (sizeof(friction_t), PU_LEVEL, NULL);
+          memcpy (friction, save_p, sizeof(friction_t));
+          save_p += sizeof(friction_t);
+          friction->thinker.function = T_Friction;
+          P_AddThinker(&friction->thinker);
+          break;
+        }
+
+      default:
+        I_Error("P_UnarchiveSpecials: Unknown tclass %i in savegame", tclass);
+      }
 }
 
 // killough 2/16/98: save/restore random number generator state information

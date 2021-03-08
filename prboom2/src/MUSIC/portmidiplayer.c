@@ -146,17 +146,43 @@ static int pm_init(int samplerate) {
   return 1;
 }
 
-static void pm_shutdown(void) {
-  if (pm_stream) {
-/* ugly deadlock in portmidi win32 implementation:
+static void pm_stop (void);
 
-main thread gets stuck in Pm_Close
-midi thread (started by windows) gets stuck in winmm_streamout_callback
+static void pm_shutdown (void)
+{
+  if (pm_stream)
+  {
+    // stop all sound, in case of hanging notes
+    pm_stop();
 
-winapi ref says:
-"Applications should not call any multimedia functions from inside the callback
-function, as doing so can cause a deadlock. Other system functions can safely be
-called from the callback."
+    /* ugly deadlock in portmidi win32 implementation:
+
+    main thread gets stuck in Pm_Close
+    midi thread (started by windows) gets stuck in winmm_streamout_callback
+
+    winapi ref says:
+    "Applications should not call any multimedia functions from inside the callback function,
+     as doing so can cause a deadlock. Other system functions can safely be called from the callback."
+    
+    winmm_streamout_callback calls midiOutUnprepareHeader.  oops?
+
+    
+    since timestamps are slightly in the future, it's very possible to have some messages still in
+    the windows midi queue when Pm_Close is called.  this is normally no problem, but if one so happens
+    to dequeue and call winmm_streamout_callback at the exact right moment...
+
+    fix: at this point, we've stopped generating midi messages.  sleep for more than DRIVER_LATENCY to ensure
+    all messages are flushed.
+    
+    not a fix: calling Pm_Abort(); then midiStreamStop deadlocks instead of midiStreamClose. 
+    */
+    Pt_Sleep (DRIVER_LATENCY * 2);
+
+    Pm_Close (pm_stream);
+    Pm_Terminate ();
+    pm_stream = NULL;
+  }
+}
 
 winmm_streamout_callback calls midiOutUnprepareHeader.  oops?
 
@@ -337,9 +363,20 @@ static void pm_stop(void) {
   pm_playing = 0;
 
   // songs can be stopped at any time, so reset everything
-  for (i = 0; i < 16; i++) {
-    writeevent(when, MIDI_EVENT_CONTROLLER, i, 123, 0); // all notes off
-    writeevent(when, MIDI_EVENT_CONTROLLER, i, 121, 0); // reset all parameters
+  for (i = 0; i < 16; i++)
+  {
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 123, 0); // all notes off
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 121, 0); // reset all parameters
+
+    // RPN sequence to adjust pitch bend range (RPN value 0x0000)
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x65, 0x00);
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x64, 0x00);
+    // reset pitch bend range to central tuning +/- 2 semitones and 0 cents
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x06, 0x02);
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x26, 0x00);
+    // end of RPN sequence
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x64, 0x7f);
+    writeevent (when, MIDI_EVENT_CONTROLLER, i, 0x65, 0x7f);
   }
   // abort any partial sysex
   sysexbufflen = 0;

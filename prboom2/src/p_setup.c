@@ -2455,10 +2455,14 @@ void P_InitSubsectorsLines(void) {
 //
 // killough 5/3/98: reformatted, cleaned up
 
-void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
-  int i;
-  char lumpname[9];
-  int lumpnum;
+// [FG] current map lump number
+int maplumpnum = -1;
+
+void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
+{
+  int   i;
+  char  lumpname[9];
+  int   lumpnum;
 
   char gl_lumpname[9];
   int gl_lumpnum;
@@ -2669,6 +2673,9 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
   // preload graphics
   if (precache)
     R_PrecacheLevel();
+
+  // [FG] current map lump number
+  maplumpnum = lumpnum;
 
 #ifdef GL_DOOM
   if (V_GetMode() == VID_MODEGL) {

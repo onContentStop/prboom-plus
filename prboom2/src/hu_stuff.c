@@ -923,24 +923,27 @@ int HU_GetHealthColor(int health, int def) {
 int HU_GetArmorColor(int armor, int def) {
   int result;
 
-  if (sts_armorcolor_type) {
-    // armor color dictated by type (Advanced HUD)
-    if (plr->armortype >= 2)
-      result = CR_BLUE;
-    else if (plr->armortype == 1)
-      result = CR_GREEN;
-    else if (plr->armortype == 0)
-      result = CR_RED;
-  } else {
-    // armor color dictated by percent only, not type (Advanced HUD)
-    if (armor < armor_red)
-      result = CR_RED;
-    else if (armor < armor_yellow)
-      result = CR_GOLD;
-    else if (armor <= armor_green)
-      result = CR_GREEN;
-    else
-      result = def;
+  if (sts_armorcolor_type)
+  {
+  // armor color dictated by type (Advanced HUD)
+  if (plr->armortype >= 2)
+    result = CR_BLUE;
+  else if (plr->armortype == 1)
+    result = CR_GREEN;
+  else
+    result = CR_RED;
+  }
+  else
+  {
+  // armor color dictated by percent only, not type (Advanced HUD)
+  if (armor < armor_red)
+    result = CR_RED;
+  else if (armor < armor_yellow)
+    result = CR_GOLD;
+  else if (armor <= armor_green)
+    result = CR_GREEN;
+  else
+    result = def;
   }
   return result;
 }
@@ -1843,10 +1846,9 @@ void HU_draw_crosshair(void) {
 
   crosshair.target_sprite = -1;
 
-  if (!crosshair_nam[hudadd_crosshair] || crosshair.lump == -1 ||
-      custom_message_p->ticks > 0 || automapmode & am_active ||
-      menuactive != mnact_inactive || paused ||
-      plr->readyweapon == wp_chainsaw || plr->readyweapon == wp_fist) {
+  if (!crosshair_nam[hudadd_crosshair] || crosshair.lump == -1 || automapmode & am_active ||
+      menuactive != mnact_inactive || paused)
+  {
     return;
   }
 
@@ -1855,19 +1857,22 @@ void HU_draw_crosshair(void) {
   else
     cm = hudadd_crosshair_color;
 
-  if (hudadd_crosshair_target || hudadd_crosshair_lock_target) {
-    fixed_t slope;
+  if (hudadd_crosshair_target || hudadd_crosshair_lock_target)
+  {
+    fixed_t range, slope;
     angle_t an = plr->mo->angle;
-
+    ammotype_t ammo = weaponinfo[plr->readyweapon].ammo;
+    
     // intercepts overflow guard
     overflows_enabled = false;
-    slope = P_AimLineAttack(plr->mo, an, 16 * 64 * FRACUNIT, 0);
-    if (plr->readyweapon == wp_missile || plr->readyweapon == wp_plasma ||
-        plr->readyweapon == wp_bfg) {
+    range = (ammo == am_noammo) ? MELEERANGE : 16*64*FRACUNIT;
+    slope = P_AimLineAttack(plr->mo, an, range, 0);
+    if (ammo == am_misl || ammo == am_cell)
+    {
       if (!linetarget)
-        slope = P_AimLineAttack(plr->mo, an += 1 << 26, 16 * 64 * FRACUNIT, 0);
+        slope = P_AimLineAttack(plr->mo, an += 1<<26, range, 0);
       if (!linetarget)
-        slope = P_AimLineAttack(plr->mo, an -= 2 << 26, 16 * 64 * FRACUNIT, 0);
+        slope = P_AimLineAttack(plr->mo, an -= 2<<26, range, 0);
     }
     overflows_enabled = true;
 
@@ -2078,8 +2083,12 @@ void HU_Drawer(void) {
   HU_Erase(); // jff 4/24/98 Erase current lines before drawing current
               // needed when screen not fullsize
 
-  // jff 4/21/98 if setup has disabled message list while active, turn it off
-  if (hud_msg_lines <= 1)
+  // Draw crosshair before messages
+  if (hudadd_crosshair)
+    HU_draw_crosshair();
+
+  //jff 4/21/98 if setup has disabled message list while active, turn it off
+  if (hud_msg_lines<=1)
     message_list = false;
 
   // if the message review not enabled, show the standard message widget
@@ -2089,9 +2098,6 @@ void HU_Drawer(void) {
   // e6y
   if (custom_message_p->ticks > 0)
     HUlib_drawTextLine(&w_centermsg, false);
-
-  if (hudadd_crosshair)
-    HU_draw_crosshair();
 
   // if the message review is enabled show the scrolling message review
   if (hud_msg_lines > 1 && message_list)

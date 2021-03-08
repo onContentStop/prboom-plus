@@ -44,7 +44,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <sys/time.h>
-#include <unistd.h>
+#include <ctype.h>
+#include <signal.h>
+#include <string.h>
 
 #include "doomdef.h"
 #include "doomtype.h"
@@ -113,19 +115,20 @@ unsigned long I_GetRandomTimeSeed(void) {
 /* cphipps - I_GetVersionString
  * Returns a version string in the given buffer
  */
-const char *I_GetVersionString(char *buf, size_t sz) {
-  snprintf(buf, sz, "%s v%s (http://prboom-plus.sourceforge.net)", PACKAGE_NAME,
-           PACKAGE_VERSION);
+const char* I_GetVersionString(char* buf, size_t sz)
+{
+  snprintf(buf,sz,"%s v%s (%s)",PACKAGE_NAME,PACKAGE_VERSION,PACKAGE_HOMEPAGE);
   return buf;
 }
 
 /* cphipps - I_SigString
  * Returns a string describing a signal number
  */
-const char *I_SigString(char *buf, size_t sz, int signum) {
-#ifdef HAVE_DECL_SYS_SIGLIST
-  if (strlen(sys_siglist[signum]) < sz)
-    strcpy(buf, sys_siglist[signum]);
+const char* I_SigString(char* buf, size_t sz, int signum)
+{
+#ifdef HAVE_STRSIGNAL
+  if (strsignal(signum) && strlen(strsignal(signum)) < sz)
+    strcpy(buf,strsignal(signum));
   else
 #endif
     sprintf(buf, "signal %d", signum);

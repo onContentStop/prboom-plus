@@ -111,20 +111,19 @@ int gl_depthbuffer_bits = 16;
 extern void M_QuitDOOM(int choice);
 int use_fullscreen;
 int desired_fullscreen;
+int exclusive_fullscreen;
 int render_vsync;
 int screen_multiply;
 int render_screen_multiply;
+int integer_scaling;
 SDL_Surface *screen;
-SDL_Surface *surface;
-SDL_Surface *buffer;
+static SDL_Surface *buffer;
 SDL_Window *sdl_window;
 SDL_Renderer *sdl_renderer;
-SDL_Texture *sdl_texture;
-SDL_Texture *sdl_texture_upscaled;
-SDL_GLContext sdl_glcontext;
+static SDL_Texture *sdl_texture;
+static SDL_GLContext sdl_glcontext;
 unsigned int windowid = 0;
-SDL_Rect src_rect = {0, 0, 0, 0};
-SDL_Rect dst_rect = {0, 0, 0, 0};
+SDL_Rect src_rect = { 0, 0, 0, 0 };
 
 ////////////////////////////////////////////////////////////////////////////
 // Input code
@@ -134,7 +133,7 @@ int leds_always_off = 0; // Expected by m_misc, not relevant
 extern int usemouse;           // config file var
 static dboolean mouse_enabled; // usemouse, but can be overriden by -nomouse
 
-int I_GetModeFromString(const char *modestr);
+video_mode_t I_GetModeFromString(const char *modestr);
 
 /////////////////////////////////////////////////////////////////////////////////
 // Keyboard handling
@@ -314,13 +313,19 @@ static int I_TranslateKey(SDL_Keysym *key) {
 // Main input code
 
 /* cph - pulled out common button code logic */
-// e6y static
-int I_SDLtoDoomMouseState(Uint32 buttonstate) {
-  return 0 | (buttonstate & SDL_BUTTON(1) ? 1 : 0) |
-         (buttonstate & SDL_BUTTON(2) ? 2 : 0) |
-         (buttonstate & SDL_BUTTON(3) ? 4 : 0) |
-         (buttonstate & SDL_BUTTON(6) ? 8 : 0) |
-         (buttonstate & SDL_BUTTON(7) ? 16 : 0);
+//e6y static 
+int I_SDLtoDoomMouseState(Uint32 buttonstate)
+{
+  return 0
+      | (buttonstate & SDL_BUTTON(1) ? 1 : 0)
+      | (buttonstate & SDL_BUTTON(2) ? 2 : 0)
+      | (buttonstate & SDL_BUTTON(3) ? 4 : 0)
+      | (buttonstate & SDL_BUTTON(6) ? 8 : 0)
+      | (buttonstate & SDL_BUTTON(7) ? 16 : 0)
+      | (buttonstate & SDL_BUTTON(4) ? 32 : 0)
+      | (buttonstate & SDL_BUTTON(5) ? 64 : 0)
+      | (buttonstate & SDL_BUTTON(8) ? 128 : 0)
+      ;
 }
 
 static void I_GetEvent(void) {
@@ -360,10 +365,60 @@ static void I_GetEvent(void) {
         }
       }
 #endif
+    event.type = ev_keydown;
+    event.data1 = I_TranslateKey(&Event->key.keysym);
+    D_PostEvent(&event);
+    break;
+
+  case SDL_KEYUP:
+  {
+    event.type = ev_keyup;
+    event.data1 = I_TranslateKey(&Event->key.keysym);
+    D_PostEvent(&event);
+  }
+  break;
+
+  case SDL_MOUSEBUTTONDOWN:
+  case SDL_MOUSEBUTTONUP:
+  if (mouse_enabled && window_focused)
+  {
+    event.type = ev_mouse;
+    event.data1 = I_SDLtoDoomMouseState(SDL_GetMouseState(NULL, NULL));
+    event.data2 = event.data3 = 0;
+    D_PostEvent(&event);
+  }
+  break;
+
+  case SDL_MOUSEWHEEL:
+  if (mouse_enabled && window_focused)
+  {
+    if (Event->wheel.y > 0)
+    {
       event.type = ev_keydown;
-      event.data1 = I_TranslateKey(&Event->key.keysym);
+      event.data1 = KEYD_MWHEELUP;
+      mwheeluptic = gametic;
       D_PostEvent(&event);
-      break;
+    }
+    else if (Event->wheel.y < 0)
+    {
+      event.type = ev_keydown;
+      event.data1 = KEYD_MWHEELDOWN;
+      mwheeldowntic = gametic;
+      D_PostEvent(&event);
+    }
+  }
+  break;
+  case SDL_MOUSEMOTION:
+    if (mouse_enabled && window_focused)
+    {
+      int xrel, yrel;
+      event.type = ev_mouse;
+      event.data1 = I_SDLtoDoomMouseState(SDL_GetRelativeMouseState(&xrel, &yrel));
+      event.data2 = xrel << 4;
+      event.data3 = -yrel << 4;
+      D_PostEvent(&event);
+    }
+    break;
 
     case SDL_KEYUP: {
       event.type = ev_keyup;
@@ -601,10 +656,10 @@ void I_FinishUpdate(void) {
   }
 #endif
 
-  if ((screen_multiply > 1) || SDL_MUSTLOCK(screen)) {
-    int h;
-    byte *src;
-    byte *dest;
+  if (SDL_MUSTLOCK(screen)) {
+      int h;
+      byte *src;
+      byte *dest;
 
     if (SDL_LockSurface(screen) < 0) {
       lprintf(LO_INFO, "I_FinishUpdate: %s\n", SDL_GetError());
@@ -640,18 +695,7 @@ void I_FinishUpdate(void) {
   // Make sure the pillarboxes are kept clear each frame.
   SDL_RenderClear(sdl_renderer);
 
-  if (screen_multiply > 1) {
-    // Render this intermediate texture into the upscaled texture
-    // using "nearest" integer scaling.
-    SDL_SetRenderTarget(sdl_renderer, sdl_texture_upscaled);
-    SDL_RenderCopy(sdl_renderer, sdl_texture, &src_rect, NULL);
-
-    // Finally, render this upscaled texture to screen using linear scaling.
-    SDL_SetRenderTarget(sdl_renderer, NULL);
-    SDL_RenderCopy(sdl_renderer, sdl_texture_upscaled, NULL, NULL);
-  } else {
-    SDL_RenderCopy(sdl_renderer, sdl_texture, &src_rect, NULL);
-  }
+  SDL_RenderCopy(sdl_renderer, sdl_texture, &src_rect, NULL);
 
   // Draw!
   SDL_RenderPresent(sdl_renderer);
@@ -668,7 +712,15 @@ void I_SetPalette(int pal) { newpal = pal; }
 
 // I_PreInitGraphics
 
-static void I_ShutdownSDL(void) {
+static void I_ShutdownSDL(void)
+{
+  if (sdl_glcontext) SDL_GL_DeleteContext(sdl_glcontext);
+  if (screen) SDL_FreeSurface(screen);
+  if (buffer) SDL_FreeSurface(buffer);
+  if (sdl_texture) SDL_DestroyTexture(sdl_texture);
+  if (sdl_renderer) SDL_DestroyRenderer(sdl_renderer);
+  if (sdl_window) SDL_DestroyWindow(sdl_window);
+
   SDL_Quit();
   return;
 }
@@ -703,7 +755,6 @@ void I_InitBuffersRes(void) {
 
 #define MAX_RESOLUTIONS_COUNT 128
 const char *screen_resolutions_list[MAX_RESOLUTIONS_COUNT] = {NULL};
-const char *screen_resolution_lowest;
 const char *screen_resolution = NULL;
 
 //
@@ -724,6 +775,17 @@ void I_GetScreenResolution(void) {
     }
   }
 }
+
+// make sure the canonical resolutions are always available
+static const struct {
+  const int w, h;
+} canonicals[] = {
+  {640, 480}, // Doom 95
+  {640, 400}, // MBF
+  {320, 240}, // Doom 95
+  {320, 200}, // Vanilla Doom
+};
+static const int num_canonicals = sizeof(canonicals)/sizeof(*canonicals);
 
 //
 // I_FillScreenResolutionsList
@@ -753,22 +815,37 @@ static void I_FillScreenResolutionsList(void) {
   list_size = 0;
   current_resolution_index = -1;
 
-  if (count > 0) {
-    count = MIN(count, MAX_RESOLUTIONS_COUNT - 2);
+  // on success, SDL_GetNumDisplayModes() always returns at least 1
+  if (count > 0)
+  {
+    // -2 for the desired resolution and for NULL
+    count = MIN(count, MAX_RESOLUTIONS_COUNT - 2 - num_canonicals);
 
-    for (i = count - 1; i >= 0; i--) {
+    for(i = count - 1 + num_canonicals; i >= 0; i--)
+    {
       int in_list = false;
 
-      SDL_GetDisplayMode(display_index, i, &mode);
+      // make sure the canonical resolutions are always available
+      if (i > count - 1)
+      {
+        // no hard-coded resolutions for mode-changing fullscreen
+        if (exclusive_fullscreen)
+          continue;
+
+        mode.w = canonicals[i - count].w;
+        mode.h = canonicals[i - count].h;
+      }
+      else
+      {
+        SDL_GetDisplayMode(display_index, i, &mode);
+      }
 
       doom_snprintf(mode_name, sizeof(mode_name), "%dx%d", mode.w, mode.h);
 
-      if (i == count - 1) {
-        screen_resolution_lowest = strdup(mode_name);
-      }
-
-      for (j = 0; j < list_size; j++) {
-        if (!strcmp(mode_name, screen_resolutions_list[j])) {
+      for(j = 0; j < list_size; j++)
+      {
+        if (!strcmp(mode_name, screen_resolutions_list[j]))
+        {
           in_list = true;
           break;
         }
@@ -913,7 +990,11 @@ void I_CalculateRes(int width, int height) {
     unsigned int count1, count2;
     int pitch1, pitch2;
 
-    SCREENWIDTH = width; //(width+15) & ~15;
+    if (desired_fullscreen && exclusive_fullscreen)
+    {
+      I_ClosestResolution(&width, &height);
+    }
+    SCREENWIDTH = width;//(width+15) & ~15;
     SCREENHEIGHT = height;
 
     // e6y
@@ -945,21 +1026,13 @@ void I_CalculateRes(int width, int height) {
       SCREENPITCH = SCREENWIDTH * V_GetPixelDepth();
     }
   }
-
-  // e6y: processing of screen_multiply
-  {
-    int factor = ((V_GetMode() == VID_MODEGL) ? 1 : render_screen_multiply);
-    REAL_SCREENWIDTH = SCREENWIDTH * factor;
-    REAL_SCREENHEIGHT = SCREENHEIGHT * factor;
-    REAL_SCREENPITCH = SCREENPITCH * factor;
-  }
 }
 
 // CPhipps -
 // I_InitScreenResolution
 // Sets the screen resolution
-// e6y: processing of screen_multiply
-void I_InitScreenResolution(void) {
+void I_InitScreenResolution(void)
+{
   int i, p, w, h;
   char c, x;
   video_mode_t mode;
@@ -1033,7 +1106,13 @@ void I_InitScreenResolution(void) {
   if ((i = M_CheckParm("-vidmode")) && i < myargc - 1) {
     mode = (video_mode_t)I_GetModeFromString(myargv[i + 1]);
   }
-
+#ifndef GL_DOOM
+  if (mode == VID_MODEGL)
+  {
+    mode = (video_mode_t)I_GetModeFromString(default_videomode = "8bit");
+  }
+#endif
+  
   V_InitMode(mode);
 
   I_CalculateRes(w, h);
@@ -1041,25 +1120,24 @@ void I_InitScreenResolution(void) {
   V_FreeScreens();
 
   // set first three to standard values
-  for (i = 0; i < 3; i++) {
-    screens[i].width = REAL_SCREENWIDTH;
-    screens[i].height = REAL_SCREENHEIGHT;
-    screens[i].byte_pitch = REAL_SCREENPITCH;
-    screens[i].short_pitch = REAL_SCREENPITCH / V_GetModePixelDepth(VID_MODE16);
-    screens[i].int_pitch = REAL_SCREENPITCH / V_GetModePixelDepth(VID_MODE32);
+  for (i=0; i<3; i++) {
+    screens[i].width = SCREENWIDTH;
+    screens[i].height = SCREENHEIGHT;
+    screens[i].byte_pitch = SCREENPITCH;
+    screens[i].short_pitch = SCREENPITCH / V_GetModePixelDepth(VID_MODE16);
+    screens[i].int_pitch = SCREENPITCH / V_GetModePixelDepth(VID_MODE32);
   }
 
   // statusbar
-  screens[4].width = REAL_SCREENWIDTH;
-  screens[4].height = REAL_SCREENHEIGHT;
-  screens[4].byte_pitch = REAL_SCREENPITCH;
-  screens[4].short_pitch = REAL_SCREENPITCH / V_GetModePixelDepth(VID_MODE16);
-  screens[4].int_pitch = REAL_SCREENPITCH / V_GetModePixelDepth(VID_MODE32);
+  screens[4].width = SCREENWIDTH;
+  screens[4].height = SCREENHEIGHT;
+  screens[4].byte_pitch = SCREENPITCH;
+  screens[4].short_pitch = SCREENPITCH / V_GetModePixelDepth(VID_MODE16);
+  screens[4].int_pitch = SCREENPITCH / V_GetModePixelDepth(VID_MODE32);
 
   I_InitBuffersRes();
 
-  lprintf(LO_INFO, "I_InitScreenResolution: Using resolution %dx%d\n",
-          REAL_SCREENWIDTH, REAL_SCREENHEIGHT);
+  lprintf(LO_INFO,"I_InitScreenResolution: Using resolution %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
 }
 
 //
@@ -1118,7 +1196,8 @@ void I_InitGraphics(void) {
   }
 }
 
-int I_GetModeFromString(const char *modestr) {
+video_mode_t I_GetModeFromString(const char *modestr)
+{
   video_mode_t mode;
 
   if (!stricmp(modestr, "15")) {
@@ -1146,7 +1225,9 @@ int I_GetModeFromString(const char *modestr) {
 
 void I_UpdateVideoMode(void) {
   int init_flags = 0;
-  const dboolean novsync = M_CheckParm("-timedemo") || M_CheckParm("-fastdemo");
+  int actualheight;
+  const dboolean novsync = M_CheckParm("-timedemo") || \
+                           M_CheckParm("-fastdemo");
 
   if (sdl_window) {
     // video capturing cannot be continued with new screen settings
@@ -1162,17 +1243,19 @@ void I_UpdateVideoMode(void) {
 
     I_InitScreenResolution();
 
-    SDL_GL_DeleteContext(sdl_glcontext);
-    SDL_FreeSurface(screen);
-    SDL_FreeSurface(buffer);
-    SDL_DestroyTexture(sdl_texture);
-    SDL_DestroyTexture(sdl_texture_upscaled);
-    SDL_DestroyRenderer(sdl_renderer);
+    if (sdl_glcontext) SDL_GL_DeleteContext(sdl_glcontext);
+    if (screen) SDL_FreeSurface(screen);
+    if (buffer) SDL_FreeSurface(buffer);
+    if (sdl_texture) SDL_DestroyTexture(sdl_texture);
+    if (sdl_renderer) SDL_DestroyRenderer(sdl_renderer);
     SDL_DestroyWindow(sdl_window);
 
     sdl_renderer = NULL;
     sdl_window = NULL;
+    sdl_glcontext = NULL;
     screen = NULL;
+    buffer = NULL;
+    sdl_texture = NULL;
   }
 
   // e6y: initialisation of screen_multiply
@@ -1184,16 +1267,19 @@ void I_UpdateVideoMode(void) {
   }
 
   // Fullscreen desktop for software renderer only - DTIED
-  if (desired_fullscreen && V_GetMode() != VID_MODEGL)
-    init_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-  else if (desired_fullscreen)
-    init_flags |= SDL_WINDOW_FULLSCREEN;
+  if (desired_fullscreen)
+  {
+    if (V_GetMode() == VID_MODEGL || exclusive_fullscreen)
+      init_flags |= SDL_WINDOW_FULLSCREEN;
+    else
+      init_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+  }
 
     // In windowed mode, the window can be resized while the game is
     // running.  This feature is disabled on OS X, as it adds an ugly
     // scroll handle to the corner of the screen.
 #ifndef MACOSX
-  if (!desired_fullscreen)
+  if (!desired_fullscreen && V_GetMode() != VID_MODEGL)
     init_flags |= SDL_WINDOW_RESIZABLE;
 #endif
 
@@ -1216,10 +1302,11 @@ void I_UpdateVideoMode(void) {
     // e6y: anti-aliasing
     gld_MultisamplingInit();
 
-    sdl_window =
-        SDL_CreateWindow(PACKAGE_NAME " " PACKAGE_VERSION,
-                         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                         REAL_SCREENWIDTH, REAL_SCREENHEIGHT, init_flags);
+    sdl_window = SDL_CreateWindow(
+      PACKAGE_NAME " " PACKAGE_VERSION,
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      SCREENWIDTH, SCREENHEIGHT,
+      init_flags);
     sdl_glcontext = SDL_GL_CreateContext(sdl_window);
 
     gld_CheckHardwareGamma();
@@ -1230,31 +1317,50 @@ void I_UpdateVideoMode(void) {
     if (render_vsync && !novsync)
       flags |= SDL_RENDERER_PRESENTVSYNC;
 
-    sdl_window =
-        SDL_CreateWindow(PACKAGE_NAME " " PACKAGE_VERSION,
-                         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                         REAL_SCREENWIDTH, REAL_SCREENHEIGHT, init_flags);
+    sdl_window = SDL_CreateWindow(
+      PACKAGE_NAME " " PACKAGE_VERSION,
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      SCREENWIDTH, SCREENHEIGHT,
+      init_flags);
     sdl_renderer = SDL_CreateRenderer(sdl_window, -1, flags);
 
-    SDL_RenderSetLogicalSize(sdl_renderer, REAL_SCREENWIDTH, REAL_SCREENHEIGHT);
+    // [FG] aspect ratio correction for the canonical video modes
+    if ((SCREENWIDTH == 320 && SCREENHEIGHT == 200) ||
+        (SCREENWIDTH == 640 && SCREENHEIGHT == 400))
+    {
+      actualheight = 6*SCREENHEIGHT/5;
+    }
+    else
+    {
+      actualheight = SCREENHEIGHT;
+    }
 
-    screen = SDL_CreateRGBSurface(0, SCREENWIDTH, SCREENHEIGHT,
-                                  V_GetNumPixelBits(), 0, 0, 0, 0);
-    buffer = SDL_CreateRGBSurface(0, REAL_SCREENWIDTH, REAL_SCREENHEIGHT, 32, 0,
-                                  0, 0, 0);
+    SDL_SetWindowMinimumSize(sdl_window, SCREENWIDTH, actualheight);
+    SDL_RenderSetLogicalSize(sdl_renderer, SCREENWIDTH, actualheight);
+
+    // [FG] make sure initial window size is always >= 640x480
+    if (SCREENWIDTH <= 320 && SCREENHEIGHT <= 240 && screen_multiply == 1)
+    {
+      screen_multiply = 2;
+    }
+
+    // [FG] apply screen_multiply to initial window size
+    if (!desired_fullscreen)
+    {
+      SDL_SetWindowSize(sdl_window, screen_multiply*SCREENWIDTH, screen_multiply*actualheight);
+    }
+
+    // [FG] force integer scales
+    SDL_RenderSetIntegerScale(sdl_renderer, integer_scaling);
+
+    screen = SDL_CreateRGBSurface(0, SCREENWIDTH, SCREENHEIGHT, V_GetNumPixelBits(), 0, 0, 0, 0);
+    buffer = SDL_CreateRGBSurface(0, SCREENWIDTH, SCREENHEIGHT, 32, 0, 0, 0, 0);
     SDL_FillRect(buffer, NULL, 0);
 
     sdl_texture = SDL_CreateTextureFromSurface(sdl_renderer, buffer);
 
-    if (screen_multiply) {
-      sdl_texture_upscaled = SDL_CreateTexture(
-          sdl_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET,
-          REAL_SCREENWIDTH, REAL_SCREENHEIGHT);
-    }
-
-    if (screen == NULL) {
-      I_Error("Couldn't set %dx%d video mode [%s]", REAL_SCREENWIDTH,
-              REAL_SCREENHEIGHT, SDL_GetError());
+    if(screen == NULL) {
+      I_Error("Couldn't set %dx%d video mode [%s]", SCREENWIDTH, SCREENHEIGHT, SDL_GetError());
     }
   }
 
@@ -1268,6 +1374,18 @@ void I_UpdateVideoMode(void) {
                             SDL_WINDOWPOS_CENTERED);
     }
   }
+
+  // Workaround for SDL 2.0.14 alt-tab bug (taken from Doom Retro)
+#if defined(_WIN32)
+{
+   SDL_version ver;
+   SDL_GetVersion(&ver);
+   if (ver.major == 2 && ver.minor == 0 && ver.patch == 14)
+   {
+      SDL_SetHintWithPriority(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "1", SDL_HINT_OVERRIDE);
+   }
+}
+#endif
 
   windowid = SDL_GetWindowID(sdl_window);
 
@@ -1288,7 +1406,8 @@ void I_UpdateVideoMode(void) {
             screen && SDL_MUSTLOCK(screen) ? "lock-and-copy" : "direct access");
 
     // Get the info needed to render to the display
-    if (screen_multiply == 1 && !SDL_MUSTLOCK(screen)) {
+    if (!SDL_MUSTLOCK(screen))
+    {
       screens[0].not_on_heap = true;
       screens[0].data = (unsigned char *)(screen->pixels);
       screens[0].byte_pitch = screen->pitch;
@@ -1357,8 +1476,6 @@ void I_UpdateVideoMode(void) {
 
   src_rect.w = SCREENWIDTH;
   src_rect.h = SCREENHEIGHT;
-  dst_rect.w = REAL_SCREENWIDTH;
-  dst_rect.h = REAL_SCREENHEIGHT;
 }
 
 static void ActivateMouse(void) { SDL_SetRelativeMouseMode(SDL_TRUE); }
@@ -1478,9 +1595,6 @@ void UpdateGrab(void) {
   currently_grabbed = grab;
 }
 
-static void ApplyWindowResize(SDL_Event *resize_event) {
-  int w = resize_event->window.data1;
-  int h = resize_event->window.data2;
-  SDL_RenderSetLogicalSize(sdl_renderer, w,
-                           w * REAL_SCREENHEIGHT / REAL_SCREENWIDTH);
+static void ApplyWindowResize(SDL_Event *resize_event)
+{
 }
