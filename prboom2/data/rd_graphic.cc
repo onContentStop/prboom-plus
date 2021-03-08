@@ -131,7 +131,7 @@ size_t ppm_to_patch(void **lumpdata, const char *filename, int insert_x,
     unsigned char *pixels, **columns, *patch;
     size_t *columnsizes, totalcolumnsize, offset;
 
-    pixels = parseppm((data), size, filename, &width, &height);
+    pixels = parseppm(data, size, filename, &width, &height);
     columns = xmalloc(width * sizeof(*columns));
     columnsizes = xmalloc(width * sizeof(*columnsizes));
     column_colours = xmalloc(height * sizeof(*column_colours));
