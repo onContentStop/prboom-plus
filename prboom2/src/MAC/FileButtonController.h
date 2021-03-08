@@ -2,12 +2,13 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface FileButtonController : NSObject {
-  IBOutlet NSButton *button;
-  IBOutlet id field;
+@interface FileButtonController : NSObject
+{
+    IBOutlet NSButton *button;
+    IBOutlet id field;
 
-  NSArray *types;
-  bool allowMultiple;
+    NSArray *types;
+    bool allowMultiple;
 }
 
 - (id)init;

@@ -68,21 +68,28 @@
  * coordinates are given for a 320*200 view screen.
  */
 
-typedef enum { ps_weapon, ps_flash, NUMPSPRITES } psprnum_t;
+typedef enum
+{
+    ps_weapon,
+    ps_flash,
+    NUMPSPRITES
+} psprnum_t;
 
-typedef struct {
-  state_t *state; /* a NULL state means not active */
-  int tics;
-  fixed_t sx;
-  fixed_t sy;
+typedef struct
+{
+    state_t *state; /* a NULL state means not active */
+    int tics;
+    fixed_t sx;
+    fixed_t sy;
 } pspdef_t;
 
-enum {
-  CENTERWEAPON_OFF,
-  CENTERWEAPON_HOR,
-  CENTERWEAPON_HORVER,
-  CENTERWEAPON_BOB,
-  NUM_CENTERWEAPON,
+enum
+{
+    CENTERWEAPON_OFF,
+    CENTERWEAPON_HOR,
+    CENTERWEAPON_HORVER,
+    CENTERWEAPON_BOB,
+    NUM_CENTERWEAPON,
 };
 
 extern int weapon_preferences[2][NUMWEAPONS + 1]; /* killough 5/2/98 */

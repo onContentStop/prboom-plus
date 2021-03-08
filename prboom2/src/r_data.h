@@ -45,9 +45,10 @@
 
 // A single patch from a texture definition, basically
 // a rectangular area within the texture rectangle.
-typedef struct {
-  int originx, originy; // Block origin, which has already accounted
-  int patch;            // for the internal origin of the patch.
+typedef struct
+{
+    int originx, originy; // Block origin, which has already accounted
+    int patch;            // for the internal origin of the patch.
 } texpatch_t;
 
 //
@@ -56,15 +57,16 @@ typedef struct {
 // which are to be combined in a predefined order.
 //
 
-typedef struct {
-  char name[8];    // Keep name for switch changing, etc.
-  int next, index; // killough 1/31/98: used in hashing algorithm
-  // CPhipps - moved arrays with per-texture entries to elements here
-  unsigned widthmask;
-  // CPhipps - end of additions
-  short width, height;
-  short patchcount;      // All the patches[patchcount] are drawn
-  texpatch_t patches[1]; // back-to-front into the cached texture.
+typedef struct
+{
+    char name[8];    // Keep name for switch changing, etc.
+    int next, index; // killough 1/31/98: used in hashing algorithm
+    // CPhipps - moved arrays with per-texture entries to elements here
+    unsigned widthmask;
+    // CPhipps - end of additions
+    short width, height;
+    short patchcount;      // All the patches[patchcount] are drawn
+    texpatch_t patches[1]; // back-to-front into the cached texture.
 } texture_t;
 
 extern int numtextures;

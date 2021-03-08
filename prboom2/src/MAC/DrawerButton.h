@@ -2,8 +2,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface DrawerButton : NSButton {
-  IBOutlet id drawer;
+@interface DrawerButton : NSButton
+{
+    IBOutlet id drawer;
 }
 
 - (void)drawerDidClose:(NSNotification *)notification;

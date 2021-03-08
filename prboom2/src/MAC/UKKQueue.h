@@ -27,22 +27,22 @@
 
 #ifndef UKKQUEUE_BACKWARDS_COMPATIBLE
 #define UKKQUEUE_BACKWARDS_COMPATIBLE                                          \
-  1 // 1 to send old-style kqueue:receivedNotification:forFile: messages to
-    // objects that accept them.
+    1 // 1 to send old-style kqueue:receivedNotification:forFile: messages to
+      // objects that accept them.
 #endif
 
 // Flags for notifyingAbout:
 #define UKKQueueNotifyAboutRename NOTE_RENAME // Item was renamed.
 #define UKKQueueNotifyAboutWrite                                               \
-  NOTE_WRITE // Item contents changed (also folder contents changed).
+    NOTE_WRITE // Item contents changed (also folder contents changed).
 #define UKKQueueNotifyAboutDelete NOTE_DELETE // item was removed.
 #define UKKQueueNotifyAboutAttributeChange                                     \
-  NOTE_ATTRIB                                       // Item attributes changed.
+    NOTE_ATTRIB                                     // Item attributes changed.
 #define UKKQueueNotifyAboutSizeIncrease NOTE_EXTEND // Item size increased.
 #define UKKQueueNotifyAboutLinkCountChanged                                    \
-  NOTE_LINK // Item's link count changed.
+    NOTE_LINK // Item's link count changed.
 #define UKKQueueNotifyAboutAccessRevocation                                    \
-  NOTE_REVOKE // Access to item was revoked.
+    NOTE_REVOKE // Access to item was revoked.
 
 // Notifications this sends:
 //  (see UKFileWatcher)
@@ -51,31 +51,32 @@
 #define UKKQueueFileWrittenToNotification UKFileWatcherWriteNotification
 #define UKKQueueFileDeletedNotification UKFileWatcherDeleteNotification
 #define UKKQueueFileAttributesChangedNotification                              \
-  UKFileWatcherAttributeChangeNotification
+    UKFileWatcherAttributeChangeNotification
 #define UKKQueueFileSizeIncreasedNotification                                  \
-  UKFileWatcherSizeIncreaseNotification
+    UKFileWatcherSizeIncreaseNotification
 #define UKKQueueFileLinkCountChangedNotification                               \
-  UKFileWatcherLinkCountChangeNotification
+    UKFileWatcherLinkCountChangeNotification
 #define UKKQueueFileAccessRevocationNotification                               \
-  UKFileWatcherAccessRevocationNotification
+    UKFileWatcherAccessRevocationNotification
 
 // -----------------------------------------------------------------------------
 //  UKKQueue:
 // -----------------------------------------------------------------------------
 
-@interface UKKQueue : NSObject <UKFileWatcher> {
-  int queueFD; // The actual queue ID.
-  NSMutableArray
-      *watchedPaths; // List of NSStrings containing the paths we're watching.
-  NSMutableArray *watchedFDs; // List of NSNumbers containing the file
-                              // descriptors we're watching.
-  id delegate; // Gets messages about changes instead of notification center, if
-               // specified.
-  id delegateProxy;  // Proxy object to which we send messages so they reach
-                     // delegate on the main thread.
-  BOOL alwaysNotify; // Send notifications even if we have a delegate? Defaults
-                     // to NO.
-  BOOL keepThreadRunning; // Termination criterion of our thread.
+@interface UKKQueue : NSObject <UKFileWatcher>
+{
+    int queueFD; // The actual queue ID.
+    NSMutableArray
+        *watchedPaths; // List of NSStrings containing the paths we're watching.
+    NSMutableArray *watchedFDs; // List of NSNumbers containing the file
+                                // descriptors we're watching.
+    id delegate; // Gets messages about changes instead of notification center,
+                 // if specified.
+    id delegateProxy;  // Proxy object to which we send messages so they reach
+                       // delegate on the main thread.
+    BOOL alwaysNotify; // Send notifications even if we have a delegate?
+                       // Defaults to NO.
+    BOOL keepThreadRunning; // Termination criterion of our thread.
 }
 
 + (UKKQueue *)sharedQueue; // Returns a singleton, a shared kqueue object Handy

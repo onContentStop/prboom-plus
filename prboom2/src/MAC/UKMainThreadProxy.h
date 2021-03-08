@@ -44,8 +44,9 @@
    retain/release etc.
 */
 
-@interface UKMainThreadProxy : NSObject {
-  IBOutlet id target;
+@interface UKMainThreadProxy : NSObject
+{
+    IBOutlet id target;
 }
 
 - (id)initWithTarget:(id)targ;

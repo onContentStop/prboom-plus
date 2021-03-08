@@ -46,9 +46,9 @@
 #define TXT_MAX_MOUSE_BUTTONS 16
 
 #define TXT_KEY_TO_MOUSE_BUTTON(x)                                             \
-  ((x) >= TXT_MOUSE_BASE && (x) < TXT_MOUSE_BASE + TXT_MAX_MOUSE_BUTTONS       \
-       ? (x)-TXT_MOUSE_BASE                                                    \
-       : -1)
+    ((x) >= TXT_MOUSE_BASE && (x) < TXT_MOUSE_BASE + TXT_MAX_MOUSE_BUTTONS     \
+         ? (x)-TXT_MOUSE_BASE                                                  \
+         : -1)
 
 // Unicode offset. Unicode values from 128 onwards are offset up into
 // this range, so TXT_UNICODE_BASE = Unicode character #128, and so on.
@@ -58,7 +58,9 @@
 // Convert a key value to a Unicode character:
 
 #define TXT_KEY_TO_UNICODE(x)                                                  \
-  ((x) < 128 ? (x) : (x) >= TXT_UNICODE_BASE ? ((x)-TXT_UNICODE_BASE + 128) : 0)
+    ((x) < 128                 ? (x)                                           \
+     : (x) >= TXT_UNICODE_BASE ? ((x)-TXT_UNICODE_BASE + 128)                  \
+                               : 0)
 
 // Screen size
 
@@ -67,32 +69,34 @@
 
 #define TXT_COLOR_BLINKING (1 << 3)
 
-typedef enum {
-  TXT_COLOR_BLACK,
-  TXT_COLOR_BLUE,
-  TXT_COLOR_GREEN,
-  TXT_COLOR_CYAN,
-  TXT_COLOR_RED,
-  TXT_COLOR_MAGENTA,
-  TXT_COLOR_BROWN,
-  TXT_COLOR_GREY,
-  TXT_COLOR_DARK_GREY,
-  TXT_COLOR_BRIGHT_BLUE,
-  TXT_COLOR_BRIGHT_GREEN,
-  TXT_COLOR_BRIGHT_CYAN,
-  TXT_COLOR_BRIGHT_RED,
-  TXT_COLOR_BRIGHT_MAGENTA,
-  TXT_COLOR_YELLOW,
-  TXT_COLOR_BRIGHT_WHITE,
+typedef enum
+{
+    TXT_COLOR_BLACK,
+    TXT_COLOR_BLUE,
+    TXT_COLOR_GREEN,
+    TXT_COLOR_CYAN,
+    TXT_COLOR_RED,
+    TXT_COLOR_MAGENTA,
+    TXT_COLOR_BROWN,
+    TXT_COLOR_GREY,
+    TXT_COLOR_DARK_GREY,
+    TXT_COLOR_BRIGHT_BLUE,
+    TXT_COLOR_BRIGHT_GREEN,
+    TXT_COLOR_BRIGHT_CYAN,
+    TXT_COLOR_BRIGHT_RED,
+    TXT_COLOR_BRIGHT_MAGENTA,
+    TXT_COLOR_YELLOW,
+    TXT_COLOR_BRIGHT_WHITE,
 } txt_color_t;
 
 // Modifier keys.
 
-typedef enum {
-  TXT_MOD_SHIFT,
-  TXT_MOD_CTRL,
-  TXT_MOD_ALT,
-  TXT_NUM_MODIFIERS
+typedef enum
+{
+    TXT_MOD_SHIFT,
+    TXT_MOD_CTRL,
+    TXT_MOD_ALT,
+    TXT_NUM_MODIFIERS
 } txt_modifier_t;
 
 // Initialize the screen

@@ -2,12 +2,13 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface WadViewController : NSObject {
-  // Wad options
-  NSMutableArray *wads;
+@interface WadViewController : NSObject
+{
+    // Wad options
+    NSMutableArray *wads;
 
-  IBOutlet id view;
-  IBOutlet id removeButton;
+    IBOutlet id view;
+    IBOutlet id removeButton;
 }
 
 - (id)init;

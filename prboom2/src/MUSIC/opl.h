@@ -28,7 +28,11 @@
 
 typedef void (*opl_callback_t)(void *data);
 
-typedef enum { OPL_REGISTER_PORT = 0, OPL_DATA_PORT = 1 } opl_port_t;
+typedef enum
+{
+    OPL_REGISTER_PORT = 0,
+    OPL_DATA_PORT = 1
+} opl_port_t;
 
 #define OPL_NUM_OPERATORS 21
 #define OPL_NUM_VOICES 9

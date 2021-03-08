@@ -96,72 +96,75 @@ int clipammo[NUMAMMO] = {10, 4, 20, 1};
 // Returns false if the ammo can't be picked up at all
 //
 
-static dboolean P_GiveAmmo(player_t *player, ammotype_t ammo, int num) {
-  int oldammo;
+static dboolean P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
+{
+    int oldammo;
 
-  if (ammo == am_noammo)
-    return false;
+    if (ammo == am_noammo)
+        return false;
 
 #ifdef RANGECHECK
-  if (ammo < 0 || ammo > NUMAMMO)
-    I_Error("P_GiveAmmo: bad type %i", ammo);
+    if (ammo < 0 || ammo > NUMAMMO)
+        I_Error("P_GiveAmmo: bad type %i", ammo);
 #endif
 
-  if (player->ammo[ammo] == player->maxammo[ammo])
-    return false;
+    if (player->ammo[ammo] == player->maxammo[ammo])
+        return false;
 
-  if (num)
-    num *= clipammo[ammo];
-  else
-    num = clipammo[ammo] / 2;
+    if (num)
+        num *= clipammo[ammo];
+    else
+        num = clipammo[ammo] / 2;
 
-  // give double ammo in trainer mode, you'll need in nightmare
-  if (gameskill == sk_baby || gameskill == sk_nightmare)
-    num <<= 1;
+    // give double ammo in trainer mode, you'll need in nightmare
+    if (gameskill == sk_baby || gameskill == sk_nightmare)
+        num <<= 1;
 
-  oldammo = player->ammo[ammo];
-  player->ammo[ammo] += num;
+    oldammo = player->ammo[ammo];
+    player->ammo[ammo] += num;
 
-  if (player->ammo[ammo] > player->maxammo[ammo])
-    player->ammo[ammo] = player->maxammo[ammo];
+    if (player->ammo[ammo] > player->maxammo[ammo])
+        player->ammo[ammo] = player->maxammo[ammo];
 
-  // If non zero ammo, don't change up weapons, player was lower on purpose.
-  if (oldammo)
-    return true;
+    // If non zero ammo, don't change up weapons, player was lower on purpose.
+    if (oldammo)
+        return true;
 
-  // We were down to zero, so select a new weapon.
-  // Preferences are not user selectable.
+    // We were down to zero, so select a new weapon.
+    // Preferences are not user selectable.
 
-  switch (ammo) {
-  case am_clip:
-    if (player->readyweapon == wp_fist) {
-      if (player->weaponowned[wp_chaingun])
-        player->pendingweapon = wp_chaingun;
-      else
-        player->pendingweapon = wp_pistol;
+    switch (ammo)
+    {
+    case am_clip:
+        if (player->readyweapon == wp_fist)
+        {
+            if (player->weaponowned[wp_chaingun])
+                player->pendingweapon = wp_chaingun;
+            else
+                player->pendingweapon = wp_pistol;
+        }
+        break;
+
+    case am_shell:
+        if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
+            if (player->weaponowned[wp_shotgun])
+                player->pendingweapon = wp_shotgun;
+        break;
+
+    case am_cell:
+        if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
+            if (player->weaponowned[wp_plasma])
+                player->pendingweapon = wp_plasma;
+        break;
+
+    case am_misl:
+        if (player->readyweapon == wp_fist)
+            if (player->weaponowned[wp_missile])
+                player->pendingweapon = wp_missile;
+    default:
+        break;
     }
-    break;
-
-  case am_shell:
-    if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-      if (player->weaponowned[wp_shotgun])
-        player->pendingweapon = wp_shotgun;
-    break;
-
-  case am_cell:
-    if (player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-      if (player->weaponowned[wp_plasma])
-        player->pendingweapon = wp_plasma;
-    break;
-
-  case am_misl:
-    if (player->readyweapon == wp_fist)
-      if (player->weaponowned[wp_missile])
-        player->pendingweapon = wp_missile;
-  default:
-    break;
-  }
-  return true;
+    return true;
 }
 
 //
@@ -170,44 +173,50 @@ static dboolean P_GiveAmmo(player_t *player, ammotype_t ammo, int num) {
 //
 
 static dboolean P_GiveWeapon(player_t *player, weapontype_t weapon,
-                             dboolean dropped) {
-  dboolean gaveammo;
-  dboolean gaveweapon;
+                             dboolean dropped)
+{
+    dboolean gaveammo;
+    dboolean gaveweapon;
 
-  if (netgame && deathmatch != 2 && !dropped) {
-    // leave placed weapons forever on net games
+    if (netgame && deathmatch != 2 && !dropped)
+    {
+        // leave placed weapons forever on net games
+        if (player->weaponowned[weapon])
+            return false;
+
+        player->bonuscount += BONUSADD;
+        player->weaponowned[weapon] = true;
+
+        P_GiveAmmo(player, weaponinfo[weapon].ammo, deathmatch ? 5 : 2);
+
+        player->pendingweapon = weapon;
+        /* cph 20028/10 - for old-school DM addicts, allow old behavior
+         * where only consoleplayer's pickup sounds are heard */
+        // displayplayer, not consoleplayer, for viewing multiplayer demos
+        if (!comp[comp_sound] || player == &players[displayplayer])
+            S_StartSound(player->mo,
+                         sfx_wpnup | PICKUP_SOUND); // killough 4/25/98
+        return false;
+    }
+
+    if (weaponinfo[weapon].ammo != am_noammo)
+    {
+        // give one clip with a dropped weapon,
+        // two clips with a found weapon
+        gaveammo = P_GiveAmmo(player, weaponinfo[weapon].ammo, dropped ? 1 : 2);
+    }
+    else
+        gaveammo = false;
+
     if (player->weaponowned[weapon])
-      return false;
-
-    player->bonuscount += BONUSADD;
-    player->weaponowned[weapon] = true;
-
-    P_GiveAmmo(player, weaponinfo[weapon].ammo, deathmatch ? 5 : 2);
-
-    player->pendingweapon = weapon;
-    /* cph 20028/10 - for old-school DM addicts, allow old behavior
-     * where only consoleplayer's pickup sounds are heard */
-    // displayplayer, not consoleplayer, for viewing multiplayer demos
-    if (!comp[comp_sound] || player == &players[displayplayer])
-      S_StartSound(player->mo, sfx_wpnup | PICKUP_SOUND); // killough 4/25/98
-    return false;
-  }
-
-  if (weaponinfo[weapon].ammo != am_noammo) {
-    // give one clip with a dropped weapon,
-    // two clips with a found weapon
-    gaveammo = P_GiveAmmo(player, weaponinfo[weapon].ammo, dropped ? 1 : 2);
-  } else
-    gaveammo = false;
-
-  if (player->weaponowned[weapon])
-    gaveweapon = false;
-  else {
-    gaveweapon = true;
-    player->weaponowned[weapon] = true;
-    player->pendingweapon = weapon;
-  }
-  return gaveweapon || gaveammo;
+        gaveweapon = false;
+    else
+    {
+        gaveweapon = true;
+        player->weaponowned[weapon] = true;
+        player->pendingweapon = weapon;
+    }
+    return gaveweapon || gaveammo;
 }
 
 //
@@ -215,14 +224,15 @@ static dboolean P_GiveWeapon(player_t *player, weapontype_t weapon,
 // Returns false if the body isn't needed at all
 //
 
-static dboolean P_GiveBody(player_t *player, int num) {
-  if (player->health >= maxhealth)
-    return false; // Ty 03/09/98 externalized MAXHEALTH to maxhealth
-  player->health += num;
-  if (player->health > maxhealth)
-    player->health = maxhealth;
-  player->mo->health = player->health;
-  return true;
+static dboolean P_GiveBody(player_t *player, int num)
+{
+    if (player->health >= maxhealth)
+        return false; // Ty 03/09/98 externalized MAXHEALTH to maxhealth
+    player->health += num;
+    if (player->health > maxhealth)
+        player->health = maxhealth;
+    player->mo->health = player->health;
+    return true;
 }
 
 //
@@ -231,24 +241,26 @@ static dboolean P_GiveBody(player_t *player, int num) {
 // than the current armor.
 //
 
-static dboolean P_GiveArmor(player_t *player, int armortype) {
-  int hits = armortype * 100;
-  if (player->armorpoints >= hits)
-    return false; // don't pick up
-  player->armortype = armortype;
-  player->armorpoints = hits;
-  return true;
+static dboolean P_GiveArmor(player_t *player, int armortype)
+{
+    int hits = armortype * 100;
+    if (player->armorpoints >= hits)
+        return false; // don't pick up
+    player->armortype = armortype;
+    player->armorpoints = hits;
+    return true;
 }
 
 //
 // P_GiveCard
 //
 
-static void P_GiveCard(player_t *player, card_t card) {
-  if (player->cards[card])
-    return;
-  player->bonuscount = BONUSADD;
-  player->cards[card] = 1;
+static void P_GiveCard(player_t *player, card_t card)
+{
+    if (player->cards[card])
+        return;
+    player->bonuscount = BONUSADD;
+    player->cards[card] = 1;
 }
 
 //
@@ -257,382 +269,396 @@ static void P_GiveCard(player_t *player, card_t card) {
 // Rewritten by Lee Killough
 //
 
-dboolean P_GivePower(player_t *player, int power) {
-  static const int tics[NUMPOWERS] = {
-      INVULNTICS, 1 /* strength */, INVISTICS,
-      IRONTICS,   1 /* allmap */,   INFRATICS,
-  };
+dboolean P_GivePower(player_t *player, int power)
+{
+    static const int tics[NUMPOWERS] = {
+        INVULNTICS, 1 /* strength */, INVISTICS,
+        IRONTICS,   1 /* allmap */,   INFRATICS,
+    };
 
-  switch (power) {
-  case pw_invisibility:
-    player->mo->flags |= MF_SHADOW;
-    break;
-  case pw_allmap:
-    if (player->powers[pw_allmap])
-      return false;
-    break;
-  case pw_strength:
-    P_GiveBody(player, 100);
-    break;
-  }
+    switch (power)
+    {
+    case pw_invisibility:
+        player->mo->flags |= MF_SHADOW;
+        break;
+    case pw_allmap:
+        if (player->powers[pw_allmap])
+            return false;
+        break;
+    case pw_strength:
+        P_GiveBody(player, 100);
+        break;
+    }
 
-  // Unless player has infinite duration cheat, set duration (killough)
+    // Unless player has infinite duration cheat, set duration (killough)
 
-  if (player->powers[power] >= 0)
-    player->powers[power] = tics[power];
-  return true;
+    if (player->powers[power] >= 0)
+        player->powers[power] = tics[power];
+    return true;
 }
 
 //
 // P_TouchSpecialThing
 //
 
-void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher) {
-  player_t *player;
-  int i;
-  int sound;
-  fixed_t delta = special->z - toucher->z;
+void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
+{
+    player_t *player;
+    int i;
+    int sound;
+    fixed_t delta = special->z - toucher->z;
 
-  if (delta > toucher->height || delta < -8 * FRACUNIT)
-    return; // out of reach
+    if (delta > toucher->height || delta < -8 * FRACUNIT)
+        return; // out of reach
 
-  sound = sfx_itemup;
-  player = toucher->player;
+    sound = sfx_itemup;
+    player = toucher->player;
 
-  // Dead thing touching.
-  // Can happen with a sliding player corpse.
-  if (toucher->health <= 0)
-    return;
+    // Dead thing touching.
+    // Can happen with a sliding player corpse.
+    if (toucher->health <= 0)
+        return;
 
-  // Identify by sprite.
-  switch (special->sprite) {
-    // armor
-  case SPR_ARM1:
-    if (!P_GiveArmor(player, green_armor_class))
-      return;
-    player->message = s_GOTARMOR; // Ty 03/22/98 - externalized
-    break;
+    // Identify by sprite.
+    switch (special->sprite)
+    {
+        // armor
+    case SPR_ARM1:
+        if (!P_GiveArmor(player, green_armor_class))
+            return;
+        player->message = s_GOTARMOR; // Ty 03/22/98 - externalized
+        break;
 
-  case SPR_ARM2:
-    if (!P_GiveArmor(player, blue_armor_class))
-      return;
-    player->message = s_GOTMEGA; // Ty 03/22/98 - externalized
-    break;
+    case SPR_ARM2:
+        if (!P_GiveArmor(player, blue_armor_class))
+            return;
+        player->message = s_GOTMEGA; // Ty 03/22/98 - externalized
+        break;
 
-    // bonus items
-  case SPR_BON1:
-    player->health++;                      // can go over 100%
-    if (player->health > (maxhealthbonus)) // e6y
-      player->health = (maxhealthbonus);   // e6y
-    player->mo->health = player->health;
-    player->message = s_GOTHTHBONUS; // Ty 03/22/98 - externalized
-    break;
+        // bonus items
+    case SPR_BON1:
+        player->health++;                      // can go over 100%
+        if (player->health > (maxhealthbonus)) // e6y
+            player->health = (maxhealthbonus); // e6y
+        player->mo->health = player->health;
+        player->message = s_GOTHTHBONUS; // Ty 03/22/98 - externalized
+        break;
 
-  case SPR_BON2:
-    player->armorpoints++; // can go over 100%
-    // e6y
-    // Doom 1.2 does not do check of armor points on overflow.
-    // If you set the "IDKFA Armor" to MAX_INT (DWORD at 0x00064B5A -> FFFFFF7F)
-    // and pick up one or more armor bonuses, your armor becomes negative
-    // and you will die after reception of any damage since this moment.
-    // It happens because the taken health damage depends from armor points
-    // if they are present and becomes equal to very large value in this case
-    if (player->armorpoints > max_armor &&
-        compatibility_level != doom_12_compatibility)
-      player->armorpoints = max_armor;
-    // e6y
-    // We always give armor type 1 for the armor bonuses;
-    // dehacked only affects the GreenArmor.
-    if (!player->armortype)
-      player->armortype =
-          ((!demo_compatibility ||
-            prboom_comp[PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES].state)
-               ? green_armor_class
-               : 1);
-    player->message = s_GOTARMBONUS; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_SOUL:
-    player->health += soul_health;
-    if (player->health > max_soul)
-      player->health = max_soul;
-    player->mo->health = player->health;
-    player->message = s_GOTSUPER; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-  case SPR_MEGA:
-    if (gamemode != commercial)
-      return;
-    player->health = mega_health;
-    player->mo->health = player->health;
-    // e6y
-    // We always give armor type 2 for the megasphere;
-    // dehacked only affects the MegaArmor.
-    P_GiveArmor(player,
+    case SPR_BON2:
+        player->armorpoints++; // can go over 100%
+        // e6y
+        // Doom 1.2 does not do check of armor points on overflow.
+        // If you set the "IDKFA Armor" to MAX_INT (DWORD at 0x00064B5A ->
+        // FFFFFF7F) and pick up one or more armor bonuses, your armor becomes
+        // negative and you will die after reception of any damage since this
+        // moment. It happens because the taken health damage depends from armor
+        // points if they are present and becomes equal to very large value in
+        // this case
+        if (player->armorpoints > max_armor &&
+            compatibility_level != doom_12_compatibility)
+            player->armorpoints = max_armor;
+        // e6y
+        // We always give armor type 1 for the armor bonuses;
+        // dehacked only affects the GreenArmor.
+        if (!player->armortype)
+            player->armortype =
                 ((!demo_compatibility ||
-                  prboom_comp[PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE].state)
-                     ? blue_armor_class
-                     : 2));
-    player->message = s_GOTMSPHERE; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
+                  prboom_comp[PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES]
+                      .state)
+                     ? green_armor_class
+                     : 1);
+        player->message = s_GOTARMBONUS; // Ty 03/22/98 - externalized
+        break;
 
-    // cards
-    // leave cards for everyone
-  case SPR_BKEY:
-    if (!player->cards[it_bluecard])
-      player->message = s_GOTBLUECARD; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_bluecard);
-    if (!netgame)
-      break;
-    return;
+    case SPR_SOUL:
+        player->health += soul_health;
+        if (player->health > max_soul)
+            player->health = max_soul;
+        player->mo->health = player->health;
+        player->message = s_GOTSUPER; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
 
-  case SPR_YKEY:
-    if (!player->cards[it_yellowcard])
-      player->message = s_GOTYELWCARD; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_yellowcard);
-    if (!netgame)
-      break;
-    return;
+    case SPR_MEGA:
+        if (gamemode != commercial)
+            return;
+        player->health = mega_health;
+        player->mo->health = player->health;
+        // e6y
+        // We always give armor type 2 for the megasphere;
+        // dehacked only affects the MegaArmor.
+        P_GiveArmor(
+            player,
+            ((!demo_compatibility ||
+              prboom_comp[PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE].state)
+                 ? blue_armor_class
+                 : 2));
+        player->message = s_GOTMSPHERE; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
 
-  case SPR_RKEY:
-    if (!player->cards[it_redcard])
-      player->message = s_GOTREDCARD; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_redcard);
-    if (!netgame)
-      break;
-    return;
-
-  case SPR_BSKU:
-    if (!player->cards[it_blueskull])
-      player->message = s_GOTBLUESKUL; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_blueskull);
-    if (!netgame)
-      break;
-    return;
-
-  case SPR_YSKU:
-    if (!player->cards[it_yellowskull])
-      player->message = s_GOTYELWSKUL; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_yellowskull);
-    if (!netgame)
-      break;
-    return;
-
-  case SPR_RSKU:
-    if (!player->cards[it_redskull])
-      player->message = s_GOTREDSKULL; // Ty 03/22/98 - externalized
-    P_GiveCard(player, it_redskull);
-    if (!netgame)
-      break;
-    return;
-
-    // medikits, heals
-  case SPR_STIM:
-    if (!P_GiveBody(player, 10))
-      return;
-    player->message = s_GOTSTIM; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_MEDI:
-    if (!P_GiveBody(player, 25))
-      return;
-
-    if (player->health < 50) // cph - 25 + the 25 just added, thanks to Quasar
-                             // for reporting this bug
-      player->message = s_GOTMEDINEED; // Ty 03/22/98 - externalized
-    else
-      player->message = s_GOTMEDIKIT; // Ty 03/22/98 - externalized
-    break;
-
-    // power ups
-  case SPR_PINV:
-    if (!P_GivePower(player, pw_invulnerability))
-      return;
-    player->message = s_GOTINVUL; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-  case SPR_PSTR:
-    if (!P_GivePower(player, pw_strength))
-      return;
-    player->message = s_GOTBERSERK; // Ty 03/22/98 - externalized
-    if (player->readyweapon != wp_fist)
-      player->pendingweapon = wp_fist;
-    sound = sfx_getpow;
-    break;
-
-  case SPR_PINS:
-    if (!P_GivePower(player, pw_invisibility))
-      return;
-    player->message = s_GOTINVIS; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-  case SPR_SUIT:
-    if (!P_GivePower(player, pw_ironfeet))
-      return;
-    player->message = s_GOTSUIT; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-  case SPR_PMAP:
-    if (!P_GivePower(player, pw_allmap))
-      return;
-    player->message = s_GOTMAP; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-  case SPR_PVIS:
-    if (!P_GivePower(player, pw_infrared))
-      return;
-    player->message = s_GOTVISOR; // Ty 03/22/98 - externalized
-    sound = sfx_getpow;
-    break;
-
-    // ammo
-  case SPR_CLIP:
-    if (special->flags & MF_DROPPED) {
-      if (!P_GiveAmmo(player, am_clip, 0))
+        // cards
+        // leave cards for everyone
+    case SPR_BKEY:
+        if (!player->cards[it_bluecard])
+            player->message = s_GOTBLUECARD; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_bluecard);
+        if (!netgame)
+            break;
         return;
-    } else {
-      if (!P_GiveAmmo(player, am_clip, 1))
+
+    case SPR_YKEY:
+        if (!player->cards[it_yellowcard])
+            player->message = s_GOTYELWCARD; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_yellowcard);
+        if (!netgame)
+            break;
         return;
+
+    case SPR_RKEY:
+        if (!player->cards[it_redcard])
+            player->message = s_GOTREDCARD; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_redcard);
+        if (!netgame)
+            break;
+        return;
+
+    case SPR_BSKU:
+        if (!player->cards[it_blueskull])
+            player->message = s_GOTBLUESKUL; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_blueskull);
+        if (!netgame)
+            break;
+        return;
+
+    case SPR_YSKU:
+        if (!player->cards[it_yellowskull])
+            player->message = s_GOTYELWSKUL; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_yellowskull);
+        if (!netgame)
+            break;
+        return;
+
+    case SPR_RSKU:
+        if (!player->cards[it_redskull])
+            player->message = s_GOTREDSKULL; // Ty 03/22/98 - externalized
+        P_GiveCard(player, it_redskull);
+        if (!netgame)
+            break;
+        return;
+
+        // medikits, heals
+    case SPR_STIM:
+        if (!P_GiveBody(player, 10))
+            return;
+        player->message = s_GOTSTIM; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_MEDI:
+        if (!P_GiveBody(player, 25))
+            return;
+
+        if (player->health < 50) // cph - 25 + the 25 just added, thanks to
+                                 // Quasar for reporting this bug
+            player->message = s_GOTMEDINEED; // Ty 03/22/98 - externalized
+        else
+            player->message = s_GOTMEDIKIT; // Ty 03/22/98 - externalized
+        break;
+
+        // power ups
+    case SPR_PINV:
+        if (!P_GivePower(player, pw_invulnerability))
+            return;
+        player->message = s_GOTINVUL; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
+
+    case SPR_PSTR:
+        if (!P_GivePower(player, pw_strength))
+            return;
+        player->message = s_GOTBERSERK; // Ty 03/22/98 - externalized
+        if (player->readyweapon != wp_fist)
+            player->pendingweapon = wp_fist;
+        sound = sfx_getpow;
+        break;
+
+    case SPR_PINS:
+        if (!P_GivePower(player, pw_invisibility))
+            return;
+        player->message = s_GOTINVIS; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
+
+    case SPR_SUIT:
+        if (!P_GivePower(player, pw_ironfeet))
+            return;
+        player->message = s_GOTSUIT; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
+
+    case SPR_PMAP:
+        if (!P_GivePower(player, pw_allmap))
+            return;
+        player->message = s_GOTMAP; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
+
+    case SPR_PVIS:
+        if (!P_GivePower(player, pw_infrared))
+            return;
+        player->message = s_GOTVISOR; // Ty 03/22/98 - externalized
+        sound = sfx_getpow;
+        break;
+
+        // ammo
+    case SPR_CLIP:
+        if (special->flags & MF_DROPPED)
+        {
+            if (!P_GiveAmmo(player, am_clip, 0))
+                return;
+        }
+        else
+        {
+            if (!P_GiveAmmo(player, am_clip, 1))
+                return;
+        }
+        player->message = s_GOTCLIP; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_AMMO:
+        if (!P_GiveAmmo(player, am_clip, 5))
+            return;
+        player->message = s_GOTCLIPBOX; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_ROCK:
+        if (!P_GiveAmmo(player, am_misl, 1))
+            return;
+        player->message = s_GOTROCKET; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_BROK:
+        if (!P_GiveAmmo(player, am_misl, 5))
+            return;
+        player->message = s_GOTROCKBOX; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_CELL:
+        if (!P_GiveAmmo(player, am_cell, 1))
+            return;
+        player->message = s_GOTCELL; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_CELP:
+        if (!P_GiveAmmo(player, am_cell, 5))
+            return;
+        player->message = s_GOTCELLBOX; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_SHEL:
+        if (!P_GiveAmmo(player, am_shell, 1))
+            return;
+        player->message = s_GOTSHELLS; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_SBOX:
+        if (!P_GiveAmmo(player, am_shell, 5))
+            return;
+        player->message = s_GOTSHELLBOX; // Ty 03/22/98 - externalized
+        break;
+
+    case SPR_BPAK:
+        if (!player->backpack)
+        {
+            for (i = 0; i < NUMAMMO; i++)
+                player->maxammo[i] *= 2;
+            player->backpack = true;
+        }
+        for (i = 0; i < NUMAMMO; i++)
+            P_GiveAmmo(player, i, 1);
+        player->message = s_GOTBACKPACK; // Ty 03/22/98 - externalized
+        break;
+
+        // weapons
+    case SPR_BFUG:
+        if (!P_GiveWeapon(player, wp_bfg, false))
+            return;
+        player->message = s_GOTBFG9000; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_MGUN:
+        if (!P_GiveWeapon(player, wp_chaingun,
+                          (special->flags & MF_DROPPED) != 0))
+            return;
+        player->message = s_GOTCHAINGUN; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_CSAW:
+        if (!P_GiveWeapon(player, wp_chainsaw, false))
+            return;
+        player->message = s_GOTCHAINSAW; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_LAUN:
+        if (!P_GiveWeapon(player, wp_missile, false))
+            return;
+        player->message = s_GOTLAUNCHER; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_PLAS:
+        if (!P_GiveWeapon(player, wp_plasma, false))
+            return;
+        player->message = s_GOTPLASMA; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_SHOT:
+        if (!P_GiveWeapon(player, wp_shotgun,
+                          (special->flags & MF_DROPPED) != 0))
+            return;
+        player->message = s_GOTSHOTGUN; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    case SPR_SGN2:
+        if (!P_GiveWeapon(player, wp_supershotgun,
+                          (special->flags & MF_DROPPED) != 0))
+            return;
+        player->message = s_GOTSHOTGUN2; // Ty 03/22/98 - externalized
+        sound = sfx_wpnup;
+        break;
+
+    default:
+        I_Error("P_SpecialThing: Unknown gettable thing");
     }
-    player->message = s_GOTCLIP; // Ty 03/22/98 - externalized
-    break;
 
-  case SPR_AMMO:
-    if (!P_GiveAmmo(player, am_clip, 5))
-      return;
-    player->message = s_GOTCLIPBOX; // Ty 03/22/98 - externalized
-    break;
+    if (special->flags & MF_COUNTITEM)
+        player->itemcount++;
+    P_RemoveMobj(special);
+    player->bonuscount += BONUSADD;
 
-  case SPR_ROCK:
-    if (!P_GiveAmmo(player, am_misl, 1))
-      return;
-    player->message = s_GOTROCKET; // Ty 03/22/98 - externalized
-    break;
+    CheckThingsPickupTracer(special); // e6y
 
-  case SPR_BROK:
-    if (!P_GiveAmmo(player, am_misl, 5))
-      return;
-    player->message = s_GOTROCKBOX; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_CELL:
-    if (!P_GiveAmmo(player, am_cell, 1))
-      return;
-    player->message = s_GOTCELL; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_CELP:
-    if (!P_GiveAmmo(player, am_cell, 5))
-      return;
-    player->message = s_GOTCELLBOX; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_SHEL:
-    if (!P_GiveAmmo(player, am_shell, 1))
-      return;
-    player->message = s_GOTSHELLS; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_SBOX:
-    if (!P_GiveAmmo(player, am_shell, 5))
-      return;
-    player->message = s_GOTSHELLBOX; // Ty 03/22/98 - externalized
-    break;
-
-  case SPR_BPAK:
-    if (!player->backpack) {
-      for (i = 0; i < NUMAMMO; i++)
-        player->maxammo[i] *= 2;
-      player->backpack = true;
-    }
-    for (i = 0; i < NUMAMMO; i++)
-      P_GiveAmmo(player, i, 1);
-    player->message = s_GOTBACKPACK; // Ty 03/22/98 - externalized
-    break;
-
-    // weapons
-  case SPR_BFUG:
-    if (!P_GiveWeapon(player, wp_bfg, false))
-      return;
-    player->message = s_GOTBFG9000; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_MGUN:
-    if (!P_GiveWeapon(player, wp_chaingun, (special->flags & MF_DROPPED) != 0))
-      return;
-    player->message = s_GOTCHAINGUN; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_CSAW:
-    if (!P_GiveWeapon(player, wp_chainsaw, false))
-      return;
-    player->message = s_GOTCHAINSAW; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_LAUN:
-    if (!P_GiveWeapon(player, wp_missile, false))
-      return;
-    player->message = s_GOTLAUNCHER; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_PLAS:
-    if (!P_GiveWeapon(player, wp_plasma, false))
-      return;
-    player->message = s_GOTPLASMA; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_SHOT:
-    if (!P_GiveWeapon(player, wp_shotgun, (special->flags & MF_DROPPED) != 0))
-      return;
-    player->message = s_GOTSHOTGUN; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  case SPR_SGN2:
-    if (!P_GiveWeapon(player, wp_supershotgun,
-                      (special->flags & MF_DROPPED) != 0))
-      return;
-    player->message = s_GOTSHOTGUN2; // Ty 03/22/98 - externalized
-    sound = sfx_wpnup;
-    break;
-
-  default:
-    I_Error("P_SpecialThing: Unknown gettable thing");
-  }
-
-  if (special->flags & MF_COUNTITEM)
-    player->itemcount++;
-  P_RemoveMobj(special);
-  player->bonuscount += BONUSADD;
-
-  CheckThingsPickupTracer(special); // e6y
-
-  /* cph 20028/10 - for old-school DM addicts, allow old behavior
-   * where only consoleplayer's pickup sounds are heard */
-  // displayplayer, not consoleplayer, for viewing multiplayer demos
-  if (!comp[comp_sound] || player == &players[displayplayer])
-    S_StartSound(player->mo, sound | PICKUP_SOUND); // killough 4/25/98
+    /* cph 20028/10 - for old-school DM addicts, allow old behavior
+     * where only consoleplayer's pickup sounds are heard */
+    // displayplayer, not consoleplayer, for viewing multiplayer demos
+    if (!comp[comp_sound] || player == &players[displayplayer])
+        S_StartSound(player->mo, sound | PICKUP_SOUND); // killough 4/25/98
 }
 
 //
 // KillMobj
 //
 // killough 11/98: make static
-static void P_KillMobj(mobj_t *source, mobj_t *target) {
-  mobjtype_t item;
-  mobj_t *mo;
-  dboolean e6y = false;
+static void P_KillMobj(mobj_t *source, mobj_t *target)
+{
+    mobjtype_t item;
+    mobj_t *mo;
+    dboolean e6y = false;
 
 #if 0
   if (target->player && source && target->health < -target->info->spawnhealth &&
@@ -643,149 +669,178 @@ static void P_KillMobj(mobj_t *source, mobj_t *target) {
   }
 #endif
 
-  target->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY);
+    target->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY);
 
-  if (target->type != MT_SKULL)
-    target->flags &= ~MF_NOGRAVITY;
+    if (target->type != MT_SKULL)
+        target->flags &= ~MF_NOGRAVITY;
 
-  target->flags |= MF_CORPSE | MF_DROPOFF;
-  target->height >>= 2;
+    target->flags |= MF_CORPSE | MF_DROPOFF;
+    target->height >>= 2;
 
-  if (compatibility_level == mbf_compatibility &&
-      !prboom_comp[PC_MBF_REMOVE_THINKER_IN_KILLMOBJ].state) {
-    // killough 8/29/98: remove from threaded list
-    P_UpdateThinker(&target->thinker);
-  }
-
-  if (!((target->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
-    totallive--;
-
-  if (source && source->player) {
-    // count for intermission
-    if (target->flags & MF_COUNTKILL) {
-      source->player->killcount++;
-
-      if (target->flags & MF_RESSURECTED)
-        source->player->resurectedkillcount++;
+    if (compatibility_level == mbf_compatibility &&
+        !prboom_comp[PC_MBF_REMOVE_THINKER_IN_KILLMOBJ].state)
+    {
+        // killough 8/29/98: remove from threaded list
+        P_UpdateThinker(&target->thinker);
     }
-    if (target->player)
-      source->player->frags[target->player - players]++;
-  } else if (target->flags & MF_COUNTKILL) { /* Add to kills tally */
-    if ((compatibility_level < lxdoom_1_compatibility) || !netgame) {
-      if (!netgame) {
-        // count all monster deaths,
-        // even those caused by other monsters
-        players[0].killcount++;
 
-        if (target->flags & MF_RESSURECTED)
-          players[0].resurectedkillcount++;
-      } else {
-        if (!deathmatch) {
-          if (target->lastenemy && target->lastenemy->health > 0 &&
-              target->lastenemy->player) {
-            target->lastenemy->player->killcount++;
+    if (!((target->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+        totallive--;
+
+    if (source && source->player)
+    {
+        // count for intermission
+        if (target->flags & MF_COUNTKILL)
+        {
+            source->player->killcount++;
+
             if (target->flags & MF_RESSURECTED)
-              target->lastenemy->player->resurectedkillcount++;
-          } else {
-            unsigned int player;
-            for (player = 0; player < MAXPLAYERS; player++) {
-              if (playeringame[player]) {
-                players[player].killcount++;
-                if (target->flags & MF_RESSURECTED)
-                  players[player].resurectedkillcount++;
-                break;
-              }
-            }
-          }
+                source->player->resurectedkillcount++;
         }
-      }
-
-    } else if (!deathmatch) {
-      // try and find a player to give the kill to, otherwise give the
-      // kill to a random player.  this fixes the missing monsters bug
-      // in coop - rain
-      // CPhipps - not a bug as such, but certainly an inconsistency.
-      if (target->lastenemy && target->lastenemy->health > 0 &&
-          target->lastenemy->player) // Fighting a player
-      {
-        target->lastenemy->player->killcount++;
-
-        if (target->flags & MF_RESSURECTED)
-          target->lastenemy->player->resurectedkillcount++;
-      } else {
-        // cph - randomely choose a player in the game to be credited
-        //  and do it uniformly between the active players
-        unsigned int activeplayers = 0, player, i;
-
-        for (player = 0; player < MAXPLAYERS; player++)
-          if (playeringame[player])
-            activeplayers++;
-
-        if (activeplayers) {
-          player = P_Random(pr_friends) % activeplayers;
-
-          for (i = 0; i < MAXPLAYERS; i++)
-            if (playeringame[i])
-              if (!player--) {
-                players[i].killcount++;
-
-                if (target->flags & MF_RESSURECTED)
-                  players[i].resurectedkillcount++;
-              }
-        }
-      }
+        if (target->player)
+            source->player->frags[target->player - players]++;
     }
-  }
+    else if (target->flags & MF_COUNTKILL)
+    { /* Add to kills tally */
+        if ((compatibility_level < lxdoom_1_compatibility) || !netgame)
+        {
+            if (!netgame)
+            {
+                // count all monster deaths,
+                // even those caused by other monsters
+                players[0].killcount++;
 
-  if (target->player) {
-    // count environment kills against you
-    if (!source)
-      target->player->frags[target->player - players]++;
+                if (target->flags & MF_RESSURECTED)
+                    players[0].resurectedkillcount++;
+            }
+            else
+            {
+                if (!deathmatch)
+                {
+                    if (target->lastenemy && target->lastenemy->health > 0 &&
+                        target->lastenemy->player)
+                    {
+                        target->lastenemy->player->killcount++;
+                        if (target->flags & MF_RESSURECTED)
+                            target->lastenemy->player->resurectedkillcount++;
+                    }
+                    else
+                    {
+                        unsigned int player;
+                        for (player = 0; player < MAXPLAYERS; player++)
+                        {
+                            if (playeringame[player])
+                            {
+                                players[player].killcount++;
+                                if (target->flags & MF_RESSURECTED)
+                                    players[player].resurectedkillcount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (!deathmatch)
+        {
+            // try and find a player to give the kill to, otherwise give the
+            // kill to a random player.  this fixes the missing monsters bug
+            // in coop - rain
+            // CPhipps - not a bug as such, but certainly an inconsistency.
+            if (target->lastenemy && target->lastenemy->health > 0 &&
+                target->lastenemy->player) // Fighting a player
+            {
+                target->lastenemy->player->killcount++;
 
-    target->flags &= ~MF_SOLID;
-    target->player->playerstate = PST_DEAD;
-    P_DropWeapon(target->player);
+                if (target->flags & MF_RESSURECTED)
+                    target->lastenemy->player->resurectedkillcount++;
+            }
+            else
+            {
+                // cph - randomely choose a player in the game to be credited
+                //  and do it uniformly between the active players
+                unsigned int activeplayers = 0, player, i;
 
-    if (target->player == &players[consoleplayer] && (automapmode & am_active))
-      AM_Stop(); // don't die in auto map; switch view prior to dying
-  }
+                for (player = 0; player < MAXPLAYERS; player++)
+                    if (playeringame[player])
+                        activeplayers++;
 
-  if (e6y) {
-    P_SetMobjState(target, S_PLAY_GDIE1);
-  } else {
-    if (target->health < -target->info->spawnhealth &&
-        target->info->xdeathstate)
-      P_SetMobjState(target, target->info->xdeathstate);
+                if (activeplayers)
+                {
+                    player = P_Random(pr_friends) % activeplayers;
+
+                    for (i = 0; i < MAXPLAYERS; i++)
+                        if (playeringame[i])
+                            if (!player--)
+                            {
+                                players[i].killcount++;
+
+                                if (target->flags & MF_RESSURECTED)
+                                    players[i].resurectedkillcount++;
+                            }
+                }
+            }
+        }
+    }
+
+    if (target->player)
+    {
+        // count environment kills against you
+        if (!source)
+            target->player->frags[target->player - players]++;
+
+        target->flags &= ~MF_SOLID;
+        target->player->playerstate = PST_DEAD;
+        P_DropWeapon(target->player);
+
+        if (target->player == &players[consoleplayer] &&
+            (automapmode & am_active))
+            AM_Stop(); // don't die in auto map; switch view prior to dying
+    }
+
+    if (e6y)
+    {
+        P_SetMobjState(target, S_PLAY_GDIE1);
+    }
     else
-      P_SetMobjState(target, target->info->deathstate);
-  }
+    {
+        if (target->health < -target->info->spawnhealth &&
+            target->info->xdeathstate)
+            P_SetMobjState(target, target->info->xdeathstate);
+        else
+            P_SetMobjState(target, target->info->deathstate);
+    }
 
-  target->tics -= P_Random(pr_killtics) & 3;
+    target->tics -= P_Random(pr_killtics) & 3;
 
-  if (target->tics < 1)
-    target->tics = 1;
+    if (target->tics < 1)
+        target->tics = 1;
 
-  // In Chex Quest, monsters don't drop items.
-  if (gamemission == chex) {
-    return;
-  }
+    // In Chex Quest, monsters don't drop items.
+    if (gamemission == chex)
+    {
+        return;
+    }
 
-  // Drop stuff.
-  // This determines the kind of object spawned
-  // during the death frame of a thing.
+    // Drop stuff.
+    // This determines the kind of object spawned
+    // during the death frame of a thing.
 
-  if (target->info->droppeditem != MT_NULL) {
-    item = target->info->droppeditem;
-  } else
-    return;
+    if (target->info->droppeditem != MT_NULL)
+    {
+        item = target->info->droppeditem;
+    }
+    else
+        return;
 
-  mo = P_SpawnMobj(target->x, target->y, ONFLOORZ, item);
-  mo->flags |= MF_DROPPED; // special versions of items
+    mo = P_SpawnMobj(target->x, target->y, ONFLOORZ, item);
+    mo->flags |= MF_DROPPED; // special versions of items
 
 #ifdef GL_DOOM
-  if (target->momx == 0 && target->momy == 0) {
-    target->flags |= MF_FOREGROUND;
-  }
+    if (target->momx == 0 && target->momy == 0)
+    {
+        target->flags |= MF_FOREGROUND;
+    }
 #endif
 }
 
@@ -801,178 +856,194 @@ static void P_KillMobj(mobj_t *source, mobj_t *target) {
 // and other environmental stuff.
 //
 
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source,
-                  int damage) {
-  player_t *player;
-  dboolean justhit = false; /* killough 11/98 */
+void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
+{
+    player_t *player;
+    dboolean justhit = false; /* killough 11/98 */
 
-  /* killough 8/31/98: allow bouncers to take damage */
-  if (!(target->flags & (MF_SHOOTABLE | MF_BOUNCES)))
-    return; // shouldn't happen...
+    /* killough 8/31/98: allow bouncers to take damage */
+    if (!(target->flags & (MF_SHOOTABLE | MF_BOUNCES)))
+        return; // shouldn't happen...
 
-  if (target->health <= 0)
-    return;
+    if (target->health <= 0)
+        return;
 
-  if (target->flags & MF_SKULLFLY)
-    target->momx = target->momy = target->momz = 0;
+    if (target->flags & MF_SKULLFLY)
+        target->momx = target->momy = target->momz = 0;
 
-  player = target->player;
-  if (player && gameskill == sk_baby)
-    damage >>= 1; // take half damage in trainer mode
+    player = target->player;
+    if (player && gameskill == sk_baby)
+        damage >>= 1; // take half damage in trainer mode
 
-  // Some close combat weapons should not
-  // inflict thrust and push the victim out of reach,
-  // thus kick away unless using the chainsaw.
+    // Some close combat weapons should not
+    // inflict thrust and push the victim out of reach,
+    // thus kick away unless using the chainsaw.
 
-  if (inflictor && !(target->flags & MF_NOCLIP) &&
-      (!source || !source->player ||
-       source->player->readyweapon != wp_chainsaw)) {
-    unsigned ang =
-        R_PointToAngle2(inflictor->x, inflictor->y, target->x, target->y);
-
-    fixed_t thrust = damage * (FRACUNIT >> 3) * 100 / target->info->mass;
-
-    // make fall forwards sometimes
-    if (damage < 40 && damage > target->health &&
-        target->z - inflictor->z > 64 * FRACUNIT &&
-        P_Random(pr_damagemobj) & 1) {
-      ang += ANG180;
-      thrust *= 4;
-    }
-
-    ang >>= ANGLETOFINESHIFT;
-    target->momx += FixedMul(thrust, finecosine[ang]);
-    target->momy += FixedMul(thrust, finesine[ang]);
-
-    /* killough 11/98: thrust objects hanging off ledges */
-    if (target->intflags & MIF_FALLING && target->gear >= MAXGEAR)
-      target->gear = 0;
-  }
-
-  // player specific
-  if (player) {
-    // end of game hell hack
-    if (target->subsector->sector->special == 11 && damage >= target->health)
-      damage = target->health - 1;
-
-    // Below certain threshold,
-    // ignore damage in GOD mode, or with INVUL power.
-    // killough 3/26/98: make god mode 100% god mode in non-compat mode
-
-    if ((damage < 1000 || (!comp[comp_god] && (player->cheats & CF_GODMODE))) &&
-        (player->cheats & CF_GODMODE || player->powers[pw_invulnerability]))
-      return;
-
-    if (player->armortype) {
-      int saved = player->armortype == 1 ? damage / 3 : damage / 2;
-      if (player->armorpoints <= saved) {
-        // armor is used up
-        saved = player->armorpoints;
-        player->armortype = 0;
-      }
-      player->armorpoints -= saved;
-      damage -= saved;
-    }
-
-    player->health -= damage; // mirror mobj health here for Dave
-    if (player->health < 0)
-      player->health = 0;
-
-    player->attacker = source;
-    player->damagecount += damage; // add damage after armor / invuln
-
-    if (player->damagecount > 100)
-      player->damagecount = 100; // teleport stomp does 10k points...
-  }
-
-  if (source && target) {
-    CheckGivenDamageTracer(source, damage);
-  }
-
-  // do the damage
-  target->health -= damage;
-  if (target->health <= 0) {
-    P_KillMobj(source, target);
-    return;
-  }
-
-  // killough 9/7/98: keep track of targets so that friends can help friends
-  if (mbf_features) {
-    /* If target is a player, set player's target to source,
-     * so that a friend can tell who's hurting a player
-     */
-    if (player)
-      P_SetTarget(&target->target, source);
-
-    /* killough 9/8/98:
-     * If target's health is less than 50%, move it to the front of its list.
-     * This will slightly increase the chances that enemies will choose to
-     * "finish it off", but its main purpose is to alert friends of danger.
-     */
-    if (target->health * 2 < target->info->spawnhealth) {
-      thinker_t *cap =
-          &thinkerclasscap[target->flags & MF_FRIEND ? th_friends : th_enemies];
-      (target->thinker.cprev->cnext = target->thinker.cnext)->cprev =
-          target->thinker.cprev;
-      (target->thinker.cnext = cap->cnext)->cprev = &target->thinker;
-      (target->thinker.cprev = cap)->cnext = &target->thinker;
-    }
-  }
-
-  if (P_Random(pr_painchance) < target->info->painchance &&
-      !(target->flags & MF_SKULLFLY)) { // killough 11/98: see below
-    if (mbf_features)
-      justhit = true;
-    else
-      target->flags |= MF_JUSTHIT; // fight back!
-
-    // e6y
+    if (inflictor && !(target->flags & MF_NOCLIP) &&
+        (!source || !source->player ||
+         source->player->readyweapon != wp_chainsaw))
     {
-      if (demo_compatibility)
-        if ((target->target == source || !target->target ||
-             !(target->flags & target->target->flags & MF_FRIEND)))
-          target->flags |= MF_JUSTHIT; // fight back!
+        unsigned ang =
+            R_PointToAngle2(inflictor->x, inflictor->y, target->x, target->y);
+
+        fixed_t thrust = damage * (FRACUNIT >> 3) * 100 / target->info->mass;
+
+        // make fall forwards sometimes
+        if (damage < 40 && damage > target->health &&
+            target->z - inflictor->z > 64 * FRACUNIT &&
+            P_Random(pr_damagemobj) & 1)
+        {
+            ang += ANG180;
+            thrust *= 4;
+        }
+
+        ang >>= ANGLETOFINESHIFT;
+        target->momx += FixedMul(thrust, finecosine[ang]);
+        target->momy += FixedMul(thrust, finesine[ang]);
+
+        /* killough 11/98: thrust objects hanging off ledges */
+        if (target->intflags & MIF_FALLING && target->gear >= MAXGEAR)
+            target->gear = 0;
     }
 
-    P_SetMobjState(target, target->info->painstate);
-  } // e6y
+    // player specific
+    if (player)
+    {
+        // end of game hell hack
+        if (target->subsector->sector->special == 11 &&
+            damage >= target->health)
+            damage = target->health - 1;
 
-  target->reactiontime = 0; // we're awake now...
+        // Below certain threshold,
+        // ignore damage in GOD mode, or with INVUL power.
+        // killough 3/26/98: make god mode 100% god mode in non-compat mode
 
-  /* killough 9/9/98: cleaned up, made more consistent: */
-  // e6y: Monsters could commit suicide in Doom v1.2 if they damaged themselves
-  // by exploding a barrel
-  if (source &&
-      (source != target || compatibility_level == doom_12_compatibility) &&
-      source->type != MT_VILE &&
-      (!target->threshold || target->type == MT_VILE) &&
-      ((source->flags ^ target->flags) & MF_FRIEND || monster_infighting ||
-       !mbf_features)) {
-    /* if not intent on another player, chase after this one
-     *
-     * killough 2/15/98: remember last enemy, to prevent
-     * sleeping early; 2/21/98: Place priority on players
-     * killough 9/9/98: cleaned up, made more consistent:
-     */
+        if ((damage < 1000 ||
+             (!comp[comp_god] && (player->cheats & CF_GODMODE))) &&
+            (player->cheats & CF_GODMODE || player->powers[pw_invulnerability]))
+            return;
 
-    if (!target->lastenemy || target->lastenemy->health <= 0 ||
-        (!mbf_features
-             ? !target->lastenemy->player
-             : !((target->flags ^ target->lastenemy->flags) & MF_FRIEND) &&
-                   target->target != source)) // remember last enemy - killough
-      P_SetTarget(&target->lastenemy, target->target);
+        if (player->armortype)
+        {
+            int saved = player->armortype == 1 ? damage / 3 : damage / 2;
+            if (player->armorpoints <= saved)
+            {
+                // armor is used up
+                saved = player->armorpoints;
+                player->armortype = 0;
+            }
+            player->armorpoints -= saved;
+            damage -= saved;
+        }
 
-    P_SetTarget(&target->target, source); // killough 11/98
-    target->threshold = BASETHRESHOLD;
-    if (target->state == &states[target->info->spawnstate] &&
-        target->info->seestate != S_NULL)
-      P_SetMobjState(target, target->info->seestate);
-  }
+        player->health -= damage; // mirror mobj health here for Dave
+        if (player->health < 0)
+            player->health = 0;
 
-  /* killough 11/98: Don't attack a friend, unless hit by that friend.
-   * cph 2006/04/01 - implicitly this is only if mbf_features */
-  if (!demo_compatibility) // e6y
-    if (justhit && (target->target == source || !target->target ||
-                    !(target->flags & target->target->flags & MF_FRIEND)))
-      target->flags |= MF_JUSTHIT; // fight back!
+        player->attacker = source;
+        player->damagecount += damage; // add damage after armor / invuln
+
+        if (player->damagecount > 100)
+            player->damagecount = 100; // teleport stomp does 10k points...
+    }
+
+    if (source && target)
+    {
+        CheckGivenDamageTracer(source, damage);
+    }
+
+    // do the damage
+    target->health -= damage;
+    if (target->health <= 0)
+    {
+        P_KillMobj(source, target);
+        return;
+    }
+
+    // killough 9/7/98: keep track of targets so that friends can help friends
+    if (mbf_features)
+    {
+        /* If target is a player, set player's target to source,
+         * so that a friend can tell who's hurting a player
+         */
+        if (player)
+            P_SetTarget(&target->target, source);
+
+        /* killough 9/8/98:
+         * If target's health is less than 50%, move it to the front of its
+         * list. This will slightly increase the chances that enemies will
+         * choose to "finish it off", but its main purpose is to alert friends
+         * of danger.
+         */
+        if (target->health * 2 < target->info->spawnhealth)
+        {
+            thinker_t *cap =
+                &thinkerclasscap[target->flags & MF_FRIEND ? th_friends
+                                                           : th_enemies];
+            (target->thinker.cprev->cnext = target->thinker.cnext)->cprev =
+                target->thinker.cprev;
+            (target->thinker.cnext = cap->cnext)->cprev = &target->thinker;
+            (target->thinker.cprev = cap)->cnext = &target->thinker;
+        }
+    }
+
+    if (P_Random(pr_painchance) < target->info->painchance &&
+        !(target->flags & MF_SKULLFLY))
+    { // killough 11/98: see below
+        if (mbf_features)
+            justhit = true;
+        else
+            target->flags |= MF_JUSTHIT; // fight back!
+
+        // e6y
+        {
+            if (demo_compatibility)
+                if ((target->target == source || !target->target ||
+                     !(target->flags & target->target->flags & MF_FRIEND)))
+                    target->flags |= MF_JUSTHIT; // fight back!
+        }
+
+        P_SetMobjState(target, target->info->painstate);
+    } // e6y
+
+    target->reactiontime = 0; // we're awake now...
+
+    /* killough 9/9/98: cleaned up, made more consistent: */
+    // e6y: Monsters could commit suicide in Doom v1.2 if they damaged
+    // themselves by exploding a barrel
+    if (source &&
+        (source != target || compatibility_level == doom_12_compatibility) &&
+        source->type != MT_VILE &&
+        (!target->threshold || target->type == MT_VILE) &&
+        ((source->flags ^ target->flags) & MF_FRIEND || monster_infighting ||
+         !mbf_features))
+    {
+        /* if not intent on another player, chase after this one
+         *
+         * killough 2/15/98: remember last enemy, to prevent
+         * sleeping early; 2/21/98: Place priority on players
+         * killough 9/9/98: cleaned up, made more consistent:
+         */
+
+        if (!target->lastenemy || target->lastenemy->health <= 0 ||
+            (!mbf_features
+                 ? !target->lastenemy->player
+                 : !((target->flags ^ target->lastenemy->flags) & MF_FRIEND) &&
+                       target->target !=
+                           source)) // remember last enemy - killough
+            P_SetTarget(&target->lastenemy, target->target);
+
+        P_SetTarget(&target->target, source); // killough 11/98
+        target->threshold = BASETHRESHOLD;
+        if (target->state == &states[target->info->spawnstate] &&
+            target->info->seestate != S_NULL)
+            P_SetMobjState(target, target->info->seestate);
+    }
+
+    /* killough 11/98: Don't attack a friend, unless hit by that friend.
+     * cph 2006/04/01 - implicitly this is only if mbf_features */
+    if (!demo_compatibility) // e6y
+        if (justhit && (target->target == source || !target->target ||
+                        !(target->flags & target->target->flags & MF_FRIEND)))
+            target->flags |= MF_JUSTHIT; // fight back!
 }

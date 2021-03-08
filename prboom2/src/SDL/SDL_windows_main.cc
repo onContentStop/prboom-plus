@@ -21,14 +21,15 @@
 #endif /* main */
 
 #define WIN_WStringToUTF8(S)                                                   \
-  SDL_iconv_string("UTF-8", "UTF-16LE", (char *)(S),                           \
-                   (SDL_wcslen(S) + 1) * sizeof(WCHAR))
+    SDL_iconv_string("UTF-8", "UTF-16LE", (char *)(S),                         \
+                     (SDL_wcslen(S) + 1) * sizeof(WCHAR))
 
 /* Pop up an out of memory message, returns to Windows */
-static BOOL OutOfMemory(void) {
-  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error",
-                           "Out of memory - aborting", NULL);
-  return FALSE;
+static BOOL OutOfMemory(void)
+{
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error",
+                             "Out of memory - aborting", NULL);
+    return FALSE;
 }
 
 #if defined(_MSC_VER)
@@ -41,57 +42,68 @@ static BOOL OutOfMemory(void) {
 
 /* Gets the arguments with GetCommandLine, converts them to argc and argv
    and calls SDL_main */
-static int main_getcmdline(void) {
-  LPWSTR *argvw;
-  char **argv;
-  int i, argc, result;
+static int main_getcmdline(void)
+{
+    LPWSTR *argvw;
+    char **argv;
+    int i, argc, result;
 
-  argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
-  if (argvw == NULL) {
-    return OutOfMemory();
-  }
-
-  /* Parse it into argv and argc */
-  argv = (char **)SDL_calloc(argc + 1, sizeof(*argv));
-  if (!argv) {
-    return OutOfMemory();
-  }
-  for (i = 0; i < argc; ++i) {
-    argv[i] = WIN_WStringToUTF8(argvw[i]);
-    if (!argv[i]) {
-      return OutOfMemory();
+    argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (argvw == NULL)
+    {
+        return OutOfMemory();
     }
-  }
-  argv[i] = NULL;
-  LocalFree(argvw);
 
-  SDL_SetMainReady();
+    /* Parse it into argv and argc */
+    argv = (char **)SDL_calloc(argc + 1, sizeof(*argv));
+    if (!argv)
+    {
+        return OutOfMemory();
+    }
+    for (i = 0; i < argc; ++i)
+    {
+        argv[i] = WIN_WStringToUTF8(argvw[i]);
+        if (!argv[i])
+        {
+            return OutOfMemory();
+        }
+    }
+    argv[i] = NULL;
+    LocalFree(argvw);
 
-  /* Run the application main() code */
-  result = SDL_main(argc, argv);
+    SDL_SetMainReady();
 
-  /* Free argv, to avoid memory leak */
-  for (i = 0; i < argc; ++i) {
-    SDL_free(argv[i]);
-  }
-  SDL_free(argv);
+    /* Run the application main() code */
+    result = SDL_main(argc, argv);
 
-  return result;
+    /* Free argv, to avoid memory leak */
+    for (i = 0; i < argc; ++i)
+    {
+        SDL_free(argv[i]);
+    }
+    SDL_free(argv);
+
+    return result;
 }
 
 /* This is where execution begins [console apps, ansi] */
-int console_ansi_main(int argc, char *argv[]) { return main_getcmdline(); }
+int console_ansi_main(int argc, char *argv[])
+{
+    return main_getcmdline();
+}
 
 #if UNICODE
 /* This is where execution begins [console apps, unicode] */
-int console_wmain(int argc, wchar_t *wargv[], wchar_t *wenvp) {
-  return main_getcmdline();
+int console_wmain(int argc, wchar_t *wargv[], wchar_t *wenvp)
+{
+    return main_getcmdline();
 }
 #endif
 
 /* This is where execution begins [windowed apps] */
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {
-  return main_getcmdline();
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
+{
+    return main_getcmdline();
 }
 
 #endif /* __WIN32__ */

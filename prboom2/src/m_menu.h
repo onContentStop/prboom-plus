@@ -77,7 +77,7 @@ void M_DrawCredits(void); // killough 11/98
 
 /* killough 8/15/98: warn about changes not being committed until next game */
 #define warn_about_changes(x)                                                  \
-  (warning_about_changes = (x), print_warning_about_changes = 2)
+    (warning_about_changes = (x), print_warning_about_changes = 2)
 
 extern int warning_about_changes, print_warning_about_changes;
 
@@ -124,17 +124,17 @@ extern dboolean menu_background;
  */
 
 #define S_SHOWDESC                                                             \
-  (S_TITLE | S_YESNO | S_CRITEM | S_COLOR | S_CHAT | S_RESET | S_PREV |        \
-   S_NEXT | S_KEY | S_WEAP | S_NUM | S_FILE | S_CREDIT | S_CHOICE)
+    (S_TITLE | S_YESNO | S_CRITEM | S_COLOR | S_CHAT | S_RESET | S_PREV |      \
+     S_NEXT | S_KEY | S_WEAP | S_NUM | S_FILE | S_CREDIT | S_CHOICE)
 
 #define S_SHOWSET                                                              \
-  (S_YESNO | S_CRITEM | S_COLOR | S_CHAT | S_KEY | S_WEAP | S_NUM | S_FILE |   \
-   S_CHOICE)
+    (S_YESNO | S_CRITEM | S_COLOR | S_CHAT | S_KEY | S_WEAP | S_NUM | S_FILE | \
+     S_CHOICE)
 
 #define S_STRING (S_CHAT | S_FILE)
 
 #define S_HASDEFPTR                                                            \
-  (S_STRING | S_YESNO | S_NUM | S_WEAP | S_COLOR | S_CRITEM | S_CHOICE)
+    (S_STRING | S_YESNO | S_NUM | S_WEAP | S_COLOR | S_CRITEM | S_CHOICE)
 
 /****************************
  *
@@ -142,11 +142,12 @@ extern dboolean menu_background;
  * that you can bind a key differently in each 'group'.
  */
 
-typedef enum {
-  m_null, // Has no meaning; not applicable
-  m_scrn, // A key can not be assigned to more than one action
-  m_map,  // in the same group. A key can be assigned to one
-  m_menu, // action in one group, and another action in another.
+typedef enum
+{
+    m_null, // Has no meaning; not applicable
+    m_scrn, // A key can not be assigned to more than one action
+    m_map,  // in the same group. A key can be assigned to one
+    m_menu, // action in one group, and another action in another.
 } setup_group;
 
 /****************************
@@ -166,26 +167,27 @@ typedef enum {
  * Moved from m_menu.c to m_menu.h so that m_misc.c can use it.
  */
 
-typedef struct setup_menu_s {
-  const char *m_text;  /* text to display */
-  int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
-  setup_group m_group; /* Group */
-  short m_x;           /* screen x position (left is 0) */
-  short m_y;           /* screen y position (top is 0) */
+typedef struct setup_menu_s
+{
+    const char *m_text;  /* text to display */
+    int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
+    setup_group m_group; /* Group */
+    short m_x;           /* screen x position (left is 0) */
+    short m_y;           /* screen y position (top is 0) */
 
-  union /* killough 11/98: The first field is a union of several types */
-  {
-    const void *var;           /* generic variable */
-    int *m_key;                /* key value, or 0 if not shown */
-    const char *name;          /* name */
-    struct default_s *def;     /* default[] table entry */
-    struct setup_menu_s *menu; /* next or prev menu */
-  } var;
+    union /* killough 11/98: The first field is a union of several types */
+    {
+        const void *var;           /* generic variable */
+        int *m_key;                /* key value, or 0 if not shown */
+        const char *name;          /* name */
+        struct default_s *def;     /* default[] table entry */
+        struct setup_menu_s *menu; /* next or prev menu */
+    } var;
 
-  int *m_mouse;         /* mouse button value, or 0 if not shown */
-  int *m_joy;           /* joystick button value, or 0 if not shown */
-  void (*action)(void); /* killough 10/98: function to call after changing */
-  const char **selectstrings; /* list of strings for choice value */
+    int *m_mouse;         /* mouse button value, or 0 if not shown */
+    int *m_joy;           /* joystick button value, or 0 if not shown */
+    void (*action)(void); /* killough 10/98: function to call after changing */
+    const char **selectstrings; /* list of strings for choice value */
 } setup_menu_t;
 
 #endif

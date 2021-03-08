@@ -59,22 +59,25 @@ void R_ResetAfterTeleport(player_t *player);
 // DemoEx stuff
 //
 
-typedef struct {
-  wadinfo_t header;
-  filelump_t *lumps;
-  char *data;
-  int datasize;
+typedef struct
+{
+    wadinfo_t header;
+    filelump_t *lumps;
+    char *data;
+    int datasize;
 } wadtbl_t;
 
-typedef struct {
-  wadfile_info_t *wadfiles;
-  size_t numwadfiles;
+typedef struct
+{
+    wadfile_info_t *wadfiles;
+    size_t numwadfiles;
 } waddata_t;
 
-typedef struct {
-  int pattern_num;
-  char pattern_name[80];
-  char *missed;
+typedef struct
+{
+    int pattern_num;
+    char pattern_name[80];
+    char *missed;
 } patterndata_t;
 
 extern int demo_extendedformat;

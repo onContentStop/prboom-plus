@@ -62,15 +62,16 @@ extern fixed_t pspriteiscale;
 extern fixed_t pspritexscale;
 extern fixed_t pspriteyscale;
 extern fixed_t pspriteiyscale;
-//e6y: added for GL
+// e6y: added for GL
 extern float pspritexscale_f;
 extern float pspriteyscale_f;
 
-typedef enum {
-  DOOM_ORDER_NONE,
-  DOOM_ORDER_STATIC,
-  DOOM_ORDER_DYNAMIC,
-  DOOM_ORDER_LAST
+typedef enum
+{
+    DOOM_ORDER_NONE,
+    DOOM_ORDER_STATIC,
+    DOOM_ORDER_DYNAMIC,
+    DOOM_ORDER_LAST
 } sprite_doom_order_t;
 extern int sprites_doom_order;
 

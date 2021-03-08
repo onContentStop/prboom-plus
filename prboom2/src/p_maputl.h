@@ -47,20 +47,22 @@
 #define PT_ADDTHINGS 2
 #define PT_EARLYOUT 4
 
-typedef struct {
-  fixed_t x;
-  fixed_t y;
-  fixed_t dx;
-  fixed_t dy;
+typedef struct
+{
+    fixed_t x;
+    fixed_t y;
+    fixed_t dx;
+    fixed_t dy;
 } divline_t;
 
-typedef struct {
-  fixed_t frac; /* along trace line */
-  dboolean isaline;
-  union {
-    mobj_t *thing;
-    line_t *line;
-  } d;
+typedef struct
+{
+    fixed_t frac; /* along trace line */
+    dboolean isaline;
+    union {
+        mobj_t *thing;
+        line_t *line;
+    } d;
 } intercept_t;
 
 typedef dboolean (*traverser_t)(intercept_t *in);

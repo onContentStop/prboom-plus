@@ -53,10 +53,10 @@
 #define UKFileWatcherWriteNotification @"UKKQueueFileWrittenToNotification"
 #define UKFileWatcherDeleteNotification @"UKKQueueFileDeletedNotification"
 #define UKFileWatcherAttributeChangeNotification                               \
-  @"UKKQueueFileAttributesChangedNotification"
+    @"UKKQueueFileAttributesChangedNotification"
 #define UKFileWatcherSizeIncreaseNotification                                  \
-  @"UKKQueueFileSizeIncreasedNotification"
+    @"UKKQueueFileSizeIncreasedNotification"
 #define UKFileWatcherLinkCountChangeNotification                               \
-  @"UKKQueueFileLinkCountChangedNotification"
+    @"UKKQueueFileLinkCountChangedNotification"
 #define UKFileWatcherAccessRevocationNotification                              \
-  @"UKKQueueFileAccessRevocationNotification"
+    @"UKKQueueFileAccessRevocationNotification"

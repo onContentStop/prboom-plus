@@ -75,57 +75,59 @@ int(P_Random)(pr_class_t pr_class
               ,
               const char *file, int line
 #endif
-) {
-  // killough 2/16/98:  We always update both sets of random number
-  // generators, to ensure repeatability if the demo_compatibility
-  // flag is changed while the program is running. Changing the
-  // demo_compatibility flag does not change the sequences generated,
-  // only which one is selected from.
-  //
-  // All of this RNG stuff is tricky as far as demo sync goes --
-  // it's like playing with explosives :) Lee
+)
+{
+    // killough 2/16/98:  We always update both sets of random number
+    // generators, to ensure repeatability if the demo_compatibility
+    // flag is changed while the program is running. Changing the
+    // demo_compatibility flag does not change the sequences generated,
+    // only which one is selected from.
+    //
+    // All of this RNG stuff is tricky as far as demo sync goes --
+    // it's like playing with explosives :) Lee
 
 #ifdef INSTRUMENTED
-  // lprintf(LO_DEBUG, "%.10d: %.10d - %s:%.5d\n", gametic, pr_class, file,
-  // line);
+    // lprintf(LO_DEBUG, "%.10d: %.10d - %s:%.5d\n", gametic, pr_class, file,
+    // line);
 #endif
 
-  int compat = pr_class == pr_misc ? (rng.prndindex = (rng.prndindex + 1) & 255)
-                                   : (rng.rndindex = (rng.rndindex + 1) & 255);
+    int compat = pr_class == pr_misc
+                     ? (rng.prndindex = (rng.prndindex + 1) & 255)
+                     : (rng.rndindex = (rng.rndindex + 1) & 255);
 
-  unsigned long boom;
+    unsigned long boom;
 
-  // killough 3/31/98:
-  // If demo sync insurance is not requested, use
-  // much more unstable method by putting everything
-  // except pr_misc into pr_all_in_one
+    // killough 3/31/98:
+    // If demo sync insurance is not requested, use
+    // much more unstable method by putting everything
+    // except pr_misc into pr_all_in_one
 
-  if (pr_class != pr_misc && !demo_insurance) // killough 3/31/98
-    pr_class = pr_all_in_one;
+    if (pr_class != pr_misc && !demo_insurance) // killough 3/31/98
+        pr_class = pr_all_in_one;
 
-  boom = rng.seed[pr_class];
+    boom = rng.seed[pr_class];
 
-  // killough 3/26/98: add pr_class*2 to addend
+    // killough 3/26/98: add pr_class*2 to addend
 
-  rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class * 2;
+    rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class * 2;
 
-  if (demo_compatibility)
-    return rndtable[compat];
+    if (demo_compatibility)
+        return rndtable[compat];
 
-  boom >>= 20;
+    boom >>= 20;
 
-  /* killough 3/30/98: use gametic-levelstarttic to shuffle RNG
-   * killough 3/31/98: but only if demo insurance requested,
-   * since it's unnecessary for random shuffling otherwise
-   * killough 9/29/98: but use basetic now instead of levelstarttic
-   * cph - DEMOSYNC - this change makes MBF demos work,
-   *       but does it break Boom ones?
-   */
+    /* killough 3/30/98: use gametic-levelstarttic to shuffle RNG
+     * killough 3/31/98: but only if demo insurance requested,
+     * since it's unnecessary for random shuffling otherwise
+     * killough 9/29/98: but use basetic now instead of levelstarttic
+     * cph - DEMOSYNC - this change makes MBF demos work,
+     *       but does it break Boom ones?
+     */
 
-  if (demo_insurance)
-    boom += (gametic - basetic) * 7;
+    if (demo_insurance)
+        boom += (gametic - basetic) * 7;
 
-  return boom & 255;
+    return boom & 255;
 }
 
 // Initialize all the seeds
@@ -135,10 +137,11 @@ int(P_Random)(pr_class_t pr_class
 // are added they must be added to end of pr_class_t list. killough
 //
 
-void M_ClearRandom(void) {
-  int i;
-  unsigned int seed = rngseed * 2 + 1; // add 3/26/98: add rngseed
-  for (i = 0; i < NUMPRCLASS; i++)     // go through each pr_class and set
-    rng.seed[i] = seed *= 69069ul;     // each starting seed differently
-  rng.prndindex = rng.rndindex = 0;    // clear two compatibility indices
+void M_ClearRandom(void)
+{
+    int i;
+    unsigned int seed = rngseed * 2 + 1; // add 3/26/98: add rngseed
+    for (i = 0; i < NUMPRCLASS; i++)     // go through each pr_class and set
+        rng.seed[i] = seed *= 69069ul;   // each starting seed differently
+    rng.prndindex = rng.rndindex = 0;    // clear two compatibility indices
 }

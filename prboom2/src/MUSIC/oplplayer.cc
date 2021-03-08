@@ -53,105 +53,111 @@
 #define GENMIDI_FLAG_FIXED 0x0001  /* fixed pitch */
 #define GENMIDI_FLAG_2VOICE 0x0004 /* double voice (OPL3) */
 
-typedef struct {
-  byte tremolo;
-  byte attack;
-  byte sustain;
-  byte waveform;
-  byte scale;
-  byte level;
+typedef struct
+{
+    byte tremolo;
+    byte attack;
+    byte sustain;
+    byte waveform;
+    byte scale;
+    byte level;
 } PACKEDATTR genmidi_op_t;
 
-typedef struct {
-  genmidi_op_t modulator;
-  byte feedback;
-  genmidi_op_t carrier;
-  byte unused;
-  short base_note_offset;
+typedef struct
+{
+    genmidi_op_t modulator;
+    byte feedback;
+    genmidi_op_t carrier;
+    byte unused;
+    short base_note_offset;
 } PACKEDATTR genmidi_voice_t;
 
-typedef struct {
-  unsigned short flags;
-  byte fine_tuning;
-  byte fixed_note;
+typedef struct
+{
+    unsigned short flags;
+    byte fine_tuning;
+    byte fixed_note;
 
-  genmidi_voice_t voices[2];
+    genmidi_voice_t voices[2];
 } PACKEDATTR genmidi_instr_t;
 
 // Data associated with a channel of a track that is currently playing.
 
-typedef struct {
-  // The instrument currently used for this track.
+typedef struct
+{
+    // The instrument currently used for this track.
 
-  const genmidi_instr_t *instrument;
+    const genmidi_instr_t *instrument;
 
-  // Volume level
+    // Volume level
 
-  int volume;
+    int volume;
 
-  // Pitch bend value:
+    // Pitch bend value:
 
-  int bend;
+    int bend;
 
 } opl_channel_data_t;
 
 // Data associated with a track that is currently playing.
 
-typedef struct {
-  // Data for each channel.
+typedef struct
+{
+    // Data for each channel.
 
-  opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
+    opl_channel_data_t channels[MIDI_CHANNELS_PER_TRACK];
 
-  // Track iterator used to read new events.
+    // Track iterator used to read new events.
 
-  midi_track_iter_t *iter;
+    midi_track_iter_t *iter;
 
-  // Tempo control variables
+    // Tempo control variables
 
-  unsigned int ticks_per_beat;
-  unsigned int ms_per_beat;
+    unsigned int ticks_per_beat;
+    unsigned int ms_per_beat;
 } opl_track_data_t;
 
 typedef struct opl_voice_s opl_voice_t;
 
-struct opl_voice_s {
-  // Index of this voice:
-  int index;
+struct opl_voice_s
+{
+    // Index of this voice:
+    int index;
 
-  // The operators used by this voice:
-  int op1, op2;
+    // The operators used by this voice:
+    int op1, op2;
 
-  // Currently-loaded instrument data
-  const genmidi_instr_t *current_instr;
+    // Currently-loaded instrument data
+    const genmidi_instr_t *current_instr;
 
-  // The voice number in the instrument to use.
-  // This is normally set to zero; if this is a double voice
-  // instrument, it may be one.
-  unsigned int current_instr_voice;
+    // The voice number in the instrument to use.
+    // This is normally set to zero; if this is a double voice
+    // instrument, it may be one.
+    unsigned int current_instr_voice;
 
-  // The channel currently using this voice.
-  opl_channel_data_t *channel;
+    // The channel currently using this voice.
+    opl_channel_data_t *channel;
 
-  // The midi key that this voice is playing.
-  unsigned int key;
+    // The midi key that this voice is playing.
+    unsigned int key;
 
-  // The note being played.  This is normally the same as
-  // the key, but if the instrument is a fixed pitch
-  // instrument, it is different.
-  unsigned int note;
+    // The note being played.  This is normally the same as
+    // the key, but if the instrument is a fixed pitch
+    // instrument, it is different.
+    unsigned int note;
 
-  // The frequency value being used.
-  unsigned int freq;
+    // The frequency value being used.
+    unsigned int freq;
 
-  // The volume of the note being played on this channel.
-  unsigned int note_volume;
+    // The volume of the note being played on this channel.
+    unsigned int note_volume;
 
-  // The current volume (register value) that has been set for this channel.
-  unsigned int reg_volume;
+    // The current volume (register value) that has been set for this channel.
+    unsigned int reg_volume;
 
-  // Next in linked list; a voice is always either in the
-  // free list or the allocated list.
-  opl_voice_t *next;
+    // Next in linked list; a voice is always either in the
+    // free list or the allocated list.
+    opl_voice_t *next;
 };
 
 // Operators used by the different voices.
@@ -905,288 +911,314 @@ int opl_io_port = 0x388;
 
 // Load instrument table from GENMIDI lump:
 
-static dboolean LoadInstrumentTable(void) {
-  const byte *lump;
+static dboolean LoadInstrumentTable(void)
+{
+    const byte *lump;
 
-  lump = (const byte *)W_CacheLumpName("GENMIDI");
+    lump = (const byte *)W_CacheLumpName("GENMIDI");
 
-  // Check header
+    // Check header
 
-  if (strncmp((const char *)lump, GENMIDI_HEADER, strlen(GENMIDI_HEADER)) !=
-      0) {
-    W_UnlockLumpName("GENMIDI");
+    if (strncmp((const char *)lump, GENMIDI_HEADER, strlen(GENMIDI_HEADER)) !=
+        0)
+    {
+        W_UnlockLumpName("GENMIDI");
 
-    return false;
-  }
+        return false;
+    }
 
-  main_instrs = (const genmidi_instr_t *)(lump + strlen(GENMIDI_HEADER));
-  percussion_instrs = main_instrs + GENMIDI_NUM_INSTRS;
+    main_instrs = (const genmidi_instr_t *)(lump + strlen(GENMIDI_HEADER));
+    percussion_instrs = main_instrs + GENMIDI_NUM_INSTRS;
 
-  return true;
+    return true;
 }
 
 // Get the next available voice from the freelist.
 
-static opl_voice_t *GetFreeVoice(void) {
-  opl_voice_t *result;
+static opl_voice_t *GetFreeVoice(void)
+{
+    opl_voice_t *result;
 
-  // None available?
+    // None available?
 
-  if (voice_free_list == NULL) {
-    return NULL;
-  }
+    if (voice_free_list == NULL)
+    {
+        return NULL;
+    }
 
-  // Remove from free list
+    // Remove from free list
 
-  result = voice_free_list;
-  voice_free_list = voice_free_list->next;
+    result = voice_free_list;
+    voice_free_list = voice_free_list->next;
 
-  // Add to allocated list
+    // Add to allocated list
 
-  result->next = voice_alloced_list;
-  voice_alloced_list = result;
+    result->next = voice_alloced_list;
+    voice_alloced_list = result;
 
-  return result;
+    return result;
 }
 
 // Remove a voice from the allocated voices list.
 
-static void RemoveVoiceFromAllocedList(opl_voice_t *voice) {
-  opl_voice_t **rover;
+static void RemoveVoiceFromAllocedList(opl_voice_t *voice)
+{
+    opl_voice_t **rover;
 
-  rover = &voice_alloced_list;
+    rover = &voice_alloced_list;
 
-  // Search the list until we find the voice, then remove it.
+    // Search the list until we find the voice, then remove it.
 
-  while (*rover != NULL) {
-    if (*rover == voice) {
-      *rover = voice->next;
-      voice->next = NULL;
-      break;
+    while (*rover != NULL)
+    {
+        if (*rover == voice)
+        {
+            *rover = voice->next;
+            voice->next = NULL;
+            break;
+        }
+
+        rover = &(*rover)->next;
     }
-
-    rover = &(*rover)->next;
-  }
 }
 
 // Release a voice back to the freelist.
 
-static void ReleaseVoice(opl_voice_t *voice) {
-  opl_voice_t **rover;
+static void ReleaseVoice(opl_voice_t *voice)
+{
+    opl_voice_t **rover;
 
-  voice->channel = NULL;
-  voice->note = 0;
+    voice->channel = NULL;
+    voice->note = 0;
 
-  // Remove from alloced list.
+    // Remove from alloced list.
 
-  RemoveVoiceFromAllocedList(voice);
+    RemoveVoiceFromAllocedList(voice);
 
-  // Search to the end of the freelist (This is how Doom behaves!)
+    // Search to the end of the freelist (This is how Doom behaves!)
 
-  rover = &voice_free_list;
+    rover = &voice_free_list;
 
-  while (*rover != NULL) {
-    rover = &(*rover)->next;
-  }
+    while (*rover != NULL)
+    {
+        rover = &(*rover)->next;
+    }
 
-  *rover = voice;
-  voice->next = NULL;
+    *rover = voice;
+    voice->next = NULL;
 }
 
 // Load data to the specified Operator
 
 static void LoadOperatorData(int Operator, const genmidi_op_t *data,
-                             dboolean max_level) {
-  int level;
+                             dboolean max_level)
+{
+    int level;
 
-  // The scale and level fields must be combined for the level register.
-  // For the carrier wave we always set the maximum level.
+    // The scale and level fields must be combined for the level register.
+    // For the carrier wave we always set the maximum level.
 
-  level = (data->scale & 0xc0) | (data->level & 0x3f);
+    level = (data->scale & 0xc0) | (data->level & 0x3f);
 
-  if (max_level) {
-    level |= 0x3f;
-  }
+    if (max_level)
+    {
+        level |= 0x3f;
+    }
 
-  OPL_WriteRegister(OPL_REGS_LEVEL + Operator, level);
-  OPL_WriteRegister(OPL_REGS_TREMOLO + Operator, data->tremolo);
-  OPL_WriteRegister(OPL_REGS_ATTACK + Operator, data->attack);
-  OPL_WriteRegister(OPL_REGS_SUSTAIN + Operator, data->sustain);
-  OPL_WriteRegister(OPL_REGS_WAVEFORM + Operator, data->waveform);
+    OPL_WriteRegister(OPL_REGS_LEVEL + Operator, level);
+    OPL_WriteRegister(OPL_REGS_TREMOLO + Operator, data->tremolo);
+    OPL_WriteRegister(OPL_REGS_ATTACK + Operator, data->attack);
+    OPL_WriteRegister(OPL_REGS_SUSTAIN + Operator, data->sustain);
+    OPL_WriteRegister(OPL_REGS_WAVEFORM + Operator, data->waveform);
 }
 
 // Set the instrument for a particular voice.
 
 static void SetVoiceInstrument(opl_voice_t *voice, const genmidi_instr_t *instr,
-                               unsigned int instr_voice) {
-  const genmidi_voice_t *data;
-  unsigned int modulating;
+                               unsigned int instr_voice)
+{
+    const genmidi_voice_t *data;
+    unsigned int modulating;
 
-  // Instrument already set for this channel?
+    // Instrument already set for this channel?
 
-  if (voice->current_instr == instr &&
-      voice->current_instr_voice == instr_voice) {
-    return;
-  }
+    if (voice->current_instr == instr &&
+        voice->current_instr_voice == instr_voice)
+    {
+        return;
+    }
 
-  voice->current_instr = instr;
-  voice->current_instr_voice = instr_voice;
+    voice->current_instr = instr;
+    voice->current_instr_voice = instr_voice;
 
-  data = &instr->voices[instr_voice];
+    data = &instr->voices[instr_voice];
 
-  // Are we usind modulated feedback mode?
+    // Are we usind modulated feedback mode?
 
-  modulating = (data->feedback & 0x01) == 0;
+    modulating = (data->feedback & 0x01) == 0;
 
-  // Doom loads the second operator first, then the first.
-  // The carrier is set to minimum volume until the voice volume
-  // is set in SetVoiceVolume (below).  If we are not using
-  // modulating mode, we must set both to minimum volume.
+    // Doom loads the second operator first, then the first.
+    // The carrier is set to minimum volume until the voice volume
+    // is set in SetVoiceVolume (below).  If we are not using
+    // modulating mode, we must set both to minimum volume.
 
-  LoadOperatorData(voice->op2, &data->carrier, true);
-  LoadOperatorData(voice->op1, &data->modulator, !modulating);
+    LoadOperatorData(voice->op2, &data->carrier, true);
+    LoadOperatorData(voice->op1, &data->modulator, !modulating);
 
-  // Set feedback register that control the connection between the
-  // two operators.  Turn on bits in the upper nybble; I think this
-  // is for OPL3, where it turns on channel A/B.
+    // Set feedback register that control the connection between the
+    // two operators.  Turn on bits in the upper nybble; I think this
+    // is for OPL3, where it turns on channel A/B.
 
-  OPL_WriteRegister(OPL_REGS_FEEDBACK + voice->index, data->feedback | 0x30);
+    OPL_WriteRegister(OPL_REGS_FEEDBACK + voice->index, data->feedback | 0x30);
 
-  // Hack to force a volume update.
+    // Hack to force a volume update.
 
-  voice->reg_volume = 999;
+    voice->reg_volume = 999;
 }
 
-static void SetVoiceVolume(opl_voice_t *voice, unsigned int volume) {
-  const genmidi_voice_t *opl_voice;
-  unsigned int full_volume;
-  unsigned int op_volume;
-  unsigned int reg_volume;
+static void SetVoiceVolume(opl_voice_t *voice, unsigned int volume)
+{
+    const genmidi_voice_t *opl_voice;
+    unsigned int full_volume;
+    unsigned int op_volume;
+    unsigned int reg_volume;
 
-  voice->note_volume = volume;
+    voice->note_volume = volume;
 
-  opl_voice = &voice->current_instr->voices[voice->current_instr_voice];
+    opl_voice = &voice->current_instr->voices[voice->current_instr_voice];
 
-  // Multiply note volume and channel volume to get the actual volume.
+    // Multiply note volume and channel volume to get the actual volume.
 
-  full_volume = (volume_mapping_table[voice->note_volume] *
-                 volume_mapping_table[voice->channel->volume] *
-                 volume_mapping_table[current_music_volume]) /
-                (127 * 127);
+    full_volume = (volume_mapping_table[voice->note_volume] *
+                   volume_mapping_table[voice->channel->volume] *
+                   volume_mapping_table[current_music_volume]) /
+                  (127 * 127);
 
-  // The volume of each instrument can be controlled via GENMIDI:
+    // The volume of each instrument can be controlled via GENMIDI:
 
-  op_volume = 0x3f - opl_voice->carrier.level;
+    op_volume = 0x3f - opl_voice->carrier.level;
 
-  // The volume value to use in the register:
+    // The volume value to use in the register:
 
-  reg_volume = (op_volume * full_volume) / 128;
-  reg_volume = (0x3f - reg_volume) | opl_voice->carrier.scale;
+    reg_volume = (op_volume * full_volume) / 128;
+    reg_volume = (0x3f - reg_volume) | opl_voice->carrier.scale;
 
-  // Update the volume register(s) if necessary.
+    // Update the volume register(s) if necessary.
 
-  if (reg_volume != voice->reg_volume) {
-    voice->reg_volume = reg_volume;
+    if (reg_volume != voice->reg_volume)
+    {
+        voice->reg_volume = reg_volume;
 
-    OPL_WriteRegister(OPL_REGS_LEVEL + voice->op2, reg_volume);
+        OPL_WriteRegister(OPL_REGS_LEVEL + voice->op2, reg_volume);
 
-    // If we are using non-modulated feedback mode, we must set the
-    // volume for both voices.
-    // Note that the same register volume value is written for
-    // both voices, always calculated from the carrier's level
-    // value.
+        // If we are using non-modulated feedback mode, we must set the
+        // volume for both voices.
+        // Note that the same register volume value is written for
+        // both voices, always calculated from the carrier's level
+        // value.
 
-    if ((opl_voice->feedback & 0x01) != 0) {
-      OPL_WriteRegister(OPL_REGS_LEVEL + voice->op1, reg_volume);
+        if ((opl_voice->feedback & 0x01) != 0)
+        {
+            OPL_WriteRegister(OPL_REGS_LEVEL + voice->op1, reg_volume);
+        }
     }
-  }
 }
 
 // Initialize the voice table and freelist
 
-static void InitVoices(void) {
-  int i;
+static void InitVoices(void)
+{
+    int i;
 
-  // Start with an empty free list.
+    // Start with an empty free list.
 
-  voice_free_list = NULL;
+    voice_free_list = NULL;
 
-  // Initialize each voice.
+    // Initialize each voice.
 
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    voices[i].index = i;
-    voices[i].op1 = voice_operators[0][i];
-    voices[i].op2 = voice_operators[1][i];
-    voices[i].current_instr = NULL;
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        voices[i].index = i;
+        voices[i].op1 = voice_operators[0][i];
+        voices[i].op2 = voice_operators[1][i];
+        voices[i].current_instr = NULL;
 
-    // Add this voice to the freelist.
+        // Add this voice to the freelist.
 
-    ReleaseVoice(&voices[i]);
-  }
+        ReleaseVoice(&voices[i]);
+    }
 }
 
 // Set music volume (0 - 15)
 
-void I_OPL_SetMusicVolume(int volume) {
-  int opl_vol = volume * 127 / 15; // OPL synth internally uses 0-127
+void I_OPL_SetMusicVolume(int volume)
+{
+    int opl_vol = volume * 127 / 15; // OPL synth internally uses 0-127
 
-  unsigned int i;
+    unsigned int i;
 
-  // Internal state variable.
+    // Internal state variable.
 
-  current_music_volume = opl_vol;
+    current_music_volume = opl_vol;
 
-  // Update the volume of all voices.
+    // Update the volume of all voices.
 
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel != NULL) {
-      SetVoiceVolume(&voices[i], voices[i].note_volume);
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel != NULL)
+        {
+            SetVoiceVolume(&voices[i], voices[i].note_volume);
+        }
     }
-  }
 }
 
-static void VoiceKeyOff(opl_voice_t *voice) {
-  OPL_WriteRegister(OPL_REGS_FREQ_2 + voice->index, voice->freq >> 8);
+static void VoiceKeyOff(opl_voice_t *voice)
+{
+    OPL_WriteRegister(OPL_REGS_FREQ_2 + voice->index, voice->freq >> 8);
 }
 
 // Get the frequency that we should be using for a voice.
 
-static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event) {
-  opl_channel_data_t *channel;
-  unsigned int key;
-  unsigned int i;
+static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    opl_channel_data_t *channel;
+    unsigned int key;
+    unsigned int i;
 
-  /*
-  printf("note off: channel %i, %i, %i\n",
-         event->data.channel.channel,
-         event->data.channel.param1,
-         event->data.channel.param2);
-  */
+    /*
+    printf("note off: channel %i, %i, %i\n",
+           event->data.channel.channel,
+           event->data.channel.param1,
+           event->data.channel.param2);
+    */
 
-  channel = &track->channels[event->data.channel.channel];
-  key = event->data.channel.param1;
+    channel = &track->channels[event->data.channel.channel];
+    key = event->data.channel.param1;
 
-  // Turn off voices being used to play this key.
-  // If it is a double voice instrument there will be two.
+    // Turn off voices being used to play this key.
+    // If it is a double voice instrument there will be two.
 
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel == channel && voices[i].key == key) {
-      VoiceKeyOff(&voices[i]);
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel == channel && voices[i].key == key)
+        {
+            VoiceKeyOff(&voices[i]);
 
-      // Finished with this voice now.
+            // Finished with this voice now.
 
-      ReleaseVoice(&voices[i]);
+            ReleaseVoice(&voices[i]);
+        }
     }
-  }
 }
 
 // Compare the priorities of channels, returning either -1, 0 or 1.
 
 static int CompareChannelPriorities(opl_channel_data_t *chan1,
-                                    opl_channel_data_t *chan2) {
-  // TODO ...
+                                    opl_channel_data_t *chan2)
+{
+    // TODO ...
 
-  return 1;
+    return 1;
 }
 
 // When all voices are in use, we must discard an existing voice to
@@ -1194,139 +1226,157 @@ static int CompareChannelPriorities(opl_channel_data_t *chan1,
 // passed to the function is the channel for the new note to be
 // played.
 
-static opl_voice_t *ReplaceExistingVoice(opl_channel_data_t *channel) {
-  opl_voice_t *rover;
-  opl_voice_t *result;
+static opl_voice_t *ReplaceExistingVoice(opl_channel_data_t *channel)
+{
+    opl_voice_t *rover;
+    opl_voice_t *result;
 
-  // Check the allocated voices, if we find an instrument that is
-  // of a lower priority to the new instrument, discard it.
-  // If a voice is being used to play the second voice of an instrument,
-  // use that, as second voices are non-essential.
-  // Lower numbered MIDI channels implicitly have a higher priority
-  // than higher-numbered channels, eg. MIDI channel 1 is never
-  // discarded for MIDI channel 2.
+    // Check the allocated voices, if we find an instrument that is
+    // of a lower priority to the new instrument, discard it.
+    // If a voice is being used to play the second voice of an instrument,
+    // use that, as second voices are non-essential.
+    // Lower numbered MIDI channels implicitly have a higher priority
+    // than higher-numbered channels, eg. MIDI channel 1 is never
+    // discarded for MIDI channel 2.
 
-  result = NULL;
+    result = NULL;
 
-  for (rover = voice_alloced_list; rover != NULL; rover = rover->next) {
-    if (rover->current_instr_voice != 0 ||
-        (rover->channel > channel &&
-         CompareChannelPriorities(channel, rover->channel) > 0)) {
-      result = rover;
-      break;
+    for (rover = voice_alloced_list; rover != NULL; rover = rover->next)
+    {
+        if (rover->current_instr_voice != 0 ||
+            (rover->channel > channel &&
+             CompareChannelPriorities(channel, rover->channel) > 0))
+        {
+            result = rover;
+            break;
+        }
     }
-  }
 
-  // If we didn't find a voice, find an existing voice being used to
-  // play a note on the same channel, and use that.
+    // If we didn't find a voice, find an existing voice being used to
+    // play a note on the same channel, and use that.
 
-  if (result == NULL) {
-    for (rover = voice_alloced_list; rover != NULL; rover = rover->next) {
-      if (rover->channel == channel) {
-        result = rover;
-        break;
-      }
+    if (result == NULL)
+    {
+        for (rover = voice_alloced_list; rover != NULL; rover = rover->next)
+        {
+            if (rover->channel == channel)
+            {
+                result = rover;
+                break;
+            }
+        }
     }
-  }
 
-  // Still nothing found?  Give up and just use the first voice in
-  // the list.
+    // Still nothing found?  Give up and just use the first voice in
+    // the list.
 
-  if (result == NULL) {
-    result = voice_alloced_list;
-  }
+    if (result == NULL)
+    {
+        result = voice_alloced_list;
+    }
 
-  // Stop playing this voice playing and release it back to the free
-  // list.
+    // Stop playing this voice playing and release it back to the free
+    // list.
 
-  VoiceKeyOff(result);
-  ReleaseVoice(result);
+    VoiceKeyOff(result);
+    ReleaseVoice(result);
 
-  // Re-allocate the voice again and return it.
+    // Re-allocate the voice again and return it.
 
-  return GetFreeVoice();
+    return GetFreeVoice();
 }
 
-static unsigned int FrequencyForVoice(opl_voice_t *voice) {
-  const genmidi_voice_t *gm_voice;
-  unsigned int freq_index;
-  unsigned int octave;
-  unsigned int sub_index;
-  unsigned int note;
+static unsigned int FrequencyForVoice(opl_voice_t *voice)
+{
+    const genmidi_voice_t *gm_voice;
+    unsigned int freq_index;
+    unsigned int octave;
+    unsigned int sub_index;
+    unsigned int note;
 
-  note = voice->note;
-
-  // Apply note offset.
-  // Don't apply offset if the instrument is a fixed note instrument.
-
-  gm_voice = &voice->current_instr->voices[voice->current_instr_voice];
-
-  if ((voice->current_instr->flags & GENMIDI_FLAG_FIXED) == 0) {
-    note += (signed short)doom_htows(gm_voice->base_note_offset);
-  }
-
-  // Avoid possible overflow due to base note offset:
-
-  if (note > 0x7f) {
     note = voice->note;
-  }
 
-  freq_index = 64 + 32 * note + voice->channel->bend;
+    // Apply note offset.
+    // Don't apply offset if the instrument is a fixed note instrument.
 
-  // If this is the second voice of a double voice instrument, the
-  // frequency index can be adjusted by the fine tuning field.
+    gm_voice = &voice->current_instr->voices[voice->current_instr_voice];
 
-  if (voice->current_instr_voice != 0) {
-    freq_index += (voice->current_instr->fine_tuning / 2) - 64;
-  }
-
-  // The first 7 notes use the start of the table, while
-  // consecutive notes loop around the latter part.
-
-  if (freq_index < 284) {
-    return frequency_curve[freq_index];
-  }
-
-  sub_index = (freq_index - 284) % (12 * 32);
-  octave = (freq_index - 284) / (12 * 32);
-
-  // Once the seventh octave is reached, things break down.
-  // We can only go up to octave 7 as a maximum anyway (the OPL
-  // register only has three bits for octave number), but for the
-  // notes in octave 7, the first five bits have octave=7, the
-  // following notes have octave=6.  This 7/6 pattern repeats in
-  // following octaves (which are technically impossible to
-  // represent anyway).
-
-  if (octave >= 7) {
-    if (sub_index < 5) {
-      octave = 7;
-    } else {
-      octave = 6;
+    if ((voice->current_instr->flags & GENMIDI_FLAG_FIXED) == 0)
+    {
+        note += (signed short)doom_htows(gm_voice->base_note_offset);
     }
-  }
 
-  // Calculate the resulting register value to use for the frequency.
+    // Avoid possible overflow due to base note offset:
 
-  return frequency_curve[sub_index + 284] | (octave << 10);
+    if (note > 0x7f)
+    {
+        note = voice->note;
+    }
+
+    freq_index = 64 + 32 * note + voice->channel->bend;
+
+    // If this is the second voice of a double voice instrument, the
+    // frequency index can be adjusted by the fine tuning field.
+
+    if (voice->current_instr_voice != 0)
+    {
+        freq_index += (voice->current_instr->fine_tuning / 2) - 64;
+    }
+
+    // The first 7 notes use the start of the table, while
+    // consecutive notes loop around the latter part.
+
+    if (freq_index < 284)
+    {
+        return frequency_curve[freq_index];
+    }
+
+    sub_index = (freq_index - 284) % (12 * 32);
+    octave = (freq_index - 284) / (12 * 32);
+
+    // Once the seventh octave is reached, things break down.
+    // We can only go up to octave 7 as a maximum anyway (the OPL
+    // register only has three bits for octave number), but for the
+    // notes in octave 7, the first five bits have octave=7, the
+    // following notes have octave=6.  This 7/6 pattern repeats in
+    // following octaves (which are technically impossible to
+    // represent anyway).
+
+    if (octave >= 7)
+    {
+        if (sub_index < 5)
+        {
+            octave = 7;
+        }
+        else
+        {
+            octave = 6;
+        }
+    }
+
+    // Calculate the resulting register value to use for the frequency.
+
+    return frequency_curve[sub_index + 284] | (octave << 10);
 }
 
 // Update the frequency that a voice is programmed to use.
 
-static void UpdateVoiceFrequency(opl_voice_t *voice) {
-  unsigned int freq;
+static void UpdateVoiceFrequency(opl_voice_t *voice)
+{
+    unsigned int freq;
 
-  // Calculate the frequency to use for this voice and update it
-  // if neccessary.
+    // Calculate the frequency to use for this voice and update it
+    // if neccessary.
 
-  freq = FrequencyForVoice(voice);
+    freq = FrequencyForVoice(voice);
 
-  if (voice->freq != freq) {
-    OPL_WriteRegister(OPL_REGS_FREQ_1 + voice->index, freq & 0xff);
-    OPL_WriteRegister(OPL_REGS_FREQ_2 + voice->index, (freq >> 8) | 0x20);
+    if (voice->freq != freq)
+    {
+        OPL_WriteRegister(OPL_REGS_FREQ_1 + voice->index, freq & 0xff);
+        OPL_WriteRegister(OPL_REGS_FREQ_2 + voice->index, (freq >> 8) | 0x20);
 
-    voice->freq = freq;
-  }
+        voice->freq = freq;
+    }
 }
 
 // Program a single voice for an instrument.  For a double voice
@@ -1336,544 +1386,615 @@ static void UpdateVoiceFrequency(opl_voice_t *voice) {
 static void VoiceKeyOn(opl_channel_data_t *channel,
                        const genmidi_instr_t *instrument,
                        unsigned int instrument_voice, unsigned int key,
-                       unsigned int volume) {
-  opl_voice_t *voice;
+                       unsigned int volume)
+{
+    opl_voice_t *voice;
 
-  // Find a voice to use for this new note.
+    // Find a voice to use for this new note.
 
-  voice = GetFreeVoice();
+    voice = GetFreeVoice();
 
-  // If there are no more voices left, we must decide what to do.
-  // If this is the first voice of the instrument, free an existing
-  // voice and use that.  Otherwise, if this is the second voice,
-  // it isn't as important; just discard it.
+    // If there are no more voices left, we must decide what to do.
+    // If this is the first voice of the instrument, free an existing
+    // voice and use that.  Otherwise, if this is the second voice,
+    // it isn't as important; just discard it.
 
-  if (voice == NULL) {
-    if (instrument_voice == 0) {
-      voice = ReplaceExistingVoice(channel);
-    } else {
-      return;
-    }
-  }
-
-  voice->channel = channel;
-  voice->key = key;
-
-  // Work out the note to use.  This is normally the same as
-  // the key, unless it is a fixed pitch instrument.
-
-  if ((instrument->flags & GENMIDI_FLAG_FIXED) != 0) {
-    voice->note = instrument->fixed_note;
-  } else {
-    voice->note = key;
-  }
-
-  // Program the voice with the instrument data:
-
-  SetVoiceInstrument(voice, instrument, instrument_voice);
-
-  // Set the volume level.
-
-  SetVoiceVolume(voice, volume);
-
-  // Write the frequency value to turn the note on.
-
-  voice->freq = 0;
-  UpdateVoiceFrequency(voice);
-}
-
-static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event) {
-  const genmidi_instr_t *instrument;
-  opl_channel_data_t *channel;
-  unsigned int key;
-  unsigned int volume;
-
-  /*
-  printf("note on: channel %i, %i, %i\n",
-         event->data.channel.channel,
-         event->data.channel.param1,
-         event->data.channel.param2);
-  */
-
-  if (event->data.channel.param2 == 0) { // NSM
-    // i have no idea why this is the case, but it is
-    // note that you don't see this in any of the base doom/doom2 music
-    KeyOffEvent(track, event);
-    return;
-  }
-
-  // The channel.
-
-  channel = &track->channels[event->data.channel.channel];
-  key = event->data.channel.param1;
-  volume = event->data.channel.param2;
-
-  // Percussion channel (10) is treated differently.
-
-  if (event->data.channel.channel == 9) {
-    if (key < 35 || key > 81) {
-      return;
+    if (voice == NULL)
+    {
+        if (instrument_voice == 0)
+        {
+            voice = ReplaceExistingVoice(channel);
+        }
+        else
+        {
+            return;
+        }
     }
 
-    instrument = &percussion_instrs[key - 35];
-  } else {
-    instrument = channel->instrument;
-  }
+    voice->channel = channel;
+    voice->key = key;
 
-  // Find and program a voice for this instrument.  If this
-  // is a double voice instrument, we must do this twice.
+    // Work out the note to use.  This is normally the same as
+    // the key, unless it is a fixed pitch instrument.
 
-  VoiceKeyOn(channel, instrument, 0, key, volume);
-
-  if ((instrument->flags & GENMIDI_FLAG_2VOICE) != 0) {
-    VoiceKeyOn(channel, instrument, 1, key, volume);
-  }
-}
-
-static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event) {
-  int channel;
-  int instrument;
-
-  // Set the instrument used on this channel.
-
-  channel = event->data.channel.channel;
-  instrument = event->data.channel.param1;
-  track->channels[channel].instrument = &main_instrs[instrument];
-
-  // TODO: Look through existing voices that are turned on on this
-  // channel, and change the instrument.
-}
-
-static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume) {
-  unsigned int i;
-
-  channel->volume = volume;
-
-  // Update all voices that this channel is using.
-
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel == channel) {
-      SetVoiceVolume(&voices[i], voices[i].note_volume);
+    if ((instrument->flags & GENMIDI_FLAG_FIXED) != 0)
+    {
+        voice->note = instrument->fixed_note;
     }
-  }
+    else
+    {
+        voice->note = key;
+    }
+
+    // Program the voice with the instrument data:
+
+    SetVoiceInstrument(voice, instrument, instrument_voice);
+
+    // Set the volume level.
+
+    SetVoiceVolume(voice, volume);
+
+    // Write the frequency value to turn the note on.
+
+    voice->freq = 0;
+    UpdateVoiceFrequency(voice);
 }
 
-static void ControllerEvent(opl_track_data_t *track, midi_event_t *event) {
-  unsigned int controller;
-  unsigned int param;
-  opl_channel_data_t *channel;
+static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    const genmidi_instr_t *instrument;
+    opl_channel_data_t *channel;
+    unsigned int key;
+    unsigned int volume;
 
-  /*
-  printf("change controller: channel %i, %i, %i\n",
-         event->data.channel.channel,
-         event->data.channel.param1,
-         event->data.channel.param2);
-  */
+    /*
+    printf("note on: channel %i, %i, %i\n",
+           event->data.channel.channel,
+           event->data.channel.param1,
+           event->data.channel.param2);
+    */
 
-  channel = &track->channels[event->data.channel.channel];
-  controller = event->data.channel.param1;
-  param = event->data.channel.param2;
+    if (event->data.channel.param2 == 0)
+    { // NSM
+        // i have no idea why this is the case, but it is
+        // note that you don't see this in any of the base doom/doom2 music
+        KeyOffEvent(track, event);
+        return;
+    }
 
-  switch (controller) {
-  case MIDI_CONTROLLER_MAIN_VOLUME:
-    SetChannelVolume(channel, param);
-    break;
+    // The channel.
 
-  default:
+    channel = &track->channels[event->data.channel.channel];
+    key = event->data.channel.param1;
+    volume = event->data.channel.param2;
+
+    // Percussion channel (10) is treated differently.
+
+    if (event->data.channel.channel == 9)
+    {
+        if (key < 35 || key > 81)
+        {
+            return;
+        }
+
+        instrument = &percussion_instrs[key - 35];
+    }
+    else
+    {
+        instrument = channel->instrument;
+    }
+
+    // Find and program a voice for this instrument.  If this
+    // is a double voice instrument, we must do this twice.
+
+    VoiceKeyOn(channel, instrument, 0, key, volume);
+
+    if ((instrument->flags & GENMIDI_FLAG_2VOICE) != 0)
+    {
+        VoiceKeyOn(channel, instrument, 1, key, volume);
+    }
+}
+
+static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    int channel;
+    int instrument;
+
+    // Set the instrument used on this channel.
+
+    channel = event->data.channel.channel;
+    instrument = event->data.channel.param1;
+    track->channels[channel].instrument = &main_instrs[instrument];
+
+    // TODO: Look through existing voices that are turned on on this
+    // channel, and change the instrument.
+}
+
+static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume)
+{
+    unsigned int i;
+
+    channel->volume = volume;
+
+    // Update all voices that this channel is using.
+
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel == channel)
+        {
+            SetVoiceVolume(&voices[i], voices[i].note_volume);
+        }
+    }
+}
+
+static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    unsigned int controller;
+    unsigned int param;
+    opl_channel_data_t *channel;
+
+    /*
+    printf("change controller: channel %i, %i, %i\n",
+           event->data.channel.channel,
+           event->data.channel.param1,
+           event->data.channel.param2);
+    */
+
+    channel = &track->channels[event->data.channel.channel];
+    controller = event->data.channel.param1;
+    param = event->data.channel.param2;
+
+    switch (controller)
+    {
+    case MIDI_CONTROLLER_MAIN_VOLUME:
+        SetChannelVolume(channel, param);
+        break;
+
+    default:
 #ifdef OPL_MIDI_DEBUG
-    lprintf(LO_WARN, "Unknown MIDI controller type: %i\n", controller);
+        lprintf(LO_WARN, "Unknown MIDI controller type: %i\n", controller);
 #endif
-    break;
-  }
+        break;
+    }
 }
 
 // Process a pitch bend event.
 
-static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event) {
-  opl_channel_data_t *channel;
-  unsigned int i;
+static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    opl_channel_data_t *channel;
+    unsigned int i;
 
-  // Update the channel bend value.  Only the MSB of the pitch bend
-  // value is considered: this is what Doom does.
+    // Update the channel bend value.  Only the MSB of the pitch bend
+    // value is considered: this is what Doom does.
 
-  channel = &track->channels[event->data.channel.channel];
-  channel->bend = event->data.channel.param2 - 64;
+    channel = &track->channels[event->data.channel.channel];
+    channel->bend = event->data.channel.param2 - 64;
 
-  // Update all voices for this channel.
+    // Update all voices for this channel.
 
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel == channel) {
-      UpdateVoiceFrequency(&voices[i]);
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel == channel)
+        {
+            UpdateVoiceFrequency(&voices[i]);
+        }
     }
-  }
 }
 
 // Process a meta event.
 
-static void MetaEvent(opl_track_data_t *track, midi_event_t *event) {
-  switch (event->data.meta.type) {
-    // Things we can just ignore.
+static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    switch (event->data.meta.type)
+    {
+        // Things we can just ignore.
 
-  case MIDI_META_SEQUENCE_NUMBER:
-  case MIDI_META_TEXT:
-  case MIDI_META_COPYRIGHT:
-  case MIDI_META_TRACK_NAME:
-  case MIDI_META_INSTR_NAME:
-  case MIDI_META_LYRICS:
-  case MIDI_META_MARKER:
-  case MIDI_META_CUE_POINT:
-  case MIDI_META_SEQUENCER_SPECIFIC:
-    break;
+    case MIDI_META_SEQUENCE_NUMBER:
+    case MIDI_META_TEXT:
+    case MIDI_META_COPYRIGHT:
+    case MIDI_META_TRACK_NAME:
+    case MIDI_META_INSTR_NAME:
+    case MIDI_META_LYRICS:
+    case MIDI_META_MARKER:
+    case MIDI_META_CUE_POINT:
+    case MIDI_META_SEQUENCER_SPECIFIC:
+        break;
 
-    // End of track - actually handled when we run out of events
-    // in the track, see below.
+        // End of track - actually handled when we run out of events
+        // in the track, see below.
 
-  case MIDI_META_END_OF_TRACK:
-    break;
+    case MIDI_META_END_OF_TRACK:
+        break;
 
-  default:
+    default:
 #ifdef OPL_MIDI_DEBUG
-    lprintf(LO_WARN, "Unknown MIDI meta event type: %i\n",
-            event->data.meta.type);
+        lprintf(LO_WARN, "Unknown MIDI meta event type: %i\n",
+                event->data.meta.type);
 #endif
-    break;
-  }
+        break;
+    }
 }
 
 // Process a MIDI event from a track.
 
-static void ProcessEvent(opl_track_data_t *track, midi_event_t *event) {
-  switch (event->event_type) {
-  case MIDI_EVENT_NOTE_OFF:
-    KeyOffEvent(track, event);
-    break;
+static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
+{
+    switch (event->event_type)
+    {
+    case MIDI_EVENT_NOTE_OFF:
+        KeyOffEvent(track, event);
+        break;
 
-  case MIDI_EVENT_NOTE_ON:
-    KeyOnEvent(track, event);
-    break;
+    case MIDI_EVENT_NOTE_ON:
+        KeyOnEvent(track, event);
+        break;
 
-  case MIDI_EVENT_CONTROLLER:
-    ControllerEvent(track, event);
-    break;
+    case MIDI_EVENT_CONTROLLER:
+        ControllerEvent(track, event);
+        break;
 
-  case MIDI_EVENT_PROGRAM_CHANGE:
-    ProgramChangeEvent(track, event);
-    break;
+    case MIDI_EVENT_PROGRAM_CHANGE:
+        ProgramChangeEvent(track, event);
+        break;
 
-  case MIDI_EVENT_PITCH_BEND:
-    PitchBendEvent(track, event);
-    break;
+    case MIDI_EVENT_PITCH_BEND:
+        PitchBendEvent(track, event);
+        break;
 
-  case MIDI_EVENT_META:
-    MetaEvent(track, event);
-    break;
+    case MIDI_EVENT_META:
+        MetaEvent(track, event);
+        break;
 
-    // SysEx events can be ignored.
+        // SysEx events can be ignored.
 
-  case MIDI_EVENT_SYSEX:
-  case MIDI_EVENT_SYSEX_SPLIT:
-    break;
+    case MIDI_EVENT_SYSEX:
+    case MIDI_EVENT_SYSEX_SPLIT:
+        break;
 
-  default:
+    default:
 #ifdef OPL_MIDI_DEBUG
-    lprintf(LO_WARN, "Unknown MIDI event type %i\n", event->event_type);
+        lprintf(LO_WARN, "Unknown MIDI event type %i\n", event->event_type);
 #endif
-    break;
-  }
+        break;
+    }
 }
 
 static void ScheduleTrack(opl_track_data_t *track);
 
 // Restart a song from the beginning.
 
-static void RestartSong(void) {
-  unsigned int i;
+static void RestartSong(void)
+{
+    unsigned int i;
 
-  running_tracks = num_tracks;
+    running_tracks = num_tracks;
 
-  // fix buggy songs that forget to terminate notes held over loop point
-  // sdl_mixer does this as well
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel != NULL &&
-        voices[i].current_instr < percussion_instrs) {
-      VoiceKeyOff(&voices[i]);
+    // fix buggy songs that forget to terminate notes held over loop point
+    // sdl_mixer does this as well
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel != NULL &&
+            voices[i].current_instr < percussion_instrs)
+        {
+            VoiceKeyOff(&voices[i]);
+        }
     }
-  }
 
-  for (i = 0; i < num_tracks; ++i) {
-    MIDI_RestartIterator(tracks[i].iter);
-    ScheduleTrack(&tracks[i]);
-  }
+    for (i = 0; i < num_tracks; ++i)
+    {
+        MIDI_RestartIterator(tracks[i].iter);
+        ScheduleTrack(&tracks[i]);
+    }
 }
 
 // Callback function invoked when another event needs to be read from
 // a track.
 
-static void TrackTimerCallback(void *arg) {
-  opl_track_data_t *track = (opl_track_data_t *)arg;
-  midi_event_t *event;
+static void TrackTimerCallback(void *arg)
+{
+    opl_track_data_t *track = (opl_track_data_t *)arg;
+    midi_event_t *event;
 
-  // Get the next event and process it.
+    // Get the next event and process it.
 
-  if (!MIDI_GetNextEvent(track->iter, &event)) {
-    return;
-  }
-
-  ProcessEvent(track, event);
-
-  // End of track?
-
-  if (event->event_type == MIDI_EVENT_META &&
-      event->data.meta.type == MIDI_META_END_OF_TRACK) {
-    --running_tracks;
-
-    // When all tracks have finished, restart the song.
-
-    if (running_tracks <= 0 && song_looping) {
-      RestartSong();
+    if (!MIDI_GetNextEvent(track->iter, &event))
+    {
+        return;
     }
 
-    return;
-  }
+    ProcessEvent(track, event);
 
-  // Reschedule the callback for the next event in the track.
+    // End of track?
 
-  ScheduleTrack(track);
+    if (event->event_type == MIDI_EVENT_META &&
+        event->data.meta.type == MIDI_META_END_OF_TRACK)
+    {
+        --running_tracks;
+
+        // When all tracks have finished, restart the song.
+
+        if (running_tracks <= 0 && song_looping)
+        {
+            RestartSong();
+        }
+
+        return;
+    }
+
+    // Reschedule the callback for the next event in the track.
+
+    ScheduleTrack(track);
 }
 
-static void ScheduleTrack(opl_track_data_t *track) {
-  unsigned int nticks;
-  unsigned int ms;
-  static int total = 0;
+static void ScheduleTrack(opl_track_data_t *track)
+{
+    unsigned int nticks;
+    unsigned int ms;
+    static int total = 0;
 
-  // Get the number of milliseconds until the next event.
+    // Get the number of milliseconds until the next event.
 
-  nticks = MIDI_GetDeltaTime(track->iter);
-  ms = (nticks * track->ms_per_beat) / track->ticks_per_beat;
-  total += ms;
+    nticks = MIDI_GetDeltaTime(track->iter);
+    ms = (nticks * track->ms_per_beat) / track->ticks_per_beat;
+    total += ms;
 
-  // Set a timer to be invoked when the next event is
-  // ready to play.
+    // Set a timer to be invoked when the next event is
+    // ready to play.
 
-  OPL_SetCallback(ms, TrackTimerCallback, track);
+    OPL_SetCallback(ms, TrackTimerCallback, track);
 }
 
 // Initialize a channel.
 
-static void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel) {
-  // TODO: Work out sensible defaults?
+static void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel)
+{
+    // TODO: Work out sensible defaults?
 
-  channel->instrument = &main_instrs[0];
-  channel->volume = 127;
-  channel->bend = 0;
+    channel->instrument = &main_instrs[0];
+    channel->volume = 127;
+    channel->bend = 0;
 }
 
 // Start a MIDI track playing:
 
-static void StartTrack(const midi_file_t *file, unsigned int track_num) {
-  opl_track_data_t *track;
-  unsigned int i;
+static void StartTrack(const midi_file_t *file, unsigned int track_num)
+{
+    opl_track_data_t *track;
+    unsigned int i;
 
-  track = &tracks[track_num];
-  track->iter = MIDI_IterateTrack(file, track_num);
-  track->ticks_per_beat = MIDI_GetFileTimeDivision(file);
+    track = &tracks[track_num];
+    track->iter = MIDI_IterateTrack(file, track_num);
+    track->ticks_per_beat = MIDI_GetFileTimeDivision(file);
 
-  // Default is 120 bpm.
-  // TODO: this is wrong
+    // Default is 120 bpm.
+    // TODO: this is wrong
 
-  track->ms_per_beat = 500;
+    track->ms_per_beat = 500;
 
-  for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i) {
-    InitChannel(track, &track->channels[i]);
-  }
+    for (i = 0; i < MIDI_CHANNELS_PER_TRACK; ++i)
+    {
+        InitChannel(track, &track->channels[i]);
+    }
 
-  // Schedule the first event.
+    // Schedule the first event.
 
-  ScheduleTrack(track);
+    ScheduleTrack(track);
 }
 
 // Start playing a mid
 
-static void I_OPL_PlaySong(const void *handle, int looping) {
-  const midi_file_t *file;
-  unsigned int i;
+static void I_OPL_PlaySong(const void *handle, int looping)
+{
+    const midi_file_t *file;
+    unsigned int i;
 
-  if (!music_initialized || handle == NULL) {
-    return;
-  }
-
-  file = (midi_file_t *)handle;
-
-  // Allocate track data.
-
-  tracks = (opl_track_data_t *)malloc(MIDI_NumTracks(file) *
-                                      sizeof(opl_track_data_t));
-
-  num_tracks = MIDI_NumTracks(file);
-  running_tracks = num_tracks;
-  song_looping = looping;
-
-  for (i = 0; i < num_tracks; ++i) {
-    StartTrack(file, i);
-  }
-}
-
-static void I_OPL_PauseSong(void) {
-  unsigned int i;
-
-  if (!music_initialized) {
-    return;
-  }
-
-  // Pause OPL callbacks.
-
-  OPL_SetPaused(1);
-
-  // Turn off all main instrument voices (not percussion).
-  // This is what Vanilla does.
-
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel != NULL &&
-        voices[i].current_instr < percussion_instrs) {
-      VoiceKeyOff(&voices[i]);
+    if (!music_initialized || handle == NULL)
+    {
+        return;
     }
-  }
-}
 
-static void I_OPL_ResumeSong(void) {
-  if (!music_initialized) {
-    return;
-  }
+    file = (midi_file_t *)handle;
 
-  OPL_SetPaused(0);
-}
+    // Allocate track data.
 
-static void I_OPL_StopSong(void) {
-  unsigned int i;
+    tracks = (opl_track_data_t *)malloc(MIDI_NumTracks(file) *
+                                        sizeof(opl_track_data_t));
 
-  if (!music_initialized) {
-    return;
-  }
+    num_tracks = MIDI_NumTracks(file);
+    running_tracks = num_tracks;
+    song_looping = looping;
 
-  // Stop all playback.
-
-  OPL_ClearCallbacks();
-
-  // Free all voices.
-
-  for (i = 0; i < OPL_NUM_VOICES; ++i) {
-    if (voices[i].channel != NULL) {
-      VoiceKeyOff(&voices[i]);
-      ReleaseVoice(&voices[i]);
+    for (i = 0; i < num_tracks; ++i)
+    {
+        StartTrack(file, i);
     }
-  }
-
-  // Free all track data.
-
-  for (i = 0; i < num_tracks; ++i) {
-    MIDI_FreeIterator(tracks[i].iter);
-  }
-
-  free(tracks);
-
-  tracks = NULL;
-  num_tracks = 0;
 }
 
-static void I_OPL_UnRegisterSong(const void *handle) {
-  if (!music_initialized) {
-    return;
-  }
+static void I_OPL_PauseSong(void)
+{
+    unsigned int i;
 
-  if (handle != NULL) {
-    MIDI_FreeFile((midi_file_t *)handle);
-  }
+    if (!music_initialized)
+    {
+        return;
+    }
+
+    // Pause OPL callbacks.
+
+    OPL_SetPaused(1);
+
+    // Turn off all main instrument voices (not percussion).
+    // This is what Vanilla does.
+
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel != NULL &&
+            voices[i].current_instr < percussion_instrs)
+        {
+            VoiceKeyOff(&voices[i]);
+        }
+    }
+}
+
+static void I_OPL_ResumeSong(void)
+{
+    if (!music_initialized)
+    {
+        return;
+    }
+
+    OPL_SetPaused(0);
+}
+
+static void I_OPL_StopSong(void)
+{
+    unsigned int i;
+
+    if (!music_initialized)
+    {
+        return;
+    }
+
+    // Stop all playback.
+
+    OPL_ClearCallbacks();
+
+    // Free all voices.
+
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel != NULL)
+        {
+            VoiceKeyOff(&voices[i]);
+            ReleaseVoice(&voices[i]);
+        }
+    }
+
+    // Free all track data.
+
+    for (i = 0; i < num_tracks; ++i)
+    {
+        MIDI_FreeIterator(tracks[i].iter);
+    }
+
+    free(tracks);
+
+    tracks = NULL;
+    num_tracks = 0;
+}
+
+static void I_OPL_UnRegisterSong(const void *handle)
+{
+    if (!music_initialized)
+    {
+        return;
+    }
+
+    if (handle != NULL)
+    {
+        MIDI_FreeFile((midi_file_t *)handle);
+    }
 }
 
 // Determine whether memory block is a .mid file
 
-static dboolean IsMid(byte *mem, int len) {
-  return len > 4 && !memcmp(mem, "MThd", 4);
+static dboolean IsMid(byte *mem, int len)
+{
+    return len > 4 && !memcmp(mem, "MThd", 4);
 }
 
 // now only takes files in MIDI format
-static const void *I_OPL_RegisterSong(const void *data, unsigned len) {
-  midi_file_t *result;
-  midimem_t mf;
+static const void *I_OPL_RegisterSong(const void *data, unsigned len)
+{
+    midi_file_t *result;
+    midimem_t mf;
 
-  if (!music_initialized) {
-    return NULL;
-  }
-  mf.len = len;
-  mf.pos = 0;
-  mf.data = (byte *)data;
+    if (!music_initialized)
+    {
+        return NULL;
+    }
+    mf.len = len;
+    mf.pos = 0;
+    mf.data = (byte *)data;
 
-  // NSM: if a file has a miniscule timecode we have to not load it.
-  // if it's 0, we'll hang in scheduling and never finish.  if it's
-  // very small but close to 0, there's probably something wrong with it
+    // NSM: if a file has a miniscule timecode we have to not load it.
+    // if it's 0, we'll hang in scheduling and never finish.  if it's
+    // very small but close to 0, there's probably something wrong with it
 
-  // this check of course isn't very accurate, but to actually get the
-  // time numbers we have to traverse the tracks and everything
-  if (mf.len < 100) {
-    lprintf(LO_WARN, "I_OPL_RegisterSong: Very short MIDI (%li bytes)\n",
-            mf.len);
-    return NULL;
-  }
+    // this check of course isn't very accurate, but to actually get the
+    // time numbers we have to traverse the tracks and everything
+    if (mf.len < 100)
+    {
+        lprintf(LO_WARN, "I_OPL_RegisterSong: Very short MIDI (%li bytes)\n",
+                mf.len);
+        return NULL;
+    }
 
-  result = MIDI_LoadFileSpecial(&mf);
+    result = MIDI_LoadFileSpecial(&mf);
 
-  if (result == NULL) {
-    lprintf(LO_WARN, "I_OPL_RegisterSong: Failed to load MID.\n");
-  }
+    if (result == NULL)
+    {
+        lprintf(LO_WARN, "I_OPL_RegisterSong: Failed to load MID.\n");
+    }
 
-  return result;
+    return result;
 }
 
-static void I_OPL_ShutdownMusic(void) {
-  if (music_initialized) {
-    // Stop currently-playing track, if there is one:
+static void I_OPL_ShutdownMusic(void)
+{
+    if (music_initialized)
+    {
+        // Stop currently-playing track, if there is one:
 
-    I_OPL_StopSong();
+        I_OPL_StopSong();
 
-    OPL_Shutdown();
+        OPL_Shutdown();
 
-    // Release GENMIDI lump
+        // Release GENMIDI lump
 
-    W_UnlockLumpName("GENMIDI");
+        W_UnlockLumpName("GENMIDI");
 
-    music_initialized = false;
-  }
+        music_initialized = false;
+    }
 }
 
 // Initialize music subsystem
 
-int I_OPL_InitMusic(int samplerate) {
+int I_OPL_InitMusic(int samplerate)
+{
 
-  if (!OPL_Init(samplerate)) {
-    // printf("Dude.  The Adlib isn't responding.\n");
-    return 0;
-  }
+    if (!OPL_Init(samplerate))
+    {
+        // printf("Dude.  The Adlib isn't responding.\n");
+        return 0;
+    }
 
-  // Load instruments from GENMIDI lump:
+    // Load instruments from GENMIDI lump:
 
-  if (!LoadInstrumentTable()) {
-    OPL_Shutdown();
-    return false;
-  }
+    if (!LoadInstrumentTable())
+    {
+        OPL_Shutdown();
+        return false;
+    }
 
-  InitVoices();
+    InitVoices();
 
-  tracks = NULL;
-  num_tracks = 0;
-  music_initialized = true;
+    tracks = NULL;
+    num_tracks = 0;
+    music_initialized = true;
 
-  return 1;
+    return 1;
 }
 
-const char *I_OPL_SynthName(void) { return "opl2 synth player"; }
+const char *I_OPL_SynthName(void)
+{
+    return "opl2 synth player";
+}
 
-void I_OPL_RenderSamples(void *dest, unsigned nsamp) {
-  OPL_Render_Samples(dest, nsamp);
+void I_OPL_RenderSamples(void *dest, unsigned nsamp)
+{
+    OPL_Render_Samples(dest, nsamp);
 }
 
 const music_player_t opl_synth_player = {

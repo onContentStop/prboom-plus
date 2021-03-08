@@ -1135,7 +1135,7 @@ state_t states[NUMSTATES] = {
 
 #define BFGDELAY 1
 #define OLDBFG_1FRAMES(x)                                                      \
-  {SPR_BFGG, 1, BFGDELAY, A_FireOldBFG, x + S_OLDBFG1 + 2},
+    {SPR_BFGG, 1, BFGDELAY, A_FireOldBFG, x + S_OLDBFG1 + 2},
 #define OLDBFG_2FRAMES(x) OLDBFG_1FRAMES(x) OLDBFG_1FRAMES(x + 1)
 #define OLDBFG_4FRAMES(x) OLDBFG_2FRAMES(x) OLDBFG_2FRAMES(x + 2)
 #define OLDBFG_8FRAMES(x) OLDBFG_4FRAMES(x) OLDBFG_4FRAMES(x + 4)

@@ -38,7 +38,13 @@
 #include <limits.h>
 
 /* Bounding box coordinate storage. */
-enum { BOXTOP, BOXBOTTOM, BOXLEFT, BOXRIGHT }; /* bbox coordinates */
+enum
+{
+    BOXTOP,
+    BOXBOTTOM,
+    BOXLEFT,
+    BOXRIGHT
+}; /* bbox coordinates */
 
 /* Bounding box functions. */
 

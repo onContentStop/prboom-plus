@@ -33,10 +33,11 @@ typedef void (*pcsound_callback_func)(int *duration, int *frequency);
 typedef int (*pcsound_init_func)(pcsound_callback_func callback);
 typedef void (*pcsound_shutdown_func)(void);
 
-struct pcsound_driver_s {
-  const char *name;
-  pcsound_init_func init_func;
-  pcsound_shutdown_func shutdown_func;
+struct pcsound_driver_s
+{
+    const char *name;
+    pcsound_init_func init_func;
+    pcsound_shutdown_func shutdown_func;
 };
 
 int PCSound_Init(pcsound_callback_func callback_func);
