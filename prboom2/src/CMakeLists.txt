@@ -9,204 +9,204 @@ endfunction()
 # PrBoom main executable
 
 set(COMMON_SRC
-    am_map.c
+    am_map.cc
     am_map.h
     doomdata.h
-    doomdef.c
+    doomdef.cc
     doomdef.h
-    doomstat.c
+    doomstat.cc
     doomstat.h
     doomtype.h
-    dstrings.c
+    dstrings.cc
     dstrings.h
-    d_deh.c
+    d_deh.cc
     d_deh.h
     d_englsh.h
     d_event.h
-    d_items.c
+    d_items.cc
     d_items.h
-    d_main.c
+    d_main.cc
     d_main.h
     d_net.h
     d_player.h
     d_think.h
     d_ticcmd.h
-    e6y.c
+    e6y.cc
     e6y.h
-    f_finale.c
+    f_finale.cc
     f_finale.h
-    f_finale2.c
-    f_wipe.c
+    f_finale2.cc
+    f_wipe.cc
     f_wipe.h
-    g_game.c
+    g_game.cc
     g_game.h
-    g_overflow.c
+    g_overflow.cc
     g_overflow.h
-    hu_lib.c
+    hu_lib.cc
     hu_lib.h
-    hu_stuff.c
+    hu_stuff.cc
     hu_stuff.h
-    hu_tracers.c
+    hu_tracers.cc
     hu_tracers.h
-    info.c
+    info.cc
     info.h
-    i_capture.c
+    i_capture.cc
     i_capture.h
     i_joy.h
     i_main.h
     i_network.h
-    i_pcsound.c
+    i_pcsound.cc
     i_pcsound.h
     i_sound.h
     i_system.h
     i_video.h
-    lprintf.c
+    lprintf.cc
     lprintf.h
-    md5.c
+    md5.cc
     md5.h
-    m_argv.c
+    m_argv.cc
     m_argv.h
-    m_bbox.c
+    m_bbox.cc
     m_bbox.h
-    m_cheat.c
+    m_cheat.cc
     m_cheat.h
     m_fixed.h
-    m_menu.c
+    m_menu.cc
     m_menu.h
-    m_misc.c
+    m_misc.cc
     m_misc.h
-    m_random.c
+    m_random.cc
     m_random.h
     m_swap.h
     protocol.h
-    p_ceilng.c
-    p_checksum.c
+    p_ceilng.cc
+    p_checksum.cc
     p_checksum.h
-    p_doors.c
-    p_enemy.c
+    p_doors.cc
+    p_enemy.cc
     p_enemy.h
-    p_floor.c
-    p_genlin.c
-    p_inter.c
+    p_floor.cc
+    p_genlin.cc
+    p_inter.cc
     p_inter.h
-    p_lights.c
-    p_map.c
+    p_lights.cc
+    p_map.cc
     p_map.h
-    p_maputl.c
+    p_maputl.cc
     p_maputl.h
-    p_mobj.c
+    p_mobj.cc
     p_mobj.h
-    p_plats.c
-    p_pspr.c
+    p_plats.cc
+    p_pspr.cc
     p_pspr.h
-    p_saveg.c
+    p_saveg.cc
     p_saveg.h
-    p_setup.c
+    p_setup.cc
     p_setup.h
-    p_sight.c
-    p_spec.c
+    p_sight.cc
+    p_spec.cc
     p_spec.h
-    p_switch.c
-    p_telept.c
-    p_tick.c
+    p_switch.cc
+    p_telept.cc
+    p_tick.cc
     p_tick.h
-    p_user.c
+    p_user.cc
     p_user.h
-    r_bsp.c
+    r_bsp.cc
     r_bsp.h
-    r_data.c
+    r_data.cc
     r_data.h
     r_defs.h
-    r_demo.c
+    r_demo.cc
     r_demo.h
-    r_draw.c
+    r_draw.cc
     r_draw.h
-    r_filter.c
+    r_filter.cc
     r_filter.h
-    r_fps.c
+    r_fps.cc
     r_fps.h
-    r_main.c
+    r_main.cc
     r_main.h
-    r_patch.c
+    r_patch.cc
     r_patch.h
-    r_plane.c
+    r_plane.cc
     r_plane.h
-    r_segs.c
+    r_segs.cc
     r_segs.h
-    r_sky.c
+    r_sky.cc
     r_sky.h
     r_state.h
-    r_things.c
+    r_things.cc
     r_things.h
-    scanner.cpp
+    scanner.cc
     scanner.h
-    sc_man.c
+    sc_man.cc
     sc_man.h
-    sounds.c
+    sounds.cc
     sounds.h
-    statdump.c
+    statdump.cc
     statdump.h
-    st_lib.c
+    st_lib.cc
     st_lib.h
-    st_stuff.c
+    st_stuff.cc
     st_stuff.h
-    s_advsound.c
+    s_advsound.cc
     s_advsound.h
-    s_sound.c
+    s_sound.cc
     s_sound.h
-    tables.c
+    tables.cc
     tables.h
-    umapinfo.cpp
+    umapinfo.cc
     umapinfo.h
-    version.c
+    version.cc
     version.h
-    v_trans.c
+    v_trans.cc
     v_trans.h
-    v_video.c
+    v_video.cc
     v_video.h
-    wi_stuff.c
+    wi_stuff.cc
     wi_stuff.h
-    w_wad.c
+    w_wad.cc
     w_wad.h
-    z_bmalloc.c
+    z_bmalloc.cc
     z_bmalloc.h
-    z_zone.c
+    z_zone.cc
     z_zone.h
 )
 
 set(NET_CLIENT_SRC
-    d_client.c
+    d_client.cc
 )
 
 if(HAVE_MMAP)
-    set(WAD_SRC w_mmap.c)
+    set(WAD_SRC w_mmap.cc)
 else()
-    set(WAD_SRC w_memcache.c)
+    set(WAD_SRC w_memcache.cc)
 endif()
 
 set(MUS2MID_SRC
-    memio.c
+    memio.cc
     memio.h
-    mus2mid.c
+    mus2mid.cc
     mus2mid.h
 )
 
 set(SDLDOOM_SOURCES
-    SDL/i_joy.c
-    SDL/i_main.c
-    SDL/i_network.c
-    SDL/i_sound.c
-    SDL/i_sshot.c
-    SDL/i_system.c
-    SDL/i_video.c
+    SDL/i_joy.cc
+    SDL/i_main.cc
+    SDL/i_network.cc
+    SDL/i_sound.cc
+    SDL/i_sshot.cc
+    SDL/i_system.cc
+    SDL/i_video.cc
 )
 
 set(PCSOUND_SOURCES
-    PCSOUND/pcsound.c
+    PCSOUND/pcsound.cc
     PCSOUND/pcsound.h
-    PCSOUND/pcsound_linux.c
-    PCSOUND/pcsound_sdl.c
-    PCSOUND/pcsound_win32.c
+    PCSOUND/pcsound_linux.cc
+    PCSOUND/pcsound_sdl.cc
+    PCSOUND/pcsound_win32.cc
 )
 
 set(TEXTSCREEN_SOURCES
@@ -214,32 +214,32 @@ set(TEXTSCREEN_SOURCES
     TEXTSCREEN/txt_main.h
     TEXTSCREEN/txt_font.h
     TEXTSCREEN/txt_largefont.h
-    TEXTSCREEN/txt_sdl.c
+    TEXTSCREEN/txt_sdl.cc
     TEXTSCREEN/txt_sdl.h
     TEXTSCREEN/txt_smallfont.h
 )
 
 set(DOOMMUSIC_SOURCES
-    MUSIC/dbopl.c
+    MUSIC/dbopl.cc
     MUSIC/dbopl.h
-    MUSIC/dumbplayer.c
+    MUSIC/dumbplayer.cc
     MUSIC/dumbplayer.h
-    MUSIC/flplayer.c
+    MUSIC/flplayer.cc
     MUSIC/flplayer.h
-    MUSIC/madplayer.c
+    MUSIC/madplayer.cc
     MUSIC/madplayer.h
-    MUSIC/midifile.c
+    MUSIC/midifile.cc
     MUSIC/midifile.h
     MUSIC/musicplayer.h
-    MUSIC/opl.c
+    MUSIC/opl.cc
     MUSIC/opl.h
-    MUSIC/oplplayer.c
+    MUSIC/oplplayer.cc
     MUSIC/oplplayer.h
-    MUSIC/opl_queue.c
+    MUSIC/opl_queue.cc
     MUSIC/opl_queue.h
-    MUSIC/portmidiplayer.c
+    MUSIC/portmidiplayer.cc
     MUSIC/portmidiplayer.h
-    MUSIC/vorbisplayer.c
+    MUSIC/vorbisplayer.cc
     MUSIC/vorbisplayer.h
 )
 
@@ -266,28 +266,28 @@ function(AddGameExecutable TARGET SOURCES)
     if(OPENGL_FOUND AND OPENGL_GLU_FOUND)
         set(SOURCES
             ${SOURCES}
-            gl_clipper.c
-            gl_detail.c
-            gl_drawinfo.c
-            gl_fbo.c
-            gl_gamma.c
-            gl_hires.c
-            gl_hqresize.c
+            gl_clipper.cc
+            gl_detail.cc
+            gl_drawinfo.cc
+            gl_fbo.cc
+            gl_gamma.cc
+            gl_hires.cc
+            gl_hqresize.cc
             gl_intern.h
-            gl_light.c
-            gl_main.c
-            gl_map.c
-            gl_missingtexture.c
-            gl_opengl.c
+            gl_light.cc
+            gl_main.cc
+            gl_map.cc
+            gl_missingtexture.cc
+            gl_opengl.cc
             gl_opengl.h
-            gl_preprocess.c
-            gl_shader.c
-            gl_shadow.c
-            gl_sky.c
+            gl_preprocess.cc
+            gl_shader.cc
+            gl_shadow.cc
+            gl_sky.cc
             gl_struct.h
-            gl_texture.c
-            gl_vertex.c
-            gl_wipe.c
+            gl_texture.cc
+            gl_vertex.cc
+            gl_wipe.cc
         )
     endif()
 
@@ -296,9 +296,9 @@ function(AddGameExecutable TARGET SOURCES)
         set(SOURCES
             ${SOURCES}
             ../ICONS/icons.rc
-            e6y_launcher.c
+            e6y_launcher.cc
             e6y_launcher.h
-            SDL/SDL_windows_main.c
+            SDL/SDL_windows_main.cc
         )
     endif()
 
@@ -398,20 +398,20 @@ option(BUILD_SERVER "Build PrBoom-Plus server executable" ON)
 
 if(BUILD_SERVER AND SDL2_NET_FOUND)
     set(PRBOOM_PLUS_GAME_SERVER_SOURCES
-        d_server.c
+        d_server.cc
         protocol.h
-        SDL/i_network.c
+        SDL/i_network.cc
     )
 
     if(MSVC)
         set(PRBOOM_PLUS_GAME_SERVER_SOURCES
             ${PRBOOM_PLUS_GAME_SERVER_SOURCES}
-            SDL/i_system.c
+            SDL/i_system.cc
         )
     else()
         set(PRBOOM_PLUS_GAME_SERVER_SOURCES
             ${PRBOOM_PLUS_GAME_SERVER_SOURCES}
-            POSIX/i_system.c
+            POSIX/i_system.cc
         )
     endif()
 

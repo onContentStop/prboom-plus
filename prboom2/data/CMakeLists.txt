@@ -2,16 +2,16 @@
 
 if(NOT CMAKE_CROSSCOMPILING)
     add_executable(rdatawad 
-        rd_main.c
-        rd_util.c
+        rd_main.cc
+        rd_util.cc
         rd_util.h
-        rd_output.c
+        rd_output.cc
         rd_output.h
-        rd_sound.c
+        rd_sound.cc
         rd_sound.h
-        rd_palette.c
+        rd_palette.cc
         rd_palette.h
-        rd_graphic.c
+        rd_graphic.cc
         rd_graphic.h
     )
     target_include_directories(rdatawad PRIVATE ${CMAKE_BINARY_DIR})
