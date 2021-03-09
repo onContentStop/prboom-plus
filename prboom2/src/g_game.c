@@ -4248,7 +4248,7 @@ dboolean G_CheckDemoStatus (void)
 
       M_SaveDefaults();
 
-      I_Error ("Timed %u gametics in %u realtics = %-.1f frames per second",
+      I_Error ("Timed %u gametics in %u realtics = %-.1f frames per second\n",
                (unsigned) gametic,realtics,
                (unsigned) gametic * (double) TICRATE / realtics);
     }
