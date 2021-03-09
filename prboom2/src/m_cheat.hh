@@ -34,7 +34,7 @@
 #ifndef __M_CHEAT__
 #define __M_CHEAT__
 
-#include "d_ticcmd.h"
+#include "d_ticcmd.hh"
 #include <stddef.h>
 
 #define CHEAT(cheat, deh_cheat, when, func, arg)                               \

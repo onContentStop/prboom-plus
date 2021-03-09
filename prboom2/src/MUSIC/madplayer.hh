@@ -31,7 +31,7 @@
 #ifndef MADPLAYER_H
 #define MADPLAYER_H
 
-#include "musicplayer.h"
+#include "musicplayer.hh"
 
 extern const music_player_t mp_player;
 

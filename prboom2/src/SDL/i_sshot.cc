@@ -38,19 +38,19 @@
 
 #include <stdlib.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #ifdef HAVE_LIBSDL2_IMAGE
 #include <SDL_image.h>
 #endif
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "v_video.h"
-#include "z_zone.h"
+#include "../doomdef.hh"
+#include "../doomstat.hh"
+#include "../doomtype.hh"
+#include "../i_video.hh"
+#include "../lprintf.hh"
+#include "../v_video.hh"
+#include "../z_zone.hh"
 
 int renderW;
 int renderH;

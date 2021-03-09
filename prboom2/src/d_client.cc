@@ -48,28 +48,28 @@
 #endif
 
 #ifdef USE_SDL_NET
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #endif
 
-#include "d_net.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "z_zone.h"
+#include "d_net.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "z_zone.hh"
 
-#include "d_main.h"
-#include "g_game.h"
-#include "m_menu.h"
-#include "p_checksum.h"
+#include "d_main.hh"
+#include "g_game.hh"
+#include "m_menu.hh"
+#include "p_checksum.hh"
 
-#include "e6y.h"
-#include "i_main.h"
-#include "i_network.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "protocol.h"
-#include "r_fps.h"
+#include "e6y.hh"
+#include "i_main.hh"
+#include "i_network.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "protocol.hh"
+#include "r_fps.hh"
 
 static dboolean server;
 static int remotetic;  // Tic expected from the remote

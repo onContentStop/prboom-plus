@@ -32,7 +32,7 @@
 #include "config.h"
 #endif
 
-#include "musicplayer.h"
+#include "musicplayer.hh"
 
 #ifndef HAVE_LIBVORBISFILE
 #include <string.h>

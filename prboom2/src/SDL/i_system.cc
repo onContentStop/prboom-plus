@@ -47,6 +47,7 @@
 #include <time.h>
 #include <signal.h>
 #include <string.h>
+#include <array>
 #ifdef _MSC_VER
 #define F_OK 0 /* Check for file existence */
 #define W_OK 2 /* Check for write permission */
@@ -58,7 +59,7 @@
 #endif
 #include <sys/stat.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -74,29 +75,30 @@
 #include <sys/stat.h>
 
 #ifndef PRBOOM_SERVER
-#include "m_argv.h"
+#include "../m_argv.hh"
 #endif
-#include "doomdef.h"
-#include "doomtype.h"
-#include "lprintf.h"
+#include "../doomdef.hh"
+#include "../doomtype.hh"
+#include "../doomstat.hh"
+#include "../lprintf.hh"
 #ifndef PRBOOM_SERVER
-#include "d_player.h"
-#include "e6y.h"
-#include "m_fixed.h"
-#include "r_fps.h"
+#include "../d_player.hh"
+#include "../e6y.hh"
+#include "../m_fixed.hh"
+#include "../r_fps.hh"
 #endif
-#include "i_system.h"
+#include "../i_system.hh"
 
 #ifdef __GNUG__
-#pragma implementation "i_system.h"
+#pragma implementation "../i_system.hh"
 #endif
-#include "i_system.h"
+#include "../i_system.hh"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "z_zone.h"
+#include "../z_zone.hh"
 
 void I_uSleep(unsigned long usecs)
 {
@@ -417,7 +419,8 @@ const char *I_DoomExeDir(void)
         char *home = getenv("HOME");
         size_t len = strlen(home);
 
-        base = malloc(len + strlen(prboom_dir) + 1);
+        base = static_cast<char *>(
+            malloc(len + strlen(static_cast<const char *>(prboom_dir)) + 1));
         strcpy(base, home);
         // I've had trouble with trailing slashes before...
         if (base[len - 1] == '/')
@@ -475,27 +478,28 @@ dboolean HasTrailingSlash(const char *dn)
 char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
 {
     // lookup table of directories to search
-    static struct
+    struct Search
     {
-        const char *dir;           // directory
-        const char *sub;           // subdirectory
-        const char *env;           // environment variable
-        const char *(*func)(void); // for I_DoomExeDir
-    } search0[] =
-        {
-            {NULL, NULL, NULL, I_DoomExeDir}, // config directory
-            {NULL},                           // current working directory
-            {NULL, NULL, "DOOMWADDIR"},       // run-time $DOOMWADDIR
-            {DOOMWADDIR},                // build-time configured DOOMWADDIR
-            {NULL, "doom", "HOME"},      // ~/doom
-            {NULL, "doom/iwad", "HOME"}, // ~/doom/iwad
-            {NULL, NULL, "HOME"},        // ~
-            {"/usr/local/share/games/doom"},
-            {"/usr/share/games/doom"},
-            {"/usr/local/share/doom"},
-            {"/usr/share/doom"},
-        },
-      *search;
+        const char *dir;       // directory
+        const char *sub;       // subdirectory
+        const char *env;       // environment variable
+        const char *(*func)(); // for I_DoomExeDir
+    };
+    static std::array<Search, 12> search0 = {{
+        {NULL},
+        {NULL, NULL, I_DoomExeDir},  // config directory
+        {NULL},                      // current working directory
+        {NULL, NULL, "DOOMWADDIR"},  // run-time $DOOMWADDIR
+        {DOOMWADDIR},                // build-time configured DOOMWADDIR
+        {NULL, "doom", "HOME"},      // ~/doom
+        {NULL, "doom/iwad", "HOME"}, // ~/doom/iwad
+        {NULL, NULL, "HOME"},        // ~
+        {"/usr/local/share/games/doom"},
+        {"/usr/share/games/doom"},
+        {"/usr/local/share/doom"},
+        {"/usr/share/doom"},
+    }};
+    static Search *search;
 
     static size_t num_search;
     size_t i;
@@ -513,9 +517,9 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
         char *dwp;
 
         // initialize with the static lookup table
-        num_search = sizeof(search0) / sizeof(*search0);
-        search = malloc(num_search * sizeof(*search));
-        memcpy(search, search0, num_search * sizeof(*search));
+        num_search = search0.size();
+        search = static_cast<Search *>(malloc(num_search * sizeof(Search)));
+        memcpy(search, search0.data(), num_search * sizeof(Search));
 
         // add each directory from the $DOOMWADPATH environment variable
         if ((dwp = getenv("DOOMWADPATH")))
@@ -533,7 +537,8 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
                     *ptr = '\0';
 
                     num_search++;
-                    search = realloc(search, num_search * sizeof(*search));
+                    search = static_cast<Search *>(
+                        realloc(search, num_search * sizeof(*search)));
                     memset(&search[num_search - 1], 0, sizeof(*search));
                     search[num_search - 1].dir = strdup(left);
 
@@ -546,7 +551,8 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
             }
 
             num_search++;
-            search = realloc(search, num_search * sizeof(*search));
+            search = static_cast<Search *>(
+                realloc(search, num_search * sizeof(*search)));
             memset(&search[num_search - 1], 0, sizeof(*search));
             search[num_search - 1].dir = strdup(left);
 

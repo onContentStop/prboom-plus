@@ -52,29 +52,29 @@ typedef BOOL(WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
 
 #include <errno.h>
 
-#include "../TEXTSCREEN/txt_main.h"
+#include "../TEXTSCREEN/txt_main.hh"
 
-#include "../d_main.h"
-#include "../doomdef.h"
-#include "../doomstat.h"
-#include "../g_game.h"
-#include "../i_main.h"
-#include "../i_sound.h"
-#include "../i_system.h"
-#include "../i_video.h"
-#include "../lprintf.h"
-#include "../m_argv.h"
-#include "../m_fixed.h"
-#include "../m_misc.h"
-#include "../m_random.h"
-#include "../r_fps.h"
-#include "../z_zone.h"
+#include "../d_main.hh"
+#include "../doomdef.hh"
+#include "../doomstat.hh"
+#include "../g_game.hh"
+#include "../i_main.hh"
+#include "../i_sound.hh"
+#include "../i_system.hh"
+#include "../i_video.hh"
+#include "../lprintf.hh"
+#include "../m_argv.hh"
+#include "../m_fixed.hh"
+#include "../m_misc.hh"
+#include "../m_random.hh"
+#include "../r_fps.hh"
+#include "../z_zone.hh"
 
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../e6y.h"
+#include "../e6y.hh"
 
 /* Most of the following has been rewritten by Lee Killough
  *

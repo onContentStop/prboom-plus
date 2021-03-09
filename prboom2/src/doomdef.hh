@@ -46,7 +46,7 @@
 #endif
 
 // This must come first, since it redefines malloc(), free(), etc. -- killough:
-#include "z_zone.h"
+#include "z_zone.hh"
 
 #include <ctype.h>
 #include <limits.h>
@@ -59,9 +59,9 @@
 #define O_BINARY 0
 #endif
 
-#include "doomtype.h"
-#include "m_swap.h"
-#include "version.h"
+#include "doomtype.hh"
+#include "m_swap.hh"
+#include "version.hh"
 
 extern dboolean bfgedition;
 
@@ -148,6 +148,7 @@ extern int SCREEN_320x200;
 
 typedef enum
 {
+    GS_FORCEWIPE = -1,
     GS_LEVEL,
     GS_INTERMISSION,
     GS_FINALE,

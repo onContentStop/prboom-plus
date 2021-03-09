@@ -33,8 +33,8 @@
 #ifndef __HU_STUFF_H__
 #define __HU_STUFF_H__
 
-#include "d_event.h"
-#include "d_think.h"
+#include "d_event.hh"
+#include "d_think.hh"
 
 /*
  * Globally visible constants.

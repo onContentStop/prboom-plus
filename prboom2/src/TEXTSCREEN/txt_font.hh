@@ -364,8 +364,15 @@ static unsigned char main_font_data[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00};
 
+typedef struct
+{
+    unsigned char *data;
+    unsigned int w;
+    unsigned int h;
+} txt_font_t;
+
 static txt_font_t main_font = {
-    main_font_data,
+    static_cast<unsigned char *>(main_font_data),
     8, // width
     16 // height
 };

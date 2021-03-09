@@ -45,7 +45,7 @@ extern UDP_SOCKET udp_socket;
 #define UDP_CHANNEL struct sockaddr
 #endif
 
-#include "protocol.h"
+#include "protocol.hh"
 
 #ifndef IPPORT_RESERVED
 #define IPPORT_RESERVED 1024

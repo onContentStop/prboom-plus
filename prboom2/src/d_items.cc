@@ -33,13 +33,14 @@
  */
 
 // We are referring to sprite numbers.
-#include "doomtype.h"
-#include "info.h"
+#include "doomdef.hh"
+#include "doomtype.hh"
+#include "info.hh"
 
 #ifdef __GNUG__
-#pragma implementation "d_items.h"
+#pragma implementation "d_items.hh"
 #endif
-#include "d_items.h"
+#include "d_items.hh"
 
 //
 // PSPRITE ACTIONS for waepons.
@@ -84,11 +85,11 @@ weaponinfo_t weaponinfo[NUMWEAPONS + 2] = {
     // dseg03:00082E68                 dd 8                    ; speed
     // dseg03:00082E68                 dd 0                    ; istexture
     {// ololo weapon
-     0,
+     static_cast<ammotype_t>(0),
      S_NULL, // states are not used for emulation of weaponinfo overrun
      S_NULL, S_NULL, S_NULL, S_NULL},
     {// preved medved weapon
-     0, S_NULL, S_NULL, S_NULL, S_NULL, S_NULL},
+     static_cast<ammotype_t>(0), S_NULL, S_NULL, S_NULL, S_NULL, S_NULL},
 };
 
 int ammopershot[NUMWEAPONS + 2] = {0, 1, 1, 1, 1, 1, 40, 0, 2, 0, 0};

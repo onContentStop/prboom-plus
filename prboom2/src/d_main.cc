@@ -35,11 +35,12 @@
  *-----------------------------------------------------------------------------
  */
 
+#include "m_misc.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "SDL_timer.h"
+#include "SDL2/SDL_timer.h"
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -51,50 +52,50 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "am_map.h"
-#include "d_deh.h" // Ty 04/08/98 - Externalizations
-#include "d_main.h"
-#include "d_net.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "dstrings.h"
-#include "f_finale.h"
-#include "f_wipe.h"
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "i_main.h"
-#include "i_sound.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "lprintf.h" // jff 08/03/98 - declaration of lprintf
-#include "m_argv.h"
-#include "m_menu.h"
-#include "m_misc.h"
-#include "p_checksum.h"
-#include "p_setup.h"
-#include "r_draw.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "st_stuff.h"
-#include "statdump.h"
-#include "umapinfo.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "wi_stuff.h"
-#include "z_zone.h"
+#include "am_map.hh"
+#include "d_deh.hh" // Ty 04/08/98 - Externalizations
+#include "d_main.hh"
+#include "d_net.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "dstrings.hh"
+#include "f_finale.hh"
+#include "f_wipe.hh"
+#include "g_game.hh"
+#include "hu_stuff.hh"
+#include "i_main.hh"
+#include "i_sound.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "lprintf.hh" // jff 08/03/98 - declaration of lprintf
+#include "m_argv.hh"
+#include "m_menu.hh"
+#include "m_misc.hh"
+#include "p_checksum.hh"
+#include "p_setup.hh"
+#include "r_draw.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "st_stuff.hh"
+#include "statdump.hh"
+#include "umapinfo.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include "wi_stuff.hh"
+#include "z_zone.hh"
 
 // e6y
-#include "e6y.h"
-#include "r_demo.h"
+#include "e6y.hh"
+#include "r_demo.hh"
 #ifdef USE_WINDOWS_LAUNCHER
-#include "e6y_launcher.h"
+#include "e6y_launcher.hh"
 #endif
 
 // NSM
-#include "i_capture.h"
+#include "i_capture.hh"
 
 void GetFirstMap(int *ep,
                  int *map); // Ty 08/29/98 - add "-warp x" functionality
@@ -243,7 +244,7 @@ void D_Display(fixed_t frac)
 {
     static dboolean isborderstate = false;
     static dboolean borderwillneedredraw = false;
-    static gamestate_t oldgamestate = -1;
+    static gamestate_t oldgamestate = GS_FORCEWIPE;
     dboolean wipe;
     dboolean viewactive = false, isborder = false;
 
@@ -275,7 +276,7 @@ void D_Display(fixed_t frac)
     if (setsizeneeded)
     { // change the view size if needed
         R_ExecuteSetViewSize();
-        oldgamestate = -1; // force background redraw
+        oldgamestate = GS_FORCEWIPE; // force background redraw
     }
 
     // save the current screen if about to wipe
@@ -319,10 +320,14 @@ void D_Display(fixed_t frac)
 
         // Work out if the player view is visible, and if there is a border
         viewactive =
-            (!(automapmode & am_active) || (automapmode & am_overlay)) &&
+            (!(automapmode & automapmode_e::am_active) ||
+             static_cast<bool>(automapmode & automapmode_e::am_overlay)) &&
             !inhelpscreens;
-        isborder = viewactive ? (viewheight != SCREENHEIGHT)
-                              : (!inhelpscreens && (automapmode & am_active));
+        isborder =
+            viewactive
+                ? (viewheight != SCREENHEIGHT)
+                : (!inhelpscreens &&
+                   static_cast<bool>(automapmode & automapmode_e::am_active));
 
         if (oldgamestate != GS_LEVEL)
         {
@@ -344,7 +349,8 @@ void D_Display(fixed_t frac)
             // not only if viewactive is true
             borderwillneedredraw =
                 (borderwillneedredraw) ||
-                (((automapmode & am_active) && !(automapmode & am_overlay)));
+                ((static_cast<bool>(automapmode & automapmode_e::am_active) &&
+                  !(automapmode & automapmode_e::am_overlay)));
         }
         if (redrawborderstuff || (V_GetMode() == VID_MODEGL))
             R_DrawViewBorder();
@@ -371,7 +377,7 @@ void D_Display(fixed_t frac)
         use_boom_cm = false;
         frame_fixedcolormap = 0;
 
-        if (automapmode & am_active)
+        if (static_cast<bool>(automapmode & automapmode_e::am_active))
         {
             AM_Drawer();
         }
@@ -379,7 +385,8 @@ void D_Display(fixed_t frac)
         R_RestoreInterpolations();
 
         ST_Drawer(((viewheight != SCREENHEIGHT) ||
-                   ((automapmode & am_active) && !(automapmode & am_overlay))),
+                   (static_cast<bool>(automapmode & automapmode_e::am_active) &&
+                    !(automapmode & automapmode_e::am_overlay))),
                   redrawborderstuff || BorderNeedRefresh,
                   (menuactive == mnact_full));
 
@@ -397,7 +404,8 @@ void D_Display(fixed_t frac)
     {
         // Simplified the "logic" here and no need for x-coord caching - POPE
         V_DrawNamePatch((320 - V_NamePatchWidth("M_PAUSE")) / 2, 4, 0,
-                        "M_PAUSE", CR_DEFAULT, VPT_STRETCH);
+                        "M_PAUSE", CR_DEFAULT,
+                        patch_translation_e::VPT_STRETCH);
     }
 
     // menus go directly to the screen
@@ -520,7 +528,7 @@ static void D_DoomLoop(void)
             char *avi_shot_curr_fname;
             avi_shot_num++;
             len = snprintf(NULL, 0, "%s%06d.tga", avi_shot_fname, avi_shot_num);
-            avi_shot_curr_fname = malloc(len + 1);
+            avi_shot_curr_fname = static_cast<char *>(malloc(len + 1));
             sprintf(avi_shot_curr_fname, "%s%06d.tga", avi_shot_fname,
                     avi_shot_num);
             M_DoScreenShot(avi_shot_curr_fname);
@@ -558,7 +566,8 @@ static void D_PageDrawer(void)
     // proff - added M_DrawCredits
     if (pagename)
     {
-        V_DrawNamePatch(0, 0, 0, pagename, CR_DEFAULT, VPT_STRETCH);
+        V_DrawNamePatch(0, 0, 0, pagename, CR_DEFAULT,
+                        patch_translation_e::VPT_STRETCH);
         // e6y: wide-res
         V_FillBorder(-1, 0);
     }
@@ -721,23 +730,24 @@ void D_AddFile(const char *file, wad_source_t source)
     char *gwa_filename = NULL;
     int len;
 
-    wadfiles = realloc(wadfiles, sizeof(*wadfiles) * (numwadfiles + 1));
-    wadfiles[numwadfiles].name =
-        AddDefaultExtension(strcpy(malloc(strlen(file) + 5), file), ".wad");
+    wadfiles = static_cast<wadfile_info_t *>(
+        realloc(wadfiles, sizeof(*wadfiles) * (numwadfiles + 1)));
+    wadfiles[numwadfiles].name = AddDefaultExtension(
+        strcpy(static_cast<char *>(malloc(strlen(file) + 5)), file), ".wad");
     wadfiles[numwadfiles].src = source; // Ty 08/29/98
     wadfiles[numwadfiles].handle = 0;
 
     // No Rest For The Living
     len = strlen(wadfiles[numwadfiles].name);
-    if (len >= 9 &&
-        !strnicmp(wadfiles[numwadfiles].name + len - 9, "nerve.wad", 9))
+    if (len >= 9 && !M_CaseInsensitiveCompareUntil(
+                        wadfiles[numwadfiles].name + len - 9, "nerve.wad", 9))
         gamemission = pack_nerve;
 
     numwadfiles++;
     // proff: automatically try to add the gwa files
     // proff - moved from w_wad.c
-    gwa_filename =
-        AddDefaultExtension(strcpy(malloc(strlen(file) + 5), file), ".wad");
+    gwa_filename = AddDefaultExtension(
+        strcpy(static_cast<char *>(malloc(strlen(file) + 5)), file), ".wad");
     if (strlen(gwa_filename) > 4)
         if (!strcasecmp(gwa_filename + (strlen(gwa_filename) - 4), ".wad"))
         {
@@ -746,7 +756,8 @@ void D_AddFile(const char *file, wad_source_t source)
             ext[1] = 'g';
             ext[2] = 'w';
             ext[3] = 'a';
-            wadfiles = realloc(wadfiles, sizeof(*wadfiles) * (numwadfiles + 1));
+            wadfiles = static_cast<wadfile_info_t *>(
+                realloc(wadfiles, sizeof(*wadfiles) * (numwadfiles + 1)));
             wadfiles[numwadfiles].name = gwa_filename;
             wadfiles[numwadfiles].src = source; // Ty 08/29/98
             wadfiles[numwadfiles].handle = 0;
@@ -808,7 +819,8 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec)
                 header.numlumps = LittleLong(header.numlumps);
                 header.infotableofs = LittleLong(header.infotableofs);
                 length = header.numlumps;
-                fileinfo = malloc(length * sizeof(filelump_t));
+                fileinfo = static_cast<filelump_t *>(
+                    malloc(length * sizeof(filelump_t)));
                 if (fseek(fp, header.infotableofs, SEEK_SET) ||
                     fread(fileinfo, sizeof(filelump_t), length, fp) != length ||
                     fclose(fp))
@@ -906,18 +918,23 @@ void AddIWAD(const char *iwad)
     case registered:
     case shareware:
         gamemission = doom;
-        if (i >= 8 && !strnicmp(iwad + i - 8, "chex.wad", 8))
+        if (i >= 8 &&
+            !M_CaseInsensitiveCompareUntil(iwad + i - 8, "chex.wad", 8))
             gamemission = chex;
         break;
     case commercial:
         gamemission = doom2;
-        if (i >= 10 && !strnicmp(iwad + i - 10, "doom2f.wad", 10))
+        if (i >= 10 &&
+            !M_CaseInsensitiveCompareUntil(iwad + i - 10, "doom2f.wad", 10))
             language = french;
-        else if (i >= 7 && !strnicmp(iwad + i - 7, "tnt.wad", 7))
+        else if (i >= 7 &&
+                 !M_CaseInsensitiveCompareUntil(iwad + i - 7, "tnt.wad", 7))
             gamemission = pack_tnt;
-        else if (i >= 12 && !strnicmp(iwad + i - 12, "plutonia.wad", 12))
+        else if (i >= 12 && !M_CaseInsensitiveCompareUntil(iwad + i - 12,
+                                                           "plutonia.wad", 12))
             gamemission = pack_plut;
-        else if (i >= 8 && !strnicmp(iwad + i - 8, "hacx.wad", 8))
+        else if (i >= 8 &&
+                 !M_CaseInsensitiveCompareUntil(iwad + i - 8, "hacx.wad", 8))
             gamemission = hacx;
         break;
     default:
@@ -1078,12 +1095,12 @@ static void FindResponseFile(void)
             int index;
             int indexinfile;
             byte *file = NULL;
-            const char **moreargs = malloc(myargc * sizeof(const char *));
+            auto **moreargs = static_cast<const char **>(
+                malloc(myargc * sizeof(const char *)));
             char **newargv;
             // proff 04/05/2000: Added for searching responsefile
-            char *fname;
-
-            fname = malloc(strlen(&myargv[i][i]) + 4 + 1);
+            auto *fname =
+                static_cast<char *>(malloc(strlen(&myargv[i][i]) + 4 + 1));
             strcpy(fname, &myargv[i][1]);
             AddDefaultExtension(fname, ".rsp");
 
@@ -1096,7 +1113,7 @@ static void FindResponseFile(void)
             {
                 size_t fnlen = doom_snprintf(NULL, 0, "%s/%s", I_DoomExeDir(),
                                              &myargv[i][1]);
-                fname = realloc(fname, fnlen + 4 + 1);
+                fname = static_cast<char *>(realloc(fname, fnlen + 4 + 1));
                 doom_snprintf(fname, fnlen + 1, "%s/%s", I_DoomExeDir(),
                               &myargv[i][1]);
                 AddDefaultExtension(fname, ".rsp");
@@ -1119,7 +1136,8 @@ static void FindResponseFile(void)
                 int k;
                 lprintf(LO_ERROR, "\nResponse file empty!\n");
 
-                newargv = calloc(sizeof(newargv[0]), myargc);
+                newargv =
+                    static_cast<char **>(calloc(sizeof(newargv[0]), myargc));
                 newargv[0] = myargv[0];
                 for (k = 1, index = 1; k < myargc; k++)
                 {
@@ -1137,7 +1155,7 @@ static void FindResponseFile(void)
 
             {
                 char *firstargv = myargv[0];
-                newargv = calloc(sizeof(newargv[0]), 1);
+                newargv = static_cast<char **>(calloc(sizeof(newargv[0]), 1));
                 newargv[0] = firstargv;
             }
 
@@ -1154,7 +1172,7 @@ static void FindResponseFile(void)
                     }
                     if (size > 0)
                     {
-                        char *s = malloc(size + 1);
+                        auto *s = static_cast<char *>(malloc(size + 1));
                         char *p = s;
                         int quoted = 0;
 
@@ -1181,16 +1199,17 @@ static void FindResponseFile(void)
 
                         // Terminate string, realloc and add to argv
                         *p = 0;
-                        newargv = realloc(newargv, sizeof(newargv[0]) *
-                                                       (indexinfile + 1));
-                        newargv[indexinfile++] = realloc(s, strlen(s) + 1);
+                        newargv = static_cast<char **>(realloc(
+                            newargv, sizeof(newargv[0]) * (indexinfile + 1)));
+                        newargv[indexinfile++] =
+                            static_cast<char *>(realloc(s, strlen(s) + 1));
                     }
                 } while (size > 0);
             }
             free(file);
 
-            newargv =
-                realloc(newargv, sizeof(newargv[0]) * (indexinfile + index));
+            newargv = static_cast<char **>(
+                realloc(newargv, sizeof(newargv[0]) * (indexinfile + index)));
             memcpy((void *)&newargv[indexinfile], moreargs,
                    index * sizeof(moreargs[0]));
             free((void *)moreargs);
@@ -1272,10 +1291,10 @@ static void DoLooseFiles(void)
                   {"-playdemo", &lmps, &lmpcount},
                   {0}};
 
-    wads = malloc(myargc * sizeof(*wads));
-    lmps = malloc(myargc * sizeof(*lmps));
-    dehs = malloc(myargc * sizeof(*dehs));
-    skip = malloc(myargc * sizeof(dboolean));
+    wads = static_cast<char **>(malloc(myargc * sizeof(*wads)));
+    lmps = static_cast<char **>(malloc(myargc * sizeof(*lmps)));
+    dehs = static_cast<char **>(malloc(myargc * sizeof(*dehs)));
+    skip = static_cast<dboolean *>(malloc(myargc * sizeof(dboolean)));
 
     for (i = 0; i < myargc; i++)
         skip[i] = false;
@@ -1295,7 +1314,8 @@ static void DoLooseFiles(void)
         {
             extlen = strlen(looses[k].ext);
             if (arglen >= extlen &&
-                !stricmp(&myargv[i][arglen - extlen], looses[k].ext))
+                !M_CaseInsensitiveCompare(&myargv[i][arglen - extlen],
+                                          looses[k].ext))
             {
                 (*(looses[k].list))[(*looses[k].count)++] = strdup(myargv[i]);
                 break;
@@ -1336,7 +1356,7 @@ static void DoLooseFiles(void)
 
         // Now go back and redo the whole myargv array with our stuff in it.
         // First, create a new myargv array to copy into
-        tmyargv = calloc(sizeof(tmyargv[0]), myargc + n);
+        tmyargv = static_cast<char **>(calloc(sizeof(tmyargv[0]), myargc + n));
         tmyargv[0] = myargv[0]; // invocation
         tmyargc = 1;
 
@@ -1525,8 +1545,8 @@ static void D_DoomMainSetup(void)
         {
             char *tempverstr;
             const char bfgverstr[] = " (BFG Edition)";
-            tempverstr = malloc(sizeof(char) *
-                                (strlen(doomverstr) + strlen(bfgverstr) + 1));
+            tempverstr = static_cast<char *>(malloc(
+                sizeof(char) * (strlen(doomverstr) + strlen(bfgverstr) + 1)));
             strcpy(tempverstr, doomverstr);
             strcat(tempverstr, bfgverstr);
             doomverstr = strdup(tempverstr);

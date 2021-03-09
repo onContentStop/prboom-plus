@@ -32,7 +32,7 @@
 #include "config.h"
 #endif
 
-#include "musicplayer.h"
+#include "musicplayer.hh"
 
 #ifndef HAVE_LIBDUMB
 #include <string.h>

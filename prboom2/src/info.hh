@@ -37,8 +37,10 @@
 #define __INFO__
 
 /* Needed for action function pointer handling. */
-#include "d_think.h"
 #include <cstddef>
+
+#include "d_think.hh"
+#include "doomtype.hh"
 
 /********************************************************************
  * Sprite name enumeration - must match info.c                      *

@@ -34,9 +34,9 @@
 #ifndef __D_MAIN__
 #define __D_MAIN__
 
-#include "d_event.h"
-#include "m_fixed.h"
-#include "w_wad.h"
+#include "d_event.hh"
+#include "m_fixed.hh"
+#include "w_wad.hh"
 
 #ifdef __GNUG__
 #pragma interface

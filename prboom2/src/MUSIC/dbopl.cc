@@ -52,7 +52,7 @@
 #include <stdlib.h>
 #include <string.h>
 //#include "dosbox.h"
-#include "dbopl.h"
+#include "dbopl.hh"
 
 #ifdef _MSC_VER
 #define inline __inline

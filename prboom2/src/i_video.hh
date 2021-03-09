@@ -43,8 +43,8 @@
 #endif
 
 #include <SDL2/SDL.h>
-#include "doomtype.h"
-#include "v_video.h"
+#include "doomtype.hh"
+#include "v_video.hh"
 
 #ifdef __GNUG__
 #pragma interface

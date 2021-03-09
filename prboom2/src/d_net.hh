@@ -34,8 +34,8 @@
 #ifndef __D_NET__
 #define __D_NET__
 
-#include "d_player.h"
-#include "doomstat.h"
+#include "d_player.hh"
+#include "doomstat.hh"
 
 #ifdef __GNUG__
 #pragma interface

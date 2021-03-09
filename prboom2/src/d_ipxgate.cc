@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "protocol.h"
+#include "protocol.hh"
 
 #define BACKUPTICS 12
 #define NCMD_EXIT 0x80000000
@@ -98,7 +98,7 @@ int udp_socket(const char *ip)
 
 static byte ChecksumPacket(const packet_header_t *buffer, size_t len)
 {
-    const byte *p = (void *)buffer;
+    const byte *p = reinterpret_cast<const byte *>(buffer);
     byte sum = 0;
 
     if (len == 0)
@@ -151,7 +151,8 @@ int ExpandTics(int low, int maketic)
 void send_udp_packet(enum packet_type_e type, unsigned tic, void *data,
                      size_t len)
 {
-    packet_header_t *p = calloc(sizeof(packet_header_t) + len + 1, 1);
+    packet_header_t *p = static_cast<packet_header_t *>(
+        calloc(sizeof(packet_header_t) + len + 1, 1));
     p->tic = doom_htonl(basetic = tic);
     p->type = type;
     if (!data)
@@ -172,7 +173,7 @@ void ipx_receive(int s)
     ipxpacket_t buf;
     int rc;
     struct sockaddr from;
-    size_t sl = sizeof(from);
+    socklen_t sl = sizeof(from);
     rc = recvfrom(s, &buf, sizeof buf, 0, &from, &sl);
     if (rc == -1)
     {
@@ -221,7 +222,7 @@ void ipx_receive(int s)
 void udp_receive(int s)
 {
     size_t len = 1024;
-    packet_header_t *p = malloc(len);
+    packet_header_t *p = static_cast<packet_header_t *>(malloc(len));
     int rc;
 
     rc = read(s, p, len);
@@ -235,7 +236,8 @@ void udp_receive(int s)
         switch (p->type)
         {
         case PKT_SETUP: {
-            struct setup_packet_s *sinfo = (void *)(p + 1);
+            struct setup_packet_s *sinfo =
+                reinterpret_cast<struct setup_packet_s *>(p + 1);
             consoleplayer = sinfo->yourplayer;
             send_udp_packet(PKT_GO, 0, NULL, 0);
             write(ipxs,
@@ -259,7 +261,7 @@ void udp_receive(int s)
         case PKT_TICS: {
             ipxpacket_t pkt;
             int tic = doom_ntohl(p->tic);
-            byte *pp = (void *)(p + 1);
+            byte *pp = reinterpret_cast<byte *>(p + 1);
             int tics = *pp++;
             memset(&pkt, 0, sizeof(pkt));
             size_t len;

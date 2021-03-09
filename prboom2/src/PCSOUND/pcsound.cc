@@ -31,11 +31,11 @@
 #include "config.h"
 #endif
 
-#include "pcsound.h"
+#include "pcsound.hh"
 
 // e6y
-#include "../doomtype.h"
-#include "../lprintf.h"
+#include "../doomtype.hh"
+#include "../lprintf.hh"
 
 #ifdef USE_WIN32_PCSOUND_DRIVER
 extern pcsound_driver_t pcsound_win32_driver;

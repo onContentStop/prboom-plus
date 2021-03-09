@@ -48,15 +48,15 @@
 #include <signal.h>
 #include <string.h>
 
-#include "../doomdef.h"
-#include "../doomtype.h"
-#include "../i_system.h"
-#include "../m_fixed.h"
+#include "../doomdef.hh"
+#include "../doomtype.hh"
+#include "../i_system.hh"
+#include "../m_fixed.hh"
 
 #ifdef __GNUG__
-#pragma implementation "i_system.h"
+#pragma implementation "../i_system.hh"
 #endif
-#include "../i_system.h"
+#include "../i_system.hh"
 
 void I_uSleep(unsigned long usecs)
 {

@@ -27,6 +27,8 @@
 #ifndef MEMIO_H
 #define MEMIO_H
 
+#include <cstddef>
+
 typedef struct _MEMFILE MEMFILE;
 
 typedef enum

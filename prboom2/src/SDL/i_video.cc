@@ -49,43 +49,44 @@
 #include <unistd.h>
 #endif
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 // e6y
 #ifdef _WIN32
 #include <SDL_syswm.h>
 #endif
 
-#include "am_map.h"
-#include "d_deh.h"
-#include "d_event.h"
-#include "d_main.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "f_wipe.h"
-#include "g_game.h"
-#include "i_capture.h"
-#include "i_joy.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_things.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "z_zone.h"
+#include "../am_map.hh"
+#include "../d_deh.hh"
+#include "../d_event.hh"
+#include "../d_main.hh"
+#include "../doomdef.hh"
+#include "../doomstat.hh"
+#include "../doomtype.hh"
+#include "../f_wipe.hh"
+#include "../g_game.hh"
+#include "../i_capture.hh"
+#include "../i_joy.hh"
+#include "../i_video.hh"
+#include "../lprintf.hh"
+#include "../m_argv.hh"
+#include "../m_misc.hh"
+#include "../r_draw.hh"
+#include "../r_main.hh"
+#include "../r_plane.hh"
+#include "../r_things.hh"
+#include "../s_sound.hh"
+#include "../sounds.hh"
+#include "../st_stuff.hh"
+#include "../v_video.hh"
+#include "../w_wad.hh"
+#include "../z_zone.hh"
 
 #ifdef GL_DOOM
-#include "gl_struct.h"
+#include "../gl_struct.hh"
 #endif
 
-#include "e6y.h" //e6y
-#include "i_main.h"
+#include "../e6y.hh" //e6y
+#include "../i_main.hh"
 
 // e6y: new mouse code
 static SDL_Cursor *cursors[2] = {NULL, NULL};
@@ -429,56 +430,6 @@ static void I_GetEvent(void)
                 D_PostEvent(&event);
             }
             break;
-
-        case SDL_KEYUP: {
-            event.type = ev_keyup;
-            event.data1 = I_TranslateKey(&Event->key.keysym);
-            D_PostEvent(&event);
-        }
-        break;
-
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
-            if (mouse_enabled && window_focused)
-            {
-                event.type = ev_mouse;
-                event.data1 =
-                    I_SDLtoDoomMouseState(SDL_GetMouseState(NULL, NULL));
-                event.data2 = event.data3 = 0;
-                D_PostEvent(&event);
-            }
-            break;
-
-        case SDL_MOUSEWHEEL:
-            if (mouse_enabled && window_focused)
-            {
-                if (Event->wheel.y > 0)
-                {
-                    event.type = ev_keydown;
-                    event.data1 = KEYD_MWHEELUP;
-                    mwheeldowntic = gametic;
-                    D_PostEvent(&event);
-                }
-                else if (Event->wheel.y < 0)
-                {
-                    event.type = ev_keydown;
-                    event.data1 = KEYD_MWHEELDOWN;
-                    mwheeluptic = gametic;
-                    D_PostEvent(&event);
-                }
-            }
-            break;
-        case SDL_MOUSEMOTION:
-            if (mouse_enabled && window_focused)
-            {
-                event.type = ev_mouse;
-                event.data1 = I_SDLtoDoomMouseState(Event->motion.state);
-                event.data2 = Event->motion.xrel << 4;
-                event.data3 = -Event->motion.yrel << 4;
-                D_PostEvent(&event);
-            }
-            break;
-
         case SDL_WINDOWEVENT:
             if (Event->window.windowID == windowid)
             {
@@ -1252,7 +1203,7 @@ void I_SetWindowCaption(void)
 // Set the application icon
 //
 
-#include "icon.c"
+#include "../icon.cc"
 
 void I_SetWindowIcon(void)
 {
@@ -1305,35 +1256,35 @@ video_mode_t I_GetModeFromString(const char *modestr)
 {
     video_mode_t mode;
 
-    if (!stricmp(modestr, "15"))
+    if (!M_CaseInsensitiveCompare(modestr, "15"))
     {
         mode = VID_MODE15;
     }
-    else if (!stricmp(modestr, "15bit"))
+    else if (!M_CaseInsensitiveCompare(modestr, "15bit"))
     {
         mode = VID_MODE15;
     }
-    else if (!stricmp(modestr, "16"))
+    else if (!M_CaseInsensitiveCompare(modestr, "16"))
     {
         mode = VID_MODE16;
     }
-    else if (!stricmp(modestr, "16bit"))
+    else if (!M_CaseInsensitiveCompare(modestr, "16bit"))
     {
         mode = VID_MODE16;
     }
-    else if (!stricmp(modestr, "32"))
+    else if (!M_CaseInsensitiveCompare(modestr, "32"))
     {
         mode = VID_MODE32;
     }
-    else if (!stricmp(modestr, "32bit"))
+    else if (!M_CaseInsensitiveCompare(modestr, "32bit"))
     {
         mode = VID_MODE32;
     }
-    else if (!stricmp(modestr, "gl"))
+    else if (!M_CaseInsensitiveCompare(modestr, "gl"))
     {
         mode = VID_MODEGL;
     }
-    else if (!stricmp(modestr, "OpenGL"))
+    else if (!M_CaseInsensitiveCompare(modestr, "OpenGL"))
     {
         mode = VID_MODEGL;
     }

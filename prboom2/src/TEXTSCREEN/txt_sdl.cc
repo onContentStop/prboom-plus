@@ -15,34 +15,27 @@
 // Text mode emulation in SDL
 //
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "doomkeys.h"
+#include "doomkeys.hh"
 
-#include "txt_main.h"
-#include "txt_sdl.h"
+#include "txt_main.hh"
+#include "txt_sdl.hh"
 
 #if defined(_MSC_VER) && !defined(__cplusplus)
 #define inline __inline
 #endif
 
-typedef struct
-{
-    unsigned char *data;
-    unsigned int w;
-    unsigned int h;
-} txt_font_t;
-
 // Fonts:
 
-#include "txt_font.h"
-#include "txt_largefont.h"
-#include "txt_smallfont.h"
+#include "txt_font.hh"
+#include "txt_largefont.hh"
+#include "txt_smallfont.hh"
 
 // Time between character blinks in ms
 

@@ -35,7 +35,7 @@
 #include "config.h"
 #endif
 
-#include "musicplayer.h"
+#include "musicplayer.hh"
 
 #ifndef HAVE_LIBPORTMIDI
 #include <string.h>

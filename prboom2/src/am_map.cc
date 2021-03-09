@@ -42,22 +42,22 @@
 #include "gl_opengl.h"
 #endif
 
-#include "am_map.h"
-#include "d_deh.h" // Ty 03/27/98 - externalizations
-#include "doomstat.h"
-#include "g_game.h"
-#include "lprintf.h" // jff 08/03/98 - declaration of lprintf
-#include "m_bbox.h"
-#include "m_misc.h"
-#include "p_maputl.h"
-#include "p_setup.h"
-#include "p_spec.h"
-#include "r_demo.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "am_map.hh"
+#include "d_deh.hh" // Ty 03/27/98 - externalizations
+#include "doomstat.hh"
+#include "g_game.hh"
+#include "lprintf.hh" // jff 08/03/98 - declaration of lprintf
+#include "m_bbox.hh"
+#include "m_misc.hh"
+#include "p_maputl.hh"
+#include "p_setup.hh"
+#include "p_spec.hh"
+#include "r_demo.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "st_stuff.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 extern dboolean gamekeydown[];
 

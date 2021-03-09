@@ -26,7 +26,7 @@
 #ifndef MIDIFILE_H
 #define MIDIFILE_H
 
-#include "../doomtype.h"
+#include "../doomtype.hh"
 
 #include <cstddef>
 

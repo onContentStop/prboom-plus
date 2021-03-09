@@ -35,7 +35,7 @@
 #ifndef __M_MISC__
 #define __M_MISC__
 
-#include "doomtype.h"
+#include "doomtype.hh"
 
 #include <cstddef>
 

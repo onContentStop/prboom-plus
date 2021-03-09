@@ -35,20 +35,20 @@
 #define __P_MOBJ__
 
 // Basics.
-#include "m_fixed.h"
-#include "tables.h"
+#include "m_fixed.hh"
+#include "tables.hh"
 
 // We need the thinker_t stuff.
-#include "d_think.h"
+#include "d_think.hh"
 
 // We need the WAD data structure for Map things,
 // from the THINGS lump.
-#include "doomdata.h"
+#include "doomdata.hh"
 
 // States are tied to finite states are
 //  tied to animation frames.
 // Needs precompiled tables/data structures.
-#include "info.h"
+#include "info.hh"
 
 //
 // NOTES: mobj_t
@@ -263,7 +263,7 @@ enum
 /* cph 2006/08/28 - move Prev[XYZ] fields to the end of the struct. Add any
  * other new fields to the end, and make sure you don't break savegames! */
 
-typedef struct mobj_s
+struct mobj_t
 {
     // List: thinker links.
     thinker_t thinker;
@@ -274,8 +274,8 @@ typedef struct mobj_s
     fixed_t z;
 
     // More list: links in sector (if needed)
-    struct mobj_s *snext;
-    struct mobj_s **sprev; // killough 8/10/98: change to ptr-to-ptr
+    mobj_t *snext;
+    mobj_t **sprev; // killough 8/10/98: change to ptr-to-ptr
 
     // More drawing info: to determine current sprite.
     angle_t angle;      // orientation
@@ -284,8 +284,8 @@ typedef struct mobj_s
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
-    struct mobj_s *bnext;
-    struct mobj_s **bprev; // killough 8/11/98: change to ptr-to-ptr
+    mobj_t *bnext;
+    mobj_t **bprev; // killough 8/11/98: change to ptr-to-ptr
 
     struct subsector_s *subsector;
 
@@ -324,7 +324,7 @@ typedef struct mobj_s
 
     // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
-    struct mobj_s *target;
+    mobj_t *target;
 
     // Reaction time: if non 0, don't attack yet.
     // Used by player to freeze a bit after teleporting.
@@ -350,10 +350,10 @@ typedef struct mobj_s
     mapthing_t spawnpoint;
 
     // Thing being chased/attacked for tracers.
-    struct mobj_s *tracer;
+    mobj_t *tracer;
 
     // new field: last known enemy -- killough 2/15/98
-    struct mobj_s *lastenemy;
+    mobj_t *lastenemy;
 
     // killough 8/2/98: friction properties part of sectors,
     // not objects -- removed friction properties from here
@@ -379,7 +379,7 @@ typedef struct mobj_s
     fixed_t pad; // cph - needed so I can get the size unambiguously on amd64
 
     // SEE WARNING ABOVE ABOUT POINTER FIELDS!!!
-} mobj_t;
+};
 
 // External declarations (fomerly in p_local.h) -- killough 5/2/98
 

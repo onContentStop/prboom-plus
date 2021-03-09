@@ -43,38 +43,39 @@
 #define HAVE_MIXER
 #endif
 
-#include "SDL.h"
-#include "SDL_audio.h"
-#include "SDL_mutex.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_audio.h"
+#include "SDL2/SDL_mutex.h"
 
-#include "SDL_endian.h"
+#include "SDL2/SDL_endian.h"
 
-#include "SDL_thread.h"
-#include "SDL_version.h"
+#include "SDL2/SDL_thread.h"
+#include "SDL2/SDL_version.h"
 #ifdef HAVE_MIXER
 #define USE_RWOPS
-#include "SDL_mixer.h"
+#include "SDL2/SDL_mixer.h"
 #endif
 
-#include "z_zone.h"
+#include "../z_zone.hh"
 
-#include "i_sound.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_misc.h"
-#include "m_swap.h"
-#include "s_sound.h"
-#include "w_wad.h"
+#include "../i_sound.hh"
+#include "../lprintf.hh"
+#include "../m_argv.hh"
+#include "../m_misc.hh"
+#include "../m_swap.hh"
+#include "../s_sound.hh"
+#include "../w_wad.hh"
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "doomtype.h"
+#include "../doomdef.hh"
+#include "../doomstat.hh"
+#include "../doomtype.hh"
 
-#include "d_main.h"
+#include "../d_main.hh"
+#include "../sounds.hh"
 
 // e6y
-#include "e6y.h"
-#include "i_pcsound.h"
+#include "../e6y.hh"
+#include "../i_pcsound.hh"
 
 int snd_pcspeaker;
 int lowpass_filter;
@@ -172,7 +173,8 @@ static int addsfx(int sfxid, int channel, const unsigned char *data, size_t len)
 
     stopchan(channel);
 
-    if (strncmp(data, "RIFF", 4) == 0 && strncmp(data + 8, "WAVEfmt ", 8) == 0)
+    if (strncmp(reinterpret_cast<const char *>(data), "RIFF", 4) == 0 &&
+        strncmp(reinterpret_cast<const char *>(data) + 8, "WAVEfmt ", 8) == 0)
     {
         // FIXME: can't handle stereo wavs
         // ci->channels = data[22] | (data[23] << 8);
@@ -1276,16 +1278,16 @@ experimental music API
 const char *snd_soundfont; // soundfont name for synths that use it
 const char *snd_mididev;   // midi device to use (portmidiplayer)
 
-#include "mus2mid.h"
+#include "../mus2mid.hh"
 
-#include "MUSIC/musicplayer.h"
+#include "../MUSIC/musicplayer.hh"
 
-#include "MUSIC/dumbplayer.h"
-#include "MUSIC/flplayer.h"
-#include "MUSIC/madplayer.h"
-#include "MUSIC/oplplayer.h"
-#include "MUSIC/portmidiplayer.h"
-#include "MUSIC/vorbisplayer.h"
+#include "../MUSIC/dumbplayer.hh"
+#include "../MUSIC/flplayer.hh"
+#include "../MUSIC/madplayer.hh"
+#include "../MUSIC/oplplayer.hh"
+#include "../MUSIC/portmidiplayer.hh"
+#include "../MUSIC/vorbisplayer.hh"
 
 // list of possible music players
 static const music_player_t *music_players[] =

@@ -35,24 +35,24 @@
  *--------------------------------------------------------------------*/
 
 // killough 5/2/98: fixed headers, removed rendunant external declarations:
-#include "d_deh.h"
-#include "d_think.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "info.h"
-#include "m_argv.h"
-#include "m_cheat.h"
-#include "m_misc.h"
-#include "p_enemy.h"
-#include "p_inter.h"
-#include "sounds.h"
-#include "w_wad.h"
+#include "d_deh.hh"
+#include "d_think.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "info.hh"
+#include "m_argv.hh"
+#include "m_cheat.hh"
+#include "m_misc.hh"
+#include "p_enemy.hh"
+#include "p_inter.hh"
+#include "sounds.hh"
+#include "w_wad.hh"
 
 // CPhipps - modify to use logical output routine
-#include "lprintf.h"
+#include "lprintf.hh"
 
 #include <string>
 
@@ -151,7 +151,7 @@ dboolean deh_pars = FALSE; // in wi_stuff to allow pars in modified games
 
 // ====================================================================
 // Any of these can be changed using the bex extensions
-#include "dstrings.h" // to get the initial values
+#include "dstrings.hh" // to get the initial values
 /* cph - const's
  *     - removed redundant "can't XXX in a netgame" strings.
  */
@@ -3003,8 +3003,9 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring,
         {
             deh_strlookup[i].orig = *deh_strlookup[i].ppstr;
         }
-        found = lookfor ? !M_CaseInsensitiveCompare(deh_strlookup[i].orig, lookfor)
-                        : !M_CaseInsensitiveCompare(deh_strlookup[i].lookup, key);
+        found = lookfor
+                    ? !M_CaseInsensitiveCompare(deh_strlookup[i].orig, lookfor)
+                    : !M_CaseInsensitiveCompare(deh_strlookup[i].lookup, key);
 
         if (found)
         {

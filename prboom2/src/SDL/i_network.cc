@@ -50,12 +50,12 @@
 
 #ifdef HAVE_NET
 
-#include "SDL.h"
-#include "SDL_net.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_net.h"
 
-#include "i_network.h"
-#include "lprintf.h"
-#include "protocol.h"
+#include "i_network.hh"
+#include "lprintf.hh"
+#include "protocol.hh"
 //#include "doomstat.h"
 
 /* cph -

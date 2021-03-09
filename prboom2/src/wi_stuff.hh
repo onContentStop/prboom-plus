@@ -36,8 +36,8 @@
 
 //#include "v_video.h"
 
-#include "d_player.h"
-#include "doomdef.h"
+#include "d_player.hh"
+#include "doomdef.hh"
 
 // States for the intermission
 

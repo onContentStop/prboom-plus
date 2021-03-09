@@ -41,7 +41,7 @@
 #include "config.h"
 #endif
 
-#include "doomtype.h"
+#include "doomtype.hh"
 
 //
 // Map level types.

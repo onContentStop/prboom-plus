@@ -204,7 +204,7 @@ option(HEAPDUMP "Turn on dumping the heap state for debugging" OFF)
 
 configure_file(cmake/config.h.cin config.h)
 
-add_definitions(-DHAVE_CONFIG_H)
+add_compile_definitions(HAVE_CONFIG_H)
 
 if(MSVC)
   add_definitions("/D_CRT_SECURE_NO_WARNINGS")
@@ -244,3 +244,5 @@ add_subdirectory(src)
 if(NOT CMAKE_CROSSCOMPILING)
     export(TARGETS ${CROSS_EXPORTS} FILE "${CMAKE_BINARY_DIR}/ImportExecutables.cmake")
 endif()
+
+include_directories("${CMAKE_CURRENT_LIST_DIR}/build")

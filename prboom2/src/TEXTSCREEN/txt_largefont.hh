@@ -19,6 +19,10 @@
 // has been doubled in size to 16x32, and then manually tweaked.
 //
 
+#include <cstdint>
+
+#include "txt_font.hh"
+
 static uint8_t large_font_data[] = {
     // 0:
     0x00,

@@ -34,12 +34,12 @@
 
 #include "SDL2/SDL.h"
 
-#include "pcsound.h"
+#include "pcsound.hh"
 
 // e6y
-#include "../lprintf.h"
+#include "../lprintf.hh"
 
-#include "../i_sound.h" // snd_samplerate
+#include "../i_sound.hh" // snd_samplerate
 
 #define SQUARE_WAVE_AMP 0x2000
 

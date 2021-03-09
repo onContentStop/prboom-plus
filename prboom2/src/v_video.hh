@@ -37,10 +37,10 @@
 #ifndef __V_VIDEO__
 #define __V_VIDEO__
 
-#include "doomdef.h"
-#include "doomtype.h"
+#include "doomdef.hh"
+#include "doomtype.hh"
 // Needed because we are refering to patches.
-#include "r_data.h"
+#include "r_data.hh"
 
 //
 // VIDEO

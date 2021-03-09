@@ -38,9 +38,9 @@
 #include "config.h"
 #endif
 
-#include "d_event.h"
-#include "m_fixed.h"
-#include "m_misc.h"
+#include "d_event.hh"
+#include "m_fixed.hh"
+#include "m_misc.hh"
 
 typedef struct map_point_s
 {
