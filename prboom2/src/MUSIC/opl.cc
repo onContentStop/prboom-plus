@@ -23,7 +23,9 @@
 //
 //-----------------------------------------------------------------------------
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +34,7 @@
 #include "opl.h"
 #include "opl_queue.h"
 
-#include "i_sound.h" // mus_opl_gain
+#include "../i_sound.h" // mus_opl_gain
 
 static int init_stage_reg_writes = 1;
 

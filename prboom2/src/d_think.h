@@ -50,9 +50,93 @@
 typedef void (*actionf_t)();
 
 // e6y: for boom's friction code
-typedef void (*actionf_v)();
+using actionf_v = void (*)();
+struct mobj_t;
+using actionf_mobj1 = void (*)(mobj_t *);
 typedef void (*actionf_p1)(void *);
 typedef void (*actionf_p2)(void *, void *);
+
+class actionf
+{
+    enum class actionf_discriminant
+    {
+        af_v,
+        af_mobj1,
+        af_p1,
+        af_p2,
+        undefined
+    };
+    actionf_v m_v = nullptr;
+    actionf_mobj1 m_mobj1 = nullptr;
+    actionf_p1 m_p1 = nullptr;
+    actionf_p2 m_p2 = nullptr;
+    actionf_discriminant m_which = actionf_discriminant::undefined;
+
+  public:
+    actionf() = default;
+
+    actionf(actionf_v fn) : m_v(fn), m_which(actionf_discriminant::af_v)
+    {
+    }
+
+    actionf(actionf_mobj1 fn)
+        : m_mobj1(fn), m_which(actionf_discriminant::af_mobj1)
+    {
+    }
+
+    actionf(actionf_p1 fn) : m_p1(fn), m_which(actionf_discriminant::af_p1)
+    {
+    }
+
+    actionf(actionf_p2 fn) : m_p2(fn), m_which(actionf_discriminant::af_p1)
+    {
+    }
+
+    const actionf_v *V() const
+    {
+        if (m_which == actionf_discriminant::af_v)
+        {
+            return &m_v;
+        }
+
+        return nullptr;
+    }
+
+    const actionf_mobj1 *Mobj1() const
+    {
+        if (m_which == actionf_discriminant::af_mobj1)
+        {
+            return &m_mobj1;
+        }
+
+        return nullptr;
+    }
+
+    const actionf_p1 *P1() const
+    {
+        if (m_which == actionf_discriminant::af_p1)
+        {
+            return &m_p1;
+        }
+
+        return nullptr;
+    }
+
+    const actionf_p2 *P2() const
+    {
+        if (m_which == actionf_discriminant::af_p2)
+        {
+            return &m_p2;
+        }
+
+        return nullptr;
+    }
+
+    bool Empty() const
+    {
+        return m_which == actionf_discriminant::undefined;
+    }
+};
 
 /* Note: In d_deh.c you will find references to these
  * wherever code pointers and function handlers exist

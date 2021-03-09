@@ -32,14 +32,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #include "pcsound.h"
 
 // e6y
-#include "lprintf.h"
+#include "../lprintf.h"
 
-#include "i_sound.h" // snd_samplerate
+#include "../i_sound.h" // snd_samplerate
 
 #define SQUARE_WAVE_AMP 0x2000
 

@@ -4,4 +4,6 @@
 // Convert WAVE files to Doom sound format
 
 // convert wav file to doom sound format
+#include <cstddef>
+
 size_t wav_to_doom(void **lumpdata, const char *filename);

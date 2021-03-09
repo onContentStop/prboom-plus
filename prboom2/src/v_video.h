@@ -78,7 +78,8 @@ typedef struct stretch_param_s
     int deltay2;
 } stretch_param_t;
 
-extern stretch_param_t stretch_params_table[3][VPT_ALIGN_MAX];
+extern stretch_param_t stretch_params_table[3][static_cast<size_t>(
+    patch_translation_e::VPT_ALIGN_MAX)];
 extern stretch_param_t *stretch_params;
 
 extern cb_video_t video;

@@ -196,7 +196,7 @@ extern int desired_screenwidth, desired_screenheight;
 // Status flags for refresh.
 //
 
-enum automapmode_e
+enum class automapmode_e
 {
     am_active = 1,  // currently shown
     am_overlay = 2, // covers the screen, i.e. not overlay mode
@@ -204,7 +204,42 @@ enum automapmode_e
     am_follow = 8,  // keep the player centred
     am_grid = 16,   // show grid
 };
-extern enum automapmode_e automapmode; // Mode that the automap is in
+
+inline automapmode_e operator&(automapmode_e a, automapmode_e b)
+{
+    return static_cast<automapmode_e>(static_cast<int>(a) &
+                                      static_cast<int>(b));
+}
+
+inline automapmode_e operator&=(automapmode_e a, automapmode_e b)
+{
+    return a = static_cast<automapmode_e>(static_cast<int>(a) &
+                                          static_cast<int>(b));
+}
+
+inline automapmode_e operator|=(automapmode_e a, automapmode_e b)
+{
+    return a = static_cast<automapmode_e>(static_cast<int>(a) |
+                                          static_cast<int>(b));
+}
+
+inline automapmode_e operator^=(automapmode_e a, automapmode_e b)
+{
+    return a = static_cast<automapmode_e>(static_cast<int>(a) ^
+                                          static_cast<int>(b));
+}
+
+inline automapmode_e operator~(automapmode_e automapMode)
+{
+    return static_cast<automapmode_e>(~static_cast<int>(automapMode));
+}
+
+inline bool operator!(automapmode_e automapMode)
+{
+    return static_cast<int>(automapMode) != 0;
+}
+
+extern automapmode_e automapmode; // Mode that the automap is in
 
 enum menuactive_e
 {

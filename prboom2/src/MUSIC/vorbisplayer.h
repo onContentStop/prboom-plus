@@ -31,6 +31,8 @@
 #ifndef VORBISPLAYER_H
 #define VORBISPLAYER_H
 
+#include "musicplayer.h"
+
 extern const music_player_t vorb_player;
 
 #endif // VORBISPLAYER_H

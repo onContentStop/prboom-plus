@@ -54,7 +54,7 @@ char *xstrdup(const char *s)
     size_t size = strlen(s) + 1;
     void *ptr = xmalloc(size);
     memcpy(ptr, s, size);
-    return ptr;
+    return static_cast<char *>(ptr);
 }
 
 static const char **search_paths = NULL;
@@ -77,7 +77,7 @@ size_t read_or_die(void **ptr, const char *file)
         for (i = 0; i < num_search_paths; i++)
         {
             s = strlen(search_paths[i]) + 1 + strlen(file) + 1;
-            path = xmalloc(s);
+            path = static_cast<char *>(xmalloc(s));
             snprintf(path, s, "%s/%s", search_paths[i], file);
             f = fopen(path, "rb");
             free(path);
@@ -107,7 +107,7 @@ size_t read_or_die(void **ptr, const char *file)
 
 void search_path(const char *path)
 {
-    search_paths =
-        xrealloc(search_paths, (++num_search_paths) * sizeof(*search_paths));
+    search_paths = static_cast<const char **>(
+        xrealloc(search_paths, (++num_search_paths) * sizeof(*search_paths)));
     search_paths[num_search_paths - 1] = xstrdup(path);
 }

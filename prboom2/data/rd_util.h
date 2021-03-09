@@ -3,6 +3,8 @@
 
 // Useful utility functions
 
+#include <cstddef>
+
 #ifdef __GNUC__
 #define ATTR(x) __attribute__(x)
 #else

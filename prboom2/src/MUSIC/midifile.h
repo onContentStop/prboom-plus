@@ -26,7 +26,9 @@
 #ifndef MIDIFILE_H
 #define MIDIFILE_H
 
-#include "doomtype.h"
+#include "../doomtype.h"
+
+#include <cstddef>
 
 typedef struct midi_file_s midi_file_t;
 typedef struct midi_track_iter_s midi_track_iter_t;

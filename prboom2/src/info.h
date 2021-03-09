@@ -38,6 +38,7 @@
 
 /* Needed for action function pointer handling. */
 #include "d_think.h"
+#include <cstddef>
 
 /********************************************************************
  * Sprite name enumeration - must match info.c                      *
@@ -1371,10 +1372,10 @@ typedef enum
 
 typedef struct
 {
-    spritenum_t sprite;   /* sprite number to show                       */
-    long frame;           /* which frame/subframe of the sprite is shown */
-    long tics;            /* number of gametics this frame should last   */
-    actionf_t action;     /* code pointer to function for action if any  */
+    spritenum_t sprite; /* sprite number to show                       */
+    long frame;         /* which frame/subframe of the sprite is shown */
+    long tics;          /* number of gametics this frame should last   */
+    actionf action;
     statenum_t nextstate; /* linked list pointer to next state or zero   */
     long misc1, misc2;    /* apparently never used in DOOM               */
 } state_t;

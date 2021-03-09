@@ -31,6 +31,8 @@
 #ifndef PORTMIDIPLAYER_H
 #define PORTMIDIPLAYER_H
 
+#include "musicplayer.h"
+
 extern const music_player_t pm_player;
 
 #endif // PORTMIDI_H

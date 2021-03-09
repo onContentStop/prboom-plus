@@ -33,6 +33,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include <cstddef>
+#include <sstream>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1240,14 +1242,9 @@ default_t defaults[] = {
      ss_none},
 
     {"Mouse settings", {NULL}, {0}, UL, UL, def_none, ss_none},
-    {"use_mouse",
-     {&usemouse},
-     {1},
-     0,
-     1,
-     def_bool,
-     ss_none}, // enables use of mouse with DOOM
-               // jff 4/3/98 allow unlimited sensitivity
+    {"use_mouse", {&usemouse}, {1}, 0, 1, def_bool, ss_none}, // enables use of
+                                                              // mouse with DOOM
+    // jff 4/3/98 allow unlimited sensitivity
     {"mouse_sensitivity_horiz",
      {&mouseSensitivity_horiz},
      {10},
@@ -4365,4 +4362,37 @@ void *M_ArrayGetNewItem(array_t *data, int itemsize)
     data->count++;
 
     return (unsigned char *)data->data + (data->count - 1) * itemsize;
+}
+
+int M_CaseInsensitiveCompare(const char *const s1, const char *const s2)
+{
+    size_t min = strlen(s1);
+    size_t s2Len = strlen(s2);
+    if (s2Len < min)
+    {
+        min = s2Len;
+    }
+
+    for (size_t i = 0; i < min; i++)
+    {
+        if (s1[i] != s2[i])
+        {
+            return s2[i] - s1[i];
+        }
+    }
+
+    return 0;
+}
+
+int M_CaseInsensitiveCompareUntil(const char *s1, const char *s2, size_t until)
+{
+    for (size_t i = 0; i < until; i++)
+    {
+        if (s1[i] != s2[i])
+        {
+            return s2[i] - s1[i];
+        }
+    }
+
+    return 0;
 }

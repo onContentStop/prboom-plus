@@ -156,7 +156,7 @@ typedef int complevel_t;
 /* cph - from v_video.h, needed by gl_struct.h */
 #define VPT_ALIGN_MASK 0xf
 #define VPT_STRETCH_MASK 0x1f
-enum patch_translation_e
+enum class patch_translation_e
 {
     // e6y: wide-res
     VPT_ALIGN_LEFT = 1,
@@ -176,5 +176,12 @@ enum patch_translation_e
     VPT_TRANS = 512, // Translate image via a translation table
     VPT_NOOFFSET = 1024,
 };
+
+inline patch_translation_e operator|(patch_translation_e a,
+                                     patch_translation_e b)
+{
+    return static_cast<patch_translation_e>(static_cast<int>(a) |
+                                            static_cast<int>(b));
+}
 
 #endif

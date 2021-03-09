@@ -48,15 +48,15 @@
 #include <signal.h>
 #include <string.h>
 
-#include "doomdef.h"
-#include "doomtype.h"
-#include "i_system.h"
-#include "m_fixed.h"
+#include "../doomdef.h"
+#include "../doomtype.h"
+#include "../i_system.h"
+#include "../m_fixed.h"
 
 #ifdef __GNUG__
 #pragma implementation "i_system.h"
 #endif
-#include "i_system.h"
+#include "../i_system.h"
 
 void I_uSleep(unsigned long usecs)
 {
@@ -64,7 +64,8 @@ void I_uSleep(unsigned long usecs)
     usleep(usecs);
 #else
     /* Fall back on select(2) */
-    struct timeval tv = {usecs / 1000000, usecs % 1000000};
+    struct timeval tv = {static_cast<__time_t>(usecs / 1000000),
+                         static_cast<__suseconds_t>(usecs % 1000000)};
     select(0, NULL, NULL, NULL, &tv);
 #endif
 }

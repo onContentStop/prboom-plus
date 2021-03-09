@@ -37,14 +37,14 @@
 
 #include <stdlib.h>
 
-#include "SDL.h"
-#include "d_event.h"
-#include "d_main.h"
-#include "doomdef.h"
-#include "doomtype.h"
-#include "i_joy.h"
-#include "lprintf.h"
-#include "m_argv.h"
+#include <SDL2/SDL.h>
+#include "../d_event.h"
+#include "../d_main.h"
+#include "../doomdef.h"
+#include "../doomtype.h"
+#include "../i_joy.h"
+#include "../lprintf.h"
+#include "../m_argv.h"
 
 int joyleft;
 int joyright;

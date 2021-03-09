@@ -29,8 +29,8 @@
 #include <string.h>
 
 #ifndef TEST
-#include "doomdef.h"
-#include "doomtype.h"
+#include "../doomdef.h"
+#include "../doomtype.h"
 #else
 typedef enum
 {
@@ -40,7 +40,7 @@ typedef enum
 typedef unsigned char byte;
 #define PACKEDATTR __attribute__((packed))
 #endif
-#include "lprintf.h"
+#include "../lprintf.h"
 #include "midifile.h"
 
 #define HEADER_CHUNK_ID "MThd"

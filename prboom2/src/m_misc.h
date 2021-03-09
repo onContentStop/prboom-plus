@@ -37,7 +37,9 @@
 
 #include "doomtype.h"
 
-#include <stddef.h>
+#include <cstddef>
+
+#include <string>
 //
 // MISC
 //
@@ -142,5 +144,8 @@ void M_ArrayClear(array_t *data);
 void M_ArrayFree(array_t *data);
 void M_ArrayAddItem(array_t *data, void *item, int itemsize);
 void *M_ArrayGetNewItem(array_t *data, int itemsize);
+
+int M_CaseInsensitiveCompare(const char *s1, const char *s2);
+int M_CaseInsensitiveCompareUntil(const char *s1, const char *s2, size_t until);
 
 #endif

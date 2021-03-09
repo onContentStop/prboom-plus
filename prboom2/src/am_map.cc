@@ -338,7 +338,7 @@ static void AM_restoreScaleAndLoc(void)
 {
     m_w = old_m_w;
     m_h = old_m_h;
-    if (!(automapmode & am_follow))
+    if (!(automapmode & automapmode_e::am_follow))
     {
         m_x = old_m_x;
         m_y = old_m_y;
@@ -389,10 +389,10 @@ static void AM_addMark(void)
     // remove limit on automap marks
 
     if (markpointnum >= markpointnum_max)
-        markpoints = realloc(
+        markpoints = static_cast<markpoint_t *>(realloc(
             markpoints,
             (markpointnum_max = markpointnum_max ? markpointnum_max * 2 : 16) *
-                sizeof(*markpoints));
+                sizeof(*markpoints)));
 
     markpoints[markpointnum].x = m_x + m_w / 2;
     markpoints[markpointnum].y = m_y + m_h / 2;
@@ -453,7 +453,7 @@ static void AM_changeWindowLoc(void)
 
     if (m_paninc.x || m_paninc.y)
     {
-        automapmode &= ~am_follow;
+        automapmode &= ~automapmode_e::am_follow;
     }
 
     if (movement_smooth)
@@ -467,7 +467,7 @@ static void AM_changeWindowLoc(void)
         incy = m_paninc.y;
     }
 
-    if (automapmode & am_rotate)
+    if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
     {
         AM_rotate(&incx, &incy, viewangle - ANG90);
     }
@@ -475,7 +475,7 @@ static void AM_changeWindowLoc(void)
     m_x = prev_m_x + incx;
     m_y = prev_m_y + incy;
 
-    if (!(automapmode & am_rotate))
+    if (!(automapmode & automapmode_e::am_rotate))
     {
         if (m_x + m_w / 2 > max_x)
             m_x = max_x - m_w / 2;
@@ -509,7 +509,7 @@ void AM_SetScale(void)
 //
 void AM_SetPosition(void)
 {
-    if (automapmode & am_overlay)
+    if (static_cast<bool>(automapmode & automapmode_e::am_overlay))
     {
         f_x = map_overlay_pos_x * SCREENWIDTH / 320;
         f_y = map_overlay_pos_y * SCREENHEIGHT / 200;
@@ -550,7 +550,7 @@ static void AM_initVariables(void)
     int pnum;
     static event_t st_notify = {ev_keyup, AM_MSGENTERED, 0, 0};
 
-    automapmode |= am_active;
+    automapmode |= automapmode_e::am_active;
 
     m_paninc.x = m_paninc.y = 0;
     ftom_zoommul = FRACUNIT;
@@ -643,10 +643,11 @@ static void AM_LevelInit(void)
 //
 void AM_Stop(void)
 {
-    static event_t st_notify = {0, ev_keyup, AM_MSGEXITED, 0};
+    static event_t st_notify = {static_cast<evtype_t>(0), ev_keyup,
+                                AM_MSGEXITED, 0};
 
     AM_unloadPics();
-    automapmode &= ~am_active;
+    automapmode &= ~automapmode_e::am_active;
     ST_Responder(&st_notify);
     stopped = true;
 }
@@ -722,7 +723,7 @@ dboolean AM_Responder(event_t *ev)
 
     rc = false;
 
-    if (!(automapmode & am_active))
+    if (!(automapmode & automapmode_e::am_active))
     {
         if (ev->type == ev_keydown && ev->data1 == key_map) // phares
         {
@@ -733,24 +734,24 @@ dboolean AM_Responder(event_t *ev)
     else if (ev->type == ev_keydown)
     {
         rc = true;
-        ch = ev->data1;                     // phares
-        if (ch == key_map_right)            //    |
-            if (!(automapmode & am_follow)) //    V
+        ch = ev->data1;                                    // phares
+        if (ch == key_map_right)                           //    |
+            if (!(automapmode & automapmode_e::am_follow)) //    V
                 m_paninc.x = FTOM(F_PANINC);
             else
                 rc = false;
         else if (ch == key_map_left)
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.x = -FTOM(F_PANINC);
             else
                 rc = false;
         else if (ch == key_map_up)
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.y = FTOM(F_PANINC);
             else
                 rc = false;
         else if (ch == key_map_down)
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.y = -FTOM(F_PANINC);
             else
                 rc = false;
@@ -787,17 +788,22 @@ dboolean AM_Responder(event_t *ev)
         else if (ch == key_map_follow)
         {
             automapmode ^=
-                am_follow; // CPhipps - put all automap mode stuff into one enum
+                automapmode_e::am_follow; // CPhipps - put all automap mode
+                                          // stuff into one enum
             // Ty 03/27/98 - externalized
-            plr->message = (automapmode & am_follow) ? s_AMSTR_FOLLOWON
-                                                     : s_AMSTR_FOLLOWOFF;
+            plr->message =
+                static_cast<bool>(automapmode & automapmode_e::am_follow)
+                    ? s_AMSTR_FOLLOWON
+                    : s_AMSTR_FOLLOWOFF;
         }
         else if (ch == key_map_grid)
         {
-            automapmode ^= am_grid; // CPhipps
+            automapmode ^= automapmode_e::am_grid; // CPhipps
             // Ty 03/27/98 - *not* externalized
             plr->message =
-                (automapmode & am_grid) ? s_AMSTR_GRIDON : s_AMSTR_GRIDOFF;
+                static_cast<bool>(automapmode & automapmode_e::am_grid)
+                    ? s_AMSTR_GRIDON
+                    : s_AMSTR_GRIDOFF;
         }
         else if (ch == key_map_mark)
         {
@@ -814,17 +820,21 @@ dboolean AM_Responder(event_t *ev)
         }                                        //    |
         else if (ch == key_map_rotate)
         {
-            automapmode ^= am_rotate;
-            plr->message = (automapmode & am_rotate) ? s_AMSTR_ROTATEON
-                                                     : s_AMSTR_ROTATEOFF;
+            automapmode ^= automapmode_e::am_rotate;
+            plr->message =
+                static_cast<bool>(automapmode & automapmode_e::am_rotate)
+                    ? s_AMSTR_ROTATEON
+                    : s_AMSTR_ROTATEOFF;
         }
         else if (ch == key_map_overlay)
         {
-            automapmode ^= am_overlay;
+            automapmode ^= automapmode_e::am_overlay;
             AM_SetPosition();
             AM_activateNewScale();
-            plr->message = (automapmode & am_overlay) ? s_AMSTR_OVERLAYON
-                                                      : s_AMSTR_OVERLAYOFF;
+            plr->message =
+                static_cast<bool>(automapmode & automapmode_e::am_overlay)
+                    ? s_AMSTR_OVERLAYON
+                    : s_AMSTR_OVERLAYOFF;
         }
 #ifdef GL_DOOM
         else if (ch == key_map_textured)
@@ -837,31 +847,31 @@ dboolean AM_Responder(event_t *ev)
 #endif
         else // phares
         {
-            rc = false;
+            rc = 0;
         }
     }
     else if (ev->type == ev_keyup)
     {
-        rc = false;
+        rc = 0;
         ch = ev->data1;
         if (ch == key_map_right)
         {
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.x = 0;
         }
         else if (ch == key_map_left)
         {
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.x = 0;
         }
         else if (ch == key_map_up)
         {
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.y = 0;
         }
         else if (ch == key_map_down)
         {
-            if (!(automapmode & am_follow))
+            if (!(automapmode & automapmode_e::am_follow))
                 m_paninc.y = 0;
         }
         else if ((ch == key_map_zoomout) || (ch == key_map_zoomin) ||
@@ -1265,7 +1275,7 @@ static void AM_drawGrid(int color)
         ml.b.x = x;
         ml.a.y = miny - exty;
         ml.b.y = ml.a.y + minlen;
-        if (automapmode & am_rotate)
+        if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
         {
             AM_rotatePoint(&ml.a);
             AM_rotatePoint(&ml.b);
@@ -1291,7 +1301,7 @@ static void AM_drawGrid(int color)
         ml.b.x = ml.a.x + minlen;
         ml.a.y = y;
         ml.b.y = y;
-        if (automapmode & am_rotate)
+        if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
         {
             AM_rotatePoint(&ml.a);
             AM_rotatePoint(&ml.b);
@@ -1392,7 +1402,7 @@ static void AM_drawWalls(void)
         l.b.x = lines[i].v2->x >> FRACTOMAPBITS;
         l.b.y = lines[i].v2->y >> FRACTOMAPBITS;
 
-        if (automapmode & am_rotate)
+        if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
         {
             AM_rotatePoint(&l.a);
             AM_rotatePoint(&l.b);
@@ -1557,7 +1567,7 @@ static void AM_drawLineCharacter(mline_t *lineguy, int lineguylines,
     int i;
     mline_t l;
 
-    if (automapmode & am_rotate)
+    if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
         angle -= viewangle - ANG90; // cph
 
     for (i = 0; i < lineguylines; i++)
@@ -1658,7 +1668,7 @@ static void AM_drawPlayers(void)
     {
         pt.x = viewx >> FRACTOMAPBITS;
         pt.y = viewy >> FRACTOMAPBITS;
-        if (automapmode & am_rotate)
+        if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
             AM_rotatePoint(&pt);
         else
             AM_SetMPointFloatValue(&pt);
@@ -1683,7 +1693,7 @@ static void AM_drawPlayers(void)
         {
             AM_GetMobjPosition(p->mo, &pt, &angle);
 
-            if (automapmode & am_rotate)
+            if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
                 AM_rotatePoint(&pt);
             else
                 AM_SetMPointFloatValue(&pt);
@@ -2048,7 +2058,7 @@ static void AM_drawThings(void)
 
                 AM_GetMobjPosition(t, &p, &angle);
 
-                if (automapmode & am_rotate)
+                if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
                     AM_rotatePoint(&p);
                 else
                     AM_SetMPointFloatValue(&p);
@@ -2141,7 +2151,7 @@ static void AM_drawMarks(void)
             p.x = markpoints[i].x; // - m_x + prev_m_x;
             p.y = markpoints[i].y; // - m_y + prev_m_y;
 
-            if (automapmode & am_rotate)
+            if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
                 AM_rotatePoint(&p);
             else
                 AM_SetMPointFloatValue(&p);
@@ -2176,14 +2186,17 @@ static void AM_drawMarks(void)
                                 (float)p.fx * 320.0f / SCREENWIDTH,
                                 (float)p.fy * 200.0f / SCREENHEIGHT, FB,
                                 namebuf, CR_DEFAULT,
-                                VPT_ALIGN_WIDE | VPT_STRETCH);
+                                patch_translation_e::VPT_ALIGN_WIDE |
+                                    patch_translation_e::VPT_STRETCH);
                         }
                         else
                         {
-                            V_DrawNamePatch(p.x * 320 / SCREENWIDTH,
-                                            p.y * 200 / SCREENHEIGHT, FB,
-                                            namebuf, CR_DEFAULT,
-                                            VPT_ALIGN_WIDE | VPT_STRETCH);
+                            V_DrawNamePatch(
+                                p.x * 320 / SCREENWIDTH,
+                                p.y * 200 / SCREENHEIGHT, FB, namebuf,
+                                CR_DEFAULT,
+                                patch_translation_e::VPT_ALIGN_WIDE |
+                                    patch_translation_e::VPT_STRETCH);
                         }
                     }
 
@@ -2287,7 +2300,7 @@ static void AM_setFrameVariables(void)
     am_frame.centerx_f = (float)m_x + (float)m_w / 2.0f;
     am_frame.centery_f = (float)m_y + (float)m_h / 2.0f;
 
-    if (automapmode & am_rotate)
+    if (static_cast<bool>(automapmode & automapmode_e::am_rotate))
     {
         float dx = (float)(m_x2 - am_frame.centerx);
         float dy = (float)(m_y2 - am_frame.centery);
@@ -2320,10 +2333,10 @@ static void AM_setFrameVariables(void)
 void AM_Drawer(void)
 {
     // CPhipps - all automap modes put into one enum
-    if (!(automapmode & am_active))
+    if (!(automapmode & automapmode_e::am_active))
         return;
 
-    if (automapmode & am_follow)
+    if (static_cast<bool>(automapmode & automapmode_e::am_follow))
         AM_doFollowPlayer();
 
     // Change the zoom if necessary
@@ -2344,8 +2357,9 @@ void AM_Drawer(void)
     }
 #endif
 
-    if (!(automapmode & am_overlay)) // cph - If not overlay mode, clear
-                                     // background for the automap
+    if (!(automapmode &
+          automapmode_e::am_overlay)) // cph - If not overlay mode, clear
+                                      // background for the automap
         V_FillRect(FB, f_x, f_y, f_w, f_h,
                    (byte)mapcolor_back); // jff 1/5/98 background default color
 
@@ -2354,7 +2368,7 @@ void AM_Drawer(void)
         AM_drawSubsectors();
     }
 
-    if (automapmode & am_grid)
+    if (static_cast<bool>(automapmode & automapmode_e::am_grid))
         AM_drawGrid(mapcolor_grid); // jff 1/7/98 grid default color
     AM_drawWalls();
     AM_drawPlayers();

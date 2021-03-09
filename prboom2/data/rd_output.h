@@ -4,6 +4,8 @@
 // Output wad construction - add lump data, build wad directory
 
 // append lump to output wad
+#include <cstddef>
+
 void output_add(const char *filename, const void *data, size_t size);
 
 // write output file to filename

@@ -31,6 +31,8 @@
 #ifndef DUMBPLAYER_H
 #define DUMBPLAYER_H
 
+#include "musicplayer.h"
+
 extern const music_player_t db_player;
 
 #endif // DUMBPLAYER_H

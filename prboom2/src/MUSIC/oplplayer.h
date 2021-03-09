@@ -27,6 +27,8 @@
 #ifndef OPLPLAYER_H
 #define OPLPLAYER_H
 
+#include "musicplayer.h"
+
 extern const music_player_t opl_synth_player;
 
 #endif

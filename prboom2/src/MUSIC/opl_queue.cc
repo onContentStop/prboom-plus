@@ -24,7 +24,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "lprintf.h"
+#include "../lprintf.h"
 #include <stdlib.h>
 #include <string.h>
 

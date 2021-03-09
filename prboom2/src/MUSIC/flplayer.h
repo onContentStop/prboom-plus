@@ -31,6 +31,8 @@
 #ifndef FLPLAYER_H
 #define FLPLAYER_H
 
+#include "musicplayer.h"
+
 extern const music_player_t fl_player;
 
 #endif // FLPLAYER_H

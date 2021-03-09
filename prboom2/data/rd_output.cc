@@ -67,7 +67,7 @@ void output_add(const char *filename, const void *data, size_t size)
     if (numlumps >= dirsize)
     {
         dirsize = dirsize ? 2 * dirsize : 256;
-        dir = xrealloc(dir, dirsize * sizeof(*dir));
+        dir = static_cast<struct lump *>(xrealloc(dir, dirsize * sizeof(*dir)));
     }
 
     newlump = &dir[numlumps++];

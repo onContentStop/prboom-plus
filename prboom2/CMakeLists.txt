@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.0)
 
 project("PrBoom-Plus"
     VERSION 2.6
-    HOMEPAGE_URL "https://github.com/coelckers/prboom-plus")
+    HOMEPAGE_URL "https://github.com/coelckers/prboom-plus"
+    LANGUAGES CXX
+    )
+
+set(CMAKE_CXX_STANDARD 17)
 
 # Set a default build type if none was specified
 set(default_build_type "RelWithDebInfo")
