@@ -32,24 +32,24 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_map.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "g_overflow.h"
-#include "hu_tracers.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_bbox.h"
-#include "m_random.h"
-#include "p_inter.h"
-#include "p_maputl.h"
-#include "p_mobj.h"
-#include "p_setup.h"
-#include "p_spec.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "p_map.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "g_overflow.hh"
+#include "hu_tracers.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_bbox.hh"
+#include "m_random.hh"
+#include "p_inter.hh"
+#include "p_maputl.hh"
+#include "p_mobj.hh"
+#include "p_setup.hh"
+#include "p_spec.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 static mobj_t *tmthing;
 static fixed_t tmx;
@@ -492,8 +492,8 @@ static // killough 3/26/98: make static
         if (numspechit >= spechit_max)
         {
             spechit_max = spechit_max ? spechit_max * 2 : 8;
-            spechit =
-                realloc(spechit, sizeof *spechit * spechit_max); // killough
+            spechit = static_cast<line_t **>(
+                realloc(spechit, sizeof *spechit * spechit_max)); // killough
         }
         spechit[numspechit++] = ld;
         // e6y: Spechits overrun emulation code
@@ -920,7 +920,8 @@ dboolean P_TryMove(
                 // http://www.doomworld.com/idgames/index.php?id=11138
                 if ((compatibility || !dropoff ||
                      (!prboom_comp[PC_NO_DROPOFF].state && mbf_features &&
-                      compatibility_level <= prboom_2_compatibility)) &&
+                      compatibility_level <=
+                          prboom_2_compatibility)) &&
                     (tmfloorz - tmdropoffz > 24 * FRACUNIT))
                     return false; // don't stand over a dropoff
             }
@@ -1407,7 +1408,8 @@ void P_SlideMove(mobj_t *mo)
 
             if (!P_TryMove(mo, mo->x, mo->y + mo->momy, true))
                 if (!P_TryMove(mo, mo->x + mo->momx, mo->y, true))
-                    if (compatibility_level == boom_201_compatibility)
+                    if (compatibility_level ==
+                        boom_201_compatibility)
                         mo->momx = mo->momy = 0;
 
             break;
@@ -2116,7 +2118,7 @@ dboolean P_CheckSector(sector_t *sector, dboolean crunch)
 // CPhipps -
 // Use block memory allocator here
 
-#include "z_bmalloc.h"
+#include "z_bmalloc.hh"
 
 IMPLEMENT_BLOCK_MEMORY_ALLOC_ZONE(secnodezone, sizeof(msecnode_t), PU_LEVEL,
                                   256, "SecNodes");
@@ -2407,7 +2409,8 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
      *  Fun. We restore its previous value unless we're in a Boom/MBF demo.
      */
     if (!prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
-        if ((compatibility_level < boom_compatibility_compatibility) ||
+        if ((compatibility_level <
+             boom_compatibility_compatibility) ||
             (compatibility_level >= prboom_3_compatibility))
             tmthing = saved_tmthing;
     /* And, duh, the same for tmx/y - cph 2002/09/22

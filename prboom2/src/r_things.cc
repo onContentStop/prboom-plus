@@ -31,19 +31,20 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "r_things.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "lprintf.h"
-#include "p_pspr.h"
-#include "r_bsp.h"
-#include "r_draw.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_segs.h"
-#include "v_trans.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "r_things.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "gl_struct.hh"
+#include "lprintf.hh"
+#include "p_pspr.hh"
+#include "r_bsp.hh"
+#include "r_draw.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_segs.hh"
+#include "v_trans.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 #define BASEYCENTER 100
 
@@ -127,14 +128,16 @@ void R_InitSpritesRes(void)
     if (screenheightarray)
         free(screenheightarray);
 
-    xtoviewangle = calloc(1, (SCREENWIDTH + 1) * sizeof(*xtoviewangle));
-    negonearray = calloc(1, SCREENWIDTH * sizeof(*negonearray));
-    screenheightarray = calloc(1, SCREENWIDTH * sizeof(*screenheightarray));
+    xtoviewangle = static_cast<angle_t *>(
+        calloc(1, (SCREENWIDTH + 1) * sizeof(*xtoviewangle)));
+    negonearray = (int *)calloc(1, SCREENWIDTH * sizeof(*negonearray));
+    screenheightarray =
+        (int *)calloc(1, SCREENWIDTH * sizeof(*screenheightarray));
 
     if (clipbot)
         free(clipbot);
 
-    clipbot = calloc(1, 2 * SCREENWIDTH * sizeof(*clipbot));
+    clipbot = (int *)calloc(1, 2 * SCREENWIDTH * sizeof(*clipbot));
     cliptop = clipbot + SCREENWIDTH;
 }
 
@@ -236,7 +239,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame, char rot,
 static void R_InitSpriteDefs(const char *const *namelist)
 {
     size_t numentries = lastspritelump - firstspritelump + 1;
-    struct
+    struct hash_t
     {
         int index, next;
     } * hash;
@@ -251,12 +254,14 @@ static void R_InitSpriteDefs(const char *const *namelist)
 
     numsprites = i;
 
-    sprites = Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL);
+    sprites = static_cast<spritedef_t *>(
+        Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL));
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
 
-    hash = malloc(sizeof(*hash) * numentries); // allocate hash table
+    // allocate hash table
+    hash = static_cast<hash_t *>(malloc(sizeof(*hash) * numentries));
 
     for (i = 0; (size_t)i < numentries; i++) // initialize hash table as empty
         hash[i].index = -1;
@@ -291,7 +296,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
             maxframe = -1;
             do
             {
-                register lumpinfo_t *lump = lumpinfo + j + firstspritelump;
+                lumpinfo_t *lump = lumpinfo + j + firstspritelump;
 
                 // Fast portable comparison -- killough
                 // (using int pointer cast is nonportable):
@@ -384,8 +389,8 @@ static void R_InitSpriteDefs(const char *const *namelist)
                 }
 
                 // allocate space for the frames present and copy sprtemp to it
-                sprites[i].spriteframes =
-                    Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+                sprites[i].spriteframes = static_cast<spriteframe_t *>(Z_Malloc(
+                    maxframe * sizeof(spriteframe_t), PU_STATIC, NULL));
                 memcpy(sprites[i].spriteframes, sprtemp,
                        maxframe * sizeof(spriteframe_t));
             }
@@ -436,8 +441,8 @@ static vissprite_t *R_NewVisSprite(void)
 
         num_vissprite_alloc =
             num_vissprite_alloc ? num_vissprite_alloc * 2 : 128;
-        vissprites =
-            realloc(vissprites, num_vissprite_alloc * sizeof(*vissprites));
+        vissprites = static_cast<vissprite_t *>(
+            realloc(vissprites, num_vissprite_alloc * sizeof(*vissprites)));
 
         // e6y: set all fields to zero
         memset(vissprites + num_vissprite_alloc_prev, 0,
@@ -1264,9 +1269,9 @@ void R_SortVisSprites(void)
         if (num_vissprite_ptrs < num_vissprite * 2)
         {
             free(vissprite_ptrs); // better than realloc -- no preserving needed
-            vissprite_ptrs =
+            vissprite_ptrs = static_cast<vissprite_t **>(
                 malloc((num_vissprite_ptrs = num_vissprite_alloc * 2) *
-                       sizeof *vissprite_ptrs);
+                       sizeof *vissprite_ptrs));
         }
 
         if (sprites_doom_order)
@@ -1459,9 +1464,10 @@ void R_DrawMasked(void)
             for (i = 0; i < DS_RANGES_COUNT; i++)
             {
                 drawsegs_xranges[i].items =
-                    realloc(drawsegs_xranges[i].items,
-                            drawsegs_xrange_size *
-                                sizeof(drawsegs_xranges[i].items[0]));
+                    static_cast<drawseg_xrange_item_t *>(
+                        realloc(drawsegs_xranges[i].items,
+                                drawsegs_xrange_size *
+                                    sizeof(drawsegs_xranges[i].items[0])));
             }
         }
         for (ds = ds_p; ds-- > drawsegs;)

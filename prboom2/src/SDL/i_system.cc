@@ -87,7 +87,6 @@
 #include "../m_fixed.hh"
 #include "../r_fps.hh"
 #endif
-#include "../i_system.hh"
 
 #ifdef __GNUG__
 #pragma implementation "../i_system.hh"
@@ -487,7 +486,7 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
     };
     static std::array<Search, 12> search0 = {{
         {NULL},
-        {NULL, NULL, I_DoomExeDir},  // config directory
+        {NULL, NULL, NULL, I_DoomExeDir},  // config directory
         {NULL},                      // current working directory
         {NULL, NULL, "DOOMWADDIR"},  // run-time $DOOMWADDIR
         {DOOMWADDIR},                // build-time configured DOOMWADDIR

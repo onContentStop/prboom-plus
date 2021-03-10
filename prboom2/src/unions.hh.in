@@ -1,0 +1,82 @@
+union Action
+
+types
+
+ceiling_t
+elevator_t
+fireflicker_t
+floormove_t
+glow_t
+lightflash_t
+mobj_t
+message_thinker_t
+plat_t
+strobe_t
+vldoor_t
+player_t
+pspdef_t
+scroll_t
+pusher_t
+friction_t
+thinker_t
+
+types
+
+variants
+
+ceiling (fn void ceiling_t *)
+elevator (fn void elevator_t *)
+fireflicker (fn void fireflicker_t *)
+floormove (fn void floormove_t *)
+friction (fn void friction_t *)
+glow (fn void glow_t *)
+lightflash (fn void lightflash_t *)
+mobj (fn void mobj_t *)
+message_thinker (fn void message_thinker_t *)
+plat (fn void plat_t *)
+plps (fn void player_t *, pspdef_t *)
+pusher (fn void pusher_t *)
+scroll (fn void scroll_t *)
+strobe (fn void strobe_t *)
+thinker (fn void thinker_t *)
+vldoor (fn void vldoor_t *)
+
+v (fn void)
+p1 (fn void void *)
+p2 (fn void void *, void *)
+
+variants
+
+
+union SetupMenuVar
+
+types
+
+default_t
+setup_menu_t
+
+types
+
+variants
+
+other (const void *)
+key (int *)
+name (const char *)
+def (default_t *)
+menu (setup_menu_t *)
+
+variants
+
+
+union CheatSequenceFunction
+
+types
+types
+
+variants
+
+v (fn void)
+i1 (fn void int)
+buf (fn void const char *)
+
+variants

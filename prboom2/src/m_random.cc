@@ -37,10 +37,10 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h"
+#include "doomstat.hh"
 
-#include "lprintf.h"
-#include "m_random.h"
+#include "lprintf.hh"
+#include "m_random.hh"
 
 //
 // M_Random

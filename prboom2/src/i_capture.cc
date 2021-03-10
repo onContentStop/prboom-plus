@@ -28,13 +28,13 @@
  *---------------------------------------------------------------------
  */
 
-#include "SDL.h"
-#include "SDL_thread.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_thread.h>
 
-#include "i_capture.h"
-#include "i_sound.h"
-#include "i_video.h"
-#include "lprintf.h"
+#include "i_capture.hh"
+#include "i_sound.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -320,9 +320,7 @@ static int my_popen3(pipeinfo_t *p)
 
     int pid;
 
-    puser_t *puser = NULL;
-
-    puser = malloc(sizeof(puser_t));
+    auto *puser = static_cast<puser_t *>(malloc(sizeof(puser_t)));
     if (!puser)
         return 0;
 

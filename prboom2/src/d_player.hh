@@ -89,7 +89,7 @@ typedef enum
 //
 // Extended player object info: player_t
 //
-typedef struct player_s
+struct player_t
 {
     mobj_t *mo;
     playerstate_t playerstate;
@@ -192,7 +192,7 @@ typedef struct player_s
     angle_t prev_viewangle;
     angle_t prev_viewpitch;
     fixed_t jumpTics; // delay the next jump for a moment
-} player_t;
+};
 
 //
 // INTERMISSION

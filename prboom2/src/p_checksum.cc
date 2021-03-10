@@ -3,10 +3,10 @@
 #include <stdlib.h> /* exit(), atexit() */
 #include <string.h>
 
-#include "doomstat.h" /* players{,ingame} */
-#include "lprintf.h"
-#include "md5.h"
-#include "p_checksum.h"
+#include "doomstat.hh" /* players{,ingame} */
+#include "lprintf.hh"
+#include "md5.hh"
+#include "p_checksum.hh"
 
 /* forward decls */
 static void p_checksum_cleanup(void);
@@ -23,7 +23,7 @@ void (*P_Checksum)(int) = p_checksum_nop;
  * sets up the file and function pointers to write out checksum data
  */
 static FILE *outfile = NULL;
-static struct MD5Context md5global;
+static MD5Context md5global;
 
 void P_RecordChecksum(const char *file)
 {

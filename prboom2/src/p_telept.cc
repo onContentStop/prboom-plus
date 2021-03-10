@@ -31,17 +31,17 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "p_user.h"
-#include "r_demo.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "p_user.hh"
+#include "r_demo.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 static mobj_t *P_TeleportDestination(line_t *line)
 {
@@ -349,11 +349,5 @@ int EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing,
             return 1;
         }
 
-    // e6y
-    if (player && player->mo == thing)
-        R_ResetAfterTeleport(player);
-
-    return 1;
-}
-return 0;
+    return 0;
 }

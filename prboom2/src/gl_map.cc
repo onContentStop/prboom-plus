@@ -33,29 +33,36 @@
 
 #include <math.h>
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #ifdef HAVE_LIBSDL2_IMAGE
 #include "SDL_image.h"
 #endif
 
-#include "am_map.h"
-#include "gl_intern.h"
-#include "gl_opengl.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "w_wad.h"
+#include "am_map.hh"
+#include "gl_intern.hh"
+#include "gl_opengl.hh"
+#include "gl_struct.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "w_wad.hh"
 
-am_icon_t am_icons[am_icon_count + 1] = {
-    {-1, "M_SHADOW"},
-
-    {-1, "M_ARROW"},  {-1, "M_NORMAL"}, {-1, "M_HEALTH"}, {-1, "M_ARMOUR"},
-    {-1, "M_AMMO"},   {-1, "M_KEY"},    {-1, "M_POWER"},  {-1, "M_WEAP"},
-
-    {-1, "M_ARROW"},  {-1, "M_ARROW"},  {-1, "M_ARROW"},  {-1, "M_MARK"},
-    {-1, "M_NORMAL"},
-
-    {-1, NULL},
-};
+std::array<am_icon_t, am_icon_count + 1> am_icons{{
+    {static_cast<GLuint>(-1), "M_SHADOW"},
+    {static_cast<GLuint>(-1), "M_ARROW"},
+    {static_cast<GLuint>(-1), "M_NORMAL"},
+    {static_cast<GLuint>(-1), "M_HEALTH"},
+    {static_cast<GLuint>(-1), "M_ARMOUR"},
+    {static_cast<GLuint>(-1), "M_AMMO"},
+    {static_cast<GLuint>(-1), "M_KEY"},
+    {static_cast<GLuint>(-1), "M_POWER"},
+    {static_cast<GLuint>(-1), "M_WEAP"},
+    {static_cast<GLuint>(-1), "M_ARROW"},
+    {static_cast<GLuint>(-1), "M_ARROW"},
+    {static_cast<GLuint>(-1), "M_ARROW"},
+    {static_cast<GLuint>(-1), "M_MARK"},
+    {static_cast<GLuint>(-1), "M_NORMAL"},
+    {static_cast<GLuint>(-1), NULL},
+}};
 
 typedef struct map_nice_thing_s
 {
@@ -129,8 +136,8 @@ void gld_AddNiceThing(int type, float x, float y, float radius, float angle,
                       unsigned char r, unsigned char g, unsigned char b,
                       unsigned char a)
 {
-    map_nice_thing_t *thing =
-        M_ArrayGetNewItem(&map_things[type], sizeof(thing[0]));
+    auto *thing = static_cast<map_nice_thing_t *>(
+        M_ArrayGetNewItem(&map_things[type], sizeof(map_nice_thing_t)));
 
     float sina_r = (float)sin(angle) * radius;
     float cosa_r = (float)cos(angle) * radius;

@@ -33,12 +33,12 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomdef.h"
-#include "doomstat.h" //jff 5/18/98
-#include "m_random.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
+#include "doomdef.hh"
+#include "doomstat.hh" //jff 5/18/98
+#include "m_random.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
 
 //////////////////////////////////////////////////////////
 //
@@ -181,7 +181,8 @@ void P_SpawnFireFlicker(sector_t *sector)
     // Nothing special about it during gameplay.
     sector->special &= ~31; // jff 3/14/98 clear non-generalized sector type
 
-    flick = Z_Malloc(sizeof(*flick), PU_LEVSPEC, 0);
+    flick =
+        static_cast<fireflicker_t *>(Z_Malloc(sizeof(*flick), PU_LEVSPEC, 0));
 
     memset(flick, 0, sizeof(*flick));
     P_AddThinker(&flick->thinker);
@@ -209,7 +210,8 @@ void P_SpawnLightFlash(sector_t *sector)
     // nothing special about it during gameplay
     sector->special &= ~31; // jff 3/14/98 clear non-generalized sector type
 
-    flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
+    flash =
+        static_cast<lightflash_t *>(Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0));
 
     memset(flash, 0, sizeof(*flash));
     P_AddThinker(&flash->thinker);
@@ -238,7 +240,7 @@ void P_SpawnStrobeFlash(sector_t *sector, int fastOrSlow, int inSync)
 {
     strobe_t *flash;
 
-    flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
+    flash = static_cast<strobe_t *>(Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0));
 
     memset(flash, 0, sizeof(*flash));
     P_AddThinker(&flash->thinker);
@@ -274,7 +276,7 @@ void P_SpawnGlowingLight(sector_t *sector)
 {
     glow_t *g;
 
-    g = Z_Malloc(sizeof(*g), PU_LEVSPEC, 0);
+    g = static_cast<glow_t *>(Z_Malloc(sizeof(*g), PU_LEVSPEC, 0));
 
     memset(g, 0, sizeof(*g));
     P_AddThinker(&g->thinker);

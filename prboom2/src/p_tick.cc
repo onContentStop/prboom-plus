@@ -31,14 +31,15 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_tick.h"
-#include "doomstat.h"
-#include "e6y.h"
-#include "p_map.h"
-#include "p_spec.h"
-#include "p_user.h"
-#include "r_fps.h"
-#include "s_advsound.h"
+#include "p_tick.hh"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "p_map.hh"
+#include "p_spec.hh"
+#include "p_user.hh"
+#include "r_fps.hh"
+#include "s_advsound.hh"
+#include "unions.hh"
 
 int leveltime;
 
@@ -84,7 +85,7 @@ void P_UpdateThinker(thinker_t *thinker)
     register thinker_t *th;
     // find the class the thinker belongs to
 
-    int class =
+    int cls =
         thinker->function == P_RemoveThinkerDelayed ? th_delete
         : thinker->function == P_MobjThinker &&
                 ((mobj_t *)thinker)->health > 0 &&
@@ -100,7 +101,7 @@ void P_UpdateThinker(thinker_t *thinker)
     }
 
     // Add to appropriate thread
-    th = &thinkerclasscap[class];
+    th = &thinkerclasscap[cls];
     th->cprev->cnext = thinker;
     thinker->cnext = th;
     thinker->cprev = th->cprev;
@@ -250,8 +251,8 @@ static void P_RunThinkers(void)
     {
         if (newthinkerpresent)
             R_ActivateThinkerInterpolations(currentthinker);
-        if (currentthinker->function)
-            currentthinker->function(currentthinker);
+        if (currentthinker->function != ACTION_NULL)
+            currentthinker->function.thinker()(currentthinker);
     }
     newthinkerpresent = false;
 
@@ -276,8 +277,9 @@ void P_Ticker(void)
      * All of this complicated mess is used to preserve demo sync.
      */
 
-    if (paused || (menuactive && !demoplayback && !netgame &&
-                   players[consoleplayer].viewz != 1))
+    if (paused ||
+        (menuactive != mnact_inactive && !demoplayback &&
+         !netgame && players[consoleplayer].viewz != 1))
     {
         P_ResetWalkcam();
         return;

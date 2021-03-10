@@ -34,6 +34,10 @@
 #ifndef __P_SAVEG__
 #define __P_SAVEG__
 
+#include <cstddef>
+
+#include "doomtype.hh"
+
 #ifdef __GNUG__
 #pragma interface
 #endif

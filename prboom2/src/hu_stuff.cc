@@ -33,25 +33,27 @@
 
 // killough 5/3/98: remove unnecessary headers
 
-#include "hu_stuff.h"
-#include "d_deh.h" /* Ty 03/27/98 - externalization of mapnamesx arrays */
-#include "doomstat.h"
-#include "dstrings.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "g_overflow.h"
-#include "hu_lib.h"
-#include "hu_tracers.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sc_man.h"
-#include "sounds.h"
-#include "st_stuff.h" /* jff 2/16/98 need loc of status bar */
+#include "d_deh.hh" /* Ty 03/27/98 - externalization of mapnamesx arrays */
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "dstrings.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "g_overflow.hh"
+#include "hu_lib.hh"
+#include "hu_tracers.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sc_man.hh"
+#include "sounds.hh"
+#include "st_stuff.hh" /* jff 2/16/98 need loc of status bar */
+
+#include "hu_stuff.hh"
 
 // global heads up display controls
 
@@ -633,7 +635,7 @@ void HU_Start(void)
     while (*s)
         HUlib_addCharToTextLine(&w_hudadd, *(s++));
 
-    for (i = 0; i < NUMTRACES; i++)
+    for (int i = 0; i < static_cast<int>(tracertype_t::NUMTRACES); i++)
     {
         HUlib_initTextLine(&w_traces[i], HU_TRACERX, HU_TRACERY + i * HU_GAPY,
                            hu_font2, HU_FONTSTART, CR_GRAY,
@@ -710,7 +712,7 @@ typedef struct hud_widget_s
     hu_textline_t *hu_textline;
     int x;
     int y;
-    enum patch_translation_e flags;
+    patch_translation_e flags;
     HU_widget_build_func build;
     HU_widget_draw_func draw;
     const char *name;
@@ -865,7 +867,8 @@ void HU_LoadHUDDefs(void)
 
                 // setup new hud
                 huds_count++;
-                huds = realloc(huds, huds_count * sizeof(huds[0]));
+                huds = static_cast<hud_widgets_list_t *>(
+                    realloc(huds, huds_count * sizeof(huds[0])));
                 list = &huds[huds_count - 1];
                 list->items = NULL;
                 list->count = 0;
@@ -899,8 +902,8 @@ void HU_LoadHUDDefs(void)
                         hud_widget_t *item;
 
                         list->count++;
-                        list->items = realloc(
-                            list->items, list->count * sizeof(list->items[0]));
+                        list->items = static_cast<hud_widget_t *>(realloc(
+                            list->items, list->count * sizeof(list->items[0])));
 
                         item = &list->items[list->count - 1];
 
@@ -2004,7 +2007,7 @@ void SetCrosshairTarget(void)
         {
             int top, bottom, h;
             stretch_param_t *params =
-                &stretch_params[crosshair.flags & VPT_ALIGN_MASK];
+                &stretch_params[(crosshair.flags & VPT_ALIGN_MASK).value()];
 
             if (V_GetMode() != VID_MODEGL)
             {
@@ -2274,8 +2277,8 @@ void HU_Drawer(void)
         // e6y
         if (traces_present)
         {
-            int k, num = 0;
-            for (k = 0; k < NUMTRACES; k++)
+            int num = 0;
+            for (int k = 0; k < static_cast<int>(tracertype_t::NUMTRACES); k++)
             {
                 if (traces[k].count)
                 {
@@ -2284,7 +2287,7 @@ void HU_Drawer(void)
                         w_traces[num].y = w_traces[0].y - num * 8;
 
                         if (traces[k].ApplyFunc)
-                            traces[k].ApplyFunc(k);
+                            traces[k].ApplyFunc(static_cast<tracertype_t>(k));
 
                         HUlib_clearTextLine(&w_traces[num]);
                         s = traces[k].hudstr;
@@ -2292,7 +2295,7 @@ void HU_Drawer(void)
                             HUlib_addCharToTextLine(&w_traces[num], *(s++));
 
                         if (traces[k].ResetFunc)
-                            traces[k].ResetFunc(k);
+                            traces[k].ResetFunc(static_cast<tracertype_t>(k));
                     }
                     HUlib_drawTextLine(&w_traces[num], false);
                     num++;
@@ -2714,8 +2717,8 @@ int SetCustomMessage(int plr, const char *msg, int delay, int ticks, int cm,
     }
     else
     {
-        message_thinker_t *message =
-            Z_Calloc(1, sizeof(*message), PU_LEVEL, NULL);
+        auto *message = static_cast<message_thinker_t *>(
+            Z_Calloc(1, sizeof(message_thinker_t), PU_LEVEL, NULL));
         message->thinker.function = T_ShowMessage;
         message->delay = delay;
         message->plr = plr;

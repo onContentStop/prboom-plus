@@ -35,17 +35,18 @@
 #include "config.h"
 #endif
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <math.h>
 
-#include "doomstat.h"
-#include "e6y.h"
-#include "gl_intern.h"
-#include "gl_opengl.h"
-#include "lprintf.h"
-#include "r_main.h"
-#include "v_video.h"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "gl_opengl.hh"
+#include "gl_struct.hh"
+#include "lprintf.hh"
+#include "r_main.hh"
+#include "v_video.hh"
 
 gl_lightmode_t gl_lightmode;
 gl_lightmode_t gl_lightmode_default;

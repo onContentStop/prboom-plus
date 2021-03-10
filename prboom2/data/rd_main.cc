@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "rd_graphic.h"
-#include "rd_output.h"
-#include "rd_palette.h"
-#include "rd_sound.h"
-#include "rd_util.h"
+#include "rd_graphic.hh"
+#include "rd_output.hh"
+#include "rd_palette.hh"
+#include "rd_sound.hh"
+#include "rd_util.hh"
 
 enum argtype
 {

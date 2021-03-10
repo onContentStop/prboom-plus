@@ -32,16 +32,16 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_overflow.h"
-#include "lprintf.h"
-#include "p_map.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_overflow.hh"
+#include "lprintf.hh"
+#include "p_map.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 // e6y
 #define STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE 10
@@ -359,7 +359,10 @@ void T_MoveFloor(floormove_t *floor)
         // Moving floors (but not plats) in versions <= v1.2 did not
         // make floor stop sound
         if (compatibility_level > doom_12_compatibility)
-            S_StartSound((mobj_t *)&floor->sector->soundorg, sfx_pstop);
+        {
+            S_StartSound(reinterpret_cast<mobj_t *>(&floor->sector->soundorg),
+                         sfx_pstop);
+        }
     }
 }
 
@@ -472,7 +475,8 @@ int EV_DoFloor(line_t *line, floor_e floortype)
 
         // new floor thinker
         rtn = 1;
-        floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+        floor =
+            static_cast<floormove_t *>(Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
         memset(floor, 0, sizeof(*floor));
         P_AddThinker(&floor->thinker);
         sec->floordata = floor; // jff 2/22/98
@@ -529,7 +533,9 @@ int EV_DoFloor(line_t *line, floor_e floortype)
             floor->floordestheight = P_FindHighestFloorSurrounding(sec);
             if (compatibility_level == doom_12_compatibility ||
                 floor->floordestheight != sec->floorheight)
+            {
                 floor->floordestheight += 8 * FRACUNIT;
+            }
             break;
 
         case raiseFloorCrush:
@@ -801,7 +807,8 @@ int EV_BuildStairs(line_t *line, stair_e type)
 
             // create new floor thinker for first step
             rtn = 1;
-            floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+            floor = static_cast<floormove_t *>(
+                Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
             memset(floor, 0, sizeof(*floor));
             P_AddThinker(&floor->thinker);
             sec->floordata = floor;
@@ -914,7 +921,8 @@ int EV_BuildStairs(line_t *line, stair_e type)
                     secnum = newsecnum;
 
                     // create and initialize a thinker for the next step
-                    floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+                    floor = static_cast<floormove_t *>(
+                        Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
                     memset(floor, 0, sizeof(*floor));
                     P_AddThinker(&floor->thinker);
 
@@ -1086,7 +1094,8 @@ int EV_DoDonut(line_t *line)
             }
 
             //  Spawn rising slime
-            floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+            floor = static_cast<floormove_t *>(
+                Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
             memset(floor, 0, sizeof(*floor));
             P_AddThinker(&floor->thinker);
             s2->floordata = floor; // jff 2/22/98
@@ -1101,7 +1110,8 @@ int EV_DoDonut(line_t *line)
             floor->floordestheight = s3_floorheight;
 
             //  Spawn lowering donut-hole pillar
-            floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+            floor = static_cast<floormove_t *>(
+                Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
             memset(floor, 0, sizeof(*floor));
             P_AddThinker(&floor->thinker);
             s1->floordata = floor; // jff 2/22/98
@@ -1147,7 +1157,8 @@ int EV_DoElevator(line_t *line, elevator_e elevtype)
 
         // create and initialize new elevator thinker
         rtn = 1;
-        elevator = Z_Malloc(sizeof(*elevator), PU_LEVSPEC, 0);
+        elevator = static_cast<elevator_t *>(
+            Z_Malloc(sizeof(*elevator), PU_LEVSPEC, 0));
         memset(elevator, 0, sizeof(*elevator));
         P_AddThinker(&elevator->thinker);
         sec->floordata = elevator;   // jff 2/22/98

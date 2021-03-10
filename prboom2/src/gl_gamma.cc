@@ -40,14 +40,15 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "doomstat.h"
-#include "doomtype.h"
-#include "gl_intern.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "v_video.h"
-#include <SDL.h>
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "gl_intern.hh"
+#include "gl_struct.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "v_video.hh"
+#include <SDL2/SDL.h>
 
 #ifndef HIBYTE
 #define HIBYTE(W) (((W) >> 8) & 0xFF)
@@ -186,7 +187,7 @@ void gld_ResetGammaRamp(void)
             lprintf(LO_WARN,
                     "gld_ResetGammaRamp: suspicious gamma tables, using "
                     "linear ramp for restoration\n");
-            _exit(0);
+            std::exit(0);
         }
     }
 }

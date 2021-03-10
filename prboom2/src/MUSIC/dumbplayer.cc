@@ -60,7 +60,7 @@ const music_player_t db_player = {db_name, db_init, NULL, NULL, NULL, NULL,
 #endif /* _MSC_VER */
 #endif
 
-#include "lprintf.h"
+#include "lprintf.hh"
 #include <dumb.h>
 #include <string.h>
 

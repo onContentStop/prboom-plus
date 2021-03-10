@@ -167,7 +167,96 @@ typedef enum
  * Moved from m_menu.c to m_menu.h so that m_misc.c can use it.
  */
 
-typedef struct setup_menu_s
+struct default_t;
+struct setup_menu_t;
+
+class setup_menu_var_t
+{
+    using var_t = const void *;
+    using key_t = int *;
+    using name_t = const char *;
+    using def_t = default_t *;
+    using menu_t = setup_menu_t *;
+
+    var_t m_var = NULL;
+    key_t m_key = NULL;
+    name_t m_name = NULL;
+    def_t m_def = NULL;
+    menu_t m_menu = NULL;
+
+    enum class d
+    {
+        u,
+        v,
+        k,
+        n,
+        d,
+        m,
+    };
+
+    d m_d = d::u;
+
+  public:
+    constexpr setup_menu_var_t() = default;
+    constexpr setup_menu_var_t(var_t var) : m_var(var), m_d(d::v)
+    {
+    }
+    constexpr setup_menu_var_t(key_t key) : m_key(key), m_d(d::k)
+    {
+    }
+    constexpr setup_menu_var_t(name_t name) : m_name(name), m_d(d::n)
+    {
+    }
+    constexpr setup_menu_var_t(def_t def) : m_def(def), m_d(d::n)
+    {
+    }
+    constexpr setup_menu_var_t(menu_t menu) : m_menu(menu), m_d(d::n)
+    {
+    }
+
+    constexpr var_t &var()
+    {
+        return m_var;
+    }
+    constexpr var_t var() const
+    {
+        return m_var;
+    }
+    constexpr key_t &key()
+    {
+        return m_key;
+    }
+    constexpr key_t key() const
+    {
+        return m_key;
+    }
+    constexpr name_t &name()
+    {
+        return m_name;
+    }
+    constexpr name_t name() const
+    {
+        return m_name;
+    }
+    constexpr def_t &def()
+    {
+        return m_def;
+    }
+    constexpr def_t def() const
+    {
+        return m_def;
+    }
+    constexpr menu_t &menu()
+    {
+        return m_menu;
+    }
+    constexpr menu_t menu() const
+    {
+        return m_menu;
+    }
+};
+
+struct setup_menu_t
 {
     const char *m_text;  /* text to display */
     int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
@@ -175,19 +264,12 @@ typedef struct setup_menu_s
     short m_x;           /* screen x position (left is 0) */
     short m_y;           /* screen y position (top is 0) */
 
-    union /* killough 11/98: The first field is a union of several types */
-    {
-        const void *var;           /* generic variable */
-        int *m_key;                /* key value, or 0 if not shown */
-        const char *name;          /* name */
-        struct default_s *def;     /* default[] table entry */
-        struct setup_menu_s *menu; /* next or prev menu */
-    } var;
+    setup_menu_var_t var;
 
     int *m_mouse;         /* mouse button value, or 0 if not shown */
     int *m_joy;           /* joystick button value, or 0 if not shown */
     void (*action)(void); /* killough 10/98: function to call after changing */
     const char **selectstrings; /* list of strings for choice value */
-} setup_menu_t;
+};
 
 #endif

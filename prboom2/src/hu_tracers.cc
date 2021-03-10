@@ -35,39 +35,41 @@
 #include "config.h"
 #endif
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_misc.h"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_misc.hh"
 
-#include "hu_tracers.h"
+#include "hu_tracers.hh"
 
 dboolean traces_present;
 
-hu_textline_t w_traces[NUMTRACES];
+hu_textline_t w_traces[static_cast<size_t>(tracertype_t::NUMTRACES)];
 
 void TracerApply(tracertype_t index);
 void GivenDamageReset(tracertype_t index);
 void GivenDamageApply(tracertype_t index);
 
-traceslist_t traces[NUMTRACES];
+traceslist_t traces[static_cast<size_t>(tracertype_t::NUMTRACES)];
 
 void InitTracers(void)
 {
     int i, p;
     int value, count;
 
-    traceslistinit_t traces_init[NUMTRACES] = {
-        {"-trace_thingshealth", "health ", TracerApply, NULL},
-        {"-trace_thingspickup", "pickup ", TracerApply, NULL},
-        {"-trace_linescross", "lcross ", TracerApply, NULL},
-        {"-trace_givendamage", "damage ", GivenDamageApply, GivenDamageReset},
-    };
+    traceslistinit_t traces_init[static_cast<size_t>(tracertype_t::NUMTRACES)] =
+        {
+            {"-trace_thingshealth", "health ", TracerApply, NULL},
+            {"-trace_thingspickup", "pickup ", TracerApply, NULL},
+            {"-trace_linescross", "lcross ", TracerApply, NULL},
+            {"-trace_givendamage", "damage ", GivenDamageApply,
+             GivenDamageReset},
+        };
 
     traces_present = false;
 
-    for (i = 0; i < NUMTRACES; i++)
+    for (i = 0; i < static_cast<size_t>(tracertype_t::NUMTRACES); i++)
     {
         strcpy(traces[i].cmd, traces_init[i].cmd);
         strcpy(traces[i].prefix, traces_init[i].prefix);
@@ -86,7 +88,7 @@ void InitTracers(void)
                 traces[i].items[count].index = value;
 
                 if (traces[i].ApplyFunc)
-                    traces[i].ApplyFunc(i);
+                    traces[i].ApplyFunc(static_cast<tracertype_t>(i));
 
                 traces_present = true;
                 count++;
@@ -96,12 +98,12 @@ void InitTracers(void)
     }
 }
 
-void TracerApply(tracertype_t index)
+void TracerApply(tracertype_t _index)
 {
-    int i;
+    auto index = static_cast<size_t>(_index);
 
     strcpy(traces[index].hudstr, traces[index].prefix);
-    for (i = 0; i < traces[index].count; i++)
+    for (int i = 0; i < traces[index].count; i++)
     {
         sprintf(traces[index].hudstr + strlen(traces[index].hudstr),
                 "\x1b\x33%s ", traces[index].items[i].value);
@@ -110,17 +112,19 @@ void TracerApply(tracertype_t index)
 
 void CheckThingsPickupTracer(mobj_t *mobj)
 {
-    if (traces[TRACE_PICKUP].count)
+    if (traces[(size_t)tracertype_t::TRACE_PICKUP].count)
     {
         int i;
-        for (i = 0; i < traces[TRACE_PICKUP].count; i++)
+        for (i = 0; i < traces[(size_t)tracertype_t::TRACE_PICKUP].count; i++)
         {
-            if (mobj->index == traces[TRACE_PICKUP].items[i].index)
+            if (mobj->index ==
+                traces[(size_t)tracertype_t::TRACE_PICKUP].items[i].index)
             {
-                sprintf(traces[TRACE_PICKUP].items[i].value,
-                        "\x1b\x36%d \x1b\x33%05.2f",
-                        traces[TRACE_PICKUP].items[i].index,
-                        (float)(leveltime) / 35);
+                sprintf(
+                    traces[(size_t)tracertype_t::TRACE_PICKUP].items[i].value,
+                    "\x1b\x36%d \x1b\x33%05.2f",
+                    traces[(size_t)tracertype_t::TRACE_PICKUP].items[i].index,
+                    (float)(leveltime) / 35);
             }
         }
     }
@@ -128,15 +132,17 @@ void CheckThingsPickupTracer(mobj_t *mobj)
 
 void CheckThingsHealthTracer(mobj_t *mobj)
 {
-    if (traces[TRACE_HEALTH].count)
+    if (traces[(size_t)tracertype_t::TRACE_HEALTH].count)
     {
         int i;
-        for (i = 0; i < traces[TRACE_HEALTH].count; i++)
+        for (i = 0; i < traces[(size_t)tracertype_t::TRACE_HEALTH].count; i++)
         {
-            if (mobj->index == traces[TRACE_HEALTH].items[i].index)
+            if (mobj->index ==
+                traces[(size_t)tracertype_t::TRACE_HEALTH].items[i].index)
             {
-                sprintf(traces[TRACE_HEALTH].items[i].value,
-                        "\x1b\x36%d \x1b\x33%d", mobj->index, mobj->health);
+                sprintf(
+                    traces[(size_t)tracertype_t::TRACE_HEALTH].items[i].value,
+                    "\x1b\x36%d \x1b\x33%d", mobj->index, mobj->health);
             }
         }
     }
@@ -145,21 +151,27 @@ void CheckThingsHealthTracer(mobj_t *mobj)
 int crossed_lines_count = 0;
 void CheckLinesCrossTracer(line_t *line)
 {
-    if (traces[TRACE_CROSS].count)
+    if (traces[(size_t)tracertype_t::TRACE_CROSS].count)
     {
         int i;
         crossed_lines_count++;
-        for (i = 0; i < traces[TRACE_CROSS].count; i++)
+        for (i = 0; i < traces[(size_t)tracertype_t::TRACE_CROSS].count; i++)
         {
-            if (line->iLineID == traces[TRACE_CROSS].items[i].index)
+            if (line->iLineID ==
+                traces[(size_t)tracertype_t::TRACE_CROSS].items[i].index)
             {
-                if (!traces[TRACE_CROSS].items[i].data1)
+                if (!traces[(size_t)tracertype_t::TRACE_CROSS].items[i].data1)
                 {
-                    sprintf(traces[TRACE_CROSS].items[i].value,
+                    sprintf(traces[(size_t)tracertype_t::TRACE_CROSS]
+                                .items[i]
+                                .value,
                             "\x1b\x36%d \x1b\x33%05.2f",
-                            traces[TRACE_CROSS].items[i].index,
+                            traces[(size_t)tracertype_t::TRACE_CROSS]
+                                .items[i]
+                                .index,
                             (float)(leveltime) / 35);
-                    traces[TRACE_CROSS].items[i].data1 = 1;
+                    traces[(size_t)tracertype_t::TRACE_CROSS].items[i].data1 =
+                        1;
                 }
             }
         }
@@ -168,14 +180,15 @@ void CheckLinesCrossTracer(line_t *line)
 
 void ClearLinesCrossTracer(void)
 {
-    if (traces[TRACE_CROSS].count)
+    if (traces[(size_t)tracertype_t::TRACE_CROSS].count)
     {
         if (!crossed_lines_count)
         {
             int i;
-            for (i = 0; i < traces[TRACE_CROSS].count; i++)
+            for (i = 0; i < traces[(size_t)tracertype_t::TRACE_CROSS].count;
+                 i++)
             {
-                traces[TRACE_CROSS].items[i].data1 = 0;
+                traces[(size_t)tracertype_t::TRACE_CROSS].items[i].data1 = 0;
             }
         }
         crossed_lines_count = 0;
@@ -189,12 +202,13 @@ static int given_damage_processed[MAXTRACEITEMS];
 
 void CheckGivenDamageTracer(mobj_t *mobj, int damage)
 {
-    if (traces[TRACE_DAMAGE].count)
+    if (traces[(size_t)tracertype_t::TRACE_DAMAGE].count)
     {
         int i;
-        for (i = 0; i < traces[TRACE_DAMAGE].count; i++)
+        for (i = 0; i < traces[(size_t)tracertype_t::TRACE_DAMAGE].count; i++)
         {
-            if (mobj->index == traces[TRACE_DAMAGE].items[i].index)
+            if (mobj->index ==
+                traces[(size_t)tracertype_t::TRACE_DAMAGE].items[i].index)
             {
                 given_damage_processed[i] = false;
                 given_damage_pertic[i] += damage;
@@ -204,8 +218,9 @@ void CheckGivenDamageTracer(mobj_t *mobj, int damage)
     }
 }
 
-void GivenDamageApply(tracertype_t index)
+void GivenDamageApply(tracertype_t _index)
 {
+    auto index = static_cast<size_t>(_index);
     if (traces[index].count)
     {
         int i;
@@ -221,7 +236,7 @@ void GivenDamageApply(tracertype_t index)
                     "\x1b\x36%d \x1b\x33%d/\x1b\x33%d",
                     traces[index].items[i].index, given_damage_pertic_saved[i],
                     given_damage_total[i]);
-            TracerApply(index);
+            TracerApply(static_cast<tracertype_t>(index));
         }
     }
 }
@@ -229,7 +244,7 @@ void GivenDamageApply(tracertype_t index)
 void GivenDamageReset(tracertype_t index)
 {
     int i;
-    for (i = 0; i < traces[index].count; i++)
+    for (i = 0; i < traces[static_cast<size_t>(index)].count; i++)
     {
         given_damage_pertic[i] = 0;
     }
@@ -251,9 +266,9 @@ void TracerAddDeathmatchStart(int num, int index)
     {
         num_deathmatchstarts_indexes = num + 1;
 
-        deathmatchstarts_indexes = realloc(
-            deathmatchstarts_indexes,
-            num_deathmatchstarts_indexes * sizeof(deathmatchstarts_indexes[0]));
+        deathmatchstarts_indexes = static_cast<tracer_mapthing_t *>(realloc(
+            deathmatchstarts_indexes, num_deathmatchstarts_indexes *
+                                          sizeof(deathmatchstarts_indexes[0])));
     }
 
     deathmatchstarts_indexes[num].index = index;

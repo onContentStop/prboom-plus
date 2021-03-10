@@ -35,9 +35,9 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
 
-#include "z_zone.h"
+#include "z_zone.hh"
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -47,27 +47,27 @@
 #ifndef CALLBACK
 #define CALLBACK
 #endif
-#include "d_event.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "e6y.h"
-#include "gl_intern.h"
-#include "gl_struct.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_bbox.h"
-#include "p_maputl.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_bsp.h"
-#include "r_data.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_sky.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include <SDL.h>
+#include "d_event.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "gl_struct.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_bbox.hh"
+#include "p_maputl.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_bsp.hh"
+#include "r_data.hh"
+#include "r_draw.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "r_sky.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include <SDL2/SDL.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -242,11 +242,13 @@ static GLTexture *gld_AddNewGLTexItem(int num, int count, GLTexture ***items)
         return NULL;
     if (!(*items))
     {
-        (*items) = Z_Calloc(count, sizeof(GLTexture *), PU_STATIC, 0);
+        (*items) = static_cast<GLTexture **>(
+            Z_Calloc(count, sizeof(GLTexture *), PU_STATIC, NULL));
     }
     if (!(*items)[num])
     {
-        (*items)[num] = Z_Calloc(1, sizeof(GLTexture), PU_STATIC, 0);
+        (*items)[num] = static_cast<GLTexture *>(
+            Z_Calloc(1, sizeof(GLTexture), PU_STATIC, NULL));
         (*items)[num]->textype = GLDT_UNREGISTERED;
 
         // if (gl_boom_colormaps)
@@ -254,7 +256,8 @@ static GLTexture *gld_AddNewGLTexItem(int num, int count, GLTexture ***items)
             GLTexture *texture = (*items)[num];
             int dims[3] = {(CR_LIMIT + MAXPLAYERS), (PLAYERCOLORMAP_COUNT),
                            numcolormaps};
-            texture->glTexExID = NewIntDynArray(3, dims);
+            texture->glTexExID =
+                static_cast<GLuint ***>(NewIntDynArray(3, dims));
         }
     }
     return (*items)[num];
@@ -693,7 +696,7 @@ unsigned char *gld_GetTextureBuffer(GLuint texid, int miplevel, int *width,
 
     if (!buf)
     {
-        buf = malloc(buf_size);
+        buf = static_cast<unsigned char *>(malloc(buf_size));
     }
 
     if (texid)
@@ -707,7 +710,7 @@ unsigned char *gld_GetTextureBuffer(GLuint texid, int miplevel, int *width,
     {
         free(buf);
         buf_size = w * h * 4;
-        buf = malloc(buf_size);
+        buf = static_cast<unsigned char *>(malloc(buf_size));
     }
     glGetTexImage(GL_TEXTURE_2D, miplevel, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 
@@ -886,7 +889,7 @@ int gld_BuildTexture(GLTexture *gltexture, void *data, dboolean readonly,
         glTexImage2D(GL_TEXTURE_2D, 0, gl_tex_format, tex_width, tex_height, 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-        gld_RecolorMipLevels(data);
+        gld_RecolorMipLevels(static_cast<byte *>(data));
 
         gld_SetTexFilters(gltexture);
 
@@ -900,7 +903,7 @@ int gld_BuildTexture(GLTexture *gltexture, void *data, dboolean readonly,
         gluBuild2DMipmaps(GL_TEXTURE_2D, gl_tex_format, width, height, GL_RGBA,
                           GL_UNSIGNED_BYTE, data);
 
-        gld_RecolorMipLevels(data);
+        gld_RecolorMipLevels((byte *)data);
 
         gld_SetTexFilters(gltexture);
 
@@ -913,7 +916,7 @@ int gld_BuildTexture(GLTexture *gltexture, void *data, dboolean readonly,
 #ifdef USE_GLU_IMAGESCALE
         if ((width != tex_width) || (height != tex_height))
         {
-            tex_buffer = malloc(tex_buffer_size);
+            tex_buffer = (unsigned char *)malloc(tex_buffer_size);
             if (!tex_buffer)
             {
                 goto l_exit;
@@ -932,13 +935,15 @@ int gld_BuildTexture(GLTexture *gltexture, void *data, dboolean readonly,
             {
                 if (width == tex_width)
                 {
-                    tex_buffer = malloc(tex_buffer_size);
+                    tex_buffer =
+                        static_cast<unsigned char *>(malloc(tex_buffer_size));
                     memcpy(tex_buffer, data, width * height * 4);
                 }
                 else
                 {
                     int y;
-                    tex_buffer = calloc(1, tex_buffer_size);
+                    tex_buffer = static_cast<unsigned char *>(
+                        calloc(1, tex_buffer_size));
                     for (y = 0; y < height; y++)
                     {
                         memcpy(tex_buffer + y * tex_width * 4,
@@ -949,7 +954,7 @@ int gld_BuildTexture(GLTexture *gltexture, void *data, dboolean readonly,
             }
             else
             {
-                tex_buffer = data;
+                tex_buffer = static_cast<unsigned char *>(data);
             }
 
             if (gl_paletted_texture)
@@ -1319,7 +1324,7 @@ void gld_BindFlat(GLTexture *gltexture, unsigned int flags)
         return;
     }
 
-    flat = W_CacheLumpNum(gltexture->index);
+    flat = static_cast<const unsigned char *>(W_CacheLumpNum(gltexture->index));
     buffer = (unsigned char *)Z_Malloc(gltexture->buffer_size, PU_STATIC, 0);
     if (!(gltexture->flags & GLTEXTURE_MIPMAP) && gl_paletted_texture)
         memset(buffer, transparent_pal_index, gltexture->buffer_size);
@@ -1446,9 +1451,9 @@ void gld_Precache(void)
 
     {
         size_t size = numflats > numsprites ? numflats : numsprites;
-        hitlist =
+        hitlist = static_cast<byte *>(
             Z_Malloc((size_t)numtextures > size ? (size_t)numtextures : size,
-                     PU_LEVEL, 0);
+                     PU_LEVEL, 0));
     }
 
     // Precache flats.
@@ -1599,7 +1604,7 @@ void gld_Precache(void)
         thinker_t *th;
         for (th = thinkercap.next; th != &thinkercap; th = th->next)
         {
-            if (th->function == P_MobjThinker)
+            if (th->function == reinterpret_cast<void (*)()>(P_MobjThinker))
                 hitlist[((mobj_t *)th)->sprite] = 1;
         }
     }

@@ -35,7 +35,6 @@
  *-----------------------------------------------------------------------------
  */
 
-#include "m_misc.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -320,14 +319,11 @@ void D_Display(fixed_t frac)
 
         // Work out if the player view is visible, and if there is a border
         viewactive =
-            (!(automapmode & automapmode_e::am_active) ||
-             static_cast<bool>(automapmode & automapmode_e::am_overlay)) &&
+            (!(automapmode & am_active) || (automapmode & am_overlay)) &&
             !inhelpscreens;
-        isborder =
-            viewactive
-                ? (viewheight != SCREENHEIGHT)
-                : (!inhelpscreens &&
-                   static_cast<bool>(automapmode & automapmode_e::am_active));
+        isborder = viewactive
+                       ? (viewheight != SCREENHEIGHT)
+                       : (!inhelpscreens && (automapmode & am_active));
 
         if (oldgamestate != GS_LEVEL)
         {
@@ -349,8 +345,7 @@ void D_Display(fixed_t frac)
             // not only if viewactive is true
             borderwillneedredraw =
                 (borderwillneedredraw) ||
-                ((static_cast<bool>(automapmode & automapmode_e::am_active) &&
-                  !(automapmode & automapmode_e::am_overlay)));
+                ((automapmode & am_active && !(automapmode & am_overlay)));
         }
         if (redrawborderstuff || (V_GetMode() == VID_MODEGL))
             R_DrawViewBorder();
@@ -377,16 +372,16 @@ void D_Display(fixed_t frac)
         use_boom_cm = false;
         frame_fixedcolormap = 0;
 
-        if (static_cast<bool>(automapmode & automapmode_e::am_active))
+        if (automapmode & am_active)
         {
             AM_Drawer();
         }
 
         R_RestoreInterpolations();
 
-        ST_Drawer(((viewheight != SCREENHEIGHT) ||
-                   (static_cast<bool>(automapmode & automapmode_e::am_active) &&
-                    !(automapmode & automapmode_e::am_overlay))),
+        ST_Drawer((viewheight != SCREENHEIGHT) ||
+                   (automapmode & am_active &&
+                    !(automapmode & am_overlay)),
                   redrawborderstuff || BorderNeedRefresh,
                   (menuactive == mnact_full));
 
@@ -404,8 +399,7 @@ void D_Display(fixed_t frac)
     {
         // Simplified the "logic" here and no need for x-coord caching - POPE
         V_DrawNamePatch((320 - V_NamePatchWidth("M_PAUSE")) / 2, 4, 0,
-                        "M_PAUSE", CR_DEFAULT,
-                        patch_translation_e::VPT_STRETCH);
+                        "M_PAUSE", CR_DEFAULT, VPT_STRETCH);
     }
 
     // menus go directly to the screen
@@ -566,8 +560,7 @@ static void D_PageDrawer(void)
     // proff - added M_DrawCredits
     if (pagename)
     {
-        V_DrawNamePatch(0, 0, 0, pagename, CR_DEFAULT,
-                        patch_translation_e::VPT_STRETCH);
+        V_DrawNamePatch(0, 0, 0, pagename, CR_DEFAULT, VPT_STRETCH);
         // e6y: wide-res
         V_FillBorder(-1, 0);
     }
@@ -812,7 +805,7 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec)
                 if (strncmp(header.identification, "IWAD",
                             4)) // missing IWAD tag in header
                 {
-                    noiwad++;
+                    noiwad = true;
                 }
 
                 // read IWAD directory
@@ -855,7 +848,7 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec)
                     }
 
                     if (!strncmp(fileinfo[length].name, "DMENUPIC", 8))
-                        bfgedition++;
+                        bfgedition = true;
                     if (!strncmp(fileinfo[length].name, "HACX", 4))
                         hx++;
                     if (!strncmp(fileinfo[length].name, "W94_1", 5) ||
@@ -1602,7 +1595,7 @@ static void D_DoomMainSetup(void)
 
     if ((p = M_CheckParm("-skill")) && p < myargc - 1)
     {
-        startskill = myargv[p + 1][0] - '1';
+        startskill = static_cast<skill_t>(myargv[p + 1][0] - '1');
         autostart = true;
     }
 
@@ -1784,7 +1777,8 @@ static void D_DoomMainSetup(void)
 
     if (p && p < myargc - 1)
     {
-        char *file = malloc(strlen(myargv[p + 1]) + 4 + 1); // cph - localised
+        char *file = static_cast<char *>(
+            malloc(strlen(myargv[p + 1]) + 4 + 1)); // cph - localised
         strcpy(file, myargv[p + 1]);
         AddDefaultExtension(file, ".lmp"); // killough
         D_AddFile(file, source_lmp);

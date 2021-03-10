@@ -33,6 +33,8 @@
 #ifndef __PROTOCOL__
 #define __PROTOCOL__
 
+#include <cstring>
+
 #include "d_ticcmd.hh"
 #include "doomtype.hh"
 #include "m_swap.hh"
@@ -74,7 +76,7 @@ static inline void packet_set(packet_header_t *p, enum packet_type_e t,
 #define GAME_OPTIONS_SIZE 64
 #endif
 
-struct setup_packet_s
+struct setup_packet_t
 {
     byte players, yourplayer, skill, episode, level, deathmatch, complevel,
         ticdup, extratic;

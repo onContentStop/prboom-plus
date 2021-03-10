@@ -58,7 +58,7 @@
 
 /* Text Line widget
  *  (parent of Scrolling Text and Input Text widgets) */
-typedef struct
+struct hu_textline_t
 {
     // left-justified position of scrolling text window
     int x;
@@ -83,8 +83,8 @@ typedef struct
     int needsupdate;
 
     // e6y: wide-res
-    enum patch_translation_e flags;
-} hu_textline_t;
+    patch_translation_e flags;
+};
 
 // Scrolling Text window widget
 //  (child of Text Line widget)
@@ -147,7 +147,7 @@ void HUlib_clearTextLine(hu_textline_t *t);
 void HUlib_initTextLine(hu_textline_t *t, int x, int y, const patchnum_t *f,
                         int sc,
                         int cm, // jff 2/16/98 add color range parameter
-                        enum patch_translation_e flags);
+                        const patch_translation_e &flags);
 
 // returns success
 dboolean HUlib_addCharToTextLine(hu_textline_t *t, char ch);
@@ -166,7 +166,7 @@ void HUlib_eraseTextLine(hu_textline_t *l);
 void HUlib_initSText(hu_stext_t *s, int x, int y, int h, const patchnum_t *font,
                      int startchar,
                      int cm, // jff 2/16/98 add color range parameter
-                     enum patch_translation_e flags, dboolean *on);
+                     const patch_translation_e &flags, dboolean *on);
 
 // add a text message to an stext widget
 void HUlib_addMessageToSText(hu_stext_t *s, const char *prefix,
@@ -182,7 +182,7 @@ void HUlib_eraseSText(hu_stext_t *s);
 // initialize refresh text widget
 void HUlib_initMText(hu_mtext_t *m, int x, int y, int w, int h,
                      const patchnum_t *font, int startchar, int cm,
-                     const patchnum_t *bgfont, enum patch_translation_e flags,
+                     const patchnum_t *bgfont, const patch_translation_e &flags,
                      dboolean *on);
 
 // jff 2/26/98 message refresh widget
@@ -205,7 +205,7 @@ void HUlib_eraseMText(hu_mtext_t *m);
 void HUlib_initIText(hu_itext_t *it, int x, int y, const patchnum_t *font,
                      int startchar,
                      int cm, // jff 2/16/98 add color range parameter
-                     enum patch_translation_e flags, dboolean *on);
+                     const patch_translation_e &flags, dboolean *on);
 
 // resets line and left margin
 void HUlib_resetIText(hu_itext_t *it);

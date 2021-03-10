@@ -38,21 +38,21 @@
 #include <windows.h>
 
 #include ".\..\ICONS\resource.h"
-#include "d_main.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "i_main.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_misc.h"
-#include "w_wad.h"
+#include "d_main.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "i_main.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_misc.hh"
+#include "w_wad.hh"
 #ifdef HAVE_LIBPCREPOSIX
 #include "pcreposix.h"
 #endif /* HAVE_LIBPCREPOSIX */
-#include "e6y.h"
-#include "e6y_launcher.h"
-#include "r_demo.h"
+#include "e6y.hh"
+#include "e6y_launcher.hh"
+#include "r_demo.hh"
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "advapi32.lib")
@@ -220,7 +220,6 @@ static void L_FilesOnChange(void)
     int index;
     int i, start, end;
 
-    // блядь, как заебал этот винапи...
     start = (int)SendMessage(launcher.listPWAD, LB_GETANCHORINDEX, 0, 0);
     end = (int)SendMessage(launcher.listPWAD, LB_GETCARETINDEX, 0, 0);
 

@@ -562,11 +562,11 @@ static void I_UploadNewPalette(int pal, int force)
     {
         int pplump = W_GetNumForName("PLAYPAL");
         int gtlump = (W_CheckNumForName)("GAMMATBL", ns_prboom);
-        register const byte *palette = (const byte *)W_CacheLumpNum(pplump);
-        register const byte *const gtable =
+        const byte *palette = (const byte *)W_CacheLumpNum(pplump);
+        const byte *const gtable =
             (const byte *)W_CacheLumpNum(gtlump) +
             256 * (cachedgamma = usegamma);
-        register int i;
+        int i;
 
         num_pals = W_LumpLength(pplump) / (3 * 256);
         num_pals *= 256;
@@ -1433,7 +1433,8 @@ void I_UpdateVideoMode(void)
         }
 
         // [FG] force integer scales
-        SDL_RenderSetIntegerScale(sdl_renderer, integer_scaling);
+        SDL_RenderSetIntegerScale(sdl_renderer,
+                                  static_cast<SDL_bool>(integer_scaling));
 
         screen = SDL_CreateRGBSurface(0, SCREENWIDTH, SCREENHEIGHT,
                                       V_GetNumPixelBits(), 0, 0, 0, 0);

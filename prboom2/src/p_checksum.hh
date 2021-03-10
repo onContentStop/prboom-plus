@@ -1,3 +1,5 @@
+#pragma once
+
 extern void (*P_Checksum)(int);
 extern void P_ChecksumFinal(void);
 void P_RecordChecksum(const char *file);

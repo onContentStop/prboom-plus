@@ -48,12 +48,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "doomstat.h"
-#include "g_game.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "v_video.h"
-#include "z_zone.h"
+#include "doomstat.hh"
+#include "g_game.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "v_video.hh"
+#include "z_zone.hh"
 
 #ifdef DJGPP
 #include <dpmi.h>
@@ -405,7 +405,8 @@ void *(Z_Malloc)(size_t size, int tag, void **user
                                     DMALLOC_FUNC_MALLOC, 0, 0)))
     {
 #else
-    while (!(block = (malloc)(size + HEADER_SIZE)))
+    while ((block = static_cast<memblock_t *>(malloc(size + HEADER_SIZE))) ==
+           NULL)
     {
 #endif
         if (!blockbytag[PU_CACHE])
@@ -689,7 +690,9 @@ char *(Z_Strdup)(const char *s, int tag, void **user
 #endif
 )
 {
-    return strcpy((Z_Malloc)(strlen(s) + 1, tag, user DA(file, line)), s);
+    return strcpy(
+        static_cast<char *>(Z_Malloc(strlen(s) + 1, tag, user DA(file, line))),
+        s);
 }
 
 void(Z_CheckHeap)(

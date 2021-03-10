@@ -40,18 +40,19 @@
 #endif
 #include "SDL.h"
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "e6y.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "r_draw.h"
-#include "r_filter.h"
-#include "r_main.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h" /* needed for color translation lump lookup */
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_struct.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "r_draw.hh"
+#include "r_filter.hh"
+#include "r_main.hh"
+#include "st_stuff.hh"
+#include "v_video.hh"
+#include "w_wad.hh" /* needed for color translation lump lookup */
 
 // DWF 2012-05-10
 // SetRatio sets the following global variables based on window geometry and
@@ -66,7 +67,8 @@ const char *render_aspects_list[5] = {"auto", "16:9", "16:10", "4:3", "5:4"};
 const char *render_stretch_list[patch_stretch_max] = {
     "not adjusted", "Doom format", "fit to width"};
 
-stretch_param_t stretch_params_table[3][VPT_ALIGN_MAX];
+std::array<std::array<stretch_param_t, 3>, VPT_ALIGN_MAX.value()>
+    stretch_params_table;
 stretch_param_t *stretch_params;
 
 cb_video_t video;
@@ -178,15 +180,15 @@ void V_InitFlexTranTable(void)
 // killough 5/2/98: tiny engine driven by table above
 void V_InitColorTranslation(void)
 {
-    register const crdef_t *p;
+    const crdef_t *p;
     for (p = crdefs; p->name; p++)
     {
-        *p->map = W_CacheLumpName(p->name);
+        *p->map = static_cast<const byte *>(W_CacheLumpName(p->name));
         if (p - crdefs == CR_DEFAULT)
             continue;
         if (gamemission == chex || gamemission == hacx)
         {
-            byte *temp = malloc(256);
+            byte *temp = static_cast<byte *>(malloc(256));
             memcpy(temp, *p->map, 256);
             if (gamemission == chex)
                 memcpy(temp + 112, *p->map + 176, 16); // green range
@@ -210,7 +212,7 @@ void V_InitColorTranslation(void)
 // No return.
 //
 static void FUNC_V_CopyRect(int srcscrn, int destscrn, int x, int y, int width,
-                            int height, enum patch_translation_e flags)
+                            int height, patch_translation_e flags)
 {
     byte *src;
     byte *dest;
@@ -222,7 +224,7 @@ static void FUNC_V_CopyRect(int srcscrn, int destscrn, int x, int y, int width,
         int sx = x;
         int sy = y;
 
-        params = &stretch_params[flags & VPT_ALIGN_MASK];
+        params = &stretch_params[(flags & VPT_ALIGN_MASK).value()];
 
         x = params->video->x1lookup[x];
         y = params->video->y1lookup[y];
@@ -279,7 +281,7 @@ static void FUNC_V_CopyRect(int srcscrn, int destscrn, int x, int y, int width,
     }
 
 static void FUNC_V_FillFlat(int lump, int scrn, int x, int y, int width,
-                            int height, enum patch_translation_e flags)
+                            int height, patch_translation_e flags)
 {
     /* erase the entire screen to a tiled background */
     const byte *data;
@@ -289,7 +291,7 @@ static void FUNC_V_FillFlat(int lump, int scrn, int x, int y, int width,
     lump += firstflat;
 
     // killough 4/17/98:
-    data = W_CacheLumpNum(lump);
+    data = (const byte *)W_CacheLumpNum(lump);
 
     if (V_GetMode() == VID_MODE8)
     {
@@ -337,7 +339,7 @@ static void FUNC_V_FillFlat(int lump, int scrn, int x, int y, int width,
 }
 
 static void FUNC_V_FillPatch(int lump, int scrn, int x, int y, int width,
-                             int height, enum patch_translation_e flags)
+                             int height, patch_translation_e flags)
 {
     int sx, sy, w, h;
 
@@ -403,7 +405,7 @@ void V_Init(void)
 //  even speed them).
 //
 static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
-                           int cm, enum patch_translation_e flags)
+                           int cm, patch_translation_e flags)
 {
     const byte *trans;
 
@@ -425,7 +427,7 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
         flags &= ~VPT_STRETCH_MASK;
 
     // e6y: wide-res
-    params = &stretch_params[flags & VPT_ALIGN_MASK];
+    params = &stretch_params[(flags & VPT_ALIGN_MASK).value()];
 
     // CPhipps - null translation pointer => no translation
     if (!trans)
@@ -480,7 +482,7 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
                     if ((count -= 4) >= 0)
                         do
                         {
-                            register byte s0, s1;
+                            byte s0, s1;
                             s0 = source[0];
                             s1 = source[1];
                             dest[0] = s0;
@@ -506,7 +508,7 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
                     if ((count -= 4) >= 0)
                         do
                         {
-                            register byte s0, s1;
+                            byte s0, s1;
                             s0 = source[0];
                             s1 = source[1];
                             s0 = trans[s0];
@@ -747,14 +749,14 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
 // This inline is _only_ for the function below
 
 static void FUNC_V_DrawNumPatch(int x, int y, int scrn, int lump, int cm,
-                                enum patch_translation_e flags)
+                                patch_translation_e flags)
 {
     V_DrawMemPatch(x, y, scrn, R_CachePatchNum(lump), cm, flags);
     R_UnlockPatchNum(lump);
 }
 
 static void FUNC_V_DrawNumPatchPrecise(float x, float y, int scrn, int lump,
-                                       int cm, enum patch_translation_e flags)
+                                       int cm, patch_translation_e flags)
 {
     V_DrawMemPatch((int)x, (int)y, scrn, R_CachePatchNum(lump), cm, flags);
     R_UnlockPatchNum(lump);
@@ -782,7 +784,7 @@ void V_UpdateTrueColorPalette(video_mode_t mode)
 
     int pplump = W_GetNumForName("PLAYPAL");
     int gtlump = (W_CheckNumForName)("GAMMATBL", ns_prboom);
-    const byte *pal = W_CacheLumpNum(pplump);
+    const byte *pal = static_cast<const byte *>(W_CacheLumpNum(pplump));
     // opengl doesn't use the gamma
     const byte *const gtable =
         (const byte *)W_CacheLumpNum(gtlump) +
@@ -811,8 +813,8 @@ void V_UpdateTrueColorPalette(video_mode_t mode)
         if (!Palettes32)
         {
             // set int palette
-            Palettes32 =
-                malloc(numPals * 256 * sizeof(int) * VID_NUMCOLORWEIGHTS);
+            Palettes32 = static_cast<unsigned int *>(
+                malloc(numPals * 256 * sizeof(int) * VID_NUMCOLORWEIGHTS));
             for (p = 0; p < numPals; p++)
             {
                 for (i = 0; i < 256; i++)
@@ -847,8 +849,8 @@ void V_UpdateTrueColorPalette(video_mode_t mode)
         if (!Palettes16)
         {
             // set short palette
-            Palettes16 =
-                malloc(numPals * 256 * sizeof(short) * VID_NUMCOLORWEIGHTS);
+            Palettes16 = static_cast<unsigned short *>(
+                malloc(numPals * 256 * sizeof(short) * VID_NUMCOLORWEIGHTS));
             for (p = 0; p < numPals; p++)
             {
                 for (i = 0; i < 256; i++)
@@ -883,8 +885,8 @@ void V_UpdateTrueColorPalette(video_mode_t mode)
         if (!Palettes15)
         {
             // set short palette
-            Palettes15 =
-                malloc(numPals * 256 * sizeof(short) * VID_NUMCOLORWEIGHTS);
+            Palettes15 = static_cast<unsigned short *>(
+                malloc(numPals * 256 * sizeof(short) * VID_NUMCOLORWEIGHTS));
             for (p = 0; p < numPals; p++)
             {
                 for (i = 0; i < 256; i++)
@@ -1075,8 +1077,7 @@ static void WRAP_gld_FillRect(int scrn, int x, int y, int width, int height,
     gld_FillBlock(x, y, width, height, colour);
 }
 static void WRAP_gld_CopyRect(int srcscrn, int destscrn, int x, int y,
-                              int width, int height,
-                              enum patch_translation_e flags)
+                              int width, int height, patch_translation_e flags)
 {
 }
 static void WRAP_gld_DrawBackground(const char *flatname, int n)
@@ -1084,27 +1085,27 @@ static void WRAP_gld_DrawBackground(const char *flatname, int n)
     gld_FillFlatName(flatname, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_NONE);
 }
 static void WRAP_gld_FillFlat(int lump, int n, int x, int y, int width,
-                              int height, enum patch_translation_e flags)
+                              int height, patch_translation_e flags)
 {
     gld_FillFlat(lump, x, y, width, height, flags);
 }
 static void WRAP_gld_FillPatch(int lump, int n, int x, int y, int width,
-                               int height, enum patch_translation_e flags)
+                               int height, patch_translation_e flags)
 {
     gld_FillPatch(lump, x, y, width, height, flags);
 }
 static void WRAP_gld_DrawNumPatch(int x, int y, int scrn, int lump, int cm,
-                                  enum patch_translation_e flags)
+                                  patch_translation_e flags)
 {
     gld_DrawNumPatch(x, y, lump, cm, flags);
 }
 static void WRAP_gld_DrawNumPatchPrecise(float x, float y, int scrn, int lump,
-                                         int cm, enum patch_translation_e flags)
+                                         int cm, patch_translation_e flags)
 {
     gld_DrawNumPatch_f(x, y, lump, cm, flags);
 }
 static void WRAP_gld_DrawBlock(int x, int y, int scrn, int width, int height,
-                               const byte *src, enum patch_translation_e flags)
+                               const byte *src, patch_translation_e flags)
 {
 }
 static void V_PlotPixelGL(int scrn, int x, int y, byte color)
@@ -1127,30 +1128,30 @@ static void NULL_FillRect(int scrn, int x, int y, int width, int height,
 {
 }
 static void NULL_CopyRect(int srcscrn, int destscrn, int x, int y, int width,
-                          int height, enum patch_translation_e flags)
+                          int height, patch_translation_e flags)
 {
 }
 static void NULL_FillFlat(int lump, int n, int x, int y, int width, int height,
-                          enum patch_translation_e flags)
+                          patch_translation_e flags)
 {
 }
 static void NULL_FillPatch(int lump, int n, int x, int y, int width, int height,
-                           enum patch_translation_e flags)
+                           patch_translation_e flags)
 {
 }
 static void NULL_DrawBackground(const char *flatname, int n)
 {
 }
 static void NULL_DrawNumPatch(int x, int y, int scrn, int lump, int cm,
-                              enum patch_translation_e flags)
+                              patch_translation_e flags)
 {
 }
 static void NULL_DrawNumPatchPrecise(float x, float y, int scrn, int lump,
-                                     int cm, enum patch_translation_e flags)
+                                     int cm, patch_translation_e flags)
 {
 }
 static void NULL_DrawBlock(int x, int y, int scrn, int width, int height,
-                           const byte *src, enum patch_translation_e flags)
+                           const byte *src, patch_translation_e flags)
 {
 }
 static void NULL_PlotPixel(int scrn, int x, int y, byte color)
@@ -1333,7 +1334,8 @@ void V_AllocScreen(screeninfo_t *scrn)
     if (!scrn->not_on_heap)
         if ((scrn->byte_pitch * scrn->height) > 0)
             // e6y: Clear the screen to black.
-            scrn->data = calloc(scrn->byte_pitch * scrn->height, 1);
+            scrn->data =
+                static_cast<byte *>(calloc(scrn->byte_pitch * scrn->height, 1));
 }
 
 //
@@ -1406,15 +1408,15 @@ static void V_PlotPixel32(int scrn, int x, int y, byte color)
 //
 static void WRAP_V_DrawLine(fline_t *fl, int color)
 {
-    register int x;
-    register int y;
-    register int dx;
-    register int dy;
-    register int sx;
-    register int sy;
-    register int ax;
-    register int ay;
-    register int d;
+    int x;
+    int y;
+    int dx;
+    int dy;
+    int sx;
+    int sy;
+    int ax;
+    int ay;
+    int d;
 
 #ifdef RANGECHECK // killough 2/22/98
     static int fuck = 0;
@@ -1656,8 +1658,8 @@ const unsigned char *V_GetPlaypal(void)
     {
         int lump = W_GetNumForName("PLAYPAL");
         int len = W_LumpLength(lump);
-        const byte *data = W_CacheLumpNum(lump);
-        playpal_data = malloc(len);
+        const byte *data = static_cast<const byte *>(W_CacheLumpNum(lump));
+        playpal_data = static_cast<unsigned char *>(malloc(len));
         memcpy(playpal_data, data, len);
         W_UnlockLumpNum(lump);
     }
@@ -1929,10 +1931,9 @@ void SetRatio(int width, int height)
                      (WIDE_SCREENWIDTH == 320) && (WIDE_SCREENHEIGHT == 200);
 }
 
-void V_GetWideRect(int *x, int *y, int *w, int *h,
-                   enum patch_translation_e flags)
+void V_GetWideRect(int *x, int *y, int *w, int *h, patch_translation_e flags)
 {
-    stretch_param_t *params = &stretch_params[flags & VPT_ALIGN_MASK];
+    stretch_param_t *params = &stretch_params[(flags & VPT_ALIGN_MASK).value()];
     int sx = *x;
     int sy = *y;
 
@@ -2019,4 +2020,9 @@ void V_ChangeScreenResolution(void)
         gld_PreprocessLevel();
     }
 #endif
+}
+void V_DrawNamePatch(int x, int y, int scrn, const char *lump, int cm,
+                     patch_translation_e flags)
+{
+    V_DrawNumPatch(x, y, scrn, W_GetNumForName(lump), cm, flags);
 }

@@ -31,7 +31,7 @@
 #ifndef R_FILTER_H
 #define R_FILTER_H
 
-#include "d_ticcmd.h"
+#include "d_ticcmd.hh"
 #define DITHER_DIM 4
 
 extern byte filter_ditherMatrix[DITHER_DIM][DITHER_DIM];

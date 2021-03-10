@@ -37,10 +37,13 @@
 #ifndef __V_VIDEO__
 #define __V_VIDEO__
 
+#include <array>
+
 #include "doomdef.hh"
 #include "doomtype.hh"
 // Needed because we are refering to patches.
 #include "r_data.hh"
+#include "w_wad.hh"
 
 //
 // VIDEO
@@ -78,8 +81,8 @@ typedef struct stretch_param_s
     int deltay2;
 } stretch_param_t;
 
-extern stretch_param_t stretch_params_table[3][static_cast<size_t>(
-    patch_translation_e::VPT_ALIGN_MAX)];
+extern std::array<std::array<stretch_param_t, 3>, VPT_ALIGN_MAX.value()>
+    stretch_params_table;
 extern stretch_param_t *stretch_params;
 
 extern cb_video_t video;
@@ -206,7 +209,7 @@ void V_Init(void);
 
 // V_CopyRect
 typedef void (*V_CopyRect_f)(int srcscrn, int destscrn, int x, int y, int width,
-                             int height, enum patch_translation_e flags);
+                             int height, patch_translation_e flags);
 extern V_CopyRect_f V_CopyRect;
 
 // V_FillRect
@@ -219,16 +222,17 @@ extern V_FillRect_f V_FillRect;
 
 // V_DrawNumPatch - Draws the patch from lump num
 typedef void (*V_DrawNumPatch_f)(int x, int y, int scrn, int lump, int cm,
-                                 enum patch_translation_e flags);
+                                 patch_translation_e flags);
 extern V_DrawNumPatch_f V_DrawNumPatch;
 
-typedef void (*V_DrawNumPatchPrecise_f)(float x, float y, int scrn, int lump,
-                                        int cm, enum patch_translation_e flags);
+using V_DrawNumPatchPrecise_f = void (*)(float x, float y, int scrn, int lump,
+                                         int cm,
+                                         patch_translation_e flags);
 extern V_DrawNumPatchPrecise_f V_DrawNumPatchPrecise;
 
 // V_DrawNamePatch - Draws the patch from lump "name"
-#define V_DrawNamePatch(x, y, s, n, t, f)                                      \
-    V_DrawNumPatch(x, y, s, W_GetNumForName(n), t, f)
+void V_DrawNamePatch(int x, int y, int scrn, const char *lump, int cm,
+                     patch_translation_e flags);
 #define V_DrawNamePatchPrecise(x, y, s, n, t, f)                               \
     V_DrawNumPatchPrecise(x, y, s, W_GetNumForName(n), t, f)
 
@@ -242,14 +246,14 @@ extern V_DrawNumPatchPrecise_f V_DrawNumPatchPrecise;
 
 // e6y
 typedef void (*V_FillFlat_f)(int lump, int scrn, int x, int y, int width,
-                             int height, enum patch_translation_e flags);
+                             int height, patch_translation_e flags);
 extern V_FillFlat_f V_FillFlat;
 #define V_FillFlatName(flatname, scrn, x, y, width, height, flags)             \
     V_FillFlat(R_FlatNumForName(flatname), (scrn), (x), (y), (width),          \
                (height), (flags))
 
 typedef void (*V_FillPatch_f)(int lump, int scrn, int x, int y, int width,
-                              int height, enum patch_translation_e flags);
+                              int height, patch_translation_e flags);
 extern V_FillPatch_f V_FillPatch;
 #define V_FillPatchName(name, scrn, x, y, width, height, flags)                \
     V_FillPatch(W_GetNumForName(name), (scrn), (x), (y), (width), (height),    \
@@ -308,11 +312,11 @@ void V_FreePlaypal(void);
 void V_FillBorder(int lump, byte color);
 
 void V_GetWideRect(int *x, int *y, int *w, int *h,
-                   enum patch_translation_e flags);
+                   patch_translation_e flags);
 
 int V_BestColor(const unsigned char *palette, int r, int g, int b);
 
 #ifdef GL_DOOM
-#include "gl_struct.h"
+#include "gl_struct.hh"
 #endif
 #endif

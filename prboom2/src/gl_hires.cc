@@ -35,7 +35,7 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
 
 #ifdef _MSC_VER
 //#include <ddraw.h> /* needed for DirectX's DDSURFACEDESC2 structure definition
@@ -44,25 +44,25 @@
 #else
 #include <unistd.h>
 #endif
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <sys/stat.h>
 #ifdef HAVE_LIBSDL2_IMAGE
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #endif
-#include "doomstat.h"
-#include "e6y.h"
-#include "gl_intern.h"
-#include "hu_lib.h"
-#include "hu_stuff.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_misc.h"
-#include "r_main.h"
-#include "r_sky.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "hu_lib.hh"
+#include "hu_stuff.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_misc.hh"
+#include "r_main.hh"
+#include "r_sky.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 unsigned int gl_has_hires = 0;
 int gl_texture_external_hires = -1;
@@ -233,7 +233,7 @@ typedef struct _DDRAW_H_DDPIXELFORMAT
         unsigned long dwYUVBitCount;     // how many bits per pixel
         unsigned long dwZBufferBitDepth; // how many total bits/pixel in z
                                          // buffer (including any stencil bits)
-        unsigned long dwAlphaBitDepth;     // how many bits for alpha channels
+        unsigned long dwAlphaBitDepth;   // how many bits for alpha channels
         unsigned long dwLuminanceBitCount; // how many bits per pixel
         unsigned long dwBumpBitCount;      // how many bits per "buxel", total
         unsigned long
@@ -242,11 +242,11 @@ typedef struct _DDRAW_H_DDPIXELFORMAT
                                      // list and if DDPF_D3DFORMAT is set
     } u1;
     union {
-        unsigned long dwRBitMask;        // mask for red bit
-        unsigned long dwYBitMask;        // mask for Y bits
-        unsigned long dwStencilBitDepth; // how many stencil bits (note:
-                                         // dwZBufferBitDepth-dwStencilBitDepth
-                                         // is total Z-only bits)
+        unsigned long dwRBitMask;         // mask for red bit
+        unsigned long dwYBitMask;         // mask for Y bits
+        unsigned long dwStencilBitDepth;  // how many stencil bits (note:
+                                          // dwZBufferBitDepth-dwStencilBitDepth
+                                          // is total Z-only bits)
         unsigned long dwLuminanceBitMask; // mask for luminance bits
         unsigned long dwBumpDuBitMask;    // mask for bump map U delta bits
         unsigned long dwOperations;       // DDPF_D3DFORMAT Operations
@@ -368,7 +368,7 @@ GLGenericImage *ReadDDSFile(const char *filename, int *bufsize, int *numMipmaps)
             (strncmp(filecode, "DDS ", 4) == 0) &&    // verify the type of file
             (fread(&ddsd, sizeof(ddsd), 1, fp) == 1)) // get the surface desc
         {
-            genericImage = malloc(sizeof(GLGenericImage));
+            genericImage = (GLGenericImage *)malloc(sizeof(GLGenericImage));
             if (genericImage)
             {
                 memset(genericImage, 0, sizeof(GLGenericImage));
@@ -399,7 +399,7 @@ GLGenericImage *ReadDDSFile(const char *filename, int *bufsize, int *numMipmaps)
                                    ? ddsd.u1.dwLinearSize * factor
                                    : ddsd.u1.dwLinearSize;
                     genericImage->pixels =
-                        malloc(*bufsize * sizeof(unsigned char));
+                        (GLubyte *)malloc(*bufsize * sizeof(unsigned char));
 
                     if (fread(genericImage->pixels, 1, *bufsize, fp) > 0)
                     {
@@ -711,7 +711,7 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
 
     if (!hiresdir)
     {
-        hiresdir = malloc(PATH_MAX);
+        hiresdir = (char *)malloc(PATH_MAX);
         if (strlen(gl_texture_hires_dir) > 0)
         {
             strncpy(hiresdir, gl_texture_hires_dir, PATH_MAX - 1);
@@ -924,7 +924,7 @@ int gld_HiRes_BuildTables(void)
     const int numcolors_per_chanel = (1 << chanel_bits);
     const int RGB2PAL_size =
         numcolors_per_chanel * numcolors_per_chanel * numcolors_per_chanel;
-    unsigned char *RGB2PAL_fname;
+    const char *RGB2PAL_fname;
     int lump, size;
 
     if ((!gl_boom_colormaps) ||
@@ -944,8 +944,8 @@ int gld_HiRes_BuildTables(void)
             {
                 const byte *RGB2PAL_lump;
 
-                RGB2PAL_lump = W_CacheLumpNum(lump);
-                RGB2PAL = malloc(RGB2PAL_size);
+                RGB2PAL_lump = (const byte *)W_CacheLumpNum(lump);
+                RGB2PAL = (byte *)malloc(RGB2PAL_size);
                 memcpy(RGB2PAL, RGB2PAL_lump, RGB2PAL_size);
                 W_UnlockLumpName(RGB2PAL_NAME);
                 return true;
@@ -957,13 +957,13 @@ int gld_HiRes_BuildTables(void)
         {
             struct stat RGB24to8_stat;
             memset(&RGB24to8_stat, 0, sizeof(RGB24to8_stat));
-            stat(RGB2PAL_fname, &RGB24to8_stat);
+            stat(reinterpret_cast<const char *>(RGB2PAL_fname), &RGB24to8_stat);
             size = 0;
             if (RGB24to8_stat.st_size == RGB2PAL_size)
             {
                 I_FileToBuffer(RGB2PAL_fname, &RGB2PAL, &size);
             }
-            free(RGB2PAL_fname);
+            free((void *)RGB2PAL_fname);
 
             if (size == RGB2PAL_size)
                 return true;
@@ -992,11 +992,11 @@ int gld_HiRes_BuildTables(void)
             int **x, **y, **z;
             int dims[2] = {numcolors_per_chanel, 256};
 
-            x = NewIntDynArray(2, dims);
-            y = NewIntDynArray(2, dims);
-            z = NewIntDynArray(2, dims);
+            x = (int **)NewIntDynArray(2, dims);
+            y = (int **)NewIntDynArray(2, dims);
+            z = (int **)NewIntDynArray(2, dims);
 
-            RGB2PAL = malloc(RGB2PAL_size);
+            RGB2PAL = (byte *)malloc(RGB2PAL_size);
             palette = V_GetPlaypal();
 
             // create the RGB24to8 lookup table
@@ -1173,7 +1173,7 @@ static int gld_HiRes_LoadFromCache(GLTexture *gltexture, GLuint *texid,
     memset(&tex_stat, 0, sizeof(tex_stat));
     stat(img_path, &tex_stat);
 
-    cache_filename = malloc(strlen(img_path) + 16);
+    cache_filename = (char *)malloc(strlen(img_path) + 16);
     sprintf(cache_filename, "%s.cache", img_path);
 
     cachefp = fopen(cache_filename, "rb");
@@ -1188,7 +1188,7 @@ static int gld_HiRes_LoadFromCache(GLTexture *gltexture, GLuint *texid,
             {
                 tex_buffer_size = tex_width * tex_height * 4;
 
-                tex_buffer = malloc(tex_buffer_size);
+                tex_buffer = (unsigned char *)malloc(tex_buffer_size);
                 if (tex_buffer)
                 {
                     if (fread(tex_buffer, tex_buffer_size, 1, cachefp) == 1)
@@ -1216,7 +1216,7 @@ static int gld_HiRes_WriteCache(GLTexture *gltexture, GLuint *texid,
     int result = false;
     int w, h;
     unsigned char *buf;
-    unsigned char cache_filename[PATH_MAX];
+    char cache_filename[PATH_MAX];
     struct stat tex_stat;
     FILE *cachefp;
 
@@ -1273,7 +1273,8 @@ static int gld_HiRes_LoadFromFile(GLTexture *gltexture, GLuint *texid,
         {
             if (SDL_LockSurface(surf) >= 0)
             {
-                if (SmoothEdges(surf->pixels, surf->pitch / 4, surf->h))
+                if (SmoothEdges(static_cast<unsigned char *>(surf->pixels),
+                                surf->pitch / 4, surf->h))
                     gltexture->flags |= GLTEXTURE_HASHOLES;
                 else
                     gltexture->flags &= ~GLTEXTURE_HASHOLES;
@@ -1342,8 +1343,10 @@ int gld_LoadHiresTex(GLTexture *gltexture, int cm)
                             {
                                 if (SDL_LockSurface(surf) >= 0)
                                 {
-                                    if (SmoothEdges(surf->pixels,
-                                                    surf->pitch / 4, surf->h))
+                                    if (SmoothEdges(
+                                            static_cast<unsigned char *>(
+                                                surf->pixels),
+                                            surf->pitch / 4, surf->h))
                                         gltexture->flags |= GLTEXTURE_HASHOLES;
                                     else
                                         gltexture->flags &= ~GLTEXTURE_HASHOLES;

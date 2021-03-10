@@ -38,8 +38,8 @@
 #pragma interface
 #endif
 
-#include "r_draw.h"
-#include "r_patch.h"
+#include "r_draw.hh"
+#include "r_patch.hh"
 
 #define MINZ (FRACUNIT * 4)
 

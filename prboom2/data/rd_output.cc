@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "rd_output.h"
-#include "rd_util.h"
+#include "rd_output.hh"
+#include "rd_util.hh"
 
 struct lump
 {

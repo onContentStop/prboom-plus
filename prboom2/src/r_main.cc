@@ -36,29 +36,30 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "SDL.h"
+#include <SDL2/SDL.h>
+#include <cmath>
 
-#include "d_net.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "i_main.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "r_bsp.h"
-#include "r_demo.h"
-#include "r_draw.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_sky.h"
-#include "r_things.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "xs_Float.h"
-#include <math.h>
+#include "d_net.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "gl_struct.hh"
+#include "i_main.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "r_bsp.hh"
+#include "r_demo.hh"
+#include "r_draw.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "r_sky.hh"
+#include "r_things.hh"
+#include "st_stuff.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include "xs_Float.hh"
 
 // e6y
 // Now they are variables. Depends from render_doom_lightmaps variable.
@@ -143,10 +144,10 @@ angle_t *xtoviewangle; // killough 2/8/98
 // killough 4/4/98: support dynamic number of them as well
 
 int numcolormaps;
-const lighttable_t *(*c_scalelight)[LIGHTLEVELS_MAX][MAXLIGHTSCALE];
-const lighttable_t *(*c_zlight)[LIGHTLEVELS_MAX][MAXLIGHTZ];
-const lighttable_t *(*scalelight)[MAXLIGHTSCALE];
-const lighttable_t *(*zlight)[MAXLIGHTZ];
+const lighttable_t ****c_scalelight;
+const lighttable_t ****c_zlight;
+const lighttable_t ***scalelight;
+const lighttable_t ***zlight;
 const lighttable_t *fullcolormap;
 const lighttable_t **colormaps;
 /* cph - allow crappy fake contrast to be disabled */
@@ -402,8 +403,10 @@ static void R_InitLightTables(void)
     int i;
 
     // killough 4/4/98: dynamic colormaps
-    c_zlight = malloc(sizeof(*c_zlight) * numcolormaps);
-    c_scalelight = malloc(sizeof(*c_scalelight) * numcolormaps);
+    c_zlight = static_cast<const lighttable_t ****>(
+        malloc(sizeof(*c_zlight) * numcolormaps));
+    c_scalelight = static_cast<const lighttable_t ****>(
+        malloc(sizeof(*c_scalelight) * numcolormaps));
 
     LIGHTLEVELS = (render_doom_lightmaps ? 16 : 32);
     LIGHTSEGSHIFT = (render_doom_lightmaps ? 4 : 3);
@@ -492,7 +495,7 @@ static void GenLookup(short *lookup1, short *lookup2, int size, int max,
 }
 
 static void InitStretchParam(stretch_param_t *offsets, int stretch,
-                             enum patch_translation_e flags)
+                             patch_translation_e flags)
 {
     memset(offsets, 0, sizeof(*offsets));
 
@@ -569,7 +572,7 @@ void R_SetupViewScaling(void)
             InitStretchParam(&stretch_params_table[i][k], i, k);
         }
     }
-    stretch_params = stretch_params_table[render_stretch_hud];
+    stretch_params = stretch_params_table[render_stretch_hud].data();
 
     // SoM: ANYRES
     // Moved stuff, reformatted a bit

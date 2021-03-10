@@ -33,16 +33,17 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_user.h"
-#include "d_event.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "p_map.h"
-#include "p_spec.h"
-#include "r_demo.h"
-#include "r_fps.h"
-#include "r_main.h"
+#include "p_user.hh"
+#include "d_event.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "p_map.hh"
+#include "p_spec.hh"
+#include "r_demo.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
 
 //
 // Movement.
@@ -503,7 +504,8 @@ void P_PlayerThink(player_t *player)
         //  when the weapon psprite can do it
         //  (read: not in the middle of an attack).
 
-        newweapon = (cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT;
+        newweapon = static_cast<weapontype_t>(
+            byte(cmd->buttons & BT_WEAPONMASK) >> byte(BT_WEAPONSHIFT));
 
         // killough 3/22/98: For demo compatibility we must perform the fist
         // and SSG weapons switches here, rather than in G_BuildTiccmd(). For
@@ -514,8 +516,9 @@ void P_PlayerThink(player_t *player)
           // killough
             // e6y
             if (!prboom_comp[PC_ALLOW_SSG_DIRECT].state)
-                newweapon =
-                    (cmd->buttons & BT_WEAPONMASK_OLD) >> BT_WEAPONSHIFT;
+                newweapon = static_cast<weapontype_t>(
+                    byte(cmd->buttons & BT_WEAPONMASK_OLD) >>
+                    byte(BT_WEAPONSHIFT));
 
             if (newweapon == wp_fist && player->weaponowned[wp_chainsaw] &&
                 (player->readyweapon != wp_chainsaw ||

@@ -33,9 +33,9 @@
 
 #include <string.h>
 // CPhipps - include the correct header
-#include "doomtype.h"
-#include "m_argv.h"
-#include "z_zone.h"
+#include "doomtype.hh"
+#include "m_argv.hh"
+#include "z_zone.hh"
 
 int myargc;
 char **myargv;
@@ -85,7 +85,8 @@ int M_CheckParmEx(const char *check, char **params, int paramscount)
 
 void M_AddParam(const char *param)
 {
-    myargv = realloc(myargv, sizeof(myargv[0]) * (myargc + 1));
+    myargv =
+        static_cast<char **>(realloc(myargv, sizeof(myargv[0]) * (myargc + 1)));
     myargv[myargc] = strdup(param);
     myargc++;
 }

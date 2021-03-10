@@ -35,6 +35,7 @@
 #define __R_DRAW__
 
 #include "r_defs.hh"
+#include "r_patch.hh"
 
 #ifdef __GNUG__
 #pragma interface
@@ -73,11 +74,11 @@ typedef enum
     DRAW_COLUMN_ISPATCH = 0x00000001
 } draw_column_flags_e;
 
-typedef struct draw_column_vars_s *pdraw_column_vars_s;
-typedef void (*R_DrawColumn_f)(pdraw_column_vars_s dcvars);
+struct draw_column_vars_t;
+typedef void (*R_DrawColumn_f)(draw_column_vars_t *dcvars);
 
 // Packaged into a struct - POPE
-typedef struct draw_column_vars_s
+struct draw_column_vars_t
 {
     int x;
     int yl;
@@ -94,12 +95,12 @@ typedef struct draw_column_vars_s
     const lighttable_t *colormap;
     const lighttable_t *nextcolormap;
     const byte *translation;
-    int edgeslope; // OR'ed RDRAW_EDGESLOPE_*
+    edgeslope_t edgeslope; // OR'ed RDRAW_EDGESLOPE_*
     // 1 if R_DrawColumn* is currently drawing a masked column, otherwise 0
     int drawingmasked;
     enum sloped_edge_type_e edgetype;
     unsigned int flags; // e6y: for detect patches ind colfunc()
-} draw_column_vars_t;
+};
 
 void R_SetDefaultDrawColumnVars(draw_column_vars_t *dcvars);
 

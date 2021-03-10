@@ -34,7 +34,11 @@
 #ifndef _GL_STRUCT_H
 #define _GL_STRUCT_H
 
-#include <SDL_opengl.h>
+#include <SDL2/SDL_opengl.h>
+#include <array>
+
+#include "r_defs.hh"
+#include "d_player.hh"
 
 extern int nodesVersion;
 
@@ -102,18 +106,18 @@ void gld_InitCommandLine(void);
 void gld_InitTextureParams(void);
 
 void gld_DrawNumPatch(int x, int y, int lump, int cm,
-                      enum patch_translation_e flags);
+                      const patch_translation_e &flags);
 void gld_DrawNumPatch_f(float x, float y, int lump, int cm,
-                        enum patch_translation_e flags);
+                        const patch_translation_e &flags);
 
 void gld_FillFlat(int lump, int x, int y, int width, int height,
-                  enum patch_translation_e flags);
+                  const patch_translation_e &flags);
 #define gld_FillFlatName(flatname, x, y, width, height, flags)                 \
     gld_FillFlat(R_FlatNumForName(flatname), (x), (y), (width), (height),      \
                  (flags))
 
 void gld_FillPatch(int lump, int x, int y, int width, int height,
-                   enum patch_translation_e flags);
+                   const patch_translation_e &flags);
 #define gld_FillPatchName(name, x, y, width, height, flags)                    \
     gld_FillPatch(W_GetNumForName(name), (x), (y), (width), (height), (flags))
 
@@ -292,13 +296,13 @@ enum
     am_icon_count
 };
 
-typedef struct am_icon_s
+struct am_icon_t
 {
     GLuint tex_id;
     const char *name;
     int lumpnum;
-} am_icon_t;
-extern am_icon_t am_icons[];
+};
+extern std::array<am_icon_t, am_icon_count + 1> am_icons;
 
 void gld_InitMapPics(void);
 void gld_AddNiceThing(int type, float x, float y, float radius, float angle,

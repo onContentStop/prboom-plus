@@ -37,38 +37,38 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
 
-#include "am_map.h"
-#include "d_event.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "e6y.h" //e6y
-#include "gl_intern.h"
-#include "gl_struct.h"
-#include "hu_stuff.h"
-#include "i_main.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_bbox.h"
-#include "p_maputl.h"
-#include "p_spec.h"
-#include "r_bsp.h"
-#include "r_data.h"
-#include "r_draw.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_sky.h"
-#include "r_things.h"
-#include "sc_man.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "z_zone.h"
-#include <SDL.h>
+#include "am_map.hh"
+#include "d_event.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "e6y.hh" //e6y
+#include "gl_intern.hh"
+#include "gl_struct.hh"
+#include "hu_stuff.hh"
+#include "i_main.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_bbox.hh"
+#include "p_maputl.hh"
+#include "p_spec.hh"
+#include "r_bsp.hh"
+#include "r_data.hh"
+#include "r_draw.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "r_sky.hh"
+#include "r_things.hh"
+#include "sc_man.hh"
+#include "st_stuff.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include "z_zone.hh"
+#include <SDL2/SDL.h>
 #include <math.h>
 
 // All OpenGL extentions will be disabled in gl_compatibility mode
@@ -289,7 +289,7 @@ void gld_MultisamplingSet(void)
     {
         int use_multisampling =
             map_use_multisamling ||
-            (!(automapmode & am_active) || (automapmode & am_overlay));
+            (!(automapmode & am_active) || automapmode & am_overlay);
 
         gld_EnableMultisample(use_multisampling);
     }
@@ -477,8 +477,9 @@ void gld_MapDrawSubsectors(player_t *plr, int fx, int fy, fixed_t mx,
     float coord_scale;
     GLTexture *gltexture;
 
-    alpha = (float)((automapmode & am_overlay) ? map_textured_overlay_trans
-                                               : map_textured_trans) /
+    alpha = (float)(!!(automapmode & am_overlay)
+                        ? map_textured_overlay_trans
+                        : map_textured_trans) /
             100.0f;
     if (alpha == 0)
         return;
@@ -486,9 +487,9 @@ void gld_MapDrawSubsectors(player_t *plr, int fx, int fy, fixed_t mx,
     if (numsubsectors > visible_subsectors_size)
     {
         visible_subsectors_size = numsubsectors;
-        visible_subsectors =
+        visible_subsectors = static_cast<subsector_t **>(
             realloc(visible_subsectors,
-                    visible_subsectors_size * sizeof(visible_subsectors[0]));
+                    visible_subsectors_size * sizeof(visible_subsectors[0])));
     }
 
     visible_subsectors_count = 0;
@@ -639,7 +640,7 @@ void gld_DrawTriangleStrip(GLWall *wall, gl_strip_coords_t *c)
 }
 
 void gld_DrawNumPatch_f(float x, float y, int lump, int cm,
-                        enum patch_translation_e flags)
+                        const patch_translation_e &flags)
 {
     GLTexture *gltexture;
     float fU1, fU2, fV1, fV2;
@@ -681,9 +682,10 @@ void gld_DrawNumPatch_f(float x, float y, int lump, int cm,
         topoffset = gltexture->topoffset;
     }
 
-    if (flags & VPT_STRETCH_MASK)
+    if (!!(flags & VPT_STRETCH_MASK))
     {
-        stretch_param_t *params = &stretch_params[flags & VPT_ALIGN_MASK];
+        stretch_param_t *params =
+            &stretch_params[(flags & VPT_ALIGN_MASK).value()];
 
         xpos = (float)((x - leftoffset) * params->video->width) / 320.0f +
                params->deltax1;
@@ -739,13 +741,13 @@ void gld_DrawNumPatch_f(float x, float y, int lump, int cm,
 }
 
 void gld_DrawNumPatch(int x, int y, int lump, int cm,
-                      enum patch_translation_e flags)
+                      const patch_translation_e &flags)
 {
     gld_DrawNumPatch_f((float)x, (float)y, lump, cm, flags);
 }
 
 void gld_FillFlat(int lump, int x, int y, int width, int height,
-                  enum patch_translation_e flags)
+                  const patch_translation_e &flags)
 {
     GLTexture *gltexture;
     float fU1, fU2, fV1, fV2;
@@ -789,7 +791,7 @@ void gld_FillFlat(int lump, int x, int y, int width, int height,
 }
 
 void gld_FillPatch(int lump, int x, int y, int width, int height,
-                   enum patch_translation_e flags)
+                   const patch_translation_e &flags)
 {
     GLTexture *gltexture;
     float fU1, fU2, fV1, fV2;
@@ -851,7 +853,8 @@ void gld_DrawLine_f(float x0, float y0, float x1, float y1, int BaseColor)
     g = playpal[3 * BaseColor + 1];
     b = playpal[3 * BaseColor + 2];
 
-    line = M_ArrayGetNewItem(&map_lines, sizeof(line[0]));
+    line = static_cast<map_line_t *>(
+        M_ArrayGetNewItem(&map_lines, sizeof(line[0])));
 
     line->point[0].x = x0;
     line->point[0].y = y0;
@@ -1061,13 +1064,13 @@ unsigned char *gld_ReadScreen(void)
     if (!buffer || size > buffer_size)
     {
         buffer_size = size;
-        buffer = realloc(buffer, size);
+        buffer = static_cast<unsigned char *>(realloc(buffer, size));
     }
     size = SCREENWIDTH * SCREENHEIGHT * 3;
     if (!scr || size > scr_size)
     {
         scr_size = size;
-        scr = realloc(scr, size);
+        scr = static_cast<unsigned char *>(realloc(scr, size));
     }
 
     if (buffer && scr)
@@ -1862,7 +1865,7 @@ void gld_AddWall(seg_t *seg)
             {
                 temptex = gld_RegisterTexture(toptexture, true, false);
                 if (!temptex && gl_use_stencil && backsector &&
-                    !(seg->linedef->r_flags & RF_ISOLATED) &&
+                    !(seg->linedef->r_flags & line_t::RF_ISOLATED) &&
                     /*frontsector->ceilingpic != skyflatnum && */
                     backsector->ceilingpic != skyflatnum &&
                     !(backsector->flags & NULL_SECTOR))
@@ -2053,9 +2056,9 @@ void gld_AddWall(seg_t *seg)
         {
             temptex = gld_RegisterTexture(bottomtexture, true, false);
             if (!temptex && gl_use_stencil && backsector &&
-                !(seg->linedef->r_flags & RF_ISOLATED) &&
+                !(seg->linedef->r_flags & line_t::RF_ISOLATED) &&
                 /*frontsector->floorpic != skyflatnum && */
-                    backsector->floorpic != skyflatnum &&
+                backsector->floorpic != skyflatnum &&
                 !(backsector->flags & NULL_SECTOR))
             {
                 wall.ytop =

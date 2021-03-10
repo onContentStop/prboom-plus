@@ -52,14 +52,14 @@ const music_player_t vorb_player = {
 
 #else // HAVE_LIBVORBISFILE
 
-#include "lprintf.h"
+#include "lprintf.hh"
 #include <stdlib.h>
 #include <string.h>
 
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
-#include "i_sound.h"
+#include "i_sound.hh"
 
 // uncomment to allow (experiemntal) support for
 // zdoom-style audio loops

@@ -35,6 +35,7 @@
 #define __R_DEFS__
 
 // Screenwidth.
+#include "b_bitops.hh"
 #include "doomdef.hh"
 
 // Some more or less basic data types
@@ -100,7 +101,10 @@ typedef struct
 #define SECTOR_IS_CLOSED 0x00000004
 #define NULL_SECTOR 0x00000008
 
-typedef struct
+struct line_t;
+struct msecnode_t;
+
+struct sector_t
 {
     int iSectorID; // proff 04/05/2000: needed for OpenGL and used in debugmode
                    // by the HUD to draw sectornum
@@ -140,10 +144,10 @@ typedef struct
 
     // list of mobjs that are at least partially in the sector
     // thinglist is a subset of touching_thinglist
-    struct msecnode_s *touching_thinglist; // phares 3/14/98
+    msecnode_t *touching_thinglist; // phares 3/14/98
 
     int linecount;
-    struct line_s **lines;
+    line_t **lines;
 
     // killough 10/98: support skies coming from sidedefs. Allows scrolling
     // skies and other effects. No "level info" kind of lump is needed,
@@ -180,7 +184,7 @@ typedef struct
 #ifdef GL_DOOM
     int fakegroup[2];
 #endif
-} sector_t;
+};
 
 //
 // The SideDef.
@@ -218,7 +222,7 @@ typedef enum
     ST_NEGATIVE
 } slopetype_t;
 
-typedef struct line_s
+struct line_t
 {
     int iLineID;       // proff 04/05/2000: needed for OpenGL
     vertex_t *v1, *v2; // Vertices, from v1 to v2.
@@ -239,17 +243,18 @@ typedef struct line_s
     int tranlump;          // killough 4/11/98: translucency filter, -1 == none
     int firsttag, nexttag; // killough 4/17/98: improves searches for tags.
     int r_validcount;      // cph: if == gametic, r_flags already done
-    enum
-    {                     // cph:
-        RF_TOP_TILE = 1,  // Upper texture needs tiling
-        RF_MID_TILE = 2,  // Mid texture needs tiling
-        RF_BOT_TILE = 4,  // Lower texture needs tiling
-        RF_IGNORE = 8,    // Renderer can skip this line
-        RF_CLOSED = 16,   // Line blocks view
-        RF_ISOLATED = 32, // Isolated line
-    } r_flags;
+    using flag_t = Bitset<int>;
+    // cph:
+    static constexpr flag_t RF_NONE = 0;
+    static constexpr flag_t RF_TOP_TILE = 1;  // Upper texture needs tiling
+    static constexpr flag_t RF_MID_TILE = 2;  // Mid texture needs tiling
+    static constexpr flag_t RF_BOT_TILE = 4;  // Lower texture needs tiling
+    static constexpr flag_t RF_IGNORE = 8;    // Renderer can skip this line
+    static constexpr flag_t RF_CLOSED = 16;   // Line blocks view
+    static constexpr flag_t RF_ISOLATED = 32; // Isolated line
+    flag_t r_flags;
     degenmobj_t soundorg; // sound origin for switches/buttons
-} line_t;
+};
 
 // phares 3/14/98
 //
@@ -267,16 +272,16 @@ typedef struct line_s
 //
 // For the links, NULL means top or end of list.
 
-typedef struct msecnode_s
+struct msecnode_t
 {
-    sector_t *m_sector;         // a sector containing this object
-    struct mobj_s *m_thing;     // this object
-    struct msecnode_s *m_tprev; // prev msecnode_t for this thing
-    struct msecnode_s *m_tnext; // next msecnode_t for this thing
-    struct msecnode_s *m_sprev; // prev msecnode_t for this sector
-    struct msecnode_s *m_snext; // next msecnode_t for this sector
-    dboolean visited; // killough 4/4/98, 4/7/98: used in search algorithms
-} msecnode_t;
+    sector_t *m_sector;  // a sector containing this object
+    mobj_t *m_thing;     // this object
+    msecnode_t *m_tprev; // prev msecnode_t for this thing
+    msecnode_t *m_tnext; // next msecnode_t for this thing
+    msecnode_t *m_sprev; // prev msecnode_t for this sector
+    msecnode_t *m_snext; // next msecnode_t for this sector
+    dboolean visited;    // killough 4/4/98, 4/7/98: used in search algorithms
+};
 
 //
 // The LineSeg.

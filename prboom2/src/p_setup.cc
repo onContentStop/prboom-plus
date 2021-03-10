@@ -34,31 +34,33 @@
 
 #include <math.h>
 
-#include "am_map.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "g_overflow.h"
-#include "hu_tracers.h"
-#include "lprintf.h" //jff 10/6/98 for debug outputs
-#include "m_argv.h"
-#include "m_bbox.h"
-#include "p_enemy.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_setup.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_demo.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_things.h"
-#include "s_advsound.h"
-#include "s_sound.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "am_map.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "g_overflow.hh"
+#include "hu_tracers.hh"
+#include "lprintf.hh" //jff 10/6/98 for debug outputs
+#include "m_argv.hh"
+#include "m_bbox.hh"
+#include "p_enemy.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_setup.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_demo.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_things.hh"
+#include "s_advsound.hh"
+#include "s_sound.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
@@ -222,13 +224,13 @@ static void *calloc_IfSameLevel(void *p, size_t n1, size_t n2)
 // Checks a lump for a magic string to identify its type (e.g. extended nodes)
 //
 
-static dboolean CheckForIdentifier(int lumpnum, const byte *id, size_t length)
+static dboolean CheckForIdentifier(int lumpnum, const char *id, size_t length)
 {
     dboolean result = false;
 
     if (W_LumpLength(lumpnum) >= length)
     {
-        const char *data = W_CacheLumpNum(lumpnum);
+        auto *data = static_cast<const char *>(W_CacheLumpNum(lumpnum));
 
         if (!memcmp(data, id, length))
             result = true;
@@ -379,7 +381,8 @@ static void P_LoadVertexes(int lump)
     numvertexes = W_LumpLength(lump) / sizeof(mapvertex_t);
 
     // Allocate zone memory for buffer.
-    vertexes = calloc_IfSameLevel(vertexes, numvertexes, sizeof(vertex_t));
+    vertexes = static_cast<vertex_t *>(
+        calloc_IfSameLevel(vertexes, numvertexes, sizeof(vertex_t)));
 
     // Load data into cache.
     // cph 2006/07/29 - cast to mapvertex_t here, making the loop below much
@@ -419,7 +422,7 @@ static void P_LoadVertexes2(int lump, int gllump)
 
     if (gllump >= 0) // check for glVertices
     {
-        gldata = W_CacheLumpNum(gllump);
+        gldata = static_cast<const byte *>(W_CacheLumpNum(gllump));
 
         if (nodesVersion == 2) // 32 bit GL_VERT format (16.16 fixed)
         {
@@ -427,8 +430,8 @@ static void P_LoadVertexes2(int lump, int gllump)
 
             numvertexes +=
                 (W_LumpLength(gllump) - GL_VERT_OFFSET) / sizeof(mapglvertex_t);
-            vertexes =
-                malloc_IfSameLevel(vertexes, numvertexes * sizeof(vertex_t));
+            vertexes = static_cast<vertex_t *>(
+                malloc_IfSameLevel(vertexes, numvertexes * sizeof(vertex_t)));
             mgl = (const mapglvertex_t *)(gldata + GL_VERT_OFFSET);
 
             for (i = firstglvertex; i < numvertexes; i++)
@@ -441,8 +444,8 @@ static void P_LoadVertexes2(int lump, int gllump)
         else
         {
             numvertexes += W_LumpLength(gllump) / sizeof(mapvertex_t);
-            vertexes =
-                malloc_IfSameLevel(vertexes, numvertexes * sizeof(vertex_t));
+            vertexes = static_cast<vertex_t *>(
+                malloc_IfSameLevel(vertexes, numvertexes * sizeof(vertex_t)));
             ml = (const mapvertex_t *)gldata;
 
             for (i = firstglvertex; i < numvertexes; i++)
@@ -515,7 +518,8 @@ static void P_LoadSegs(int lump)
     const mapseg_t *data; // cph - const
 
     numsegs = W_LumpLength(lump) / sizeof(mapseg_t);
-    segs = calloc_IfSameLevel(segs, numsegs, sizeof(seg_t));
+    segs =
+        static_cast<seg_t *>(calloc_IfSameLevel(segs, numsegs, sizeof(seg_t)));
     data = (const mapseg_t *)W_CacheLumpNum(
         lump); // cph - wad lump handling updated
 
@@ -668,7 +672,8 @@ static void P_LoadSegs_V4(int lump)
     const mapseg_v4_t *data;
 
     numsegs = W_LumpLength(lump) / sizeof(mapseg_v4_t);
-    segs = calloc_IfSameLevel(segs, numsegs, sizeof(seg_t));
+    segs =
+        static_cast<seg_t *>(calloc_IfSameLevel(segs, numsegs, sizeof(seg_t)));
     data = (const mapseg_v4_t *)W_CacheLumpNum(lump);
 
     if ((!data) || (!numsegs))
@@ -809,7 +814,8 @@ static void P_LoadGLSegs(int lump)
     line_t *ldef;
 
     numsegs = W_LumpLength(lump) / sizeof(glseg_t);
-    segs = malloc_IfSameLevel(segs, numsegs * sizeof(seg_t));
+    segs =
+        static_cast<seg_t *>(malloc_IfSameLevel(segs, numsegs * sizeof(seg_t)));
     memset(segs, 0, numsegs * sizeof(seg_t));
     ml = (const glseg_t *)W_CacheLumpNum(lump);
 
@@ -869,8 +875,8 @@ static void P_LoadSubsectors(int lump)
     int i;
 
     numsubsectors = W_LumpLength(lump) / sizeof(mapsubsector_t);
-    subsectors =
-        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
+    subsectors = static_cast<subsector_t *>(
+        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t)));
     data = (const mapsubsector_t *)W_CacheLumpNum(lump);
 
     if ((!data) || (!numsubsectors))
@@ -894,8 +900,8 @@ static void P_LoadSubsectors_V4(int lump)
     int i;
 
     numsubsectors = W_LumpLength(lump) / sizeof(mapsubsector_v4_t);
-    subsectors =
-        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
+    subsectors = static_cast<subsector_t *>(
+        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t)));
     data = (const mapsubsector_v4_t *)W_CacheLumpNum(lump);
 
     if ((!data) || (!numsubsectors))
@@ -922,8 +928,10 @@ static void P_LoadSectors(int lump)
     int i;
 
     numsectors = W_LumpLength(lump) / sizeof(mapsector_t);
-    sectors = calloc_IfSameLevel(sectors, numsectors, sizeof(sector_t));
-    data = W_CacheLumpNum(lump); // cph - wad lump handling updated
+    sectors = static_cast<sector_t *>(
+        calloc_IfSameLevel(sectors, numsectors, sizeof(sector_t)));
+    data = static_cast<const byte *>(
+        W_CacheLumpNum(lump)); // cph - wad lump handling updated
 
     for (i = 0; i < numsectors; i++)
     {
@@ -982,8 +990,10 @@ static void P_LoadNodes(int lump)
     int i;
 
     numnodes = W_LumpLength(lump) / sizeof(mapnode_t);
-    nodes = malloc_IfSameLevel(nodes, numnodes * sizeof(node_t));
-    data = W_CacheLumpNum(lump); // cph - wad lump handling updated
+    nodes = static_cast<node_t *>(
+        malloc_IfSameLevel(nodes, numnodes * sizeof(node_t)));
+    data = static_cast<const byte *>(
+        W_CacheLumpNum(lump)); // cph - wad lump handling updated
 
     if ((!data) || (!numnodes))
     {
@@ -1049,8 +1059,10 @@ static void P_LoadNodes_V4(int lump)
     int i;
 
     numnodes = (W_LumpLength(lump) - 8) / sizeof(mapnode_v4_t);
-    nodes = malloc_IfSameLevel(nodes, numnodes * sizeof(node_t));
-    data = W_CacheLumpNum(lump); // cph - wad lump handling updated
+    nodes = static_cast<node_t *>(
+        malloc_IfSameLevel(nodes, numnodes * sizeof(node_t)));
+    data = static_cast<const byte *>(
+        W_CacheLumpNum(lump)); // cph - wad lump handling updated
 
     // skip header
     data = data + 8;
@@ -1189,7 +1201,7 @@ static void P_LoadZSegs(const byte *data)
 // https://zdoom.org/wiki/Node#ZDoom_extended_nodes
 static void P_LoadZNodes(int lump, int glnodes, int compressed)
 {
-    byte *data;
+    const byte *data;
     unsigned int i;
     int len;
 
@@ -1202,7 +1214,7 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
     byte *output;
 #endif
 
-    data = W_CacheLumpNum(lump);
+    data = static_cast<const byte *>(W_CacheLumpNum(lump));
     len = W_LumpLength(lump);
 
     if (compressed == ZDOOM_ZNOD_NODES)
@@ -1214,12 +1226,12 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
         // first estimate for compression rate:
         // output buffer size == 2.5 * input size
         outlen = 2.5 * len;
-        output = Z_Malloc(outlen, PU_STATIC, 0);
+        output = (byte *)Z_Malloc(outlen, PU_STATIC, 0);
 
         // initialize stream state for decompression
-        zstream = malloc(sizeof(*zstream));
+        zstream = (z_stream *)malloc(sizeof(*zstream));
         memset(zstream, 0, sizeof(*zstream));
-        zstream->next_in = data + 4;
+        zstream->next_in = (Bytef *)(data + 4);
         zstream->avail_in = len - 4;
         zstream->next_out = output;
         zstream->avail_out = outlen;
@@ -1233,7 +1245,7 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
         {
             int outlen_old = outlen;
             outlen = 2 * outlen_old;
-            output = realloc(output, outlen);
+            output = (byte *)realloc(output, outlen);
             zstream->next_out = output + outlen_old;
             zstream->avail_out = outlen - outlen_old;
         }
@@ -1282,7 +1294,8 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
         }
         else
         {
-            newvertarray = calloc(orgVerts + newVerts, sizeof(vertex_t));
+            newvertarray = static_cast<vertex_t *>(
+                calloc(orgVerts + newVerts, sizeof(vertex_t)));
             memcpy(newvertarray, vertexes, orgVerts * sizeof(vertex_t));
         }
 
@@ -1330,8 +1343,8 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
     numsubsectors = numSubs;
     if (numsubsectors <= 0)
         I_Error("P_LoadZNodes: no subsectors in level");
-    subsectors =
-        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
+    subsectors = static_cast<subsector_t *>(
+        calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t)));
 
     CheckZNodesOverflow(&len, numSubs * sizeof(mapsubsector_znod_t));
     // MB 2020-03-01
@@ -1362,7 +1375,8 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
     }
 
     numsegs = numSegs;
-    segs = calloc_IfSameLevel(segs, numsegs, sizeof(seg_t));
+    segs =
+        static_cast<seg_t *>(calloc_IfSameLevel(segs, numsegs, sizeof(seg_t)));
 
     if (glnodes == 0)
     {
@@ -1382,7 +1396,8 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed)
     data += sizeof(numNodes);
 
     numnodes = numNodes;
-    nodes = calloc_IfSameLevel(nodes, numNodes, sizeof(node_t));
+    nodes = static_cast<node_t *>(
+        calloc_IfSameLevel(nodes, numNodes, sizeof(node_t)));
 
     CheckZNodesOverflow(&len, numNodes * sizeof(mapnode_znod_t));
     for (i = 0; i < numNodes; i++)
@@ -1438,11 +1453,12 @@ static int C_DECL dicmp_sprite_by_pos(const void *a, const void *b)
 static void P_LoadThings(int lump)
 {
     int i, numthings = W_LumpLength(lump) / sizeof(mapthing_t);
-    const mapthing_t *data = W_CacheLumpNum(lump);
+    auto *data = static_cast<const mapthing_t *>(W_CacheLumpNum(lump));
 
     mobj_t *mobj;
     int mobjcount = 0;
-    mobj_t **mobjlist = malloc(numthings * sizeof(mobjlist[0]));
+    auto **mobjlist =
+        static_cast<mobj_t **>(malloc(numthings * sizeof(mobj_t *)));
 
     if ((!data) || (!numthings))
         I_Error("P_LoadThings: no things in level");
@@ -1529,8 +1545,10 @@ static void P_LoadLineDefs(int lump)
     int i;
 
     numlines = W_LumpLength(lump) / sizeof(maplinedef_t);
-    lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
-    data = W_CacheLumpNum(lump); // cph - wad lump handling updated
+    lines = static_cast<line_t *>(
+        calloc_IfSameLevel(lines, numlines, sizeof(line_t)));
+    data = static_cast<const byte *>(
+        W_CacheLumpNum(lump)); // cph - wad lump handling updated
 
     for (i = 0; i < numlines; i++)
     {
@@ -1656,7 +1674,7 @@ static void P_LoadLineDefs(int lump)
 static void P_LoadLineDefs2(int lump)
 {
     int i = numlines;
-    register line_t *ld = lines;
+    line_t *ld = lines;
     for (; i--; ld++)
     {
         ld->frontsector =
@@ -1689,7 +1707,8 @@ static void P_LoadLineDefs2(int lump)
 static void P_LoadSideDefs(int lump)
 {
     numsides = W_LumpLength(lump) / sizeof(mapsidedef_t);
-    sides = calloc_IfSameLevel(sides, numsides, sizeof(side_t));
+    sides = static_cast<side_t *>(
+        calloc_IfSameLevel(sides, numsides, sizeof(side_t)));
 }
 
 // killough 4/4/98: delay using texture names until
@@ -1698,15 +1717,15 @@ static void P_LoadSideDefs(int lump)
 
 static void P_LoadSideDefs2(int lump)
 {
-    const byte *data =
-        W_CacheLumpNum(lump); // cph - const*, wad lump handling updated
+    auto *data = static_cast<const byte *>(
+        W_CacheLumpNum(lump)); // cph - const*, wad lump handling updated
     int i;
 
     for (i = 0; i < numsides; i++)
     {
-        register const mapsidedef_t *msd = (const mapsidedef_t *)data + i;
-        register side_t *sd = sides + i;
-        register sector_t *sec;
+        const mapsidedef_t *msd = (const mapsidedef_t *)data + i;
+        side_t *sd = sides + i;
+        sector_t *sec;
 
         sd->textureoffset = LittleShort(msd->textureoffset) << FRACBITS;
         sd->rowoffset = LittleShort(msd->rowoffset) << FRACBITS;
@@ -1786,9 +1805,9 @@ static void P_LoadSideDefs2(int lump)
 
 #define blkshift 7 /* places to shift rel position for cell num */
 #define blkmask ((1 << blkshift) - 1) /* mask for rel position within cell */
-#define blkmargin 0                   /* size guardband around map used */
-                                      // jff 10/8/98 use guardband>0
-                                      // jff 10/12/98 0 ok with + 1 in rows,cols
+#define blkmargin 0 /* size guardband around map used */
+// jff 10/8/98 use guardband>0
+// jff 10/12/98 0 ok with + 1 in rows,cols
 
 typedef struct linelist_t // type used to list lines in each block
 {
@@ -1809,7 +1828,7 @@ static void AddBlockLine(linelist_t **lists, int *count, int *done, int blockno,
     if (done[blockno])
         return;
 
-    l = malloc(sizeof(linelist_t));
+    l = static_cast<linelist_t *>(malloc(sizeof(linelist_t)));
     l->num = lineno;
     l->next = lists[blockno];
     lists[blockno] = l;
@@ -1875,16 +1894,17 @@ static void P_CreateBlockMap(void)
     // finally make an array in which we can mark blocks done per line
 
     // CPhipps - calloc's
-    blocklists = calloc(NBlocks, sizeof(linelist_t *));
-    blockcount = calloc(NBlocks, sizeof(int));
-    blockdone = malloc(NBlocks * sizeof(int));
+    blocklists =
+        static_cast<linelist_t **>(calloc(NBlocks, sizeof(linelist_t *)));
+    blockcount = static_cast<int *>(calloc(NBlocks, sizeof(int)));
+    blockdone = static_cast<int *>(malloc(NBlocks * sizeof(int)));
 
     // initialize each blocklist, and enter the trailing -1 in all blocklists
     // note the linked list of lines grows backwards
 
     for (i = 0; i < NBlocks; i++)
     {
-        blocklists[i] = malloc(sizeof(linelist_t));
+        blocklists[i] = static_cast<linelist_t *>(malloc(sizeof(linelist_t)));
         blocklists[i]->num = -1;
         blocklists[i]->next = NULL;
         blockcount[i]++;
@@ -2061,8 +2081,8 @@ static void P_CreateBlockMap(void)
 
     // Create the blockmap lump
 
-    blockmaplump = malloc_IfSameLevel(
-        blockmaplump, sizeof(*blockmaplump) * (4 + NBlocks + linetotal));
+    blockmaplump = static_cast<int *>(malloc_IfSameLevel(
+        blockmaplump, sizeof(*blockmaplump) * (4 + NBlocks + linetotal)));
     // blockmap header
 
     blockmaplump[0] = bmaporgx = xorg << FRACBITS;
@@ -2189,9 +2209,10 @@ static void P_LoadBlockMap(int lump)
     {
         long i;
         // cph - const*, wad lump handling updated
-        const short *wadblockmaplump = W_CacheLumpNum(lump);
-        blockmaplump =
-            malloc_IfSameLevel(blockmaplump, sizeof(*blockmaplump) * count);
+        auto *wadblockmaplump =
+            static_cast<const short *>(W_CacheLumpNum(lump));
+        blockmaplump = static_cast<int *>(
+            malloc_IfSameLevel(blockmaplump, sizeof(*blockmaplump) * count));
 
         // killough 3/1/98: Expand wad blockmap into larger internal one,
         // by treating all offsets except -1 as unsigned and zero-extending
@@ -2230,8 +2251,8 @@ static void P_LoadBlockMap(int lump)
     }
 
     // clear out mobj chains - CPhipps - use calloc
-    blocklinks = calloc_IfSameLevel(blocklinks, bmapwidth * bmapheight,
-                                    sizeof(*blocklinks));
+    blocklinks = static_cast<mobj_t **>(calloc_IfSameLevel(
+        blocklinks, bmapwidth * bmapheight, sizeof(*blocklinks)));
     blockmap = blockmaplump + 4;
 
     // MAES: set blockmapxneg and blockmapyneg
@@ -2262,7 +2283,7 @@ static void P_LoadReject(int lumpnum, int totallines)
     if (rejectlump != -1)
         W_UnlockLumpNum(rejectlump);
     rejectlump = lumpnum + ML_REJECT;
-    rejectmatrix = W_CacheLumpNum(rejectlump);
+    rejectmatrix = static_cast<const byte *>(W_CacheLumpNum(rejectlump));
 
     // e6y: check for overflow
     RejectOverrun(rejectlump, &rejectmatrix, totallines);
@@ -2281,7 +2302,7 @@ static void P_LoadReject(int lumpnum, int totallines)
 // cph - convenient sub-function
 static void P_AddLineToSector(line_t *li, sector_t *sector)
 {
-    fixed_t *bbox = (void *)sector->blockbox;
+    auto *bbox = (fixed_t *)sector->blockbox;
 
     sector->lines[sector->linecount++] = li;
     M_AddToBox(bbox, li->v1->x, li->v1->y);
@@ -2291,8 +2312,8 @@ static void P_AddLineToSector(line_t *li, sector_t *sector)
 // modified to return totallines (needed by P_LoadReject)
 static int P_GroupLines(void)
 {
-    register line_t *li;
-    register sector_t *sector;
+    line_t *li;
+    sector_t *sector;
     int i, j, total = numlines;
 
     // figgi
@@ -2325,7 +2346,8 @@ static int P_GroupLines(void)
     }
 
     { // allocate line tables for each sector
-        line_t **linebuffer = Z_Malloc(total * sizeof(line_t *), PU_LEVEL, 0);
+        auto **linebuffer = static_cast<line_t **>(
+            Z_Malloc(total * sizeof(line_t *), PU_LEVEL, 0));
         // e6y: REJECT overrun emulation code
         // moved to P_LoadReject
 
@@ -2348,9 +2370,9 @@ static int P_GroupLines(void)
 
     for (i = 0, sector = sectors; i < numsectors; i++, sector++)
     {
-        fixed_t *bbox =
-            (void *)sector->blockbox; // cph - For convenience, so
-                                      // I can sue the old code unchanged
+        auto *bbox =
+            (fixed_t *)sector->blockbox; // cph - For convenience, so
+                                         // I can sue the old code unchanged
         int block;
 
         sector->bbox[0] = sector->blockbox[0] >> FRACTOMAPBITS;
@@ -2440,7 +2462,8 @@ static int P_GroupLines(void)
 
 static void P_RemoveSlimeTrails(void) // killough 10/98
 {
-    byte *hit = calloc(1, numvertexes); // Hitlist for vertices
+    byte *hit =
+        static_cast<byte *>(calloc(1, numvertexes)); // Hitlist for vertices
     int i;
     // Correction of desync on dv04-423.lmp/dv.wad
     // http://www.doomworld.com/vb/showthread.php?s=&postid=627257#post627257
@@ -2639,7 +2662,8 @@ void P_InitSubsectorsLines(void)
     }
 
     count = 0;
-    sslines_indexes = malloc((numsubsectors + 1) * sizeof(sslines_indexes[0]));
+    sslines_indexes = static_cast<int *>(
+        malloc((numsubsectors + 1) * sizeof(sslines_indexes[0])));
 
     for (num = 0; num < numsubsectors; num++)
     {
@@ -2671,7 +2695,7 @@ void P_InitSubsectorsLines(void)
 
     sslines_indexes[numsubsectors] = count;
 
-    sslines = malloc(count * sizeof(sslines[0]));
+    sslines = static_cast<ssline_t *>(malloc(count * sizeof(sslines[0])));
     count = 0;
 
     for (num = 0; num < numsubsectors; num++)
@@ -2895,8 +2919,8 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     }
 
 #ifdef GL_DOOM
-    map_subsectors = calloc_IfSameLevel(map_subsectors, numsubsectors,
-                                        sizeof(map_subsectors[0]));
+    map_subsectors = (byte *)calloc_IfSameLevel(map_subsectors, numsubsectors,
+                                                sizeof(map_subsectors[0]));
 #endif
 
     // reject loading and underflow padding separated out into new function

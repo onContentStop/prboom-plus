@@ -32,15 +32,16 @@
  *---------------------------------------------------------------------
  */
 
-#include "r_fps.h"
-#include "doomstat.h"
-#include "e6y.h"
-#include "i_capture.h"
-#include "i_system.h"
-#include "p_spec.h"
-#include "r_defs.h"
-#include "r_demo.h"
-#include "r_state.h"
+#include "r_fps.hh"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_struct.hh"
+#include "i_capture.hh"
+#include "i_system.hh"
+#include "p_spec.hh"
+#include "r_defs.hh"
+#include "r_demo.hh"
+#include "r_state.hh"
 
 int movement_smooth_default;
 int movement_smooth;
@@ -99,8 +100,8 @@ void R_InterpolateView(player_t *player, fixed_t frac)
 {
     static mobj_t *oviewer;
 
-    dboolean NoInterpolate =
-        (paused && !walkcamera.type) || (menuactive && !demoplayback);
+    dboolean NoInterpolate = (paused && !walkcamera.type) ||
+                             (menuactive != mnact_inactive && !demoplayback);
 
     viewplayer = player;
 
@@ -574,15 +575,15 @@ static void R_InterpolationGetData(thinker_t *th, interpolation_type_e *type1,
     {
         switch (((scroll_t *)th)->type)
         {
-        case sc_side:
+        case scroll_t::sc_side:
             *type1 = INTERP_WallPanning;
             *posptr1 = sides + ((scroll_t *)th)->affectee;
             break;
-        case sc_floor:
+        case scroll_t::sc_floor:
             *type1 = INTERP_FloorPanning;
             *posptr1 = sectors + ((scroll_t *)th)->affectee;
             break;
-        case sc_ceiling:
+        case scroll_t::sc_ceiling:
             *type1 = INTERP_CeilingPanning;
             *posptr1 = sectors + ((scroll_t *)th)->affectee;
             break;

@@ -41,12 +41,14 @@
 
 #include "d_think.hh"
 #include "doomtype.hh"
+#include "sounds.hh"
 
 /********************************************************************
  * Sprite name enumeration - must match info.c                      *
  ********************************************************************/
 typedef enum
 {
+    SPR_NULL = -1,
     SPR_TROO,
     SPR_SHTG,
     SPR_PUNG,
@@ -303,1084 +305,1090 @@ typedef enum
  * States (frames) enumeration -- must match info.c                 *
  ********************************************************************/
 
-typedef enum
-{
-    S_NULL,
-    S_LIGHTDONE,
-    S_PUNCH,
-    S_PUNCHDOWN,
-    S_PUNCHUP,
-    S_PUNCH1,
-    S_PUNCH2,
-    S_PUNCH3,
-    S_PUNCH4,
-    S_PUNCH5,
-    S_PISTOL,
-    S_PISTOLDOWN,
-    S_PISTOLUP,
-    S_PISTOL1,
-    S_PISTOL2,
-    S_PISTOL3,
-    S_PISTOL4,
-    S_PISTOLFLASH,
-    S_SGUN,
-    S_SGUNDOWN,
-    S_SGUNUP,
-    S_SGUN1,
-    S_SGUN2,
-    S_SGUN3,
-    S_SGUN4,
-    S_SGUN5,
-    S_SGUN6,
-    S_SGUN7,
-    S_SGUN8,
-    S_SGUN9,
-    S_SGUNFLASH1,
-    S_SGUNFLASH2,
-    S_DSGUN,
-    S_DSGUNDOWN,
-    S_DSGUNUP,
-    S_DSGUN1,
-    S_DSGUN2,
-    S_DSGUN3,
-    S_DSGUN4,
-    S_DSGUN5,
-    S_DSGUN6,
-    S_DSGUN7,
-    S_DSGUN8,
-    S_DSGUN9,
-    S_DSGUN10,
-    S_DSNR1,
-    S_DSNR2,
-    S_DSGUNFLASH1,
-    S_DSGUNFLASH2,
-    S_CHAIN,
-    S_CHAINDOWN,
-    S_CHAINUP,
-    S_CHAIN1,
-    S_CHAIN2,
-    S_CHAIN3,
-    S_CHAINFLASH1,
-    S_CHAINFLASH2,
-    S_MISSILE,
-    S_MISSILEDOWN,
-    S_MISSILEUP,
-    S_MISSILE1,
-    S_MISSILE2,
-    S_MISSILE3,
-    S_MISSILEFLASH1,
-    S_MISSILEFLASH2,
-    S_MISSILEFLASH3,
-    S_MISSILEFLASH4,
-    S_SAW,
-    S_SAWB,
-    S_SAWDOWN,
-    S_SAWUP,
-    S_SAW1,
-    S_SAW2,
-    S_SAW3,
-    S_PLASMA,
-    S_PLASMADOWN,
-    S_PLASMAUP,
-    S_PLASMA1,
-    S_PLASMA2,
-    S_PLASMAFLASH1,
-    S_PLASMAFLASH2,
-    S_BFG,
-    S_BFGDOWN,
-    S_BFGUP,
-    S_BFG1,
-    S_BFG2,
-    S_BFG3,
-    S_BFG4,
-    S_BFGFLASH1,
-    S_BFGFLASH2,
-    S_BLOOD1,
-    S_BLOOD2,
-    S_BLOOD3,
-    S_PUFF1,
-    S_PUFF2,
-    S_PUFF3,
-    S_PUFF4,
-    S_TBALL1,
-    S_TBALL2,
-    S_TBALLX1,
-    S_TBALLX2,
-    S_TBALLX3,
-    S_RBALL1,
-    S_RBALL2,
-    S_RBALLX1,
-    S_RBALLX2,
-    S_RBALLX3,
-    S_PLASBALL,
-    S_PLASBALL2,
-    S_PLASEXP,
-    S_PLASEXP2,
-    S_PLASEXP3,
-    S_PLASEXP4,
-    S_PLASEXP5,
-    S_ROCKET,
-    S_BFGSHOT,
-    S_BFGSHOT2,
-    S_BFGLAND,
-    S_BFGLAND2,
-    S_BFGLAND3,
-    S_BFGLAND4,
-    S_BFGLAND5,
-    S_BFGLAND6,
-    S_BFGEXP,
-    S_BFGEXP2,
-    S_BFGEXP3,
-    S_BFGEXP4,
-    S_EXPLODE1,
-    S_EXPLODE2,
-    S_EXPLODE3,
-    S_TFOG,
-    S_TFOG01,
-    S_TFOG02,
-    S_TFOG2,
-    S_TFOG3,
-    S_TFOG4,
-    S_TFOG5,
-    S_TFOG6,
-    S_TFOG7,
-    S_TFOG8,
-    S_TFOG9,
-    S_TFOG10,
-    S_IFOG,
-    S_IFOG01,
-    S_IFOG02,
-    S_IFOG2,
-    S_IFOG3,
-    S_IFOG4,
-    S_IFOG5,
-    S_PLAY,
-    S_PLAY_RUN1,
-    S_PLAY_RUN2,
-    S_PLAY_RUN3,
-    S_PLAY_RUN4,
-    S_PLAY_ATK1,
-    S_PLAY_ATK2,
-    S_PLAY_PAIN,
-    S_PLAY_PAIN2,
-    S_PLAY_DIE1,
-    S_PLAY_DIE2,
-    S_PLAY_DIE3,
-    S_PLAY_DIE4,
-    S_PLAY_DIE5,
-    S_PLAY_DIE6,
-    S_PLAY_DIE7,
-    S_PLAY_XDIE1,
-    S_PLAY_XDIE2,
-    S_PLAY_XDIE3,
-    S_PLAY_XDIE4,
-    S_PLAY_XDIE5,
-    S_PLAY_XDIE6,
-    S_PLAY_XDIE7,
-    S_PLAY_XDIE8,
-    S_PLAY_XDIE9,
-    S_POSS_STND,
-    S_POSS_STND2,
-    S_POSS_RUN1,
-    S_POSS_RUN2,
-    S_POSS_RUN3,
-    S_POSS_RUN4,
-    S_POSS_RUN5,
-    S_POSS_RUN6,
-    S_POSS_RUN7,
-    S_POSS_RUN8,
-    S_POSS_ATK1,
-    S_POSS_ATK2,
-    S_POSS_ATK3,
-    S_POSS_PAIN,
-    S_POSS_PAIN2,
-    S_POSS_DIE1,
-    S_POSS_DIE2,
-    S_POSS_DIE3,
-    S_POSS_DIE4,
-    S_POSS_DIE5,
-    S_POSS_XDIE1,
-    S_POSS_XDIE2,
-    S_POSS_XDIE3,
-    S_POSS_XDIE4,
-    S_POSS_XDIE5,
-    S_POSS_XDIE6,
-    S_POSS_XDIE7,
-    S_POSS_XDIE8,
-    S_POSS_XDIE9,
-    S_POSS_RAISE1,
-    S_POSS_RAISE2,
-    S_POSS_RAISE3,
-    S_POSS_RAISE4,
-    S_SPOS_STND,
-    S_SPOS_STND2,
-    S_SPOS_RUN1,
-    S_SPOS_RUN2,
-    S_SPOS_RUN3,
-    S_SPOS_RUN4,
-    S_SPOS_RUN5,
-    S_SPOS_RUN6,
-    S_SPOS_RUN7,
-    S_SPOS_RUN8,
-    S_SPOS_ATK1,
-    S_SPOS_ATK2,
-    S_SPOS_ATK3,
-    S_SPOS_PAIN,
-    S_SPOS_PAIN2,
-    S_SPOS_DIE1,
-    S_SPOS_DIE2,
-    S_SPOS_DIE3,
-    S_SPOS_DIE4,
-    S_SPOS_DIE5,
-    S_SPOS_XDIE1,
-    S_SPOS_XDIE2,
-    S_SPOS_XDIE3,
-    S_SPOS_XDIE4,
-    S_SPOS_XDIE5,
-    S_SPOS_XDIE6,
-    S_SPOS_XDIE7,
-    S_SPOS_XDIE8,
-    S_SPOS_XDIE9,
-    S_SPOS_RAISE1,
-    S_SPOS_RAISE2,
-    S_SPOS_RAISE3,
-    S_SPOS_RAISE4,
-    S_SPOS_RAISE5,
-    S_VILE_STND,
-    S_VILE_STND2,
-    S_VILE_RUN1,
-    S_VILE_RUN2,
-    S_VILE_RUN3,
-    S_VILE_RUN4,
-    S_VILE_RUN5,
-    S_VILE_RUN6,
-    S_VILE_RUN7,
-    S_VILE_RUN8,
-    S_VILE_RUN9,
-    S_VILE_RUN10,
-    S_VILE_RUN11,
-    S_VILE_RUN12,
-    S_VILE_ATK1,
-    S_VILE_ATK2,
-    S_VILE_ATK3,
-    S_VILE_ATK4,
-    S_VILE_ATK5,
-    S_VILE_ATK6,
-    S_VILE_ATK7,
-    S_VILE_ATK8,
-    S_VILE_ATK9,
-    S_VILE_ATK10,
-    S_VILE_ATK11,
-    S_VILE_HEAL1,
-    S_VILE_HEAL2,
-    S_VILE_HEAL3,
-    S_VILE_PAIN,
-    S_VILE_PAIN2,
-    S_VILE_DIE1,
-    S_VILE_DIE2,
-    S_VILE_DIE3,
-    S_VILE_DIE4,
-    S_VILE_DIE5,
-    S_VILE_DIE6,
-    S_VILE_DIE7,
-    S_VILE_DIE8,
-    S_VILE_DIE9,
-    S_VILE_DIE10,
-    S_FIRE1,
-    S_FIRE2,
-    S_FIRE3,
-    S_FIRE4,
-    S_FIRE5,
-    S_FIRE6,
-    S_FIRE7,
-    S_FIRE8,
-    S_FIRE9,
-    S_FIRE10,
-    S_FIRE11,
-    S_FIRE12,
-    S_FIRE13,
-    S_FIRE14,
-    S_FIRE15,
-    S_FIRE16,
-    S_FIRE17,
-    S_FIRE18,
-    S_FIRE19,
-    S_FIRE20,
-    S_FIRE21,
-    S_FIRE22,
-    S_FIRE23,
-    S_FIRE24,
-    S_FIRE25,
-    S_FIRE26,
-    S_FIRE27,
-    S_FIRE28,
-    S_FIRE29,
-    S_FIRE30,
-    S_SMOKE1,
-    S_SMOKE2,
-    S_SMOKE3,
-    S_SMOKE4,
-    S_SMOKE5,
-    S_TRACER,
-    S_TRACER2,
-    S_TRACEEXP1,
-    S_TRACEEXP2,
-    S_TRACEEXP3,
-    S_SKEL_STND,
-    S_SKEL_STND2,
-    S_SKEL_RUN1,
-    S_SKEL_RUN2,
-    S_SKEL_RUN3,
-    S_SKEL_RUN4,
-    S_SKEL_RUN5,
-    S_SKEL_RUN6,
-    S_SKEL_RUN7,
-    S_SKEL_RUN8,
-    S_SKEL_RUN9,
-    S_SKEL_RUN10,
-    S_SKEL_RUN11,
-    S_SKEL_RUN12,
-    S_SKEL_FIST1,
-    S_SKEL_FIST2,
-    S_SKEL_FIST3,
-    S_SKEL_FIST4,
-    S_SKEL_MISS1,
-    S_SKEL_MISS2,
-    S_SKEL_MISS3,
-    S_SKEL_MISS4,
-    S_SKEL_PAIN,
-    S_SKEL_PAIN2,
-    S_SKEL_DIE1,
-    S_SKEL_DIE2,
-    S_SKEL_DIE3,
-    S_SKEL_DIE4,
-    S_SKEL_DIE5,
-    S_SKEL_DIE6,
-    S_SKEL_RAISE1,
-    S_SKEL_RAISE2,
-    S_SKEL_RAISE3,
-    S_SKEL_RAISE4,
-    S_SKEL_RAISE5,
-    S_SKEL_RAISE6,
-    S_FATSHOT1,
-    S_FATSHOT2,
-    S_FATSHOTX1,
-    S_FATSHOTX2,
-    S_FATSHOTX3,
-    S_FATT_STND,
-    S_FATT_STND2,
-    S_FATT_RUN1,
-    S_FATT_RUN2,
-    S_FATT_RUN3,
-    S_FATT_RUN4,
-    S_FATT_RUN5,
-    S_FATT_RUN6,
-    S_FATT_RUN7,
-    S_FATT_RUN8,
-    S_FATT_RUN9,
-    S_FATT_RUN10,
-    S_FATT_RUN11,
-    S_FATT_RUN12,
-    S_FATT_ATK1,
-    S_FATT_ATK2,
-    S_FATT_ATK3,
-    S_FATT_ATK4,
-    S_FATT_ATK5,
-    S_FATT_ATK6,
-    S_FATT_ATK7,
-    S_FATT_ATK8,
-    S_FATT_ATK9,
-    S_FATT_ATK10,
-    S_FATT_PAIN,
-    S_FATT_PAIN2,
-    S_FATT_DIE1,
-    S_FATT_DIE2,
-    S_FATT_DIE3,
-    S_FATT_DIE4,
-    S_FATT_DIE5,
-    S_FATT_DIE6,
-    S_FATT_DIE7,
-    S_FATT_DIE8,
-    S_FATT_DIE9,
-    S_FATT_DIE10,
-    S_FATT_RAISE1,
-    S_FATT_RAISE2,
-    S_FATT_RAISE3,
-    S_FATT_RAISE4,
-    S_FATT_RAISE5,
-    S_FATT_RAISE6,
-    S_FATT_RAISE7,
-    S_FATT_RAISE8,
-    S_CPOS_STND,
-    S_CPOS_STND2,
-    S_CPOS_RUN1,
-    S_CPOS_RUN2,
-    S_CPOS_RUN3,
-    S_CPOS_RUN4,
-    S_CPOS_RUN5,
-    S_CPOS_RUN6,
-    S_CPOS_RUN7,
-    S_CPOS_RUN8,
-    S_CPOS_ATK1,
-    S_CPOS_ATK2,
-    S_CPOS_ATK3,
-    S_CPOS_ATK4,
-    S_CPOS_PAIN,
-    S_CPOS_PAIN2,
-    S_CPOS_DIE1,
-    S_CPOS_DIE2,
-    S_CPOS_DIE3,
-    S_CPOS_DIE4,
-    S_CPOS_DIE5,
-    S_CPOS_DIE6,
-    S_CPOS_DIE7,
-    S_CPOS_XDIE1,
-    S_CPOS_XDIE2,
-    S_CPOS_XDIE3,
-    S_CPOS_XDIE4,
-    S_CPOS_XDIE5,
-    S_CPOS_XDIE6,
-    S_CPOS_RAISE1,
-    S_CPOS_RAISE2,
-    S_CPOS_RAISE3,
-    S_CPOS_RAISE4,
-    S_CPOS_RAISE5,
-    S_CPOS_RAISE6,
-    S_CPOS_RAISE7,
-    S_TROO_STND,
-    S_TROO_STND2,
-    S_TROO_RUN1,
-    S_TROO_RUN2,
-    S_TROO_RUN3,
-    S_TROO_RUN4,
-    S_TROO_RUN5,
-    S_TROO_RUN6,
-    S_TROO_RUN7,
-    S_TROO_RUN8,
-    S_TROO_ATK1,
-    S_TROO_ATK2,
-    S_TROO_ATK3,
-    S_TROO_PAIN,
-    S_TROO_PAIN2,
-    S_TROO_DIE1,
-    S_TROO_DIE2,
-    S_TROO_DIE3,
-    S_TROO_DIE4,
-    S_TROO_DIE5,
-    S_TROO_XDIE1,
-    S_TROO_XDIE2,
-    S_TROO_XDIE3,
-    S_TROO_XDIE4,
-    S_TROO_XDIE5,
-    S_TROO_XDIE6,
-    S_TROO_XDIE7,
-    S_TROO_XDIE8,
-    S_TROO_RAISE1,
-    S_TROO_RAISE2,
-    S_TROO_RAISE3,
-    S_TROO_RAISE4,
-    S_TROO_RAISE5,
-    S_SARG_STND,
-    S_SARG_STND2,
-    S_SARG_RUN1,
-    S_SARG_RUN2,
-    S_SARG_RUN3,
-    S_SARG_RUN4,
-    S_SARG_RUN5,
-    S_SARG_RUN6,
-    S_SARG_RUN7,
-    S_SARG_RUN8,
-    S_SARG_ATK1,
-    S_SARG_ATK2,
-    S_SARG_ATK3,
-    S_SARG_PAIN,
-    S_SARG_PAIN2,
-    S_SARG_DIE1,
-    S_SARG_DIE2,
-    S_SARG_DIE3,
-    S_SARG_DIE4,
-    S_SARG_DIE5,
-    S_SARG_DIE6,
-    S_SARG_RAISE1,
-    S_SARG_RAISE2,
-    S_SARG_RAISE3,
-    S_SARG_RAISE4,
-    S_SARG_RAISE5,
-    S_SARG_RAISE6,
-    S_HEAD_STND,
-    S_HEAD_RUN1,
-    S_HEAD_ATK1,
-    S_HEAD_ATK2,
-    S_HEAD_ATK3,
-    S_HEAD_PAIN,
-    S_HEAD_PAIN2,
-    S_HEAD_PAIN3,
-    S_HEAD_DIE1,
-    S_HEAD_DIE2,
-    S_HEAD_DIE3,
-    S_HEAD_DIE4,
-    S_HEAD_DIE5,
-    S_HEAD_DIE6,
-    S_HEAD_RAISE1,
-    S_HEAD_RAISE2,
-    S_HEAD_RAISE3,
-    S_HEAD_RAISE4,
-    S_HEAD_RAISE5,
-    S_HEAD_RAISE6,
-    S_BRBALL1,
-    S_BRBALL2,
-    S_BRBALLX1,
-    S_BRBALLX2,
-    S_BRBALLX3,
-    S_BOSS_STND,
-    S_BOSS_STND2,
-    S_BOSS_RUN1,
-    S_BOSS_RUN2,
-    S_BOSS_RUN3,
-    S_BOSS_RUN4,
-    S_BOSS_RUN5,
-    S_BOSS_RUN6,
-    S_BOSS_RUN7,
-    S_BOSS_RUN8,
-    S_BOSS_ATK1,
-    S_BOSS_ATK2,
-    S_BOSS_ATK3,
-    S_BOSS_PAIN,
-    S_BOSS_PAIN2,
-    S_BOSS_DIE1,
-    S_BOSS_DIE2,
-    S_BOSS_DIE3,
-    S_BOSS_DIE4,
-    S_BOSS_DIE5,
-    S_BOSS_DIE6,
-    S_BOSS_DIE7,
-    S_BOSS_RAISE1,
-    S_BOSS_RAISE2,
-    S_BOSS_RAISE3,
-    S_BOSS_RAISE4,
-    S_BOSS_RAISE5,
-    S_BOSS_RAISE6,
-    S_BOSS_RAISE7,
-    S_BOS2_STND,
-    S_BOS2_STND2,
-    S_BOS2_RUN1,
-    S_BOS2_RUN2,
-    S_BOS2_RUN3,
-    S_BOS2_RUN4,
-    S_BOS2_RUN5,
-    S_BOS2_RUN6,
-    S_BOS2_RUN7,
-    S_BOS2_RUN8,
-    S_BOS2_ATK1,
-    S_BOS2_ATK2,
-    S_BOS2_ATK3,
-    S_BOS2_PAIN,
-    S_BOS2_PAIN2,
-    S_BOS2_DIE1,
-    S_BOS2_DIE2,
-    S_BOS2_DIE3,
-    S_BOS2_DIE4,
-    S_BOS2_DIE5,
-    S_BOS2_DIE6,
-    S_BOS2_DIE7,
-    S_BOS2_RAISE1,
-    S_BOS2_RAISE2,
-    S_BOS2_RAISE3,
-    S_BOS2_RAISE4,
-    S_BOS2_RAISE5,
-    S_BOS2_RAISE6,
-    S_BOS2_RAISE7,
-    S_SKULL_STND,
-    S_SKULL_STND2,
-    S_SKULL_RUN1,
-    S_SKULL_RUN2,
-    S_SKULL_ATK1,
-    S_SKULL_ATK2,
-    S_SKULL_ATK3,
-    S_SKULL_ATK4,
-    S_SKULL_PAIN,
-    S_SKULL_PAIN2,
-    S_SKULL_DIE1,
-    S_SKULL_DIE2,
-    S_SKULL_DIE3,
-    S_SKULL_DIE4,
-    S_SKULL_DIE5,
-    S_SKULL_DIE6,
-    S_SPID_STND,
-    S_SPID_STND2,
-    S_SPID_RUN1,
-    S_SPID_RUN2,
-    S_SPID_RUN3,
-    S_SPID_RUN4,
-    S_SPID_RUN5,
-    S_SPID_RUN6,
-    S_SPID_RUN7,
-    S_SPID_RUN8,
-    S_SPID_RUN9,
-    S_SPID_RUN10,
-    S_SPID_RUN11,
-    S_SPID_RUN12,
-    S_SPID_ATK1,
-    S_SPID_ATK2,
-    S_SPID_ATK3,
-    S_SPID_ATK4,
-    S_SPID_PAIN,
-    S_SPID_PAIN2,
-    S_SPID_DIE1,
-    S_SPID_DIE2,
-    S_SPID_DIE3,
-    S_SPID_DIE4,
-    S_SPID_DIE5,
-    S_SPID_DIE6,
-    S_SPID_DIE7,
-    S_SPID_DIE8,
-    S_SPID_DIE9,
-    S_SPID_DIE10,
-    S_SPID_DIE11,
-    S_BSPI_STND,
-    S_BSPI_STND2,
-    S_BSPI_SIGHT,
-    S_BSPI_RUN1,
-    S_BSPI_RUN2,
-    S_BSPI_RUN3,
-    S_BSPI_RUN4,
-    S_BSPI_RUN5,
-    S_BSPI_RUN6,
-    S_BSPI_RUN7,
-    S_BSPI_RUN8,
-    S_BSPI_RUN9,
-    S_BSPI_RUN10,
-    S_BSPI_RUN11,
-    S_BSPI_RUN12,
-    S_BSPI_ATK1,
-    S_BSPI_ATK2,
-    S_BSPI_ATK3,
-    S_BSPI_ATK4,
-    S_BSPI_PAIN,
-    S_BSPI_PAIN2,
-    S_BSPI_DIE1,
-    S_BSPI_DIE2,
-    S_BSPI_DIE3,
-    S_BSPI_DIE4,
-    S_BSPI_DIE5,
-    S_BSPI_DIE6,
-    S_BSPI_DIE7,
-    S_BSPI_RAISE1,
-    S_BSPI_RAISE2,
-    S_BSPI_RAISE3,
-    S_BSPI_RAISE4,
-    S_BSPI_RAISE5,
-    S_BSPI_RAISE6,
-    S_BSPI_RAISE7,
-    S_ARACH_PLAZ,
-    S_ARACH_PLAZ2,
-    S_ARACH_PLEX,
-    S_ARACH_PLEX2,
-    S_ARACH_PLEX3,
-    S_ARACH_PLEX4,
-    S_ARACH_PLEX5,
-    S_CYBER_STND,
-    S_CYBER_STND2,
-    S_CYBER_RUN1,
-    S_CYBER_RUN2,
-    S_CYBER_RUN3,
-    S_CYBER_RUN4,
-    S_CYBER_RUN5,
-    S_CYBER_RUN6,
-    S_CYBER_RUN7,
-    S_CYBER_RUN8,
-    S_CYBER_ATK1,
-    S_CYBER_ATK2,
-    S_CYBER_ATK3,
-    S_CYBER_ATK4,
-    S_CYBER_ATK5,
-    S_CYBER_ATK6,
-    S_CYBER_PAIN,
-    S_CYBER_DIE1,
-    S_CYBER_DIE2,
-    S_CYBER_DIE3,
-    S_CYBER_DIE4,
-    S_CYBER_DIE5,
-    S_CYBER_DIE6,
-    S_CYBER_DIE7,
-    S_CYBER_DIE8,
-    S_CYBER_DIE9,
-    S_CYBER_DIE10,
-    S_PAIN_STND,
-    S_PAIN_RUN1,
-    S_PAIN_RUN2,
-    S_PAIN_RUN3,
-    S_PAIN_RUN4,
-    S_PAIN_RUN5,
-    S_PAIN_RUN6,
-    S_PAIN_ATK1,
-    S_PAIN_ATK2,
-    S_PAIN_ATK3,
-    S_PAIN_ATK4,
-    S_PAIN_PAIN,
-    S_PAIN_PAIN2,
-    S_PAIN_DIE1,
-    S_PAIN_DIE2,
-    S_PAIN_DIE3,
-    S_PAIN_DIE4,
-    S_PAIN_DIE5,
-    S_PAIN_DIE6,
-    S_PAIN_RAISE1,
-    S_PAIN_RAISE2,
-    S_PAIN_RAISE3,
-    S_PAIN_RAISE4,
-    S_PAIN_RAISE5,
-    S_PAIN_RAISE6,
-    S_SSWV_STND,
-    S_SSWV_STND2,
-    S_SSWV_RUN1,
-    S_SSWV_RUN2,
-    S_SSWV_RUN3,
-    S_SSWV_RUN4,
-    S_SSWV_RUN5,
-    S_SSWV_RUN6,
-    S_SSWV_RUN7,
-    S_SSWV_RUN8,
-    S_SSWV_ATK1,
-    S_SSWV_ATK2,
-    S_SSWV_ATK3,
-    S_SSWV_ATK4,
-    S_SSWV_ATK5,
-    S_SSWV_ATK6,
-    S_SSWV_PAIN,
-    S_SSWV_PAIN2,
-    S_SSWV_DIE1,
-    S_SSWV_DIE2,
-    S_SSWV_DIE3,
-    S_SSWV_DIE4,
-    S_SSWV_DIE5,
-    S_SSWV_XDIE1,
-    S_SSWV_XDIE2,
-    S_SSWV_XDIE3,
-    S_SSWV_XDIE4,
-    S_SSWV_XDIE5,
-    S_SSWV_XDIE6,
-    S_SSWV_XDIE7,
-    S_SSWV_XDIE8,
-    S_SSWV_XDIE9,
-    S_SSWV_RAISE1,
-    S_SSWV_RAISE2,
-    S_SSWV_RAISE3,
-    S_SSWV_RAISE4,
-    S_SSWV_RAISE5,
-    S_KEENSTND,
-    S_COMMKEEN,
-    S_COMMKEEN2,
-    S_COMMKEEN3,
-    S_COMMKEEN4,
-    S_COMMKEEN5,
-    S_COMMKEEN6,
-    S_COMMKEEN7,
-    S_COMMKEEN8,
-    S_COMMKEEN9,
-    S_COMMKEEN10,
-    S_COMMKEEN11,
-    S_COMMKEEN12,
-    S_KEENPAIN,
-    S_KEENPAIN2,
-    S_BRAIN,
-    S_BRAIN_PAIN,
-    S_BRAIN_DIE1,
-    S_BRAIN_DIE2,
-    S_BRAIN_DIE3,
-    S_BRAIN_DIE4,
-    S_BRAINEYE,
-    S_BRAINEYESEE,
-    S_BRAINEYE1,
-    S_SPAWN1,
-    S_SPAWN2,
-    S_SPAWN3,
-    S_SPAWN4,
-    S_SPAWNFIRE1,
-    S_SPAWNFIRE2,
-    S_SPAWNFIRE3,
-    S_SPAWNFIRE4,
-    S_SPAWNFIRE5,
-    S_SPAWNFIRE6,
-    S_SPAWNFIRE7,
-    S_SPAWNFIRE8,
-    S_BRAINEXPLODE1,
-    S_BRAINEXPLODE2,
-    S_BRAINEXPLODE3,
-    S_ARM1,
-    S_ARM1A,
-    S_ARM2,
-    S_ARM2A,
-    S_BAR1,
-    S_BAR2,
-    S_BEXP,
-    S_BEXP2,
-    S_BEXP3,
-    S_BEXP4,
-    S_BEXP5,
-    S_BBAR1,
-    S_BBAR2,
-    S_BBAR3,
-    S_BON1,
-    S_BON1A,
-    S_BON1B,
-    S_BON1C,
-    S_BON1D,
-    S_BON1E,
-    S_BON2,
-    S_BON2A,
-    S_BON2B,
-    S_BON2C,
-    S_BON2D,
-    S_BON2E,
-    S_BKEY,
-    S_BKEY2,
-    S_RKEY,
-    S_RKEY2,
-    S_YKEY,
-    S_YKEY2,
-    S_BSKULL,
-    S_BSKULL2,
-    S_RSKULL,
-    S_RSKULL2,
-    S_YSKULL,
-    S_YSKULL2,
-    S_STIM,
-    S_MEDI,
-    S_SOUL,
-    S_SOUL2,
-    S_SOUL3,
-    S_SOUL4,
-    S_SOUL5,
-    S_SOUL6,
-    S_PINV,
-    S_PINV2,
-    S_PINV3,
-    S_PINV4,
-    S_PSTR,
-    S_PINS,
-    S_PINS2,
-    S_PINS3,
-    S_PINS4,
-    S_MEGA,
-    S_MEGA2,
-    S_MEGA3,
-    S_MEGA4,
-    S_SUIT,
-    S_PMAP,
-    S_PMAP2,
-    S_PMAP3,
-    S_PMAP4,
-    S_PMAP5,
-    S_PMAP6,
-    S_PVIS,
-    S_PVIS2,
-    S_CLIP,
-    S_AMMO,
-    S_ROCK,
-    S_BROK,
-    S_CELL,
-    S_CELP,
-    S_SHEL,
-    S_SBOX,
-    S_BPAK,
-    S_BFUG,
-    S_MGUN,
-    S_CSAW,
-    S_LAUN,
-    S_PLAS,
-    S_SHOT,
-    S_SHOT2,
-    S_COLU,
-    S_STALAG,
-    S_BLOODYTWITCH,
-    S_BLOODYTWITCH2,
-    S_BLOODYTWITCH3,
-    S_BLOODYTWITCH4,
-    S_DEADTORSO,
-    S_DEADBOTTOM,
-    S_HEADSONSTICK,
-    S_GIBS,
-    S_HEADONASTICK,
-    S_HEADCANDLES,
-    S_HEADCANDLES2,
-    S_DEADSTICK,
-    S_LIVESTICK,
-    S_LIVESTICK2,
-    S_MEAT2,
-    S_MEAT3,
-    S_MEAT4,
-    S_MEAT5,
-    S_STALAGTITE,
-    S_TALLGRNCOL,
-    S_SHRTGRNCOL,
-    S_TALLREDCOL,
-    S_SHRTREDCOL,
-    S_CANDLESTIK,
-    S_CANDELABRA,
-    S_SKULLCOL,
-    S_TORCHTREE,
-    S_BIGTREE,
-    S_TECHPILLAR,
-    S_EVILEYE,
-    S_EVILEYE2,
-    S_EVILEYE3,
-    S_EVILEYE4,
-    S_FLOATSKULL,
-    S_FLOATSKULL2,
-    S_FLOATSKULL3,
-    S_HEARTCOL,
-    S_HEARTCOL2,
-    S_BLUETORCH,
-    S_BLUETORCH2,
-    S_BLUETORCH3,
-    S_BLUETORCH4,
-    S_GREENTORCH,
-    S_GREENTORCH2,
-    S_GREENTORCH3,
-    S_GREENTORCH4,
-    S_REDTORCH,
-    S_REDTORCH2,
-    S_REDTORCH3,
-    S_REDTORCH4,
-    S_BTORCHSHRT,
-    S_BTORCHSHRT2,
-    S_BTORCHSHRT3,
-    S_BTORCHSHRT4,
-    S_GTORCHSHRT,
-    S_GTORCHSHRT2,
-    S_GTORCHSHRT3,
-    S_GTORCHSHRT4,
-    S_RTORCHSHRT,
-    S_RTORCHSHRT2,
-    S_RTORCHSHRT3,
-    S_RTORCHSHRT4,
-    S_HANGNOGUTS,
-    S_HANGBNOBRAIN,
-    S_HANGTLOOKDN,
-    S_HANGTSKULL,
-    S_HANGTLOOKUP,
-    S_HANGTNOBRAIN,
-    S_COLONGIBS,
-    S_SMALLPOOL,
-    S_BRAINSTEM,
-    S_TECHLAMP,
-    S_TECHLAMP2,
-    S_TECHLAMP3,
-    S_TECHLAMP4,
-    S_TECH2LAMP,
-    S_TECH2LAMP2,
-    S_TECH2LAMP3,
-    S_TECH2LAMP4,
-    S_TNT1, /* add state for invisible sprite          phares 3/8/98  */
+using statenum_t = SequentialEnum<int>;
+constexpr statenum_t S_NULL = 0;
+constexpr statenum_t S_LIGHTDONE = 1;
+constexpr statenum_t S_PUNCH = 2;
+constexpr statenum_t S_PUNCHDOWN = 3;
+constexpr statenum_t S_PUNCHUP = 4;
+constexpr statenum_t S_PUNCH1 = 5;
+constexpr statenum_t S_PUNCH2 = 6;
+constexpr statenum_t S_PUNCH3 = 7;
+constexpr statenum_t S_PUNCH4 = 8;
+constexpr statenum_t S_PUNCH5 = 9;
+constexpr statenum_t S_PISTOL = 10;
+constexpr statenum_t S_PISTOLDOWN = 11;
+constexpr statenum_t S_PISTOLUP = 12;
+constexpr statenum_t S_PISTOL1 = 13;
+constexpr statenum_t S_PISTOL2 = 14;
+constexpr statenum_t S_PISTOL3 = 15;
+constexpr statenum_t S_PISTOL4 = 16;
+constexpr statenum_t S_PISTOLFLASH = 17;
+constexpr statenum_t S_SGUN = 18;
+constexpr statenum_t S_SGUNDOWN = 19;
+constexpr statenum_t S_SGUNUP = 20;
+constexpr statenum_t S_SGUN1 = 21;
+constexpr statenum_t S_SGUN2 = 22;
+constexpr statenum_t S_SGUN3 = 23;
+constexpr statenum_t S_SGUN4 = 24;
+constexpr statenum_t S_SGUN5 = 25;
+constexpr statenum_t S_SGUN6 = 26;
+constexpr statenum_t S_SGUN7 = 27;
+constexpr statenum_t S_SGUN8 = 28;
+constexpr statenum_t S_SGUN9 = 29;
+constexpr statenum_t S_SGUNFLASH1 = 30;
+constexpr statenum_t S_SGUNFLASH2 = 31;
+constexpr statenum_t S_DSGUN = 32;
+constexpr statenum_t S_DSGUNDOWN = 33;
+constexpr statenum_t S_DSGUNUP = 34;
+constexpr statenum_t S_DSGUN1 = 35;
+constexpr statenum_t S_DSGUN2 = 36;
+constexpr statenum_t S_DSGUN3 = 37;
+constexpr statenum_t S_DSGUN4 = 38;
+constexpr statenum_t S_DSGUN5 = 39;
+constexpr statenum_t S_DSGUN6 = 40;
+constexpr statenum_t S_DSGUN7 = 41;
+constexpr statenum_t S_DSGUN8 = 42;
+constexpr statenum_t S_DSGUN9 = 43;
+constexpr statenum_t S_DSGUN10 = 44;
+constexpr statenum_t S_DSNR1 = 45;
+constexpr statenum_t S_DSNR2 = 46;
+constexpr statenum_t S_DSGUNFLASH1 = 47;
+constexpr statenum_t S_DSGUNFLASH2 = 48;
+constexpr statenum_t S_CHAIN = 49;
+constexpr statenum_t S_CHAINDOWN = 50;
+constexpr statenum_t S_CHAINUP = 51;
+constexpr statenum_t S_CHAIN1 = 52;
+constexpr statenum_t S_CHAIN2 = 53;
+constexpr statenum_t S_CHAIN3 = 54;
+constexpr statenum_t S_CHAINFLASH1 = 55;
+constexpr statenum_t S_CHAINFLASH2 = 56;
+constexpr statenum_t S_MISSILE = 57;
+constexpr statenum_t S_MISSILEDOWN = 58;
+constexpr statenum_t S_MISSILEUP = 59;
+constexpr statenum_t S_MISSILE1 = 60;
+constexpr statenum_t S_MISSILE2 = 61;
+constexpr statenum_t S_MISSILE3 = 62;
+constexpr statenum_t S_MISSILEFLASH1 = 63;
+constexpr statenum_t S_MISSILEFLASH2 = 64;
+constexpr statenum_t S_MISSILEFLASH3 = 65;
+constexpr statenum_t S_MISSILEFLASH4 = 66;
+constexpr statenum_t S_SAW = 67;
+constexpr statenum_t S_SAWB = 68;
+constexpr statenum_t S_SAWDOWN = 69;
+constexpr statenum_t S_SAWUP = 70;
+constexpr statenum_t S_SAW1 = 71;
+constexpr statenum_t S_SAW2 = 72;
+constexpr statenum_t S_SAW3 = 73;
+constexpr statenum_t S_PLASMA = 74;
+constexpr statenum_t S_PLASMADOWN = 75;
+constexpr statenum_t S_PLASMAUP = 76;
+constexpr statenum_t S_PLASMA1 = 77;
+constexpr statenum_t S_PLASMA2 = 78;
+constexpr statenum_t S_PLASMAFLASH1 = 79;
+constexpr statenum_t S_PLASMAFLASH2 = 80;
+constexpr statenum_t S_BFG = 81;
+constexpr statenum_t S_BFGDOWN = 82;
+constexpr statenum_t S_BFGUP = 83;
+constexpr statenum_t S_BFG1 = 84;
+constexpr statenum_t S_BFG2 = 85;
+constexpr statenum_t S_BFG3 = 86;
+constexpr statenum_t S_BFG4 = 87;
+constexpr statenum_t S_BFGFLASH1 = 88;
+constexpr statenum_t S_BFGFLASH2 = 89;
+constexpr statenum_t S_BLOOD1 = 90;
+constexpr statenum_t S_BLOOD2 = 91;
+constexpr statenum_t S_BLOOD3 = 92;
+constexpr statenum_t S_PUFF1 = 93;
+constexpr statenum_t S_PUFF2 = 94;
+constexpr statenum_t S_PUFF3 = 95;
+constexpr statenum_t S_PUFF4 = 96;
+constexpr statenum_t S_TBALL1 = 97;
+constexpr statenum_t S_TBALL2 = 98;
+constexpr statenum_t S_TBALLX1 = 99;
+constexpr statenum_t S_TBALLX2 = 100;
+constexpr statenum_t S_TBALLX3 = 101;
+constexpr statenum_t S_RBALL1 = 102;
+constexpr statenum_t S_RBALL2 = 103;
+constexpr statenum_t S_RBALLX1 = 104;
+constexpr statenum_t S_RBALLX2 = 105;
+constexpr statenum_t S_RBALLX3 = 106;
+constexpr statenum_t S_PLASBALL = 107;
+constexpr statenum_t S_PLASBALL2 = 108;
+constexpr statenum_t S_PLASEXP = 109;
+constexpr statenum_t S_PLASEXP2 = 110;
+constexpr statenum_t S_PLASEXP3 = 111;
+constexpr statenum_t S_PLASEXP4 = 112;
+constexpr statenum_t S_PLASEXP5 = 113;
+constexpr statenum_t S_ROCKET = 114;
+constexpr statenum_t S_BFGSHOT = 115;
+constexpr statenum_t S_BFGSHOT2 = 116;
+constexpr statenum_t S_BFGLAND = 117;
+constexpr statenum_t S_BFGLAND2 = 118;
+constexpr statenum_t S_BFGLAND3 = 119;
+constexpr statenum_t S_BFGLAND4 = 120;
+constexpr statenum_t S_BFGLAND5 = 121;
+constexpr statenum_t S_BFGLAND6 = 122;
+constexpr statenum_t S_BFGEXP = 123;
+constexpr statenum_t S_BFGEXP2 = 124;
+constexpr statenum_t S_BFGEXP3 = 125;
+constexpr statenum_t S_BFGEXP4 = 126;
+constexpr statenum_t S_EXPLODE1 = 127;
+constexpr statenum_t S_EXPLODE2 = 128;
+constexpr statenum_t S_EXPLODE3 = 129;
+constexpr statenum_t S_TFOG = 130;
+constexpr statenum_t S_TFOG01 = 131;
+constexpr statenum_t S_TFOG02 = 132;
+constexpr statenum_t S_TFOG2 = 133;
+constexpr statenum_t S_TFOG3 = 134;
+constexpr statenum_t S_TFOG4 = 135;
+constexpr statenum_t S_TFOG5 = 136;
+constexpr statenum_t S_TFOG6 = 137;
+constexpr statenum_t S_TFOG7 = 138;
+constexpr statenum_t S_TFOG8 = 139;
+constexpr statenum_t S_TFOG9 = 140;
+constexpr statenum_t S_TFOG10 = 141;
+constexpr statenum_t S_IFOG = 142;
+constexpr statenum_t S_IFOG01 = 143;
+constexpr statenum_t S_IFOG02 = 144;
+constexpr statenum_t S_IFOG2 = 145;
+constexpr statenum_t S_IFOG3 = 146;
+constexpr statenum_t S_IFOG4 = 147;
+constexpr statenum_t S_IFOG5 = 148;
+constexpr statenum_t S_PLAY = 149;
+constexpr statenum_t S_PLAY_RUN1 = 150;
+constexpr statenum_t S_PLAY_RUN2 = 151;
+constexpr statenum_t S_PLAY_RUN3 = 152;
+constexpr statenum_t S_PLAY_RUN4 = 153;
+constexpr statenum_t S_PLAY_ATK1 = 154;
+constexpr statenum_t S_PLAY_ATK2 = 155;
+constexpr statenum_t S_PLAY_PAIN = 156;
+constexpr statenum_t S_PLAY_PAIN2 = 157;
+constexpr statenum_t S_PLAY_DIE1 = 158;
+constexpr statenum_t S_PLAY_DIE2 = 159;
+constexpr statenum_t S_PLAY_DIE3 = 160;
+constexpr statenum_t S_PLAY_DIE4 = 161;
+constexpr statenum_t S_PLAY_DIE5 = 162;
+constexpr statenum_t S_PLAY_DIE6 = 163;
+constexpr statenum_t S_PLAY_DIE7 = 164;
+constexpr statenum_t S_PLAY_XDIE1 = 165;
+constexpr statenum_t S_PLAY_XDIE2 = 166;
+constexpr statenum_t S_PLAY_XDIE3 = 167;
+constexpr statenum_t S_PLAY_XDIE4 = 168;
+constexpr statenum_t S_PLAY_XDIE5 = 169;
+constexpr statenum_t S_PLAY_XDIE6 = 170;
+constexpr statenum_t S_PLAY_XDIE7 = 171;
+constexpr statenum_t S_PLAY_XDIE8 = 172;
+constexpr statenum_t S_PLAY_XDIE9 = 173;
+constexpr statenum_t S_POSS_STND = 174;
+constexpr statenum_t S_POSS_STND2 = 175;
+constexpr statenum_t S_POSS_RUN1 = 176;
+constexpr statenum_t S_POSS_RUN2 = 177;
+constexpr statenum_t S_POSS_RUN3 = 178;
+constexpr statenum_t S_POSS_RUN4 = 179;
+constexpr statenum_t S_POSS_RUN5 = 180;
+constexpr statenum_t S_POSS_RUN6 = 181;
+constexpr statenum_t S_POSS_RUN7 = 182;
+constexpr statenum_t S_POSS_RUN8 = 183;
+constexpr statenum_t S_POSS_ATK1 = 184;
+constexpr statenum_t S_POSS_ATK2 = 185;
+constexpr statenum_t S_POSS_ATK3 = 186;
+constexpr statenum_t S_POSS_PAIN = 187;
+constexpr statenum_t S_POSS_PAIN2 = 188;
+constexpr statenum_t S_POSS_DIE1 = 189;
+constexpr statenum_t S_POSS_DIE2 = 190;
+constexpr statenum_t S_POSS_DIE3 = 191;
+constexpr statenum_t S_POSS_DIE4 = 192;
+constexpr statenum_t S_POSS_DIE5 = 193;
+constexpr statenum_t S_POSS_XDIE1 = 194;
+constexpr statenum_t S_POSS_XDIE2 = 195;
+constexpr statenum_t S_POSS_XDIE3 = 196;
+constexpr statenum_t S_POSS_XDIE4 = 197;
+constexpr statenum_t S_POSS_XDIE5 = 198;
+constexpr statenum_t S_POSS_XDIE6 = 199;
+constexpr statenum_t S_POSS_XDIE7 = 200;
+constexpr statenum_t S_POSS_XDIE8 = 201;
+constexpr statenum_t S_POSS_XDIE9 = 202;
+constexpr statenum_t S_POSS_RAISE1 = 203;
+constexpr statenum_t S_POSS_RAISE2 = 204;
+constexpr statenum_t S_POSS_RAISE3 = 205;
+constexpr statenum_t S_POSS_RAISE4 = 206;
+constexpr statenum_t S_SPOS_STND = 207;
+constexpr statenum_t S_SPOS_STND2 = 208;
+constexpr statenum_t S_SPOS_RUN1 = 209;
+constexpr statenum_t S_SPOS_RUN2 = 210;
+constexpr statenum_t S_SPOS_RUN3 = 211;
+constexpr statenum_t S_SPOS_RUN4 = 212;
+constexpr statenum_t S_SPOS_RUN5 = 213;
+constexpr statenum_t S_SPOS_RUN6 = 214;
+constexpr statenum_t S_SPOS_RUN7 = 215;
+constexpr statenum_t S_SPOS_RUN8 = 216;
+constexpr statenum_t S_SPOS_ATK1 = 217;
+constexpr statenum_t S_SPOS_ATK2 = 218;
+constexpr statenum_t S_SPOS_ATK3 = 219;
+constexpr statenum_t S_SPOS_PAIN = 220;
+constexpr statenum_t S_SPOS_PAIN2 = 221;
+constexpr statenum_t S_SPOS_DIE1 = 222;
+constexpr statenum_t S_SPOS_DIE2 = 223;
+constexpr statenum_t S_SPOS_DIE3 = 224;
+constexpr statenum_t S_SPOS_DIE4 = 225;
+constexpr statenum_t S_SPOS_DIE5 = 226;
+constexpr statenum_t S_SPOS_XDIE1 = 227;
+constexpr statenum_t S_SPOS_XDIE2 = 228;
+constexpr statenum_t S_SPOS_XDIE3 = 229;
+constexpr statenum_t S_SPOS_XDIE4 = 230;
+constexpr statenum_t S_SPOS_XDIE5 = 231;
+constexpr statenum_t S_SPOS_XDIE6 = 232;
+constexpr statenum_t S_SPOS_XDIE7 = 233;
+constexpr statenum_t S_SPOS_XDIE8 = 234;
+constexpr statenum_t S_SPOS_XDIE9 = 235;
+constexpr statenum_t S_SPOS_RAISE1 = 236;
+constexpr statenum_t S_SPOS_RAISE2 = 237;
+constexpr statenum_t S_SPOS_RAISE3 = 238;
+constexpr statenum_t S_SPOS_RAISE4 = 239;
+constexpr statenum_t S_SPOS_RAISE5 = 240;
+constexpr statenum_t S_VILE_STND = 241;
+constexpr statenum_t S_VILE_STND2 = 242;
+constexpr statenum_t S_VILE_RUN1 = 243;
+constexpr statenum_t S_VILE_RUN2 = 244;
+constexpr statenum_t S_VILE_RUN3 = 245;
+constexpr statenum_t S_VILE_RUN4 = 246;
+constexpr statenum_t S_VILE_RUN5 = 247;
+constexpr statenum_t S_VILE_RUN6 = 248;
+constexpr statenum_t S_VILE_RUN7 = 249;
+constexpr statenum_t S_VILE_RUN8 = 250;
+constexpr statenum_t S_VILE_RUN9 = 251;
+constexpr statenum_t S_VILE_RUN10 = 252;
+constexpr statenum_t S_VILE_RUN11 = 253;
+constexpr statenum_t S_VILE_RUN12 = 254;
+constexpr statenum_t S_VILE_ATK1 = 255;
+constexpr statenum_t S_VILE_ATK2 = 256;
+constexpr statenum_t S_VILE_ATK3 = 257;
+constexpr statenum_t S_VILE_ATK4 = 258;
+constexpr statenum_t S_VILE_ATK5 = 259;
+constexpr statenum_t S_VILE_ATK6 = 260;
+constexpr statenum_t S_VILE_ATK7 = 261;
+constexpr statenum_t S_VILE_ATK8 = 262;
+constexpr statenum_t S_VILE_ATK9 = 263;
+constexpr statenum_t S_VILE_ATK10 = 264;
+constexpr statenum_t S_VILE_ATK11 = 265;
+constexpr statenum_t S_VILE_HEAL1 = 266;
+constexpr statenum_t S_VILE_HEAL2 = 267;
+constexpr statenum_t S_VILE_HEAL3 = 268;
+constexpr statenum_t S_VILE_PAIN = 269;
+constexpr statenum_t S_VILE_PAIN2 = 270;
+constexpr statenum_t S_VILE_DIE1 = 271;
+constexpr statenum_t S_VILE_DIE2 = 272;
+constexpr statenum_t S_VILE_DIE3 = 273;
+constexpr statenum_t S_VILE_DIE4 = 274;
+constexpr statenum_t S_VILE_DIE5 = 275;
+constexpr statenum_t S_VILE_DIE6 = 276;
+constexpr statenum_t S_VILE_DIE7 = 277;
+constexpr statenum_t S_VILE_DIE8 = 278;
+constexpr statenum_t S_VILE_DIE9 = 279;
+constexpr statenum_t S_VILE_DIE10 = 280;
+constexpr statenum_t S_FIRE1 = 281;
+constexpr statenum_t S_FIRE2 = 282;
+constexpr statenum_t S_FIRE3 = 283;
+constexpr statenum_t S_FIRE4 = 284;
+constexpr statenum_t S_FIRE5 = 285;
+constexpr statenum_t S_FIRE6 = 286;
+constexpr statenum_t S_FIRE7 = 287;
+constexpr statenum_t S_FIRE8 = 288;
+constexpr statenum_t S_FIRE9 = 289;
+constexpr statenum_t S_FIRE10 = 290;
+constexpr statenum_t S_FIRE11 = 291;
+constexpr statenum_t S_FIRE12 = 292;
+constexpr statenum_t S_FIRE13 = 293;
+constexpr statenum_t S_FIRE14 = 294;
+constexpr statenum_t S_FIRE15 = 295;
+constexpr statenum_t S_FIRE16 = 296;
+constexpr statenum_t S_FIRE17 = 297;
+constexpr statenum_t S_FIRE18 = 298;
+constexpr statenum_t S_FIRE19 = 299;
+constexpr statenum_t S_FIRE20 = 300;
+constexpr statenum_t S_FIRE21 = 301;
+constexpr statenum_t S_FIRE22 = 302;
+constexpr statenum_t S_FIRE23 = 303;
+constexpr statenum_t S_FIRE24 = 304;
+constexpr statenum_t S_FIRE25 = 305;
+constexpr statenum_t S_FIRE26 = 306;
+constexpr statenum_t S_FIRE27 = 307;
+constexpr statenum_t S_FIRE28 = 308;
+constexpr statenum_t S_FIRE29 = 309;
+constexpr statenum_t S_FIRE30 = 310;
+constexpr statenum_t S_SMOKE1 = 311;
+constexpr statenum_t S_SMOKE2 = 312;
+constexpr statenum_t S_SMOKE3 = 313;
+constexpr statenum_t S_SMOKE4 = 314;
+constexpr statenum_t S_SMOKE5 = 315;
+constexpr statenum_t S_TRACER = 316;
+constexpr statenum_t S_TRACER2 = 317;
+constexpr statenum_t S_TRACEEXP1 = 318;
+constexpr statenum_t S_TRACEEXP2 = 319;
+constexpr statenum_t S_TRACEEXP3 = 320;
+constexpr statenum_t S_SKEL_STND = 321;
+constexpr statenum_t S_SKEL_STND2 = 322;
+constexpr statenum_t S_SKEL_RUN1 = 323;
+constexpr statenum_t S_SKEL_RUN2 = 324;
+constexpr statenum_t S_SKEL_RUN3 = 325;
+constexpr statenum_t S_SKEL_RUN4 = 326;
+constexpr statenum_t S_SKEL_RUN5 = 327;
+constexpr statenum_t S_SKEL_RUN6 = 328;
+constexpr statenum_t S_SKEL_RUN7 = 329;
+constexpr statenum_t S_SKEL_RUN8 = 330;
+constexpr statenum_t S_SKEL_RUN9 = 331;
+constexpr statenum_t S_SKEL_RUN10 = 332;
+constexpr statenum_t S_SKEL_RUN11 = 333;
+constexpr statenum_t S_SKEL_RUN12 = 334;
+constexpr statenum_t S_SKEL_FIST1 = 335;
+constexpr statenum_t S_SKEL_FIST2 = 336;
+constexpr statenum_t S_SKEL_FIST3 = 337;
+constexpr statenum_t S_SKEL_FIST4 = 338;
+constexpr statenum_t S_SKEL_MISS1 = 339;
+constexpr statenum_t S_SKEL_MISS2 = 340;
+constexpr statenum_t S_SKEL_MISS3 = 341;
+constexpr statenum_t S_SKEL_MISS4 = 342;
+constexpr statenum_t S_SKEL_PAIN = 343;
+constexpr statenum_t S_SKEL_PAIN2 = 344;
+constexpr statenum_t S_SKEL_DIE1 = 345;
+constexpr statenum_t S_SKEL_DIE2 = 346;
+constexpr statenum_t S_SKEL_DIE3 = 347;
+constexpr statenum_t S_SKEL_DIE4 = 348;
+constexpr statenum_t S_SKEL_DIE5 = 349;
+constexpr statenum_t S_SKEL_DIE6 = 350;
+constexpr statenum_t S_SKEL_RAISE1 = 351;
+constexpr statenum_t S_SKEL_RAISE2 = 352;
+constexpr statenum_t S_SKEL_RAISE3 = 353;
+constexpr statenum_t S_SKEL_RAISE4 = 354;
+constexpr statenum_t S_SKEL_RAISE5 = 355;
+constexpr statenum_t S_SKEL_RAISE6 = 356;
+constexpr statenum_t S_FATSHOT1 = 357;
+constexpr statenum_t S_FATSHOT2 = 358;
+constexpr statenum_t S_FATSHOTX1 = 359;
+constexpr statenum_t S_FATSHOTX2 = 360;
+constexpr statenum_t S_FATSHOTX3 = 361;
+constexpr statenum_t S_FATT_STND = 362;
+constexpr statenum_t S_FATT_STND2 = 363;
+constexpr statenum_t S_FATT_RUN1 = 364;
+constexpr statenum_t S_FATT_RUN2 = 365;
+constexpr statenum_t S_FATT_RUN3 = 366;
+constexpr statenum_t S_FATT_RUN4 = 367;
+constexpr statenum_t S_FATT_RUN5 = 368;
+constexpr statenum_t S_FATT_RUN6 = 369;
+constexpr statenum_t S_FATT_RUN7 = 370;
+constexpr statenum_t S_FATT_RUN8 = 371;
+constexpr statenum_t S_FATT_RUN9 = 372;
+constexpr statenum_t S_FATT_RUN10 = 373;
+constexpr statenum_t S_FATT_RUN11 = 374;
+constexpr statenum_t S_FATT_RUN12 = 375;
+constexpr statenum_t S_FATT_ATK1 = 376;
+constexpr statenum_t S_FATT_ATK2 = 377;
+constexpr statenum_t S_FATT_ATK3 = 378;
+constexpr statenum_t S_FATT_ATK4 = 379;
+constexpr statenum_t S_FATT_ATK5 = 380;
+constexpr statenum_t S_FATT_ATK6 = 381;
+constexpr statenum_t S_FATT_ATK7 = 382;
+constexpr statenum_t S_FATT_ATK8 = 383;
+constexpr statenum_t S_FATT_ATK9 = 384;
+constexpr statenum_t S_FATT_ATK10 = 385;
+constexpr statenum_t S_FATT_PAIN = 386;
+constexpr statenum_t S_FATT_PAIN2 = 387;
+constexpr statenum_t S_FATT_DIE1 = 388;
+constexpr statenum_t S_FATT_DIE2 = 389;
+constexpr statenum_t S_FATT_DIE3 = 390;
+constexpr statenum_t S_FATT_DIE4 = 391;
+constexpr statenum_t S_FATT_DIE5 = 392;
+constexpr statenum_t S_FATT_DIE6 = 393;
+constexpr statenum_t S_FATT_DIE7 = 394;
+constexpr statenum_t S_FATT_DIE8 = 395;
+constexpr statenum_t S_FATT_DIE9 = 396;
+constexpr statenum_t S_FATT_DIE10 = 397;
+constexpr statenum_t S_FATT_RAISE1 = 398;
+constexpr statenum_t S_FATT_RAISE2 = 399;
+constexpr statenum_t S_FATT_RAISE3 = 400;
+constexpr statenum_t S_FATT_RAISE4 = 401;
+constexpr statenum_t S_FATT_RAISE5 = 402;
+constexpr statenum_t S_FATT_RAISE6 = 403;
+constexpr statenum_t S_FATT_RAISE7 = 404;
+constexpr statenum_t S_FATT_RAISE8 = 405;
+constexpr statenum_t S_CPOS_STND = 406;
+constexpr statenum_t S_CPOS_STND2 = 407;
+constexpr statenum_t S_CPOS_RUN1 = 408;
+constexpr statenum_t S_CPOS_RUN2 = 409;
+constexpr statenum_t S_CPOS_RUN3 = 410;
+constexpr statenum_t S_CPOS_RUN4 = 411;
+constexpr statenum_t S_CPOS_RUN5 = 412;
+constexpr statenum_t S_CPOS_RUN6 = 413;
+constexpr statenum_t S_CPOS_RUN7 = 414;
+constexpr statenum_t S_CPOS_RUN8 = 415;
+constexpr statenum_t S_CPOS_ATK1 = 416;
+constexpr statenum_t S_CPOS_ATK2 = 417;
+constexpr statenum_t S_CPOS_ATK3 = 418;
+constexpr statenum_t S_CPOS_ATK4 = 419;
+constexpr statenum_t S_CPOS_PAIN = 420;
+constexpr statenum_t S_CPOS_PAIN2 = 421;
+constexpr statenum_t S_CPOS_DIE1 = 422;
+constexpr statenum_t S_CPOS_DIE2 = 423;
+constexpr statenum_t S_CPOS_DIE3 = 424;
+constexpr statenum_t S_CPOS_DIE4 = 425;
+constexpr statenum_t S_CPOS_DIE5 = 426;
+constexpr statenum_t S_CPOS_DIE6 = 427;
+constexpr statenum_t S_CPOS_DIE7 = 428;
+constexpr statenum_t S_CPOS_XDIE1 = 429;
+constexpr statenum_t S_CPOS_XDIE2 = 430;
+constexpr statenum_t S_CPOS_XDIE3 = 431;
+constexpr statenum_t S_CPOS_XDIE4 = 432;
+constexpr statenum_t S_CPOS_XDIE5 = 433;
+constexpr statenum_t S_CPOS_XDIE6 = 434;
+constexpr statenum_t S_CPOS_RAISE1 = 435;
+constexpr statenum_t S_CPOS_RAISE2 = 436;
+constexpr statenum_t S_CPOS_RAISE3 = 437;
+constexpr statenum_t S_CPOS_RAISE4 = 438;
+constexpr statenum_t S_CPOS_RAISE5 = 439;
+constexpr statenum_t S_CPOS_RAISE6 = 440;
+constexpr statenum_t S_CPOS_RAISE7 = 441;
+constexpr statenum_t S_TROO_STND = 442;
+constexpr statenum_t S_TROO_STND2 = 443;
+constexpr statenum_t S_TROO_RUN1 = 444;
+constexpr statenum_t S_TROO_RUN2 = 445;
+constexpr statenum_t S_TROO_RUN3 = 446;
+constexpr statenum_t S_TROO_RUN4 = 447;
+constexpr statenum_t S_TROO_RUN5 = 448;
+constexpr statenum_t S_TROO_RUN6 = 449;
+constexpr statenum_t S_TROO_RUN7 = 450;
+constexpr statenum_t S_TROO_RUN8 = 451;
+constexpr statenum_t S_TROO_ATK1 = 452;
+constexpr statenum_t S_TROO_ATK2 = 453;
+constexpr statenum_t S_TROO_ATK3 = 454;
+constexpr statenum_t S_TROO_PAIN = 455;
+constexpr statenum_t S_TROO_PAIN2 = 456;
+constexpr statenum_t S_TROO_DIE1 = 457;
+constexpr statenum_t S_TROO_DIE2 = 458;
+constexpr statenum_t S_TROO_DIE3 = 459;
+constexpr statenum_t S_TROO_DIE4 = 460;
+constexpr statenum_t S_TROO_DIE5 = 461;
+constexpr statenum_t S_TROO_XDIE1 = 462;
+constexpr statenum_t S_TROO_XDIE2 = 463;
+constexpr statenum_t S_TROO_XDIE3 = 464;
+constexpr statenum_t S_TROO_XDIE4 = 465;
+constexpr statenum_t S_TROO_XDIE5 = 466;
+constexpr statenum_t S_TROO_XDIE6 = 467;
+constexpr statenum_t S_TROO_XDIE7 = 468;
+constexpr statenum_t S_TROO_XDIE8 = 469;
+constexpr statenum_t S_TROO_RAISE1 = 470;
+constexpr statenum_t S_TROO_RAISE2 = 471;
+constexpr statenum_t S_TROO_RAISE3 = 472;
+constexpr statenum_t S_TROO_RAISE4 = 473;
+constexpr statenum_t S_TROO_RAISE5 = 474;
+constexpr statenum_t S_SARG_STND = 475;
+constexpr statenum_t S_SARG_STND2 = 476;
+constexpr statenum_t S_SARG_RUN1 = 477;
+constexpr statenum_t S_SARG_RUN2 = 478;
+constexpr statenum_t S_SARG_RUN3 = 479;
+constexpr statenum_t S_SARG_RUN4 = 480;
+constexpr statenum_t S_SARG_RUN5 = 481;
+constexpr statenum_t S_SARG_RUN6 = 482;
+constexpr statenum_t S_SARG_RUN7 = 483;
+constexpr statenum_t S_SARG_RUN8 = 484;
+constexpr statenum_t S_SARG_ATK1 = 485;
+constexpr statenum_t S_SARG_ATK2 = 486;
+constexpr statenum_t S_SARG_ATK3 = 487;
+constexpr statenum_t S_SARG_PAIN = 488;
+constexpr statenum_t S_SARG_PAIN2 = 489;
+constexpr statenum_t S_SARG_DIE1 = 490;
+constexpr statenum_t S_SARG_DIE2 = 491;
+constexpr statenum_t S_SARG_DIE3 = 492;
+constexpr statenum_t S_SARG_DIE4 = 493;
+constexpr statenum_t S_SARG_DIE5 = 494;
+constexpr statenum_t S_SARG_DIE6 = 495;
+constexpr statenum_t S_SARG_RAISE1 = 496;
+constexpr statenum_t S_SARG_RAISE2 = 497;
+constexpr statenum_t S_SARG_RAISE3 = 498;
+constexpr statenum_t S_SARG_RAISE4 = 499;
+constexpr statenum_t S_SARG_RAISE5 = 500;
+constexpr statenum_t S_SARG_RAISE6 = 501;
+constexpr statenum_t S_HEAD_STND = 502;
+constexpr statenum_t S_HEAD_RUN1 = 503;
+constexpr statenum_t S_HEAD_ATK1 = 504;
+constexpr statenum_t S_HEAD_ATK2 = 505;
+constexpr statenum_t S_HEAD_ATK3 = 506;
+constexpr statenum_t S_HEAD_PAIN = 507;
+constexpr statenum_t S_HEAD_PAIN2 = 508;
+constexpr statenum_t S_HEAD_PAIN3 = 509;
+constexpr statenum_t S_HEAD_DIE1 = 510;
+constexpr statenum_t S_HEAD_DIE2 = 511;
+constexpr statenum_t S_HEAD_DIE3 = 512;
+constexpr statenum_t S_HEAD_DIE4 = 513;
+constexpr statenum_t S_HEAD_DIE5 = 514;
+constexpr statenum_t S_HEAD_DIE6 = 515;
+constexpr statenum_t S_HEAD_RAISE1 = 516;
+constexpr statenum_t S_HEAD_RAISE2 = 517;
+constexpr statenum_t S_HEAD_RAISE3 = 518;
+constexpr statenum_t S_HEAD_RAISE4 = 519;
+constexpr statenum_t S_HEAD_RAISE5 = 520;
+constexpr statenum_t S_HEAD_RAISE6 = 521;
+constexpr statenum_t S_BRBALL1 = 522;
+constexpr statenum_t S_BRBALL2 = 523;
+constexpr statenum_t S_BRBALLX1 = 524;
+constexpr statenum_t S_BRBALLX2 = 525;
+constexpr statenum_t S_BRBALLX3 = 526;
+constexpr statenum_t S_BOSS_STND = 527;
+constexpr statenum_t S_BOSS_STND2 = 528;
+constexpr statenum_t S_BOSS_RUN1 = 529;
+constexpr statenum_t S_BOSS_RUN2 = 530;
+constexpr statenum_t S_BOSS_RUN3 = 531;
+constexpr statenum_t S_BOSS_RUN4 = 532;
+constexpr statenum_t S_BOSS_RUN5 = 533;
+constexpr statenum_t S_BOSS_RUN6 = 534;
+constexpr statenum_t S_BOSS_RUN7 = 535;
+constexpr statenum_t S_BOSS_RUN8 = 536;
+constexpr statenum_t S_BOSS_ATK1 = 537;
+constexpr statenum_t S_BOSS_ATK2 = 538;
+constexpr statenum_t S_BOSS_ATK3 = 539;
+constexpr statenum_t S_BOSS_PAIN = 540;
+constexpr statenum_t S_BOSS_PAIN2 = 541;
+constexpr statenum_t S_BOSS_DIE1 = 542;
+constexpr statenum_t S_BOSS_DIE2 = 543;
+constexpr statenum_t S_BOSS_DIE3 = 544;
+constexpr statenum_t S_BOSS_DIE4 = 545;
+constexpr statenum_t S_BOSS_DIE5 = 546;
+constexpr statenum_t S_BOSS_DIE6 = 547;
+constexpr statenum_t S_BOSS_DIE7 = 548;
+constexpr statenum_t S_BOSS_RAISE1 = 549;
+constexpr statenum_t S_BOSS_RAISE2 = 550;
+constexpr statenum_t S_BOSS_RAISE3 = 551;
+constexpr statenum_t S_BOSS_RAISE4 = 552;
+constexpr statenum_t S_BOSS_RAISE5 = 553;
+constexpr statenum_t S_BOSS_RAISE6 = 554;
+constexpr statenum_t S_BOSS_RAISE7 = 555;
+constexpr statenum_t S_BOS2_STND = 556;
+constexpr statenum_t S_BOS2_STND2 = 557;
+constexpr statenum_t S_BOS2_RUN1 = 558;
+constexpr statenum_t S_BOS2_RUN2 = 559;
+constexpr statenum_t S_BOS2_RUN3 = 560;
+constexpr statenum_t S_BOS2_RUN4 = 561;
+constexpr statenum_t S_BOS2_RUN5 = 562;
+constexpr statenum_t S_BOS2_RUN6 = 563;
+constexpr statenum_t S_BOS2_RUN7 = 564;
+constexpr statenum_t S_BOS2_RUN8 = 565;
+constexpr statenum_t S_BOS2_ATK1 = 566;
+constexpr statenum_t S_BOS2_ATK2 = 567;
+constexpr statenum_t S_BOS2_ATK3 = 568;
+constexpr statenum_t S_BOS2_PAIN = 569;
+constexpr statenum_t S_BOS2_PAIN2 = 570;
+constexpr statenum_t S_BOS2_DIE1 = 571;
+constexpr statenum_t S_BOS2_DIE2 = 572;
+constexpr statenum_t S_BOS2_DIE3 = 573;
+constexpr statenum_t S_BOS2_DIE4 = 574;
+constexpr statenum_t S_BOS2_DIE5 = 575;
+constexpr statenum_t S_BOS2_DIE6 = 576;
+constexpr statenum_t S_BOS2_DIE7 = 577;
+constexpr statenum_t S_BOS2_RAISE1 = 578;
+constexpr statenum_t S_BOS2_RAISE2 = 579;
+constexpr statenum_t S_BOS2_RAISE3 = 580;
+constexpr statenum_t S_BOS2_RAISE4 = 581;
+constexpr statenum_t S_BOS2_RAISE5 = 582;
+constexpr statenum_t S_BOS2_RAISE6 = 583;
+constexpr statenum_t S_BOS2_RAISE7 = 584;
+constexpr statenum_t S_SKULL_STND = 585;
+constexpr statenum_t S_SKULL_STND2 = 586;
+constexpr statenum_t S_SKULL_RUN1 = 587;
+constexpr statenum_t S_SKULL_RUN2 = 588;
+constexpr statenum_t S_SKULL_ATK1 = 589;
+constexpr statenum_t S_SKULL_ATK2 = 590;
+constexpr statenum_t S_SKULL_ATK3 = 591;
+constexpr statenum_t S_SKULL_ATK4 = 592;
+constexpr statenum_t S_SKULL_PAIN = 593;
+constexpr statenum_t S_SKULL_PAIN2 = 594;
+constexpr statenum_t S_SKULL_DIE1 = 595;
+constexpr statenum_t S_SKULL_DIE2 = 596;
+constexpr statenum_t S_SKULL_DIE3 = 597;
+constexpr statenum_t S_SKULL_DIE4 = 598;
+constexpr statenum_t S_SKULL_DIE5 = 599;
+constexpr statenum_t S_SKULL_DIE6 = 600;
+constexpr statenum_t S_SPID_STND = 601;
+constexpr statenum_t S_SPID_STND2 = 602;
+constexpr statenum_t S_SPID_RUN1 = 603;
+constexpr statenum_t S_SPID_RUN2 = 604;
+constexpr statenum_t S_SPID_RUN3 = 605;
+constexpr statenum_t S_SPID_RUN4 = 606;
+constexpr statenum_t S_SPID_RUN5 = 607;
+constexpr statenum_t S_SPID_RUN6 = 608;
+constexpr statenum_t S_SPID_RUN7 = 609;
+constexpr statenum_t S_SPID_RUN8 = 610;
+constexpr statenum_t S_SPID_RUN9 = 611;
+constexpr statenum_t S_SPID_RUN10 = 612;
+constexpr statenum_t S_SPID_RUN11 = 613;
+constexpr statenum_t S_SPID_RUN12 = 614;
+constexpr statenum_t S_SPID_ATK1 = 615;
+constexpr statenum_t S_SPID_ATK2 = 616;
+constexpr statenum_t S_SPID_ATK3 = 617;
+constexpr statenum_t S_SPID_ATK4 = 618;
+constexpr statenum_t S_SPID_PAIN = 619;
+constexpr statenum_t S_SPID_PAIN2 = 620;
+constexpr statenum_t S_SPID_DIE1 = 621;
+constexpr statenum_t S_SPID_DIE2 = 622;
+constexpr statenum_t S_SPID_DIE3 = 623;
+constexpr statenum_t S_SPID_DIE4 = 624;
+constexpr statenum_t S_SPID_DIE5 = 625;
+constexpr statenum_t S_SPID_DIE6 = 626;
+constexpr statenum_t S_SPID_DIE7 = 627;
+constexpr statenum_t S_SPID_DIE8 = 628;
+constexpr statenum_t S_SPID_DIE9 = 629;
+constexpr statenum_t S_SPID_DIE10 = 630;
+constexpr statenum_t S_SPID_DIE11 = 631;
+constexpr statenum_t S_BSPI_STND = 632;
+constexpr statenum_t S_BSPI_STND2 = 633;
+constexpr statenum_t S_BSPI_SIGHT = 634;
+constexpr statenum_t S_BSPI_RUN1 = 635;
+constexpr statenum_t S_BSPI_RUN2 = 636;
+constexpr statenum_t S_BSPI_RUN3 = 637;
+constexpr statenum_t S_BSPI_RUN4 = 638;
+constexpr statenum_t S_BSPI_RUN5 = 639;
+constexpr statenum_t S_BSPI_RUN6 = 640;
+constexpr statenum_t S_BSPI_RUN7 = 641;
+constexpr statenum_t S_BSPI_RUN8 = 642;
+constexpr statenum_t S_BSPI_RUN9 = 643;
+constexpr statenum_t S_BSPI_RUN10 = 644;
+constexpr statenum_t S_BSPI_RUN11 = 645;
+constexpr statenum_t S_BSPI_RUN12 = 646;
+constexpr statenum_t S_BSPI_ATK1 = 647;
+constexpr statenum_t S_BSPI_ATK2 = 648;
+constexpr statenum_t S_BSPI_ATK3 = 649;
+constexpr statenum_t S_BSPI_ATK4 = 650;
+constexpr statenum_t S_BSPI_PAIN = 651;
+constexpr statenum_t S_BSPI_PAIN2 = 652;
+constexpr statenum_t S_BSPI_DIE1 = 653;
+constexpr statenum_t S_BSPI_DIE2 = 654;
+constexpr statenum_t S_BSPI_DIE3 = 655;
+constexpr statenum_t S_BSPI_DIE4 = 656;
+constexpr statenum_t S_BSPI_DIE5 = 657;
+constexpr statenum_t S_BSPI_DIE6 = 658;
+constexpr statenum_t S_BSPI_DIE7 = 659;
+constexpr statenum_t S_BSPI_RAISE1 = 660;
+constexpr statenum_t S_BSPI_RAISE2 = 661;
+constexpr statenum_t S_BSPI_RAISE3 = 662;
+constexpr statenum_t S_BSPI_RAISE4 = 663;
+constexpr statenum_t S_BSPI_RAISE5 = 664;
+constexpr statenum_t S_BSPI_RAISE6 = 665;
+constexpr statenum_t S_BSPI_RAISE7 = 666;
+constexpr statenum_t S_ARACH_PLAZ = 667;
+constexpr statenum_t S_ARACH_PLAZ2 = 668;
+constexpr statenum_t S_ARACH_PLEX = 669;
+constexpr statenum_t S_ARACH_PLEX2 = 670;
+constexpr statenum_t S_ARACH_PLEX3 = 671;
+constexpr statenum_t S_ARACH_PLEX4 = 672;
+constexpr statenum_t S_ARACH_PLEX5 = 673;
+constexpr statenum_t S_CYBER_STND = 674;
+constexpr statenum_t S_CYBER_STND2 = 675;
+constexpr statenum_t S_CYBER_RUN1 = 676;
+constexpr statenum_t S_CYBER_RUN2 = 677;
+constexpr statenum_t S_CYBER_RUN3 = 678;
+constexpr statenum_t S_CYBER_RUN4 = 679;
+constexpr statenum_t S_CYBER_RUN5 = 680;
+constexpr statenum_t S_CYBER_RUN6 = 681;
+constexpr statenum_t S_CYBER_RUN7 = 682;
+constexpr statenum_t S_CYBER_RUN8 = 683;
+constexpr statenum_t S_CYBER_ATK1 = 684;
+constexpr statenum_t S_CYBER_ATK2 = 685;
+constexpr statenum_t S_CYBER_ATK3 = 686;
+constexpr statenum_t S_CYBER_ATK4 = 687;
+constexpr statenum_t S_CYBER_ATK5 = 688;
+constexpr statenum_t S_CYBER_ATK6 = 689;
+constexpr statenum_t S_CYBER_PAIN = 690;
+constexpr statenum_t S_CYBER_DIE1 = 691;
+constexpr statenum_t S_CYBER_DIE2 = 692;
+constexpr statenum_t S_CYBER_DIE3 = 693;
+constexpr statenum_t S_CYBER_DIE4 = 694;
+constexpr statenum_t S_CYBER_DIE5 = 695;
+constexpr statenum_t S_CYBER_DIE6 = 696;
+constexpr statenum_t S_CYBER_DIE7 = 697;
+constexpr statenum_t S_CYBER_DIE8 = 698;
+constexpr statenum_t S_CYBER_DIE9 = 699;
+constexpr statenum_t S_CYBER_DIE10 = 700;
+constexpr statenum_t S_PAIN_STND = 701;
+constexpr statenum_t S_PAIN_RUN1 = 702;
+constexpr statenum_t S_PAIN_RUN2 = 703;
+constexpr statenum_t S_PAIN_RUN3 = 704;
+constexpr statenum_t S_PAIN_RUN4 = 705;
+constexpr statenum_t S_PAIN_RUN5 = 706;
+constexpr statenum_t S_PAIN_RUN6 = 707;
+constexpr statenum_t S_PAIN_ATK1 = 708;
+constexpr statenum_t S_PAIN_ATK2 = 709;
+constexpr statenum_t S_PAIN_ATK3 = 710;
+constexpr statenum_t S_PAIN_ATK4 = 711;
+constexpr statenum_t S_PAIN_PAIN = 712;
+constexpr statenum_t S_PAIN_PAIN2 = 713;
+constexpr statenum_t S_PAIN_DIE1 = 714;
+constexpr statenum_t S_PAIN_DIE2 = 715;
+constexpr statenum_t S_PAIN_DIE3 = 716;
+constexpr statenum_t S_PAIN_DIE4 = 717;
+constexpr statenum_t S_PAIN_DIE5 = 718;
+constexpr statenum_t S_PAIN_DIE6 = 719;
+constexpr statenum_t S_PAIN_RAISE1 = 720;
+constexpr statenum_t S_PAIN_RAISE2 = 721;
+constexpr statenum_t S_PAIN_RAISE3 = 722;
+constexpr statenum_t S_PAIN_RAISE4 = 723;
+constexpr statenum_t S_PAIN_RAISE5 = 724;
+constexpr statenum_t S_PAIN_RAISE6 = 725;
+constexpr statenum_t S_SSWV_STND = 726;
+constexpr statenum_t S_SSWV_STND2 = 727;
+constexpr statenum_t S_SSWV_RUN1 = 728;
+constexpr statenum_t S_SSWV_RUN2 = 729;
+constexpr statenum_t S_SSWV_RUN3 = 730;
+constexpr statenum_t S_SSWV_RUN4 = 731;
+constexpr statenum_t S_SSWV_RUN5 = 732;
+constexpr statenum_t S_SSWV_RUN6 = 733;
+constexpr statenum_t S_SSWV_RUN7 = 734;
+constexpr statenum_t S_SSWV_RUN8 = 735;
+constexpr statenum_t S_SSWV_ATK1 = 736;
+constexpr statenum_t S_SSWV_ATK2 = 737;
+constexpr statenum_t S_SSWV_ATK3 = 738;
+constexpr statenum_t S_SSWV_ATK4 = 739;
+constexpr statenum_t S_SSWV_ATK5 = 740;
+constexpr statenum_t S_SSWV_ATK6 = 741;
+constexpr statenum_t S_SSWV_PAIN = 742;
+constexpr statenum_t S_SSWV_PAIN2 = 743;
+constexpr statenum_t S_SSWV_DIE1 = 744;
+constexpr statenum_t S_SSWV_DIE2 = 745;
+constexpr statenum_t S_SSWV_DIE3 = 746;
+constexpr statenum_t S_SSWV_DIE4 = 747;
+constexpr statenum_t S_SSWV_DIE5 = 748;
+constexpr statenum_t S_SSWV_XDIE1 = 749;
+constexpr statenum_t S_SSWV_XDIE2 = 750;
+constexpr statenum_t S_SSWV_XDIE3 = 751;
+constexpr statenum_t S_SSWV_XDIE4 = 752;
+constexpr statenum_t S_SSWV_XDIE5 = 753;
+constexpr statenum_t S_SSWV_XDIE6 = 754;
+constexpr statenum_t S_SSWV_XDIE7 = 755;
+constexpr statenum_t S_SSWV_XDIE8 = 756;
+constexpr statenum_t S_SSWV_XDIE9 = 757;
+constexpr statenum_t S_SSWV_RAISE1 = 758;
+constexpr statenum_t S_SSWV_RAISE2 = 759;
+constexpr statenum_t S_SSWV_RAISE3 = 760;
+constexpr statenum_t S_SSWV_RAISE4 = 761;
+constexpr statenum_t S_SSWV_RAISE5 = 762;
+constexpr statenum_t S_KEENSTND = 763;
+constexpr statenum_t S_COMMKEEN = 764;
+constexpr statenum_t S_COMMKEEN2 = 765;
+constexpr statenum_t S_COMMKEEN3 = 766;
+constexpr statenum_t S_COMMKEEN4 = 767;
+constexpr statenum_t S_COMMKEEN5 = 768;
+constexpr statenum_t S_COMMKEEN6 = 769;
+constexpr statenum_t S_COMMKEEN7 = 770;
+constexpr statenum_t S_COMMKEEN8 = 771;
+constexpr statenum_t S_COMMKEEN9 = 772;
+constexpr statenum_t S_COMMKEEN10 = 773;
+constexpr statenum_t S_COMMKEEN11 = 774;
+constexpr statenum_t S_COMMKEEN12 = 775;
+constexpr statenum_t S_KEENPAIN = 776;
+constexpr statenum_t S_KEENPAIN2 = 777;
+constexpr statenum_t S_BRAIN = 778;
+constexpr statenum_t S_BRAIN_PAIN = 779;
+constexpr statenum_t S_BRAIN_DIE1 = 780;
+constexpr statenum_t S_BRAIN_DIE2 = 781;
+constexpr statenum_t S_BRAIN_DIE3 = 782;
+constexpr statenum_t S_BRAIN_DIE4 = 783;
+constexpr statenum_t S_BRAINEYE = 784;
+constexpr statenum_t S_BRAINEYESEE = 785;
+constexpr statenum_t S_BRAINEYE1 = 786;
+constexpr statenum_t S_SPAWN1 = 787;
+constexpr statenum_t S_SPAWN2 = 788;
+constexpr statenum_t S_SPAWN3 = 789;
+constexpr statenum_t S_SPAWN4 = 790;
+constexpr statenum_t S_SPAWNFIRE1 = 791;
+constexpr statenum_t S_SPAWNFIRE2 = 792;
+constexpr statenum_t S_SPAWNFIRE3 = 793;
+constexpr statenum_t S_SPAWNFIRE4 = 794;
+constexpr statenum_t S_SPAWNFIRE5 = 795;
+constexpr statenum_t S_SPAWNFIRE6 = 796;
+constexpr statenum_t S_SPAWNFIRE7 = 797;
+constexpr statenum_t S_SPAWNFIRE8 = 798;
+constexpr statenum_t S_BRAINEXPLODE1 = 799;
+constexpr statenum_t S_BRAINEXPLODE2 = 800;
+constexpr statenum_t S_BRAINEXPLODE3 = 801;
+constexpr statenum_t S_ARM1 = 802;
+constexpr statenum_t S_ARM1A = 803;
+constexpr statenum_t S_ARM2 = 804;
+constexpr statenum_t S_ARM2A = 805;
+constexpr statenum_t S_BAR1 = 806;
+constexpr statenum_t S_BAR2 = 807;
+constexpr statenum_t S_BEXP = 808;
+constexpr statenum_t S_BEXP2 = 809;
+constexpr statenum_t S_BEXP3 = 810;
+constexpr statenum_t S_BEXP4 = 811;
+constexpr statenum_t S_BEXP5 = 812;
+constexpr statenum_t S_BBAR1 = 813;
+constexpr statenum_t S_BBAR2 = 814;
+constexpr statenum_t S_BBAR3 = 815;
+constexpr statenum_t S_BON1 = 816;
+constexpr statenum_t S_BON1A = 817;
+constexpr statenum_t S_BON1B = 818;
+constexpr statenum_t S_BON1C = 819;
+constexpr statenum_t S_BON1D = 820;
+constexpr statenum_t S_BON1E = 821;
+constexpr statenum_t S_BON2 = 822;
+constexpr statenum_t S_BON2A = 823;
+constexpr statenum_t S_BON2B = 824;
+constexpr statenum_t S_BON2C = 825;
+constexpr statenum_t S_BON2D = 826;
+constexpr statenum_t S_BON2E = 827;
+constexpr statenum_t S_BKEY = 828;
+constexpr statenum_t S_BKEY2 = 829;
+constexpr statenum_t S_RKEY = 830;
+constexpr statenum_t S_RKEY2 = 831;
+constexpr statenum_t S_YKEY = 832;
+constexpr statenum_t S_YKEY2 = 833;
+constexpr statenum_t S_BSKULL = 834;
+constexpr statenum_t S_BSKULL2 = 835;
+constexpr statenum_t S_RSKULL = 836;
+constexpr statenum_t S_RSKULL2 = 837;
+constexpr statenum_t S_YSKULL = 838;
+constexpr statenum_t S_YSKULL2 = 839;
+constexpr statenum_t S_STIM = 840;
+constexpr statenum_t S_MEDI = 841;
+constexpr statenum_t S_SOUL = 842;
+constexpr statenum_t S_SOUL2 = 843;
+constexpr statenum_t S_SOUL3 = 844;
+constexpr statenum_t S_SOUL4 = 845;
+constexpr statenum_t S_SOUL5 = 846;
+constexpr statenum_t S_SOUL6 = 847;
+constexpr statenum_t S_PINV = 848;
+constexpr statenum_t S_PINV2 = 849;
+constexpr statenum_t S_PINV3 = 850;
+constexpr statenum_t S_PINV4 = 851;
+constexpr statenum_t S_PSTR = 852;
+constexpr statenum_t S_PINS = 853;
+constexpr statenum_t S_PINS2 = 854;
+constexpr statenum_t S_PINS3 = 855;
+constexpr statenum_t S_PINS4 = 856;
+constexpr statenum_t S_MEGA = 857;
+constexpr statenum_t S_MEGA2 = 858;
+constexpr statenum_t S_MEGA3 = 859;
+constexpr statenum_t S_MEGA4 = 860;
+constexpr statenum_t S_SUIT = 861;
+constexpr statenum_t S_PMAP = 862;
+constexpr statenum_t S_PMAP2 = 863;
+constexpr statenum_t S_PMAP3 = 864;
+constexpr statenum_t S_PMAP4 = 865;
+constexpr statenum_t S_PMAP5 = 866;
+constexpr statenum_t S_PMAP6 = 867;
+constexpr statenum_t S_PVIS = 868;
+constexpr statenum_t S_PVIS2 = 869;
+constexpr statenum_t S_CLIP = 870;
+constexpr statenum_t S_AMMO = 871;
+constexpr statenum_t S_ROCK = 872;
+constexpr statenum_t S_BROK = 873;
+constexpr statenum_t S_CELL = 874;
+constexpr statenum_t S_CELP = 875;
+constexpr statenum_t S_SHEL = 876;
+constexpr statenum_t S_SBOX = 877;
+constexpr statenum_t S_BPAK = 878;
+constexpr statenum_t S_BFUG = 879;
+constexpr statenum_t S_MGUN = 880;
+constexpr statenum_t S_CSAW = 881;
+constexpr statenum_t S_LAUN = 882;
+constexpr statenum_t S_PLAS = 883;
+constexpr statenum_t S_SHOT = 884;
+constexpr statenum_t S_SHOT2 = 885;
+constexpr statenum_t S_COLU = 886;
+constexpr statenum_t S_STALAG = 887;
+constexpr statenum_t S_BLOODYTWITCH = 888;
+constexpr statenum_t S_BLOODYTWITCH2 = 889;
+constexpr statenum_t S_BLOODYTWITCH3 = 890;
+constexpr statenum_t S_BLOODYTWITCH4 = 891;
+constexpr statenum_t S_DEADTORSO = 892;
+constexpr statenum_t S_DEADBOTTOM = 893;
+constexpr statenum_t S_HEADSONSTICK = 894;
+constexpr statenum_t S_GIBS = 895;
+constexpr statenum_t S_HEADONASTICK = 896;
+constexpr statenum_t S_HEADCANDLES = 897;
+constexpr statenum_t S_HEADCANDLES2 = 898;
+constexpr statenum_t S_DEADSTICK = 899;
+constexpr statenum_t S_LIVESTICK = 900;
+constexpr statenum_t S_LIVESTICK2 = 901;
+constexpr statenum_t S_MEAT2 = 902;
+constexpr statenum_t S_MEAT3 = 903;
+constexpr statenum_t S_MEAT4 = 904;
+constexpr statenum_t S_MEAT5 = 905;
+constexpr statenum_t S_STALAGTITE = 906;
+constexpr statenum_t S_TALLGRNCOL = 907;
+constexpr statenum_t S_SHRTGRNCOL = 908;
+constexpr statenum_t S_TALLREDCOL = 909;
+constexpr statenum_t S_SHRTREDCOL = 910;
+constexpr statenum_t S_CANDLESTIK = 911;
+constexpr statenum_t S_CANDELABRA = 912;
+constexpr statenum_t S_SKULLCOL = 913;
+constexpr statenum_t S_TORCHTREE = 914;
+constexpr statenum_t S_BIGTREE = 915;
+constexpr statenum_t S_TECHPILLAR = 916;
+constexpr statenum_t S_EVILEYE = 917;
+constexpr statenum_t S_EVILEYE2 = 918;
+constexpr statenum_t S_EVILEYE3 = 919;
+constexpr statenum_t S_EVILEYE4 = 920;
+constexpr statenum_t S_FLOATSKULL = 921;
+constexpr statenum_t S_FLOATSKULL2 = 922;
+constexpr statenum_t S_FLOATSKULL3 = 923;
+constexpr statenum_t S_HEARTCOL = 924;
+constexpr statenum_t S_HEARTCOL2 = 925;
+constexpr statenum_t S_BLUETORCH = 926;
+constexpr statenum_t S_BLUETORCH2 = 927;
+constexpr statenum_t S_BLUETORCH3 = 928;
+constexpr statenum_t S_BLUETORCH4 = 929;
+constexpr statenum_t S_GREENTORCH = 930;
+constexpr statenum_t S_GREENTORCH2 = 931;
+constexpr statenum_t S_GREENTORCH3 = 932;
+constexpr statenum_t S_GREENTORCH4 = 933;
+constexpr statenum_t S_REDTORCH = 934;
+constexpr statenum_t S_REDTORCH2 = 935;
+constexpr statenum_t S_REDTORCH3 = 936;
+constexpr statenum_t S_REDTORCH4 = 937;
+constexpr statenum_t S_BTORCHSHRT = 938;
+constexpr statenum_t S_BTORCHSHRT2 = 939;
+constexpr statenum_t S_BTORCHSHRT3 = 940;
+constexpr statenum_t S_BTORCHSHRT4 = 941;
+constexpr statenum_t S_GTORCHSHRT = 942;
+constexpr statenum_t S_GTORCHSHRT2 = 943;
+constexpr statenum_t S_GTORCHSHRT3 = 944;
+constexpr statenum_t S_GTORCHSHRT4 = 945;
+constexpr statenum_t S_RTORCHSHRT = 946;
+constexpr statenum_t S_RTORCHSHRT2 = 947;
+constexpr statenum_t S_RTORCHSHRT3 = 948;
+constexpr statenum_t S_RTORCHSHRT4 = 949;
+constexpr statenum_t S_HANGNOGUTS = 950;
+constexpr statenum_t S_HANGBNOBRAIN = 951;
+constexpr statenum_t S_HANGTLOOKDN = 952;
+constexpr statenum_t S_HANGTSKULL = 953;
+constexpr statenum_t S_HANGTLOOKUP = 954;
+constexpr statenum_t S_HANGTNOBRAIN = 955;
+constexpr statenum_t S_COLONGIBS = 956;
+constexpr statenum_t S_SMALLPOOL = 957;
+constexpr statenum_t S_BRAINSTEM = 958;
+constexpr statenum_t S_TECHLAMP = 959;
+constexpr statenum_t S_TECHLAMP2 = 960;
+constexpr statenum_t S_TECHLAMP3 = 961;
+constexpr statenum_t S_TECHLAMP4 = 962;
+constexpr statenum_t S_TECH2LAMP = 963;
+constexpr statenum_t S_TECH2LAMP2 = 964;
+constexpr statenum_t S_TECH2LAMP3 = 965;
+constexpr statenum_t S_TECH2LAMP4 = 966;
+/* add state for invisible sprite          phares 3/8/98  */
+constexpr statenum_t S_TNT1 = 967;
 
-    S_GRENADE,  /* killough 8/9/98: grenade launcher */
-    S_DETONATE, /* killough 8/9/98: detonation of objects */
-    S_DETONATE2,
-    S_DETONATE3,
+constexpr statenum_t S_GRENADE = 968; /* killough 8/9/98: grenade launcher */
+constexpr statenum_t S_DETONATE =
+    969; /* killough 8/9/98: detonation of objects */
+constexpr statenum_t S_DETONATE2 = 970;
+constexpr statenum_t S_DETONATE3 = 971;
 
-    // always count dog states, even if dogs are disabled
-    S_DOGS_STND, /* killough 7/19/98: Marine's best friend :) */
-    S_DOGS_STND2,
-    S_DOGS_RUN1,
-    S_DOGS_RUN2,
-    S_DOGS_RUN3,
-    S_DOGS_RUN4,
-    S_DOGS_RUN5,
-    S_DOGS_RUN6,
-    S_DOGS_RUN7,
-    S_DOGS_RUN8,
-    S_DOGS_ATK1,
-    S_DOGS_ATK2,
-    S_DOGS_ATK3,
-    S_DOGS_PAIN,
-    S_DOGS_PAIN2,
-    S_DOGS_DIE1,
-    S_DOGS_DIE2,
-    S_DOGS_DIE3,
-    S_DOGS_DIE4,
-    S_DOGS_DIE5,
-    S_DOGS_DIE6,
-    S_DOGS_RAISE1,
-    S_DOGS_RAISE2,
-    S_DOGS_RAISE3,
-    S_DOGS_RAISE4,
-    S_DOGS_RAISE5,
-    S_DOGS_RAISE6,
+// always count dog states; even if dogs are disabled
+/* killough 7/19/98: Marine's best friend :) */
+constexpr statenum_t S_DOGS_STND = 972;
+constexpr statenum_t S_DOGS_STND2 = 973;
+constexpr statenum_t S_DOGS_RUN1 = 974;
+constexpr statenum_t S_DOGS_RUN2 = 975;
+constexpr statenum_t S_DOGS_RUN3 = 976;
+constexpr statenum_t S_DOGS_RUN4 = 977;
+constexpr statenum_t S_DOGS_RUN5 = 978;
+constexpr statenum_t S_DOGS_RUN6 = 979;
+constexpr statenum_t S_DOGS_RUN7 = 980;
+constexpr statenum_t S_DOGS_RUN8 = 981;
+constexpr statenum_t S_DOGS_ATK1 = 982;
+constexpr statenum_t S_DOGS_ATK2 = 983;
+constexpr statenum_t S_DOGS_ATK3 = 984;
+constexpr statenum_t S_DOGS_PAIN = 985;
+constexpr statenum_t S_DOGS_PAIN2 = 986;
+constexpr statenum_t S_DOGS_DIE1 = 987;
+constexpr statenum_t S_DOGS_DIE2 = 988;
+constexpr statenum_t S_DOGS_DIE3 = 989;
+constexpr statenum_t S_DOGS_DIE4 = 990;
+constexpr statenum_t S_DOGS_DIE5 = 991;
+constexpr statenum_t S_DOGS_DIE6 = 992;
+constexpr statenum_t S_DOGS_RAISE1 = 993;
+constexpr statenum_t S_DOGS_RAISE2 = 994;
+constexpr statenum_t S_DOGS_RAISE3 = 995;
+constexpr statenum_t S_DOGS_RAISE4 = 996;
+constexpr statenum_t S_DOGS_RAISE5 = 997;
+constexpr statenum_t S_DOGS_RAISE6 = 998;
 
-    // add dummy beta bfg / lost soul frames for dehacked compatibility
-    // fixes bug #1576151 (part 2)
-    S_OLDBFG1, // killough 7/11/98: the old BFG's 43 firing frames
-    S_OLDBFG42 = S_OLDBFG1 + 41,
-    S_OLDBFG43,
+// add dummy beta bfg / lost soul frames for dehacked compatibility
+// fixes bug #1576151 (part 2)
+// killough 7/11/98: the old BFG's 43 firing frames
+constexpr statenum_t S_OLDBFG1 = 999;
+constexpr statenum_t S_OLDBFG42 = S_OLDBFG1 + 41;
+constexpr statenum_t S_OLDBFG43 = 1041;
 
-    S_PLS1BALL, // killough 7/19/98: first plasma fireball in the beta
-    S_PLS1BALL2,
-    S_PLS1EXP,
-    S_PLS1EXP2,
-    S_PLS1EXP3,
-    S_PLS1EXP4,
-    S_PLS1EXP5,
+constexpr statenum_t S_PLS1BALL =
+    1042; // killough 7/19/98: first plasma fireball in the beta
+constexpr statenum_t S_PLS1BALL2 = 1043;
+constexpr statenum_t S_PLS1EXP = 1044;
+constexpr statenum_t S_PLS1EXP2 = 1045;
+constexpr statenum_t S_PLS1EXP3 = 1046;
+constexpr statenum_t S_PLS1EXP4 = 1047;
+constexpr statenum_t S_PLS1EXP5 = 1048;
 
-    S_PLS2BALL, // killough 7/19/98: second plasma fireball in the beta
-    S_PLS2BALL2,
-    S_PLS2BALLX1,
-    S_PLS2BALLX2,
-    S_PLS2BALLX3,
-    S_BON3, // killough 7/11/98: evil sceptre in beta version
-    S_BON4, // killough 7/11/98: unholy bible in beta version
+// killough 7/19/98: second plasma fireball in the beta
+constexpr statenum_t S_PLS2BALL = 1049;
+constexpr statenum_t S_PLS2BALL2 = 1050;
+constexpr statenum_t S_PLS2BALLX1 = 1051;
+constexpr statenum_t S_PLS2BALLX2 = 1052;
+constexpr statenum_t S_PLS2BALLX3 = 1053;
+// killough 7/11/98: evil sceptre in beta version
+constexpr statenum_t S_BON3 = 1054;
+// killough 7/11/98: unholy bible in beta version
+constexpr statenum_t S_BON4 = 1055;
 
-    // killough 10/98: beta lost souls were different from their modern cousins
-    S_BSKUL_STND,
-    S_BSKUL_RUN1,
-    S_BSKUL_RUN2,
-    S_BSKUL_RUN3,
-    S_BSKUL_RUN4,
-    S_BSKUL_ATK1,
-    S_BSKUL_ATK2,
-    S_BSKUL_ATK3,
-    S_BSKUL_PAIN1,
-    S_BSKUL_PAIN2,
-    S_BSKUL_PAIN3,
-    S_BSKUL_DIE1,
-    S_BSKUL_DIE2,
-    S_BSKUL_DIE3,
-    S_BSKUL_DIE4,
-    S_BSKUL_DIE5,
-    S_BSKUL_DIE6,
-    S_BSKUL_DIE7,
-    S_BSKUL_DIE8,
+// killough 10/98: beta lost souls were different from their modern cousins
+constexpr statenum_t S_BSKUL_STND = 1056;
+constexpr statenum_t S_BSKUL_RUN1 = 1057;
+constexpr statenum_t S_BSKUL_RUN2 = 1058;
+constexpr statenum_t S_BSKUL_RUN3 = 1059;
+constexpr statenum_t S_BSKUL_RUN4 = 1060;
+constexpr statenum_t S_BSKUL_ATK1 = 1061;
+constexpr statenum_t S_BSKUL_ATK2 = 1062;
+constexpr statenum_t S_BSKUL_ATK3 = 1063;
+constexpr statenum_t S_BSKUL_PAIN1 = 1064;
+constexpr statenum_t S_BSKUL_PAIN2 = 1065;
+constexpr statenum_t S_BSKUL_PAIN3 = 1066;
+constexpr statenum_t S_BSKUL_DIE1 = 1067;
+constexpr statenum_t S_BSKUL_DIE2 = 1068;
+constexpr statenum_t S_BSKUL_DIE3 = 1069;
+constexpr statenum_t S_BSKUL_DIE4 = 1070;
+constexpr statenum_t S_BSKUL_DIE5 = 1071;
+constexpr statenum_t S_BSKUL_DIE6 = 1072;
+constexpr statenum_t S_BSKUL_DIE7 = 1073;
+constexpr statenum_t S_BSKUL_DIE8 = 1074;
 
-    S_MUSHROOM, /* killough 10/98: mushroom explosion effect */
+/* killough 10/98: mushroom explosion effect */
+constexpr statenum_t S_MUSHROOM = 1075;
 
-    S_PLAY_GDIE1,
-    S_PLAY_GDIE2,
-    S_PLAY_GDIE3,
-    S_PLAY_GDIE4,
-    S_PLAY_GDIE5,
-    S_PLAY_GDIE6,
-    S_PLAY_GDIE7,
-    S_PLAY_GDIE8,
-    S_PLAY_GDIE9,
+constexpr statenum_t S_PLAY_GDIE1 = 1076;
+constexpr statenum_t S_PLAY_GDIE2 = 1077;
+constexpr statenum_t S_PLAY_GDIE3 = 1078;
+constexpr statenum_t S_PLAY_GDIE4 = 1079;
+constexpr statenum_t S_PLAY_GDIE5 = 1080;
+constexpr statenum_t S_PLAY_GDIE6 = 1081;
+constexpr statenum_t S_PLAY_GDIE7 = 1082;
+constexpr statenum_t S_PLAY_GDIE8 = 1083;
+constexpr statenum_t S_PLAY_GDIE9 = 1084;
 
-    EXTRASTATES = 1089, // extra dehacked states
-    NUMSTATES = 4000    /* Counter of how many there are */
-
-} statenum_t;
+constexpr statenum_t EXTRASTATES = 1089; // extra dehacked states
+constexpr statenum_t NUMSTATES = 4000;   /* Counter of how many there are */
 
 /********************************************************************
  * Definition of the state (frames) structure                       *
  ********************************************************************/
 
-typedef struct
+struct state_t
 {
     spritenum_t sprite; /* sprite number to show                       */
     long frame;         /* which frame/subframe of the sprite is shown */
     long tics;          /* number of gametics this frame should last   */
-    actionf action;
+    Action action;
     statenum_t nextstate; /* linked list pointer to next state or zero   */
     long misc1, misc2;    /* apparently never used in DOOM               */
-} state_t;
+};
 
 /* these are in info.c */
 extern state_t states[NUMSTATES];
@@ -1392,276 +1400,283 @@ extern const char *sprnames[]; /* 1/17/98 killough - CPhipps - const */
  * Note that many of these are generically named for the ornamentals
  */
 
-typedef enum
-{
-    MT_NULL = -1, // ferk: null/invalid mobj (zero is reserved for MT_PLAYER)
-    MT_PLAYER,
-    MT_POSSESSED,
-    MT_SHOTGUY,
-    MT_VILE,
-    MT_FIRE,
-    MT_UNDEAD,
-    MT_TRACER,
-    MT_SMOKE,
-    MT_FATSO,
-    MT_FATSHOT,
-    MT_CHAINGUY,
-    MT_TROOP,
-    MT_SERGEANT,
-    MT_SHADOWS,
-    MT_HEAD,
-    MT_BRUISER,
-    MT_BRUISERSHOT,
-    MT_KNIGHT,
-    MT_SKULL,
-    MT_SPIDER,
-    MT_BABY,
-    MT_CYBORG,
-    MT_PAIN,
-    MT_WOLFSS,
-    MT_KEEN,
-    MT_BOSSBRAIN,
-    MT_BOSSSPIT,
-    MT_BOSSTARGET,
-    MT_SPAWNSHOT,
-    MT_SPAWNFIRE,
-    MT_BARREL,
-    MT_TROOPSHOT,
-    MT_HEADSHOT,
-    MT_ROCKET,
-    MT_PLASMA,
-    MT_BFG,
-    MT_ARACHPLAZ,
-    MT_PUFF,
-    MT_BLOOD,
-    MT_TFOG,
-    MT_IFOG,
-    MT_TELEPORTMAN,
-    MT_EXTRABFG,
-    MT_MISC0,
-    MT_MISC1,
-    MT_MISC2,
-    MT_MISC3,
-    MT_MISC4,
-    MT_MISC5,
-    MT_MISC6,
-    MT_MISC7,
-    MT_MISC8,
-    MT_MISC9,
-    MT_MISC10,
-    MT_MISC11,
-    MT_MISC12,
-    MT_INV,
-    MT_MISC13,
-    MT_INS,
-    MT_MISC14,
-    MT_MISC15,
-    MT_MISC16,
-    MT_MEGA,
-    MT_CLIP,
-    MT_MISC17,
-    MT_MISC18,
-    MT_MISC19,
-    MT_MISC20,
-    MT_MISC21,
-    MT_MISC22,
-    MT_MISC23,
-    MT_MISC24,
-    MT_MISC25,
-    MT_CHAINGUN,
-    MT_MISC26,
-    MT_MISC27,
-    MT_MISC28,
-    MT_SHOTGUN,
-    MT_SUPERSHOTGUN,
-    MT_MISC29,
-    MT_MISC30,
-    MT_MISC31,
-    MT_MISC32,
-    MT_MISC33,
-    MT_MISC34,
-    MT_MISC35,
-    MT_MISC36,
-    MT_MISC37,
-    MT_MISC38,
-    MT_MISC39,
-    MT_MISC40,
-    MT_MISC41,
-    MT_MISC42,
-    MT_MISC43,
-    MT_MISC44,
-    MT_MISC45,
-    MT_MISC46,
-    MT_MISC47,
-    MT_MISC48,
-    MT_MISC49,
-    MT_MISC50,
-    MT_MISC51,
-    MT_MISC52,
-    MT_MISC53,
-    MT_MISC54,
-    MT_MISC55,
-    MT_MISC56,
-    MT_MISC57,
-    MT_MISC58,
-    MT_MISC59,
-    MT_MISC60,
-    MT_MISC61,
-    MT_MISC62,
-    MT_MISC63,
-    MT_MISC64,
-    MT_MISC65,
-    MT_MISC66,
-    MT_MISC67,
-    MT_MISC68,
-    MT_MISC69,
-    MT_MISC70,
-    MT_MISC71,
-    MT_MISC72,
-    MT_MISC73,
-    MT_MISC74,
-    MT_MISC75,
-    MT_MISC76,
-    MT_MISC77,
-    MT_MISC78,
-    MT_MISC79,
-    MT_MISC80,
-    MT_MISC81,
-    MT_MISC82,
-    MT_MISC83,
-    MT_MISC84,
-    MT_MISC85,
-    MT_MISC86,
-    MT_PUSH,    /* controls push source - phares */
-    MT_PULL,    /* controls pull source - phares 3/20/98 */
-    MT_DOGS,    /* killough 7/19/98: Marine's best friend */
-    MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
-    MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
-    MT_SCEPTRE, // killough 7/11/98: evil sceptre in beta version
-    MT_BIBLE,   // killough 7/11/98: unholy bible in beta version
+using mobjtype_t = SequentialEnum<int>;
+// ferk: null/invalid mobj (zero is reserved for MT_PLAYER)
+constexpr mobjtype_t MT_NULL = -1;
+constexpr mobjtype_t MT_PLAYER = 0;
+constexpr mobjtype_t MT_POSSESSED = 1;
+constexpr mobjtype_t MT_SHOTGUY = 2;
+constexpr mobjtype_t MT_VILE = 3;
+constexpr mobjtype_t MT_FIRE = 4;
+constexpr mobjtype_t MT_UNDEAD = 5;
+constexpr mobjtype_t MT_TRACER = 6;
+constexpr mobjtype_t MT_SMOKE = 7;
+constexpr mobjtype_t MT_FATSO = 8;
+constexpr mobjtype_t MT_FATSHOT = 9;
+constexpr mobjtype_t MT_CHAINGUY = 10;
+constexpr mobjtype_t MT_TROOP = 11;
+constexpr mobjtype_t MT_SERGEANT = 12;
+constexpr mobjtype_t MT_SHADOWS = 13;
+constexpr mobjtype_t MT_HEAD = 14;
+constexpr mobjtype_t MT_BRUISER = 15;
+constexpr mobjtype_t MT_BRUISERSHOT = 16;
+constexpr mobjtype_t MT_KNIGHT = 17;
+constexpr mobjtype_t MT_SKULL = 18;
+constexpr mobjtype_t MT_SPIDER = 19;
+constexpr mobjtype_t MT_BABY = 20;
+constexpr mobjtype_t MT_CYBORG = 21;
+constexpr mobjtype_t MT_PAIN = 22;
+constexpr mobjtype_t MT_WOLFSS = 23;
+constexpr mobjtype_t MT_KEEN = 24;
+constexpr mobjtype_t MT_BOSSBRAIN = 25;
+constexpr mobjtype_t MT_BOSSSPIT = 26;
+constexpr mobjtype_t MT_BOSSTARGET = 27;
+constexpr mobjtype_t MT_SPAWNSHOT = 28;
+constexpr mobjtype_t MT_SPAWNFIRE = 29;
+constexpr mobjtype_t MT_BARREL = 30;
+constexpr mobjtype_t MT_TROOPSHOT = 31;
+constexpr mobjtype_t MT_HEADSHOT = 32;
+constexpr mobjtype_t MT_ROCKET = 33;
+constexpr mobjtype_t MT_PLASMA = 34;
+constexpr mobjtype_t MT_BFG = 35;
+constexpr mobjtype_t MT_ARACHPLAZ = 36;
+constexpr mobjtype_t MT_PUFF = 37;
+constexpr mobjtype_t MT_BLOOD = 38;
+constexpr mobjtype_t MT_TFOG = 39;
+constexpr mobjtype_t MT_IFOG = 40;
+constexpr mobjtype_t MT_TELEPORTMAN = 41;
+constexpr mobjtype_t MT_EXTRABFG = 42;
+constexpr mobjtype_t MT_MISC0 = 43;
+constexpr mobjtype_t MT_MISC1 = 44;
+constexpr mobjtype_t MT_MISC2 = 45;
+constexpr mobjtype_t MT_MISC3 = 46;
+constexpr mobjtype_t MT_MISC4 = 47;
+constexpr mobjtype_t MT_MISC5 = 48;
+constexpr mobjtype_t MT_MISC6 = 49;
+constexpr mobjtype_t MT_MISC7 = 50;
+constexpr mobjtype_t MT_MISC8 = 51;
+constexpr mobjtype_t MT_MISC9 = 52;
+constexpr mobjtype_t MT_MISC10 = 53;
+constexpr mobjtype_t MT_MISC11 = 54;
+constexpr mobjtype_t MT_MISC12 = 55;
+constexpr mobjtype_t MT_INV = 56;
+constexpr mobjtype_t MT_MISC13 = 57;
+constexpr mobjtype_t MT_INS = 58;
+constexpr mobjtype_t MT_MISC14 = 59;
+constexpr mobjtype_t MT_MISC15 = 60;
+constexpr mobjtype_t MT_MISC16 = 61;
+constexpr mobjtype_t MT_MEGA = 62;
+constexpr mobjtype_t MT_CLIP = 63;
+constexpr mobjtype_t MT_MISC17 = 64;
+constexpr mobjtype_t MT_MISC18 = 65;
+constexpr mobjtype_t MT_MISC19 = 66;
+constexpr mobjtype_t MT_MISC20 = 67;
+constexpr mobjtype_t MT_MISC21 = 68;
+constexpr mobjtype_t MT_MISC22 = 69;
+constexpr mobjtype_t MT_MISC23 = 70;
+constexpr mobjtype_t MT_MISC24 = 71;
+constexpr mobjtype_t MT_MISC25 = 72;
+constexpr mobjtype_t MT_CHAINGUN = 73;
+constexpr mobjtype_t MT_MISC26 = 74;
+constexpr mobjtype_t MT_MISC27 = 75;
+constexpr mobjtype_t MT_MISC28 = 76;
+constexpr mobjtype_t MT_SHOTGUN = 77;
+constexpr mobjtype_t MT_SUPERSHOTGUN = 78;
+constexpr mobjtype_t MT_MISC29 = 79;
+constexpr mobjtype_t MT_MISC30 = 80;
+constexpr mobjtype_t MT_MISC31 = 81;
+constexpr mobjtype_t MT_MISC32 = 82;
+constexpr mobjtype_t MT_MISC33 = 83;
+constexpr mobjtype_t MT_MISC34 = 84;
+constexpr mobjtype_t MT_MISC35 = 85;
+constexpr mobjtype_t MT_MISC36 = 86;
+constexpr mobjtype_t MT_MISC37 = 87;
+constexpr mobjtype_t MT_MISC38 = 88;
+constexpr mobjtype_t MT_MISC39 = 89;
+constexpr mobjtype_t MT_MISC40 = 90;
+constexpr mobjtype_t MT_MISC41 = 91;
+constexpr mobjtype_t MT_MISC42 = 92;
+constexpr mobjtype_t MT_MISC43 = 93;
+constexpr mobjtype_t MT_MISC44 = 94;
+constexpr mobjtype_t MT_MISC45 = 95;
+constexpr mobjtype_t MT_MISC46 = 96;
+constexpr mobjtype_t MT_MISC47 = 97;
+constexpr mobjtype_t MT_MISC48 = 98;
+constexpr mobjtype_t MT_MISC49 = 99;
+constexpr mobjtype_t MT_MISC50 = 100;
+constexpr mobjtype_t MT_MISC51 = 101;
+constexpr mobjtype_t MT_MISC52 = 102;
+constexpr mobjtype_t MT_MISC53 = 103;
+constexpr mobjtype_t MT_MISC54 = 104;
+constexpr mobjtype_t MT_MISC55 = 105;
+constexpr mobjtype_t MT_MISC56 = 106;
+constexpr mobjtype_t MT_MISC57 = 107;
+constexpr mobjtype_t MT_MISC58 = 108;
+constexpr mobjtype_t MT_MISC59 = 109;
+constexpr mobjtype_t MT_MISC60 = 110;
+constexpr mobjtype_t MT_MISC61 = 111;
+constexpr mobjtype_t MT_MISC62 = 112;
+constexpr mobjtype_t MT_MISC63 = 113;
+constexpr mobjtype_t MT_MISC64 = 114;
+constexpr mobjtype_t MT_MISC65 = 115;
+constexpr mobjtype_t MT_MISC66 = 116;
+constexpr mobjtype_t MT_MISC67 = 117;
+constexpr mobjtype_t MT_MISC68 = 118;
+constexpr mobjtype_t MT_MISC69 = 119;
+constexpr mobjtype_t MT_MISC70 = 120;
+constexpr mobjtype_t MT_MISC71 = 121;
+constexpr mobjtype_t MT_MISC72 = 122;
+constexpr mobjtype_t MT_MISC73 = 123;
+constexpr mobjtype_t MT_MISC74 = 124;
+constexpr mobjtype_t MT_MISC75 = 125;
+constexpr mobjtype_t MT_MISC76 = 126;
+constexpr mobjtype_t MT_MISC77 = 127;
+constexpr mobjtype_t MT_MISC78 = 128;
+constexpr mobjtype_t MT_MISC79 = 129;
+constexpr mobjtype_t MT_MISC80 = 130;
+constexpr mobjtype_t MT_MISC81 = 131;
+constexpr mobjtype_t MT_MISC82 = 132;
+constexpr mobjtype_t MT_MISC83 = 133;
+constexpr mobjtype_t MT_MISC84 = 134;
+constexpr mobjtype_t MT_MISC85 = 135;
+constexpr mobjtype_t MT_MISC86 = 136;
+/* controls push source - phares */
+constexpr mobjtype_t MT_PUSH = 137;
+/* controls pull source - phares 3/20/98 */
+constexpr mobjtype_t MT_PULL = 138;
+/* killough 7/19/98: Marine's best friend */
+constexpr mobjtype_t MT_DOGS = 139;
+// killough 7/11/98: first  of alternating beta plasma fireballs
+constexpr mobjtype_t MT_PLASMA1 = 140;
+// killough 7/11/98: second of alternating beta plasma fireballs
+constexpr mobjtype_t MT_PLASMA2 = 141;
+// killough 7/11/98: evil sceptre in beta version
+constexpr mobjtype_t MT_SCEPTRE = 142;
+// killough 7/11/98: unholy bible in beta version
+constexpr mobjtype_t MT_BIBLE = 143;
 
-    MT_MUSICSOURCE, /* MUSINFO lump */
-    MT_GIBDTH,
+/* MUSINFO lump */
+constexpr mobjtype_t MT_MUSICSOURCE = 144;
+constexpr mobjtype_t MT_GIBDTH = 145;
 
-    /* proff 11/22/98: Andy Baker's stealth monsters (next 12)
-     * cph - moved below the MBF stuff, no need to displace them */
-    MT_STEALTHBABY,
-    MT_STEALTHVILE,
-    MT_STEALTHBRUISER,
-    MT_STEALTHHEAD,
-    MT_STEALTHCHAINGUY,
-    MT_STEALTHSERGEANT,
-    MT_STEALTHKNIGHT,
-    MT_STEALTHIMP,
-    MT_STEALTHFATSO,
-    MT_STEALTHUNDEAD,
-    MT_STEALTHSHOTGUY,
-    MT_STEALTHZOMBIE,
+/* proff 11/22/98: Andy Baker's stealth monsters (next 12)
+ * cph - moved below the MBF stuff; no need to displace them */
+constexpr mobjtype_t MT_STEALTHBABY = 146;
+constexpr mobjtype_t MT_STEALTHVILE = 147;
+constexpr mobjtype_t MT_STEALTHBRUISER = 148;
+constexpr mobjtype_t MT_STEALTHHEAD = 149;
+constexpr mobjtype_t MT_STEALTHCHAINGUY = 150;
+constexpr mobjtype_t MT_STEALTHSERGEANT = 151;
+constexpr mobjtype_t MT_STEALTHKNIGHT = 152;
+constexpr mobjtype_t MT_STEALTHIMP = 153;
+constexpr mobjtype_t MT_STEALTHFATSO = 154;
+constexpr mobjtype_t MT_STEALTHUNDEAD = 155;
+constexpr mobjtype_t MT_STEALTHSHOTGUY = 156;
+constexpr mobjtype_t MT_STEALTHZOMBIE = 157;
 
-    // 100 extra mobjs to use in dehacked patches
-    MT_EXTRA00 = 150,
-    MT_EXTRA01,
-    MT_EXTRA02,
-    MT_EXTRA03,
-    MT_EXTRA04,
-    MT_EXTRA05,
-    MT_EXTRA06,
-    MT_EXTRA07,
-    MT_EXTRA08,
-    MT_EXTRA09,
-    MT_EXTRA10,
-    MT_EXTRA11,
-    MT_EXTRA12,
-    MT_EXTRA13,
-    MT_EXTRA14,
-    MT_EXTRA15,
-    MT_EXTRA16,
-    MT_EXTRA17,
-    MT_EXTRA18,
-    MT_EXTRA19,
-    MT_EXTRA20,
-    MT_EXTRA21,
-    MT_EXTRA22,
-    MT_EXTRA23,
-    MT_EXTRA24,
-    MT_EXTRA25,
-    MT_EXTRA26,
-    MT_EXTRA27,
-    MT_EXTRA28,
-    MT_EXTRA29,
-    MT_EXTRA30,
-    MT_EXTRA31,
-    MT_EXTRA32,
-    MT_EXTRA33,
-    MT_EXTRA34,
-    MT_EXTRA35,
-    MT_EXTRA36,
-    MT_EXTRA37,
-    MT_EXTRA38,
-    MT_EXTRA39,
-    MT_EXTRA40,
-    MT_EXTRA41,
-    MT_EXTRA42,
-    MT_EXTRA43,
-    MT_EXTRA44,
-    MT_EXTRA45,
-    MT_EXTRA46,
-    MT_EXTRA47,
-    MT_EXTRA48,
-    MT_EXTRA49,
-    MT_EXTRA50,
-    MT_EXTRA51,
-    MT_EXTRA52,
-    MT_EXTRA53,
-    MT_EXTRA54,
-    MT_EXTRA55,
-    MT_EXTRA56,
-    MT_EXTRA57,
-    MT_EXTRA58,
-    MT_EXTRA59,
-    MT_EXTRA60,
-    MT_EXTRA61,
-    MT_EXTRA62,
-    MT_EXTRA63,
-    MT_EXTRA64,
-    MT_EXTRA65,
-    MT_EXTRA66,
-    MT_EXTRA67,
-    MT_EXTRA68,
-    MT_EXTRA69,
-    MT_EXTRA70,
-    MT_EXTRA71,
-    MT_EXTRA72,
-    MT_EXTRA73,
-    MT_EXTRA74,
-    MT_EXTRA75,
-    MT_EXTRA76,
-    MT_EXTRA77,
-    MT_EXTRA78,
-    MT_EXTRA79,
-    MT_EXTRA80,
-    MT_EXTRA81,
-    MT_EXTRA82,
-    MT_EXTRA83,
-    MT_EXTRA84,
-    MT_EXTRA85,
-    MT_EXTRA86,
-    MT_EXTRA87,
-    MT_EXTRA88,
-    MT_EXTRA89,
-    MT_EXTRA90,
-    MT_EXTRA91,
-    MT_EXTRA92,
-    MT_EXTRA93,
-    MT_EXTRA94,
-    MT_EXTRA95,
-    MT_EXTRA96,
-    MT_EXTRA97,
-    MT_EXTRA98,
-    MT_EXTRA99,
+// 100 extra mobjs to use in dehacked patches
+constexpr mobjtype_t MT_EXTRA00 = 150;
+constexpr mobjtype_t MT_EXTRA01 = 151;
+constexpr mobjtype_t MT_EXTRA02 = 152;
+constexpr mobjtype_t MT_EXTRA03 = 153;
+constexpr mobjtype_t MT_EXTRA04 = 154;
+constexpr mobjtype_t MT_EXTRA05 = 155;
+constexpr mobjtype_t MT_EXTRA06 = 156;
+constexpr mobjtype_t MT_EXTRA07 = 157;
+constexpr mobjtype_t MT_EXTRA08 = 158;
+constexpr mobjtype_t MT_EXTRA09 = 159;
+constexpr mobjtype_t MT_EXTRA10 = 160;
+constexpr mobjtype_t MT_EXTRA11 = 161;
+constexpr mobjtype_t MT_EXTRA12 = 162;
+constexpr mobjtype_t MT_EXTRA13 = 163;
+constexpr mobjtype_t MT_EXTRA14 = 164;
+constexpr mobjtype_t MT_EXTRA15 = 165;
+constexpr mobjtype_t MT_EXTRA16 = 166;
+constexpr mobjtype_t MT_EXTRA17 = 167;
+constexpr mobjtype_t MT_EXTRA18 = 168;
+constexpr mobjtype_t MT_EXTRA19 = 169;
+constexpr mobjtype_t MT_EXTRA20 = 170;
+constexpr mobjtype_t MT_EXTRA21 = 171;
+constexpr mobjtype_t MT_EXTRA22 = 172;
+constexpr mobjtype_t MT_EXTRA23 = 173;
+constexpr mobjtype_t MT_EXTRA24 = 174;
+constexpr mobjtype_t MT_EXTRA25 = 175;
+constexpr mobjtype_t MT_EXTRA26 = 176;
+constexpr mobjtype_t MT_EXTRA27 = 177;
+constexpr mobjtype_t MT_EXTRA28 = 178;
+constexpr mobjtype_t MT_EXTRA29 = 179;
+constexpr mobjtype_t MT_EXTRA30 = 180;
+constexpr mobjtype_t MT_EXTRA31 = 181;
+constexpr mobjtype_t MT_EXTRA32 = 182;
+constexpr mobjtype_t MT_EXTRA33 = 183;
+constexpr mobjtype_t MT_EXTRA34 = 184;
+constexpr mobjtype_t MT_EXTRA35 = 185;
+constexpr mobjtype_t MT_EXTRA36 = 186;
+constexpr mobjtype_t MT_EXTRA37 = 187;
+constexpr mobjtype_t MT_EXTRA38 = 188;
+constexpr mobjtype_t MT_EXTRA39 = 189;
+constexpr mobjtype_t MT_EXTRA40 = 190;
+constexpr mobjtype_t MT_EXTRA41 = 191;
+constexpr mobjtype_t MT_EXTRA42 = 192;
+constexpr mobjtype_t MT_EXTRA43 = 193;
+constexpr mobjtype_t MT_EXTRA44 = 194;
+constexpr mobjtype_t MT_EXTRA45 = 195;
+constexpr mobjtype_t MT_EXTRA46 = 196;
+constexpr mobjtype_t MT_EXTRA47 = 197;
+constexpr mobjtype_t MT_EXTRA48 = 198;
+constexpr mobjtype_t MT_EXTRA49 = 199;
+constexpr mobjtype_t MT_EXTRA50 = 200;
+constexpr mobjtype_t MT_EXTRA51 = 201;
+constexpr mobjtype_t MT_EXTRA52 = 202;
+constexpr mobjtype_t MT_EXTRA53 = 203;
+constexpr mobjtype_t MT_EXTRA54 = 204;
+constexpr mobjtype_t MT_EXTRA55 = 205;
+constexpr mobjtype_t MT_EXTRA56 = 206;
+constexpr mobjtype_t MT_EXTRA57 = 207;
+constexpr mobjtype_t MT_EXTRA58 = 208;
+constexpr mobjtype_t MT_EXTRA59 = 209;
+constexpr mobjtype_t MT_EXTRA60 = 210;
+constexpr mobjtype_t MT_EXTRA61 = 211;
+constexpr mobjtype_t MT_EXTRA62 = 212;
+constexpr mobjtype_t MT_EXTRA63 = 213;
+constexpr mobjtype_t MT_EXTRA64 = 214;
+constexpr mobjtype_t MT_EXTRA65 = 215;
+constexpr mobjtype_t MT_EXTRA66 = 216;
+constexpr mobjtype_t MT_EXTRA67 = 217;
+constexpr mobjtype_t MT_EXTRA68 = 218;
+constexpr mobjtype_t MT_EXTRA69 = 219;
+constexpr mobjtype_t MT_EXTRA70 = 220;
+constexpr mobjtype_t MT_EXTRA71 = 221;
+constexpr mobjtype_t MT_EXTRA72 = 222;
+constexpr mobjtype_t MT_EXTRA73 = 223;
+constexpr mobjtype_t MT_EXTRA74 = 224;
+constexpr mobjtype_t MT_EXTRA75 = 225;
+constexpr mobjtype_t MT_EXTRA76 = 226;
+constexpr mobjtype_t MT_EXTRA77 = 227;
+constexpr mobjtype_t MT_EXTRA78 = 228;
+constexpr mobjtype_t MT_EXTRA79 = 229;
+constexpr mobjtype_t MT_EXTRA80 = 230;
+constexpr mobjtype_t MT_EXTRA81 = 231;
+constexpr mobjtype_t MT_EXTRA82 = 232;
+constexpr mobjtype_t MT_EXTRA83 = 233;
+constexpr mobjtype_t MT_EXTRA84 = 234;
+constexpr mobjtype_t MT_EXTRA85 = 235;
+constexpr mobjtype_t MT_EXTRA86 = 236;
+constexpr mobjtype_t MT_EXTRA87 = 237;
+constexpr mobjtype_t MT_EXTRA88 = 238;
+constexpr mobjtype_t MT_EXTRA89 = 239;
+constexpr mobjtype_t MT_EXTRA90 = 240;
+constexpr mobjtype_t MT_EXTRA91 = 241;
+constexpr mobjtype_t MT_EXTRA92 = 242;
+constexpr mobjtype_t MT_EXTRA93 = 243;
+constexpr mobjtype_t MT_EXTRA94 = 244;
+constexpr mobjtype_t MT_EXTRA95 = 245;
+constexpr mobjtype_t MT_EXTRA96 = 246;
+constexpr mobjtype_t MT_EXTRA97 = 247;
+constexpr mobjtype_t MT_EXTRA98 = 248;
+constexpr mobjtype_t MT_EXTRA99 = 249;
 
-    NUMMOBJTYPES // Counter of how many there are
-} mobjtype_t;
+constexpr mobjtype_t NUMMOBJTYPES = 250; // Counter of how many there are
 
 /********************************************************************
  * Definition of the Thing structure
@@ -1671,53 +1686,53 @@ typedef enum
  * sound doesn't apply (like lamps generally don't attack or whistle).
  */
 
-typedef struct
+struct mobjinfo_t
 {
-    int doomednum;          /* Thing number used in id's editor, and now
-               probably by every other editor too */
-    int spawnstate;         /* The state (frame) index when this Thing is
-                   first created */
-    int spawnhealth;        /* The initial hit points for this Thing */
-    int seestate;           /* The state when it sees you or wakes up */
-    int seesound;           /* The sound it makes when waking */
-    int reactiontime;       /* How many tics it waits after it wakes up
-                   before it will start to attack, in normal
-                   skills (halved for nightmare) */
-    int attacksound;        /* The sound it makes when it attacks */
-    int painstate;          /* The state to indicate pain */
-    int painchance;         /* A number that is checked against a random
-                   number 0-255 to see if the Thing is supposed
-                   to go to its painstate or not.  Note this
-                   has absolutely nothing to do with the chance
-                   it will get hurt, just the chance of it
-                   reacting visibly. */
-    int painsound;          /* The sound it emits when it feels pain */
-    int meleestate;         /* Melee==close attack */
-    int missilestate;       /* What states to use when it's in the air, if
-                   in fact it is ever used as a missile */
-    int deathstate;         /* What state begins the death sequence */
-    int xdeathstate;        /* What state begins the horrible death sequence
-                   like when a rocket takes out a trooper */
-    int deathsound;         /* The death sound.  See also A_Scream() in
-                   p_enemy.c for some tweaking that goes on
-                   for certain monsters */
-    int speed;              /* How fast it moves.  Too fast and it can miss
-                   collision logic. */
-    int radius;             /* An often incorrect radius */
-    int height;             /* An often incorrect height, used only to see
-                   if a monster can enter a sector */
-    int mass;               /* How much an impact will move it.  Cacodemons
-                   seem to retreat when shot because they have
-                   very little mass and are moved by impact */
-    int damage;             /* If this is a missile, how much does it hurt? */
-    int activesound;        /* What sound it makes wandering around, once
-                   in a while.  Chance is 3/256 it will. */
-    uint_64_t flags;        /* Bit masks for lots of things.  See p_mobj.h */
-    int raisestate;         /* The first state for an Archvile or respawn
-                   resurrection.  Zero means it won't come
-                   back to life. */
-    mobjtype_t droppeditem; /* ferk: Mobj to drop after death */
-} mobjinfo_t;
+    int doomednum;           /* Thing number used in id's editor, and now
+                probably by every other editor too */
+    statenum_t spawnstate;   /* The state (frame) index when this Thing is
+             first created */
+    int spawnhealth;         /* The initial hit points for this Thing */
+    statenum_t seestate;     /* The state when it sees you or wakes up */
+    sfxenum_t seesound;      /* The sound it makes when waking */
+    int reactiontime;        /* How many tics it waits after it wakes up
+                    before it will start to attack, in normal
+                    skills (halved for nightmare) */
+    sfxenum_t attacksound;   /* The sound it makes when it attacks */
+    statenum_t painstate;    /* The state to indicate pain */
+    int painchance;          /* A number that is checked against a random
+                    number 0-255 to see if the Thing is supposed
+                    to go to its painstate or not.  Note this
+                    has absolutely nothing to do with the chance
+                    it will get hurt, just the chance of it
+                    reacting visibly. */
+    sfxenum_t painsound;     /* The sound it emits when it feels pain */
+    statenum_t meleestate;   /* Melee==close attack */
+    statenum_t missilestate; /* What states to use when it's in the air, if
+             in fact it is ever used as a missile */
+    statenum_t deathstate;   /* What state begins the death sequence */
+    statenum_t xdeathstate;  /* What state begins the horrible death sequence
+             like when a rocket takes out a trooper */
+    sfxenum_t deathsound;    /* The death sound.  See also A_Scream() in
+              p_enemy.c for some tweaking that goes on
+              for certain monsters */
+    int speed;               /* How fast it moves.  Too fast and it can miss
+                    collision logic. */
+    int radius;              /* An often incorrect radius */
+    int height;              /* An often incorrect height, used only to see
+                    if a monster can enter a sector */
+    int mass;                /* How much an impact will move it.  Cacodemons
+                    seem to retreat when shot because they have
+                    very little mass and are moved by impact */
+    int damage;              /* If this is a missile, how much does it hurt? */
+    sfxenum_t activesound;   /* What sound it makes wandering around, once
+              in a while.  Chance is 3/256 it will. */
+    uint_64_t flags;         /* Bit masks for lots of things.  See p_mobj.h */
+    statenum_t raisestate;   /* The first state for an Archvile or respawn
+             resurrection.  Zero means it won't come
+             back to life. */
+    mobjtype_t droppeditem;  /* ferk: Mobj to drop after death */
+};
 
 /* See p_mobj_h for addition more technical info */
 extern mobjinfo_t mobjinfo[NUMMOBJTYPES];

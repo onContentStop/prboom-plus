@@ -35,22 +35,22 @@
 #define __D_ITEMS__
 
 #include "doomdef.hh"
+#include "info.hh"
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 /* Weapon info: sprite frames, ammunition use. */
-typedef struct
+struct weaponinfo_t
 {
     ammotype_t ammo;
-    int upstate;
-    int downstate;
-    int readystate;
-    int atkstate;
-    int flashstate;
-
-} weaponinfo_t;
+    statenum_t upstate;
+    statenum_t downstate;
+    statenum_t readystate;
+    statenum_t atkstate;
+    statenum_t flashstate;
+};
 
 extern weaponinfo_t weaponinfo[NUMWEAPONS + 2];
 extern int ammopershot[NUMWEAPONS + 2];

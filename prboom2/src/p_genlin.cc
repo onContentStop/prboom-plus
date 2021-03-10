@@ -32,14 +32,14 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h" //jff 6/19/98 for demo_compatibility
-#include "e6y.h"
-#include "m_random.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "doomstat.hh" //jff 6/19/98 for demo_compatibility
+#include "e6y.hh"
+#include "m_random.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 //////////////////////////////////////////////////////////
 //
@@ -120,7 +120,8 @@ int EV_DoGenFloor(line_t *line)
 
         // new floor thinker
         rtn = 1;
-        floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+        floor =
+            static_cast<floormove_t *>(Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
         memset(floor, 0, sizeof(*floor));
         P_AddThinker(&floor->thinker);
         sec->floordata = floor;
@@ -339,7 +340,8 @@ int EV_DoGenCeiling(line_t *line)
 
         // new ceiling thinker
         rtn = 1;
-        ceiling = Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0);
+        ceiling =
+            static_cast<ceiling_t *>(Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0));
         memset(ceiling, 0, sizeof(*ceiling));
         P_AddThinker(&ceiling->thinker);
         sec->ceilingdata = ceiling; // jff 2/22/98
@@ -561,7 +563,7 @@ int EV_DoGenLift(line_t *line)
 
         // Setup the plat thinker
         rtn = 1;
-        plat = Z_Malloc(sizeof(*plat), PU_LEVSPEC, 0);
+        plat = static_cast<plat_t *>(Z_Malloc(sizeof(*plat), PU_LEVSPEC, 0));
         memset(plat, 0, sizeof(*plat));
         P_AddThinker(&plat->thinker);
 
@@ -599,7 +601,7 @@ int EV_DoGenLift(line_t *line)
             plat->high = P_FindHighestFloorSurrounding(sec);
             if (plat->high < sec->floorheight)
                 plat->high = sec->floorheight;
-            plat->status = P_Random(pr_genlift) & 1;
+            plat->status = static_cast<plat_e>(P_Random(pr_genlift) & 1);
             break;
         default:
             break;
@@ -733,7 +735,8 @@ int EV_DoGenStairs(line_t *line)
 
         // new floor thinker
         rtn = 1;
-        floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+        floor =
+            static_cast<floormove_t *>(Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
         memset(floor, 0, sizeof(*floor));
         P_AddThinker(&floor->thinker);
         sec->floordata = floor;
@@ -834,7 +837,8 @@ int EV_DoGenStairs(line_t *line)
 
                 sec = tsec;
                 secnum = newsecnum;
-                floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+                floor = static_cast<floormove_t *>(
+                    Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0));
 
                 memset(floor, 0, sizeof(*floor));
                 P_AddThinker(&floor->thinker);
@@ -931,7 +935,8 @@ int EV_DoGenCrusher(line_t *line)
 
         // new ceiling thinker
         rtn = 1;
-        ceiling = Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0);
+        ceiling =
+            static_cast<ceiling_t *>(Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0));
         memset(ceiling, 0, sizeof(*ceiling));
         P_AddThinker(&ceiling->thinker);
         sec->ceilingdata = ceiling; // jff 2/22/98
@@ -1039,7 +1044,7 @@ int EV_DoGenLockedDoor(line_t *line)
 
         // new door thinker
         rtn = 1;
-        door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+        door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
         memset(door, 0, sizeof(*door));
         P_AddThinker(&door->thinker);
         sec->ceilingdata = door; // jff 2/22/98
@@ -1160,7 +1165,7 @@ int EV_DoGenDoor(line_t *line)
 
         // new door thinker
         rtn = 1;
-        door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+        door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
         memset(door, 0, sizeof(*door));
         P_AddThinker(&door->thinker);
         sec->ceilingdata = door; // jff 2/22/98

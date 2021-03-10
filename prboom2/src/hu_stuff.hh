@@ -35,6 +35,7 @@
 
 #include "d_event.hh"
 #include "d_think.hh"
+#include "doomtype.hh"
 
 /*
  * Globally visible constants.
@@ -104,21 +105,23 @@ typedef struct custom_message_s
     const char *msg;
 } custom_message_t;
 
-typedef struct message_thinker_s
+struct message_thinker_t
 {
     thinker_t thinker;
     int plr;
     int delay;
     custom_message_t msg;
-} message_thinker_t;
+};
 
-typedef struct crosshair_s
+struct crosshair_t
 {
     int lump;
-    int w, h, flags;
+    int w;
+    int h;
+    patch_translation_e flags;
     int target_x, target_y, target_z, target_sprite;
     float target_screen_x, target_screen_y;
-} crosshair_t;
+};
 extern crosshair_t crosshair;
 
 int SetCustomMessage(int plr, const char *msg, int delay, int ticks, int cm,

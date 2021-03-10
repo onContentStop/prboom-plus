@@ -1,5 +1,5 @@
-#include "v_trans.h"
-#include "doomtype.h"
+#include "v_trans.hh"
+#include "doomtype.hh"
 
 static byte cr_none[256];
 static const byte cr_red2blue[256] = {

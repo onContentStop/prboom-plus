@@ -75,43 +75,41 @@ typedef enum
 //
 // Button/action code definitions.
 //
-typedef enum
-{
-    // Press "Fire".
-    BT_ATTACK = 1,
+using buttoncode_t = Bitset<byte>;
+// Press "Fire".
+constexpr buttoncode_t BT_ATTACK = 1;
 
-    // Use button, to open doors, activate switches.
-    BT_USE = 2,
+// Use button; to open doors, activate switches.
+constexpr buttoncode_t BT_USE = 2;
 
-    // Flag: game events, not really buttons.
-    BT_SPECIAL = 128,
-    BT_SPECIALMASK = 3,
+// Flag: game events; not really buttons.
+constexpr buttoncode_t BT_SPECIAL = 128;
+constexpr buttoncode_t BT_SPECIALMASK = 3;
 
-    // Flag, weapon change pending.
-    // If true, the next 4 bits hold weapon num.
-    BT_CHANGE = 4,
+// Flag; weapon change pending.
+// If true; the next 4 bits hold weapon num.
+constexpr buttoncode_t BT_CHANGE = 4;
 
-    // The 4bit weapon mask and shift, convenience.
-    BT_WEAPONMASK_OLD = (8 + 16 + 32), // e6y
-    BT_WEAPONMASK =
-        (8 + 16 + 32 + 64), // extended to pick up SSG        // phares
-    BT_WEAPONSHIFT = 3,
+// The 4bit weapon mask and shift; convenience.
+constexpr buttoncode_t BT_WEAPONMASK_OLD = (8 + 16 + 32); // e6y
+constexpr buttoncode_t BT_WEAPONMASK =
+    (8 + 16 + 32 + 64); // extended to pick up SSG        // phares
+constexpr buttoncode_t BT_WEAPONSHIFT = 3;
 
-    // Special events
-    BTS_LOADGAME = 0, // Loads a game
-                      // Pause the game.
-    BTS_PAUSE = 1,
-    // Save the game at each console.
-    BTS_SAVEGAME = 2,
-    BTS_RESTARTLEVEL = 3, // Restarts the current level
+// Special events
+constexpr buttoncode_t BTS_LOADGAME = 0; // Loads a game
+                                         // Pause the game.
+constexpr buttoncode_t BTS_PAUSE = 1;
+// Save the game at each console.
+constexpr buttoncode_t BTS_SAVEGAME = 2;
+constexpr buttoncode_t BTS_RESTARTLEVEL = 3; // Restarts the current level
 
-    // Savegame slot numbers occupy the second byte of buttons.
-    BTS_SAVEMASK = (4 + 8 + 16),
-    BTS_SAVESHIFT = 2,
+// Savegame slot numbers occupy the second byte of buttons.
+constexpr buttoncode_t BTS_SAVEMASK = (4 + 8 + 16);
+constexpr buttoncode_t BTS_SAVESHIFT = 2;
 
-    // Demo joined.
-    BT_JOIN = 64
-} buttoncode_t;
+// Demo joined.
+constexpr buttoncode_t BT_JOIN = 64;
 
 //
 // GLOBAL VARIABLES

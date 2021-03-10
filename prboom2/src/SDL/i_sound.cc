@@ -853,7 +853,7 @@ static void Exp_ShutdownMusic(void);
 
 #ifdef HAVE_MIXER
 
-#include "mus2mid.h"
+#include "mus2mid.hh"
 
 static Mix_Music *music[2] = {NULL, NULL};
 

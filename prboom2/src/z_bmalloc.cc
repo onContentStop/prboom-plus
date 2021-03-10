@@ -35,10 +35,10 @@
 #include "config.h"
 #endif
 
-#include "doomtype.h"
-#include "lprintf.h"
-#include "z_bmalloc.h"
-#include "z_zone.h"
+#include "doomtype.hh"
+#include "lprintf.hh"
+#include "z_bmalloc.hh"
+#include "z_zone.hh"
 
 typedef struct bmalpool_s
 {
@@ -75,11 +75,11 @@ enum
 
 void *Z_BMalloc(struct block_memory_alloc_s *pzone)
 {
-    register bmalpool_t **pool = (bmalpool_t **)&(pzone->firstpool);
+    bmalpool_t **pool = (bmalpool_t **)&(pzone->firstpool);
     while (*pool != NULL)
     {
-        byte *p = memchr((*pool)->used, unused_block,
-                         (*pool)->blocks); // Scan for unused marker
+        byte *p = (byte *)memchr((*pool)->used, unused_block,
+                                 (*pool)->blocks); // Scan for unused marker
         if (p)
         {
             int n = p - (*pool)->used;
@@ -99,7 +99,7 @@ void *Z_BMalloc(struct block_memory_alloc_s *pzone)
 
         // CPhipps: Allocate new memory, initialised to 0
 
-        *pool = newpool = Z_Calloc(
+        *pool = newpool = (bmalpool_t *)Z_Calloc(
             sizeof(*newpool) + (sizeof(byte) + pzone->size) * (pzone->perpool),
             1, pzone->tag, NULL);
         newpool->nextpool = NULL; // NULL = (void*)0 so this is redundant
@@ -113,7 +113,7 @@ void *Z_BMalloc(struct block_memory_alloc_s *pzone)
 
 void Z_BFree(struct block_memory_alloc_s *pzone, void *p)
 {
-    register bmalpool_t **pool = (bmalpool_t **)&(pzone->firstpool);
+    bmalpool_t **pool = (bmalpool_t **)&(pzone->firstpool);
 
     while (*pool != NULL)
     {

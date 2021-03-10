@@ -36,107 +36,11 @@
 #ifndef __D_THINK__
 #define __D_THINK__
 
+#include "unions.hh"
+
 #ifdef __GNUG__
 #pragma interface
 #endif
-
-/*
- * Experimental stuff.
- * To compile this as "ANSI C with classes"
- *  we will need to handle the various
- *  action functions cleanly.
- */
-// killough 11/98: convert back to C instead of C++
-typedef void (*actionf_t)();
-
-// e6y: for boom's friction code
-using actionf_v = void (*)();
-struct mobj_t;
-using actionf_mobj1 = void (*)(mobj_t *);
-typedef void (*actionf_p1)(void *);
-typedef void (*actionf_p2)(void *, void *);
-
-class actionf
-{
-    enum class actionf_discriminant
-    {
-        af_v,
-        af_mobj1,
-        af_p1,
-        af_p2,
-        undefined
-    };
-    actionf_v m_v = nullptr;
-    actionf_mobj1 m_mobj1 = nullptr;
-    actionf_p1 m_p1 = nullptr;
-    actionf_p2 m_p2 = nullptr;
-    actionf_discriminant m_which = actionf_discriminant::undefined;
-
-  public:
-    actionf() = default;
-
-    actionf(actionf_v fn) : m_v(fn), m_which(actionf_discriminant::af_v)
-    {
-    }
-
-    actionf(actionf_mobj1 fn)
-        : m_mobj1(fn), m_which(actionf_discriminant::af_mobj1)
-    {
-    }
-
-    actionf(actionf_p1 fn) : m_p1(fn), m_which(actionf_discriminant::af_p1)
-    {
-    }
-
-    actionf(actionf_p2 fn) : m_p2(fn), m_which(actionf_discriminant::af_p1)
-    {
-    }
-
-    const actionf_v *V() const
-    {
-        if (m_which == actionf_discriminant::af_v)
-        {
-            return &m_v;
-        }
-
-        return nullptr;
-    }
-
-    const actionf_mobj1 *Mobj1() const
-    {
-        if (m_which == actionf_discriminant::af_mobj1)
-        {
-            return &m_mobj1;
-        }
-
-        return nullptr;
-    }
-
-    const actionf_p1 *P1() const
-    {
-        if (m_which == actionf_discriminant::af_p1)
-        {
-            return &m_p1;
-        }
-
-        return nullptr;
-    }
-
-    const actionf_p2 *P2() const
-    {
-        if (m_which == actionf_discriminant::af_p2)
-        {
-            return &m_p2;
-        }
-
-        return nullptr;
-    }
-
-    bool Empty() const
-    {
-        return m_which == actionf_discriminant::undefined;
-    }
-};
 
 /* Note: In d_deh.c you will find references to these
  * wherever code pointers and function handlers exist
@@ -155,25 +59,25 @@ typedef union
  *  function pointer to a routine to handle
  *  an actor.
  */
-typedef actionf_t think_t;
+using think_t = Action;
 
 /* Doubly linked list of actors. */
-typedef struct thinker_s
+struct thinker_t
 {
-    struct thinker_s *prev;
-    struct thinker_s *next;
+    thinker_t *prev;
+    thinker_t *next;
     think_t function;
 
     /* killough 8/29/98: we maintain thinkers in several equivalence classes,
      * according to various criteria, so as to allow quicker searches.
      */
 
-    struct thinker_s *cnext, *cprev; /* Next, previous thinkers in same class */
+    thinker_t *cnext, *cprev; /* Next, previous thinkers in same class */
 
     /* killough 11/98: count of how many other objects reference
      * this one using pointers. Used for garbage collection.
      */
     unsigned references;
-} thinker_t;
+};
 
 #endif

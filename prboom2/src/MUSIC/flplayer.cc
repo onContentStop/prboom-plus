@@ -52,10 +52,10 @@ const music_player_t fl_player = {fl_name, fl_init, NULL, NULL, NULL, NULL,
 
 #else // HAVE_LIBFLUIDSYNTH
 
-#include "i_sound.h"  // for snd_soundfont, mus_fluidsynth_gain
-#include "i_system.h" // for I_FindFile()
-#include "lprintf.h"
-#include "midifile.h"
+#include "i_sound.hh" // for snd_soundfont, mus_fluidsynth_gain
+#include "i_system.hh" // for I_FindFile()
+#include "lprintf.hh"
+#include "midifile.hh"
 #include <fluidsynth.h>
 #include <stdlib.h>
 #include <string.h>
@@ -475,34 +475,32 @@ static void fl_render(void *vdest, unsigned length)
                 }
                 return;
             }
-            return;
+            break; // not interested in most metas
+        default:   // uhh
+            break;
         }
-        break; // not interested in most metas
-    default:   // uhh
-        break;
+        // event processed so advance midiclock
+        f_delta += eventdelta;
+        eventpos++;
     }
-    // event processed so advance midiclock
-    f_delta += eventdelta;
-    eventpos++;
-}
 
-if (samples + sampleswritten > length)
-{ // broke due to next event being past
-  // the end of current render buffer
-    // finish buffer, return
-    samples = length - sampleswritten;
-    if (samples)
-    {
-        fl_writesamples_ex(dest, samples);
-        sampleswritten += samples;
-        f_delta -= samples; // save offset
-        dest += samples * 2;
+    if (samples + sampleswritten > length)
+    { // broke due to next event being past
+      // the end of current render buffer
+        // finish buffer, return
+        samples = length - sampleswritten;
+        if (samples)
+        {
+            fl_writesamples_ex(dest, samples);
+            sampleswritten += samples;
+            f_delta -= samples; // save offset
+            dest += samples * 2;
+        }
     }
-}
-else
-{ // huh?
-    return;
-}
+    else
+    { // huh?
+        return;
+    }
 }
 
 const music_player_t fl_player = {

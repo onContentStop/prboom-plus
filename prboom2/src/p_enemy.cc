@@ -33,24 +33,24 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_enemy.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "i_sound.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "m_random.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_setup.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "p_enemy.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "hu_stuff.hh"
+#include "i_sound.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "m_random.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_setup.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 static mobj_t *current_actor;
 
@@ -331,13 +331,14 @@ static dboolean P_IsOnLift(const mobj_t *actor)
 
 static int P_IsUnderDamage(mobj_t *actor)
 {
-    const struct msecnode_s *seclist;
+    const msecnode_t *seclist;
     const ceiling_t *cl; // Crushing ceiling
     int dir = 0;
     for (seclist = actor->touching_sectorlist; seclist;
          seclist = seclist->m_tnext)
-        if ((cl = seclist->m_sector->ceilingdata) &&
-            cl->thinker.function == T_MoveCeiling)
+        if ((cl = static_cast<const ceiling_t *>(
+                 seclist->m_sector->ceilingdata)) &&
+            cl->thinker.function == Action{T_MoveCeiling})
             dir |= cl->direction;
     return dir;
 }
@@ -497,7 +498,8 @@ static dboolean P_SmartMove(mobj_t *actor)
     // haleyjd: allow all friends of HelperType to also jump down
 
     if ((actor->type == MT_DOGS ||
-         (actor->type == (HelperThing - 1) && actor->flags & MF_FRIEND)) &&
+         (actor->type == mobjtype_t{HelperThing - 1} &&
+          actor->flags & MF_FRIEND)) &&
         target && dog_jumping &&
         !((target->flags ^ actor->flags) & MF_FRIEND) &&
         P_AproxDistance(actor->x - target->x, actor->y - target->y) <
@@ -1154,12 +1156,7 @@ void A_Look(mobj_t *actor)
                 S_UnlinkSound(actor);
         }
     }
-    if (actor->type == MT_SPIDER || actor->type == MT_CYBORG)
-        S_StartSound(NULL, sound); // full volume
-    else
-        S_StartSound(actor, sound);
-}
-P_SetMobjState(actor, actor->info->seestate);
+    P_SetMobjState(actor, actor->info->seestate);
 }
 
 //
@@ -2557,12 +2554,12 @@ void P_SpawnBrainTargets(void) // killough 3/26/98: renamed old function
             if (m->type == MT_BOSSTARGET)
             { // killough 2/7/98: remove limit on icon landings:
                 if (numbraintargets >= numbraintargets_alloc)
-                    braintargets = realloc(
+                    braintargets = static_cast<mobj_t **>(realloc(
                         braintargets,
                         (numbraintargets_alloc = numbraintargets_alloc
                                                      ? numbraintargets_alloc * 2
                                                      : 32) *
-                            sizeof *braintargets);
+                            sizeof *braintargets));
                 braintargets[numbraintargets++] = m;
             }
         }
@@ -2825,7 +2822,7 @@ void A_Spawn(mobj_t *mo)
     {
         mobj_t *newmobj =
             P_SpawnMobj(mo->x, mo->y, (mo->state->misc2 << FRACBITS) + mo->z,
-                        mo->state->misc1 - 1);
+                        static_cast<mobjtype_t>(mo->state->misc1 - 1));
         if (compatibility_level == mbf_compatibility &&
             !prboom_comp[PC_DO_NOT_INHERIT_FRIENDLYNESS_FLAG_ON_SPAWN].state)
             /* CPhipps - no friendlyness (yet)*/ // e6y: why not?
@@ -2879,7 +2876,7 @@ void A_RandomJump(mobj_t *mo)
         return;
 
     if (P_Random(pr_randomjump) < mo->state->misc2)
-        P_SetMobjState(mo, mo->state->misc1);
+        P_SetMobjState(mo, static_cast<statenum_t>(mo->state->misc1));
 }
 
 //

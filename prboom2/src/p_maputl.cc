@@ -34,17 +34,17 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_maputl.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "g_overflow.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "p_map.h"
-#include "p_setup.h"
-#include "r_main.h"
+#include "p_maputl.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "g_overflow.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "p_map.hh"
+#include "p_setup.hh"
+#include "r_main.hh"
 
 //
 // P_AproxDistance
@@ -441,7 +441,8 @@ void check_intercept(void)
     if (offset >= num_intercepts)
     {
         num_intercepts = num_intercepts ? num_intercepts * 2 : 128;
-        intercepts = realloc(intercepts, sizeof(*intercepts) * num_intercepts);
+        intercepts = static_cast<intercept_t *>(
+            realloc(intercepts, sizeof(*intercepts) * num_intercepts));
         intercept_p = intercepts + offset;
     }
 }

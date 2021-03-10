@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "rd_graphic.h"
-#include "rd_palette.h"
-#include "rd_util.h"
+#include "rd_graphic.hh"
+#include "rd_palette.hh"
+#include "rd_util.hh"
 
 //
 // parseppm

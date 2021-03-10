@@ -39,28 +39,28 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_spec.h"
-#include "d_deh.h"
-#include "d_englsh.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "i_sound.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_bbox.h" // phares 3/20/98
-#include "m_random.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_setup.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "w_wad.h"
+#include "p_spec.hh"
+#include "d_deh.hh"
+#include "d_englsh.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "hu_stuff.hh"
+#include "i_sound.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_bbox.hh" // phares 3/20/98
+#include "m_random.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_setup.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "w_wad.hh"
 
 //
 //      source animation definition
@@ -110,8 +110,8 @@ void MarkAnimatedTextures(void)
 #ifdef GL_DOOM
     anim_t *anim;
 
-    anim_textures = calloc(numtextures, sizeof(TAnimItemParam));
-    anim_flats = calloc(numflats, sizeof(TAnimItemParam));
+    anim_textures = (TAnimItemParam *)calloc(numtextures, sizeof(TAnimItemParam));
+    anim_flats = (TAnimItemParam *)calloc(numflats, sizeof(TAnimItemParam));
 
     for (anim = anims; anim < lastanim; anim++)
     {
@@ -172,7 +172,8 @@ void P_InitPicAnims(void)
         if (lastanim >= anims + maxanims)
         {
             size_t newmax = maxanims ? maxanims * 2 : MAXANIMS;
-            anims = realloc(anims, newmax * sizeof(*anims)); // killough
+            anims = static_cast<anim_t *>(
+                realloc(anims, newmax * sizeof(*anims))); // killough
             lastanim = anims + maxanims;
             maxanims = newmax;
         }
@@ -396,8 +397,8 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
             {
                 heightlist_size = heightlist_size ? heightlist_size * 2 : 128;
             } while (sec->linecount > heightlist_size);
-            heightlist =
-                realloc(heightlist, heightlist_size * sizeof(heightlist[0]));
+            heightlist = static_cast<fixed_t *>(
+                realloc(heightlist, heightlist_size * sizeof(heightlist[0])));
         }
 
         for (i = 0, h = 0; i < sec->linecount; i++)
@@ -501,7 +502,9 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
      * If there are no higher neighbouring sectors, Heretic just returned
      * heightlist[0] (local variable), i.e. noise off the stack. 0 is right for
      * RETURN01 E1M2, so let's take that. */
-    return (compatibility_level < doom_1666_compatibility ? 0 : currentheight);
+    return (compatibility_level < doom_1666_compatibility
+                ? 0
+                : currentheight);
 }
 
 //
@@ -2559,7 +2562,8 @@ void P_UpdateSpecials(void)
                      * unless in a compatibility mode. */
                     mobj_t *so = (mobj_t *)buttonlist[i].soundorg;
                     if (comp[comp_sound] ||
-                        compatibility_level < prboom_6_compatibility)
+                        compatibility_level <
+                            prboom_6_compatibility)
                         /* since the buttonlist array is usually zeroed out,
                          * button popouts generally appear to come from (0,0) */
                         so = (mobj_t *)&buttonlist[i].soundorg;
@@ -2821,25 +2825,25 @@ void T_Scroll(scroll_t *s)
         msecnode_t *node;
         mobj_t *thing;
 
-    case sc_side: // killough 3/7/98: Scroll wall texture
+    case scroll_t::sc_side: // killough 3/7/98: Scroll wall texture
         side = sides + s->affectee;
         side->textureoffset += dx;
         side->rowoffset += dy;
         break;
 
-    case sc_floor: // killough 3/7/98: Scroll floor texture
+    case scroll_t::sc_floor: // killough 3/7/98: Scroll floor texture
         sec = sectors + s->affectee;
         sec->floor_xoffs += dx;
         sec->floor_yoffs += dy;
         break;
 
-    case sc_ceiling: // killough 3/7/98: Scroll ceiling texture
+    case scroll_t::sc_ceiling: // killough 3/7/98: Scroll ceiling texture
         sec = sectors + s->affectee;
         sec->ceiling_xoffs += dx;
         sec->ceiling_yoffs += dy;
         break;
 
-    case sc_carry:
+    case scroll_t::sc_carry:
 
         // killough 3/7/98: Carry things on floor
         // killough 3/20/98: use new sector list which reflects true members
@@ -2865,7 +2869,7 @@ void T_Scroll(scroll_t *s)
             }
         break;
 
-    case sc_carry_ceiling: // to be added later
+    case scroll_t::sc_carry_ceiling: // to be added later
         break;
     }
 }
@@ -2891,9 +2895,10 @@ void T_Scroll(scroll_t *s)
 static void Add_Scroller(int type, fixed_t dx, fixed_t dy, int control,
                          int affectee, int accel)
 {
-    scroll_t *s = Z_Malloc(sizeof *s, PU_LEVSPEC, 0);
+    auto *s =
+        static_cast<scroll_t *>(Z_Malloc(sizeof(scroll_t), PU_LEVSPEC, 0));
     s->thinker.function = T_Scroll;
-    s->type = type;
+    s->type = static_cast<scroll_t::type_t>(type);
     s->dx = dx;
     s->dy = dy;
     s->accel = accel;
@@ -2939,7 +2944,7 @@ static void Add_WallScroller(fixed_t dx, fixed_t dy, const line_t *l,
         x = -FixedDiv(FixedMul(dy, l->dy) + FixedMul(dx, l->dx), d);
         y = -FixedDiv(FixedMul(dx, l->dy) - FixedMul(dy, l->dx), d);
     }
-    Add_Scroller(sc_side, x, y, control, *l->sidenum, accel);
+    Add_Scroller(scroll_t::sc_side, x, y, control, *l->sidenum, accel);
 }
 
 // Amount (dx,dy) vector linedef is shifted right to get scroll amount
@@ -2986,17 +2991,17 @@ static void P_SpawnScrollers(void)
 
         switch (special)
         {
-            register int s;
+            int s;
 
         case 250: // scroll effect ceiling
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
-                Add_Scroller(sc_ceiling, -dx, dy, control, s, accel);
+                Add_Scroller(scroll_t::sc_ceiling, -dx, dy, control, s, accel);
             break;
 
         case 251: // scroll effect floor
         case 253: // scroll and carry objects on floor
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
-                Add_Scroller(sc_floor, -dx, dy, control, s, accel);
+                Add_Scroller(scroll_t::sc_floor, -dx, dy, control, s, accel);
             if (special != 253)
                 break;
             // fallthrough
@@ -3005,7 +3010,7 @@ static void P_SpawnScrollers(void)
             dx = FixedMul(dx, CARRYFACTOR);
             dy = FixedMul(dy, CARRYFACTOR);
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
-                Add_Scroller(sc_carry, dx, dy, control, s, accel);
+                Add_Scroller(scroll_t::sc_carry, dx, dy, control, s, accel);
             break;
 
             // killough 3/1/98: scroll wall according to linedef
@@ -3025,16 +3030,18 @@ static void P_SpawnScrollers(void)
 
         case 255: // killough 3/2/98: scroll according to sidedef offsets
             s = lines[i].sidenum[0];
-            Add_Scroller(sc_side, -sides[s].textureoffset, sides[s].rowoffset,
-                         -1, s, accel);
+            Add_Scroller(scroll_t::sc_side, -sides[s].textureoffset,
+                         sides[s].rowoffset, -1, s, accel);
             break;
 
         case 48: // scroll first side
-            Add_Scroller(sc_side, FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
+            Add_Scroller(scroll_t::sc_side, FRACUNIT, 0, -1,
+                         lines[i].sidenum[0], accel);
             break;
 
         case 85: // jff 1/30/98 2-way scroll
-            Add_Scroller(sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
+            Add_Scroller(scroll_t::sc_side, -FRACUNIT, 0, -1,
+                         lines[i].sidenum[0], accel);
             break;
         }
     }
@@ -3052,7 +3059,8 @@ static void P_SpawnScrollers(void)
 
 static void Add_Friction(int friction, int movefactor, int affectee)
 {
-    friction_t *f = Z_Malloc(sizeof *f, PU_LEVSPEC, 0);
+    auto *f =
+        static_cast<friction_t *>(Z_Malloc(sizeof(friction_t), PU_LEVSPEC, 0));
 
     f->thinker.function /*.acp1*/ = /*(actionf_p1) */ T_Friction;
     f->friction = friction;
@@ -3283,11 +3291,12 @@ static void P_SpawnFriction(void)
 static void Add_Pusher(int type, int x_mag, int y_mag, mobj_t *source,
                        int affectee)
 {
-    pusher_t *p = Z_Malloc(sizeof *p, PU_LEVSPEC, 0);
+    auto *p =
+        static_cast<pusher_t *>(Z_Malloc(sizeof(pusher_t), PU_LEVSPEC, 0));
 
     p->thinker.function = T_Pusher;
     p->source = source;
-    p->type = type;
+    p->type = static_cast<pusher_t::pusher_type>(type);
     p->x_mag = x_mag >> FRACBITS;
     p->y_mag = y_mag >> FRACBITS;
     p->magnitude = P_AproxDistance(p->x_mag, p->y_mag);
@@ -3404,7 +3413,7 @@ void T_Pusher(pusher_t *p)
     //
     //    Apply no force if wind, full force if current.
 
-    if (p->type == p_push)
+    if (p->type == pusher_t::p_push)
     {
 
         // Seek out all pushable things within the force radius of this
@@ -3437,7 +3446,7 @@ void T_Pusher(pusher_t *p)
         thing = node->m_thing;
         if (!thing->player || (thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
             continue;
-        if (p->type == p_wind)
+        if (p->type == pusher_t::p_wind)
         {
             if (sec->heightsec == -1)         // NOT special water sector
                 if (thing->z > thing->floorz) // above ground
@@ -3534,18 +3543,18 @@ static void P_SpawnPushers(void)
         {
         case 224: // wind
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
-                Add_Pusher(p_wind, l->dx, l->dy, NULL, s);
+                Add_Pusher(pusher_t::p_wind, l->dx, l->dy, NULL, s);
             break;
         case 225: // current
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
-                Add_Pusher(p_current, l->dx, l->dy, NULL, s);
+                Add_Pusher(pusher_t::p_current, l->dx, l->dy, NULL, s);
             break;
         case 226: // push/pull
             for (s = -1; (s = P_FindSectorFromLineTag(l, s)) >= 0;)
             {
                 thing = P_GetPushThing(s);
                 if (thing) // No MT_P* means no effect
-                    Add_Pusher(p_push, l->dx, l->dy, thing, s);
+                    Add_Pusher(pusher_t::p_push, l->dx, l->dy, thing, s);
             }
             break;
         }

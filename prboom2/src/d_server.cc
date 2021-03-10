@@ -33,6 +33,7 @@
  *-----------------------------------------------------------------------------
  */
 
+#include "d_ticcmd.hh"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -54,14 +55,14 @@
 #include "SDL.h"
 #endif
 
-#include "doomtype.h"
-#include "i_network.h"
-#include "protocol.h"
+#include "doomtype.hh"
+#include "i_network.hh"
+#include "protocol.hh"
 #ifndef PRBOOM_SERVER
-#include "m_fixed.h"
+#include "m_fixed.hh"
 #endif
-#include "i_system.h"
-#include "m_swap.h"
+#include "i_system.hh"
+#include "m_swap.hh"
 
 #ifndef HAVE_GETOPT
 /* The following code for getopt is from the libc-source of FreeBSD,
@@ -118,13 +119,11 @@ char *__progname = "prboom_server";
  * getopt --
  *  Parse argc/argv argument vector.
  */
-int getopt(nargc, nargv, ostr) int nargc;
-char *const nargv[];
-const char *ostr;
+int getopt(int nargc, const char *nargv[], const char *ostr)
 {
     extern char *__progname;
-    static char *place = EMSG; /* option letter processing */
-    char *oli;                 /* option letter list index */
+    static const char *place = EMSG; /* option letter processing */
+    const char *oli;                 /* option letter list index */
 
     if (optreset || *place == 0)
     { /* update scanning pointer */
@@ -181,9 +180,9 @@ const char *ostr;
         /* Option-argument is either the rest of this argument or the
            entire next argument. */
         if (*place)
-            optarg = place;
+            optarg = const_cast<char *>(place);
         else if (nargc > ++optind)
-            optarg = nargv[optind];
+            optarg = const_cast<char *>(nargv[optind]);
         else
         {
             /* option-argument absent */
@@ -501,8 +500,10 @@ int main(int argc, char **argv)
                 if (optarg)
                 {
                     char *p;
-                    wadname = realloc(wadname, ++numwads * sizeof *wadname);
-                    wadget = realloc(wadget, numwads * sizeof *wadget);
+                    wadname = static_cast<char **>(
+                        realloc(wadname, ++numwads * sizeof *wadname));
+                    wadget = static_cast<char **>(
+                        realloc(wadget, numwads * sizeof *wadget));
                     wadname[numwads - 1] = strdup(optarg);
                     if ((p = strchr(wadname[numwads - 1], ',')))
                     {
@@ -569,7 +570,8 @@ int main(int argc, char **argv)
 
         while (1)
         {
-            packet_header_t *packet = malloc(10000);
+            packet_header_t *packet =
+                static_cast<packet_header_t *>(malloc(10000));
             size_t len;
 
             I_WaitForPacket(120 * 1000);
@@ -584,7 +586,8 @@ int main(int argc, char **argv)
                     {
                         {
                             int n;
-                            struct setup_packet_s *sinfo = (void *)(packet + 1);
+                            struct setup_packet_s *sinfo =
+                                reinterpret_cast<setup_packet_s *>(packet + 1);
 
                             /* Find player number and add to the game */
                             n = *(short *)(packet + 1);
@@ -621,7 +624,8 @@ int main(int argc, char **argv)
                                 sinfo->numwads = numwads;
                                 for (i = 0; i < numwads; i++)
                                 {
-                                    strcpy(sinfo->wadnames + extrabytes,
+                                    strcpy(reinterpret_cast<char *>(
+                                               sinfo->wadnames + extrabytes),
                                            wadname[i]);
                                     extrabytes += strlen(wadname[i]) + 1;
                                 }
@@ -676,7 +680,8 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        ticcmd_t *newtic = (void *)(((byte *)(packet + 1)) + 2);
+                        ticcmd_t *newtic =
+                            (ticcmd_t *)(((byte *)(packet + 1)) + 2);
                         if (ptic(packet) + tics < remoteticfrom[from])
                             break; // Won't help
                         remoteticfrom[from] = ptic(packet);
@@ -704,9 +709,9 @@ int main(int argc, char **argv)
 
                     if (!ingame && playerstate[from] != pc_unused)
                     {
-                        // If we already got a PKT_GO, we have to remove this
-                        // player frmo the count of ready players. And we then
-                        // flag this player slot as vacant.
+                        // If we already got a PKT_GO, we have to remove
+                        // this player frmo the count of ready players. And
+                        // we then flag this player slot as vacant.
                         printf("player %d pulls out\n", from);
                         if (playerstate[from] == pc_confirmedready)
                             curplayers--;
@@ -760,7 +765,7 @@ int main(int argc, char **argv)
                     else
                     {
                         size += strlen(wadname[i]) + strlen(wadget[i]) + 2;
-                        reply = malloc(size);
+                        reply = static_cast<packet_header_t *>(malloc(size));
                         packet_set(reply, PKT_WAD, 0);
                         strcpy((char *)(reply + 1), wadname[i]);
                         strcpy((char *)(reply + 1) + strlen(wadname[i]) + 1,
@@ -849,16 +854,16 @@ int main(int argc, char **argv)
                             continue;
                         if ((remoteticto[i] -= xtratics) < 0)
                             remoteticto[i] = 0;
-                        tics = MIN(
-                            lowtic - remoteticto[i],
-                            128); // limit number of sent tics (CVE-2019-20797)
+                        tics = MIN(lowtic - remoteticto[i],
+                                   128); // limit number of sent tics
+                                         // (CVE-2019-20797)
                         {
                             byte *p;
-                            packet =
-                                malloc(sizeof(packet_header_t) + 1 +
-                                       tics * (1 + numplayers *
-                                                       (1 + sizeof(ticcmd_t))));
-                            p = (void *)(packet + 1);
+                            packet = static_cast<packet_header_t *>(malloc(
+                                sizeof(packet_header_t) + 1 +
+                                tics *
+                                    (1 + numplayers * (1 + sizeof(ticcmd_t)))));
+                            p = (byte *)(packet + 1);
                             packet_set(packet, PKT_TICS, remoteticto[i]);
                             *p++ = tics;
                             if (verbose > 1)
@@ -898,16 +903,17 @@ int main(int argc, char **argv)
                                     35)
                                 {
                                     packet_header_t *packet =
-                                        malloc(sizeof(packet_header_t));
+                                        static_cast<packet_header_t *>(
+                                            malloc(sizeof(packet_header_t)));
                                     packet_set(packet, PKT_BACKOFF,
                                                remoteticto[i]);
                                     I_SendPacketTo(packet, sizeof *packet,
                                                    remoteaddr + i);
                                     backoffcounter[i] = 0;
                                     if (verbose)
-                                        printf(
-                                            "telling client %d to back off\n",
-                                            i);
+                                        printf("telling client %d to back "
+                                               "off\n",
+                                               i);
                                     free(packet);
                                 }
                             }

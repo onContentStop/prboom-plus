@@ -929,7 +929,7 @@ typedef struct
 #define DEH_BUFFERMAX 1024 // input buffer area size, hardcodedfor now
 // killough 8/9/98: make DEH_BLOCKMAX self-adjusting
 #define DEH_BLOCKMAX (sizeof deh_blocks / sizeof *deh_blocks) // size of array
-#define DEH_MAXKEYLEN 32   // as much of any key as we'll look at
+#define DEH_MAXKEYLEN 32 // as much of any key as we'll look at
 #define DEH_MOBJINFOMAX 25 // number of ints in the mobjinfo_t structure (!)
 
 // Put all the block header values, and the function to be called when that
@@ -1190,7 +1190,7 @@ static const char *deh_misc[] = // CPhipps - static const*
 
 typedef struct
 {
-    actionf cptr;
+    Action cptr;
     const char *lookup; // mnemonic lookup string to be specified in BEX
                         // CPhipps - const*
 } deh_bexptr;
@@ -1294,7 +1294,7 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
 
 // to hold startup code pointers from INFO.C
 // CPhipps - static
-static actionf deh_codeptr[NUMSTATES];
+static Action deh_codeptr[NUMSTATES];
 
 // haleyjd: support for BEX SPRITES, SOUNDS, and MUSIC
 char *deh_spritenames[NUMSPRITES + 1];
@@ -1684,7 +1684,7 @@ static void deh_procBexCodePointers(DEHFILE *fpin, FILE *fpout, char *line)
                             deh_bexptrs[i].lookup, i, indexnum);
                 found = TRUE;
             }
-        } while (!found && (!deh_bexptrs[i].cptr.Empty()));
+        } while (!found && deh_bexptrs[i].cptr != ACTION_NULL);
 
         if (!found)
             if (fpout)
@@ -1781,16 +1781,16 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint_64_t value)
         mi->doomednum = (int)value;
         return;
     case 1:
-        mi->spawnstate = (int)value;
+        mi->spawnstate = static_cast<statenum_t>(value);
         return;
     case 2:
         mi->spawnhealth = (int)value;
         return;
     case 3:
-        mi->seestate = (int)value;
+        mi->seestate = static_cast<statenum_t>(value);
         return;
     case 4:
-        mi->seesound = (int)value;
+        mi->seesound = static_cast<sfxenum_t>(value);
         return;
     case 5:
         mi->reactiontime = (int)value;
@@ -2190,14 +2190,14 @@ static void deh_procPointer(DEHFILE *fpin, FILE *fpout, char *line) // done
             for (i = 0; i < sizeof(deh_bexptrs) / sizeof(*deh_bexptrs); i++)
             {
                 if (!memcmp(&deh_bexptrs[i].cptr, &deh_codeptr[value],
-                            sizeof(actionf_t)))
+                            sizeof(Action)))
                 {
                     if (fpout)
                         fprintf(fpout, "BEX [CODEPTR] -> FRAME %d = %s\n",
                                 indexnum, &deh_bexptrs[i].lookup[2]);
                     break;
                 }
-                if (deh_bexptrs[i].cptr.Empty()) // stop at null entry
+                if (deh_bexptrs[i].cptr == ACTION_NULL) // stop at null entry
                     break;
             }
         }

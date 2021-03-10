@@ -10,15 +10,15 @@
 //**************************************************************************
 
 // HEADER FILES ------------------------------------------------------------
+#include <cstdlib>
 
-#include "doomtype.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "w_wad.h"
-#include "z_zone.h"
-#include <stdlib.h>
+#include "doomtype.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "w_wad.hh"
+#include "z_zone.hh"
 
-#include "sc_man.h"
+#include "sc_man.hh"
 
 // MACROS ------------------------------------------------------------------
 
@@ -90,9 +90,9 @@ void SC_OpenLumpByNum(int lump)
 
 static void OpenScript(void)
 {
-    ScriptBuffer = W_CacheLumpNum(ScriptLump);
+    ScriptBuffer = static_cast<const char *>(W_CacheLumpNum(ScriptLump));
     ScriptSize = W_LumpLength(ScriptLump);
-    ScriptBuffer = W_CacheLumpNum(ScriptLump);
+    ScriptBuffer = static_cast<const char *>(W_CacheLumpNum(ScriptLump));
     ScriptSize = W_LumpLength(ScriptLump);
 
     ScriptPtr = ScriptBuffer;

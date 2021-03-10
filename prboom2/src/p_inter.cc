@@ -31,26 +31,26 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "am_map.h"
-#include "d_deh.h" // Ty 03/22/98 - externalized strings
-#include "doomstat.h"
-#include "dstrings.h"
-#include "lprintf.h"
-#include "m_random.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "am_map.hh"
+#include "d_deh.hh" // Ty 03/22/98 - externalized strings
+#include "doomstat.hh"
+#include "dstrings.hh"
+#include "lprintf.hh"
+#include "m_random.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
-#include "hu_tracers.h"
-#include "p_enemy.h"
-#include "p_inter.h"
+#include "hu_tracers.hh"
+#include "p_enemy.hh"
+#include "p_inter.hh"
 
 #ifdef __GNUG__
-#pragma implementation "p_inter.h"
+#pragma implementation "p_inter.hh"
 #endif
-#include "e6y.h" //e6y
-#include "p_inter.h"
+#include "e6y.hh" //e6y
+#include "p_inter.hh"
 
 #define BONUSADD 6
 
@@ -575,7 +575,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
             player->backpack = true;
         }
         for (i = 0; i < NUMAMMO; i++)
-            P_GiveAmmo(player, i, 1);
+            P_GiveAmmo(player, static_cast<ammotype_t>(i), 1);
         player->message = s_GOTBACKPACK; // Ty 03/22/98 - externalized
         break;
 

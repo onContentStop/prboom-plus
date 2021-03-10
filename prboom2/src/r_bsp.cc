@@ -31,15 +31,15 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "r_bsp.h" // cph - sanity checking
-#include "doomstat.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_segs.h"
-#include "r_things.h"
-#include "v_video.h"
+#include "r_bsp.hh" // cph - sanity checking
+#include "doomstat.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "r_segs.hh"
+#include "r_things.hh"
+#include "v_video.hh"
 
 int currentsubsectornum;
 
@@ -88,14 +88,16 @@ static void R_ClipWallSegment(int first, int last, dboolean solid)
     {
         if (solidcol[first])
         {
-            if (!(p = memchr(solidcol + first, 0, last - first)))
+            if (!(p = static_cast<byte *>(
+                      memchr(solidcol + first, 0, last - first))))
                 return; // All solid
             first = p - solidcol;
         }
         else
         {
             int to;
-            if (!(p = memchr(solidcol + first, 1, last - first)))
+            if (!(p = static_cast<byte *>(
+                      memchr(solidcol + first, 1, last - first))))
                 to = last;
             else
                 to = p - solidcol;
@@ -147,7 +149,7 @@ static void R_RecalcLineFlags(line_t *linedef)
             // sky):
             && (backsector->ceilingpic != skyflatnum ||
                 frontsector->ceilingpic != skyflatnum)))
-        linedef->r_flags = RF_CLOSED;
+        linedef->r_flags = line_t::RF_CLOSED;
     else
     {
         // Reject empty lines used for triggers
@@ -170,11 +172,11 @@ static void R_RecalcLineFlags(line_t *linedef)
                        sizeof(frontsector->floorlightsec) +
                        sizeof(frontsector->ceilinglightsec)))
         {
-            linedef->r_flags = 0;
+            linedef->r_flags = line_t::RF_NONE;
             return;
         }
         else
-            linedef->r_flags = RF_IGNORE;
+            linedef->r_flags = line_t::RF_IGNORE;
     }
 
     /* cph - I'm too lazy to try and work with offsets in this */
@@ -190,13 +192,13 @@ static void R_RecalcLineFlags(line_t *linedef)
         if ((c = frontsector->ceilingheight - backsector->ceilingheight) > 0 &&
             (textureheight[texturetranslation[curline->sidedef->toptexture]] >
              c))
-            linedef->r_flags |= RF_TOP_TILE;
+            linedef->r_flags |= line_t::RF_TOP_TILE;
 
         /* Does bottom texture need tiling */
         if ((c = frontsector->floorheight - backsector->floorheight) > 0 &&
             (textureheight
                  [texturetranslation[curline->sidedef->bottomtexture]] > c))
-            linedef->r_flags |= RF_BOT_TILE;
+            linedef->r_flags |= line_t::RF_BOT_TILE;
     }
     else
     {
@@ -205,7 +207,7 @@ static void R_RecalcLineFlags(line_t *linedef)
         if ((c = frontsector->ceilingheight - frontsector->floorheight) > 0 &&
             (textureheight[texturetranslation[curline->sidedef->midtexture]] >
              c))
-            linedef->r_flags |= RF_MID_TILE;
+            linedef->r_flags |= line_t::RF_MID_TILE;
     }
 }
 
@@ -451,7 +453,8 @@ static void R_AddLine(seg_t *line)
         {
             unsigned pos = ds_p - drawsegs; // jff 8/9/98 fix from ZDOOM1.14a
             unsigned newmax = maxdrawsegs ? maxdrawsegs * 2 : 128; // killough
-            drawsegs = realloc(drawsegs, newmax * sizeof(*drawsegs));
+            drawsegs =
+                (drawseg_t *)realloc(drawsegs, newmax * sizeof(*drawsegs));
             ds_p = drawsegs + pos; // jff 8/9/98 fix from ZDOOM1.14a
             maxdrawsegs = newmax;
         }
@@ -530,12 +533,12 @@ static void R_AddLine(seg_t *line)
     if ((linedef = curline->linedef)->r_validcount != gametic)
         R_RecalcLineFlags(linedef);
 
-    if (linedef->r_flags & RF_IGNORE)
+    if (linedef->r_flags & line_t::RF_IGNORE)
     {
         return;
     }
     else
-        R_ClipWallSegment(x1, x2, linedef->r_flags & RF_CLOSED);
+        R_ClipWallSegment(x1, x2, linedef->r_flags & line_t::RF_CLOSED);
 }
 
 //

@@ -34,20 +34,20 @@
 #include "config.h"
 #endif
 
-#include "d_main.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "i_sound.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "p_mobj.h"
-#include "r_defs.h"
-#include "s_sound.h"
-#include "sc_man.h"
-#include "sounds.h"
-#include "w_wad.h"
+#include "d_main.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "i_sound.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "p_mobj.hh"
+#include "r_defs.hh"
+#include "s_sound.hh"
+#include "sc_man.hh"
+#include "sounds.hh"
+#include "w_wad.hh"
 
-#include "s_advsound.h"
+#include "s_advsound.hh"
 
 #define TIDNUM(x) ((int)(x->iden_nums & 0xFFFF)) // thing identifier
 

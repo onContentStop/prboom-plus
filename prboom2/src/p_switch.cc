@@ -31,15 +31,15 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "lprintf.h"
-#include "p_spec.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "w_wad.h"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "lprintf.hh"
+#include "p_spec.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "w_wad.hh"
 
 // killough 2/8/98: Remove switch limit
 
@@ -83,11 +83,11 @@ void P_InitSwitchList(void)
     for (i = 0;; i++)
     {
         if (index + 1 >= max_numswitches)
-            switchlist =
+            switchlist = static_cast<int *>(
                 realloc(switchlist,
                         sizeof *switchlist *
                             (max_numswitches =
-                                 max_numswitches ? max_numswitches * 2 : 8));
+                                 max_numswitches ? max_numswitches * 2 : 8)));
         if (LittleShort(alphSwitchList[i].episode) <=
             episode) // jff 5/11/98 endianess
         {
@@ -203,7 +203,7 @@ void P_ChangeSwitchTexture(line_t *line, int useAgain)
 
     /* search for a texture to change */
     texture = NULL;
-    position = 0;
+    position = top;
     for (i = 0; i < numswitches * 2; i++)
     { /* this could be more efficient... */
         if (switchlist[i] == *ttop)

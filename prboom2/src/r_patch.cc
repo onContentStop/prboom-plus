@@ -58,20 +58,21 @@
 **---------------------------------------------------------------------------
 */
 
-#include "r_patch.h"
-#include "doomstat.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "p_tick.h"
-#include "r_bsp.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "r_sky.h"
-#include "r_things.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "z_zone.h"
-#include <assert.h>
+#include <cassert>
+
+#include "r_patch.hh"
+#include "doomstat.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "p_tick.hh"
+#include "r_bsp.hh"
+#include "r_draw.hh"
+#include "r_main.hh"
+#include "r_sky.hh"
+#include "r_things.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include "z_zone.hh"
 
 // posts are runs of non masked source pixels
 typedef struct
@@ -114,13 +115,14 @@ void R_InitPatches(void)
 {
     if (!patches)
     {
-        patches = malloc(numlumps * sizeof(rpatch_t));
+        patches = static_cast<rpatch_t *>(malloc(numlumps * sizeof(rpatch_t)));
         // clear out new patches to signal they're uninitialized
         memset(patches, 0, sizeof(rpatch_t) * numlumps);
     }
     if (!texture_composites)
     {
-        texture_composites = malloc(numtextures * sizeof(rpatch_t));
+        texture_composites =
+            static_cast<rpatch_t *>(malloc(numtextures * sizeof(rpatch_t)));
         // clear out new patches to signal they're uninitialized
         memset(texture_composites, 0, sizeof(rpatch_t) * numtextures);
     }
@@ -128,7 +130,7 @@ void R_InitPatches(void)
     if (!playpal_duplicate)
     {
         int lump = W_GetNumForName("PLAYPAL");
-        const byte *playpal = W_CacheLumpNum(lump);
+        const byte *playpal = static_cast<const byte *>(W_CacheLumpNum(lump));
 
         // find two duplicate palette entries. use one for transparency.
         // rewrite source pixels in patches to the other on composition.
@@ -305,7 +307,7 @@ static void FillEmptySpace(rpatch_t *patch)
 
     // alternate between two buffers to avoid "overlapping memcpy"-like symptoms
     orig = patch->pixels;
-    copy = malloc(numpix);
+    copy = static_cast<byte *>(malloc(numpix));
 
     for (pass = 0; pass < 8; pass++) // arbitrarily chosen limit (must be even)
     {
@@ -499,20 +501,22 @@ static void createPatch(int id)
     columnsDataSize = sizeof(rcolumn_t) * patch->width;
 
     // count the number of posts in each column
-    numPostsInColumn = malloc(sizeof(int) * patch->width);
+    numPostsInColumn = static_cast<int *>(malloc(sizeof(int) * patch->width));
     numPostsTotal = 0;
 
     for (x = 0; x < patch->width; x++)
     {
-        oldColumn = (const column_t *)((const byte *)oldPatch +
-                                       LittleLong(oldPatch->columnofs[x]));
+        oldColumn = reinterpret_cast<const column_t *>(
+            reinterpret_cast<const byte *>(oldPatch) +
+            LittleLong(oldPatch->columnofs[x]));
         numPostsInColumn[x] = 0;
         while (oldColumn->topdelta != 0xff)
         {
             numPostsInColumn[x]++;
             numPostsTotal++;
-            oldColumn = (const column_t *)((const byte *)oldColumn +
-                                           oldColumn->length + 4);
+            oldColumn = reinterpret_cast<const column_t *>(
+                reinterpret_cast<const byte *>(oldColumn) + oldColumn->length +
+                4);
         }
     }
 

@@ -37,18 +37,18 @@
 #include "config.h"
 #endif
 
-#include "d_main.h"
-#include "doomstat.h"
-#include "e6y.h"
-#include "i_sound.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "m_random.h"
-#include "r_main.h"
-#include "s_advsound.h"
-#include "s_sound.h"
-#include "sc_man.h"
-#include "w_wad.h"
+#include "d_main.hh"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "i_sound.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "m_random.hh"
+#include "r_main.hh"
+#include "s_advsound.hh"
+#include "s_sound.hh"
+#include "sc_man.hh"
+#include "w_wad.hh"
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.
@@ -70,14 +70,14 @@
 
 const char *S_music_files[NUMMUSIC]; // cournia - stores music file names
 
-typedef struct
+struct channel_t
 {
     sfxinfo_t *sfxinfo; // sound information (if null, channel avail.)
-    void *origin;       // origin of sound
+    mobj_t *origin;     // origin of sound
     int handle;         // handle of the sound being played
     int is_pickup;      // killough 4/25/98: whether sound is a player's weapon
     int pitch;
-} channel_t;
+};
 
 // the set of channels available
 static channel_t *channels;
@@ -118,7 +118,7 @@ void S_StopChannel(int cnum);
 int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, int *vol, int *sep,
                         int *pitch);
 
-static int S_getChannel(void *origin, sfxinfo_t *sfxinfo, int is_pickup);
+static int S_getChannel(mobj_t *origin, sfxinfo_t *sfxinfo, int is_pickup);
 
 // Initializes sound stuff, including volume
 // Sets channels, SFX and music volume,
@@ -772,7 +772,7 @@ int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, int *vol, int *sep,
 //
 // killough 4/25/98: made static, added is_pickup argument
 
-static int S_getChannel(void *origin, sfxinfo_t *sfxinfo, int is_pickup)
+static int S_getChannel(mobj_t *origin, sfxinfo_t *sfxinfo, int is_pickup)
 {
     // channel number to use
     int cnum;

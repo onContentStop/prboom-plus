@@ -55,9 +55,9 @@ const music_player_t pm_player = {pm_name, pm_init, NULL, NULL, NULL, NULL,
 
 #else // HAVE_LIBPORTMIDI
 
-#include "i_sound.h" // for snd_mididev
-#include "lprintf.h"
-#include "midifile.h"
+#include "i_sound.hh" // for snd_mididev
+#include "lprintf.hh"
+#include "midifile.hh"
 #include <portmidi.h>
 #include <porttime.h>
 #include <stdio.h>
@@ -196,39 +196,14 @@ static void pm_shutdown(void)
         not a fix: calling Pm_Abort(); then midiStreamStop deadlocks instead of
         midiStreamClose.
         */
+#ifdef _WIN32
         Pt_Sleep(DRIVER_LATENCY * 2);
+#endif
 
         Pm_Close(pm_stream);
         Pm_Terminate();
         pm_stream = NULL;
     }
-}
-
-winmm_streamout_callback calls midiOutUnprepareHeader.oops
-    ?
-
-    since timestamps are slightly in the future,
-    it's very possible to have some messages still in the windows midi queue
-        when Pm_Close is called.this is normally no problem,
-    but if one so happens to dequeue and call winmm_streamout_callback at the
-        exact right moment...
-
-    fix
-    : at this point,
-    we've stopped generating midi messages.  sleep for more than DRIVER_LATENCY
-        to ensure all messages are flushed.
-
-    not a fix : calling
-                Pm_Abort();
-then midiStreamStop deadlocks instead of midiStreamClose.* /
-#ifdef _WIN32
-    Pt_Sleep(DRIVER_LATENCY * 2);
-#endif
-
-Pm_Close(pm_stream);
-Pm_Terminate();
-pm_stream = NULL;
-}
 }
 
 static const void *pm_registersong(const void *data, unsigned len)

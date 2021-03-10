@@ -35,6 +35,8 @@
  *-----------------------------------------------------------------------------
  */
 
+#include "d_event.hh"
+#include "doomdef.hh"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,42 +51,42 @@
 #include "config.h"
 #endif
 
-#include "am_map.h"
-#include "d_deh.h" // Ty 3/27/98 deh declarations
-#include "d_main.h"
-#include "d_net.h"
-#include "doomstat.h"
-#include "dstrings.h"
-#include "e6y.h" //e6y
-#include "f_finale.h"
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "i_main.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_menu.h"
-#include "m_misc.h"
-#include "m_random.h"
-#include "p_checksum.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_saveg.h"
-#include "p_setup.h"
-#include "p_tick.h"
-#include "r_data.h"
-#include "r_demo.h"
-#include "r_draw.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_sky.h"
-#include "s_advsound.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "st_stuff.h"
-#include "statdump.h"
-#include "w_wad.h"
-#include "wi_stuff.h"
+#include "am_map.hh"
+#include "d_deh.hh" // Ty 3/27/98 deh declarations
+#include "d_main.hh"
+#include "d_net.hh"
+#include "doomstat.hh"
+#include "dstrings.hh"
+#include "e6y.hh" //e6y
+#include "f_finale.hh"
+#include "g_game.hh"
+#include "hu_stuff.hh"
+#include "i_main.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_menu.hh"
+#include "m_misc.hh"
+#include "m_random.hh"
+#include "p_checksum.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_saveg.hh"
+#include "p_setup.hh"
+#include "p_tick.hh"
+#include "r_data.hh"
+#include "r_demo.hh"
+#include "r_draw.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_sky.hh"
+#include "s_advsound.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "st_stuff.hh"
+#include "statdump.hh"
+#include "w_wad.hh"
+#include "wi_stuff.hh"
 
 // ano - used for version 255+ demos, like EE or MBF
 static char prdemosig[] = "PR+UM";
@@ -554,11 +556,11 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 
     if (gamekeydown[key_fire] || mousebuttons[mousebfire] ||
         joybuttons[joybfire])
-        cmd->buttons |= BT_ATTACK;
+        cmd->buttons |= static_cast<byte>(BT_ATTACK);
 
     if (gamekeydown[key_use] || mousebuttons[mousebuse] || joybuttons[joybuse])
     {
-        cmd->buttons |= BT_USE;
+        cmd->buttons |= static_cast<byte>(BT_USE);
         // clear double clicks if hit use button
         dclicks = 0;
     }
@@ -666,7 +668,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
     if (newweapon != wp_nochange)
     {
         cmd->buttons |= BT_CHANGE;
-        cmd->buttons |= newweapon << BT_WEAPONSHIFT;
+        cmd->buttons |= newweapon << (byte)BT_WEAPONSHIFT;
     }
 
     // mouse
@@ -686,7 +688,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
                 dclicks++;
             if (dclicks == 2)
             {
-                cmd->buttons |= BT_USE;
+                cmd->buttons |= static_cast<byte>(BT_USE);
                 dclicks = 0;
             }
             else
@@ -708,7 +710,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
                 dclicks2++;
             if (dclicks2 == 2)
             {
-                cmd->buttons |= BT_USE;
+                cmd->buttons |= static_cast<byte>(BT_USE);
                 dclicks2 = 0;
             }
             else
@@ -793,10 +795,10 @@ void G_BuildTiccmd(ticcmd_t *cmd)
         upmove -= flyspeed[speed];
 
     // CPhipps - special events (game new/load/save/pause)
-    if (special_event & BT_SPECIAL)
+    if (static_cast<bool>(special_event & BT_SPECIAL))
     {
-        cmd->buttons = special_event;
-        special_event = 0;
+        cmd->buttons = static_cast<byte>(special_event);
+        special_event = BTS_LOADGAME;
     }
 }
 
@@ -871,7 +873,7 @@ static void G_DoLoadLevel(void)
         basetic = gametic;
 
     if (wipegamestate == GS_LEVEL)
-        wipegamestate = -1; // force a wipe
+        wipegamestate = GS_FORCEWIPE; // force a wipe
 
     gamestate = GS_LEVEL;
 
@@ -922,7 +924,7 @@ static void G_DoLoadLevel(void)
     joyxmove = joyymove = 0;
     mousex = mousey = 0;
     mlooky = 0; // e6y
-    special_event = 0;
+    special_event = BTS_LOADGAME;
     paused = false;
     memset(&mousearray, 0, sizeof(mousearray));
     memset(&joyarray, 0, sizeof(joyarray));
@@ -1038,67 +1040,8 @@ dboolean G_Responder(event_t *ev)
     case ev_keydown:
         if (ev->data1 == key_pause) // phares
         {
-        case ev_keydown:
-            if (ev->data1 == key_pause) // phares
-            {
-                special_event = BT_SPECIAL | (BTS_PAUSE & BT_SPECIALMASK);
-                return true;
-            }
-            if (ev->data1 < NUMKEYS)
-                gamekeydown[ev->data1] = true;
-            return true; // eat key down events
-
-        case ev_keyup:
-            if (ev->data1 < NUMKEYS)
-                gamekeydown[ev->data1] = false;
-            return false; // always let key up events filter down
-
-        case ev_mouse:
-            SetMouseButtons(ev->data1);
-            /*
-             * bmead@surfree.com
-             * Modified by Barry Mead after adding vastly more resolution
-             * to the Mouse Sensitivity Slider in the options menu 1-9-2000
-             * Removed the mouseSensitivity "*4" to allow more low end
-             * sensitivity resolution especially for lsdoom users.
-             */
-            // e6y mousex += (ev->data2*(mouseSensitivity_horiz))/10;  /*
-            // killough */ e6y mousey += (ev->data3*(mouseSensitivity_vert))/10;
-            // /*Mead rm *4 */
-
-            // e6y
-            mousex += (AccelerateMouse(ev->data2) * (mouseSensitivity_horiz)) /
-                      10; /* killough */
-            if (GetMouseLook())
-                if (movement_mouseinvert)
-                    mlooky += (AccelerateMouse(ev->data3) *
-                               (mouseSensitivity_mlook)) /
-                              10;
-                else
-                    mlooky -= (AccelerateMouse(ev->data3) *
-                               (mouseSensitivity_mlook)) /
-                              10;
-            else
-                mousey +=
-                    (AccelerateMouse(ev->data3) * (mouseSensitivity_vert)) / 40;
-
-            return true; // eat events
-
-        case ev_joystick:
-            joybuttons[0] = ev->data1 & 1;
-            joybuttons[1] = ev->data1 & 2;
-            joybuttons[2] = ev->data1 & 4;
-            joybuttons[3] = ev->data1 & 8;
-            joybuttons[4] = ev->data1 & 16;
-            joybuttons[5] = ev->data1 & 32;
-            joybuttons[6] = ev->data1 & 64;
-            joybuttons[7] = ev->data1 & 128;
-            joyxmove = ev->data2;
-            joyymove = ev->data3;
-            return true; // eat events
-
-        default:
-            break;
+            special_event = BT_SPECIAL | (BTS_PAUSE & BT_SPECIALMASK);
+            return true;
         }
         if (ev->data1 < NUMKEYS)
             gamekeydown[ev->data1] = true;
@@ -1110,11 +1053,7 @@ dboolean G_Responder(event_t *ev)
         return false; // always let key up events filter down
 
     case ev_mouse:
-        mousebuttons[0] = ev->data1 & 1;
-        mousebuttons[1] = ev->data1 & 2;
-        mousebuttons[2] = ev->data1 & 4;
-        mousebuttons[3] = ev->data1 & 8;
-        mousebuttons[4] = ev->data1 & 16;
+        SetMouseButtons(ev->data1);
         /*
          * bmead@surfree.com
          * Modified by Barry Mead after adding vastly more resolution
@@ -1122,9 +1061,9 @@ dboolean G_Responder(event_t *ev)
          * Removed the mouseSensitivity "*4" to allow more low end
          * sensitivity resolution especially for lsdoom users.
          */
-        // e6y mousex += (ev->data2*(mouseSensitivity_horiz))/10;  /* killough
-        // */ e6y mousey += (ev->data3*(mouseSensitivity_vert))/10;  /*Mead rm
-        // *4 */
+        // e6y mousex += (ev->data2*(mouseSensitivity_horiz))/10;  /*
+        // killough */ e6y mousey += (ev->data3*(mouseSensitivity_vert))/10;
+        // /*Mead rm *4 */
 
         // e6y
         mousex += (AccelerateMouse(ev->data2) * (mouseSensitivity_horiz)) /
@@ -1160,7 +1099,9 @@ dboolean G_Responder(event_t *ev)
     default:
         break;
     }
-    return false;
+    if (ev->data1 < NUMKEYS)
+        gamekeydown[ev->data1] = true;
+    return true; // eat key down events
 }
 
 //
@@ -1289,9 +1230,9 @@ void G_Ticker(void)
             {
                 if (players[i].cmd.buttons & BT_SPECIAL)
                 {
-                    switch (players[i].cmd.buttons & BT_SPECIALMASK)
+                    switch ((players[i].cmd.buttons & BT_SPECIALMASK).value())
                     {
-                    case BTS_PAUSE:
+                    case BTS_PAUSE.value():
                         paused ^= 1;
                         if (paused)
                             S_PauseSound();
@@ -1299,31 +1240,35 @@ void G_Ticker(void)
                             S_ResumeSound();
                         break;
 
-                    case BTS_SAVEGAME:
+                    case BTS_SAVEGAME.value():
                         if (!savedescription[0])
                             strcpy(savedescription, "NET GAME");
                         savegameslot =
-                            (players[i].cmd.buttons & BTS_SAVEMASK) >>
-                            BTS_SAVESHIFT;
+                            static_cast<byte>(players[i].cmd.buttons &
+                                              BTS_SAVEMASK) >>
+                            static_cast<byte>(BTS_SAVESHIFT);
                         gameaction = ga_savegame;
                         break;
 
                         // CPhipps - remote loadgame request
-                    case BTS_LOADGAME:
+                    case BTS_LOADGAME.value():
                         savegameslot =
-                            (players[i].cmd.buttons & BTS_SAVEMASK) >>
-                            BTS_SAVESHIFT;
+                            static_cast<byte>(players[i].cmd.buttons &
+                                              BTS_SAVEMASK) >>
+                            static_cast<byte>(BTS_SAVESHIFT);
                         gameaction = ga_loadgame;
                         forced_loadgame = netgame; // Force if a netgame
                         command_loadgame = false;
                         break;
 
                         // CPhipps - Restart the level
-                    case BTS_RESTARTLEVEL:
+                    case BTS_RESTARTLEVEL.value():
                         if (demoplayback ||
                             (compatibility_level < lxdoom_1_compatibility))
                             break; // CPhipps - Ignore in demos or old games
                         gameaction = ga_loadlevel;
+                        break;
+                    default:
                         break;
                     }
                     players[i].cmd.buttons = 0;
@@ -1382,6 +1327,8 @@ void G_Ticker(void)
     case GS_DEMOSCREEN:
         D_PageTicker();
         break;
+    default:
+        break;
     }
 }
 
@@ -1412,7 +1359,7 @@ static void G_PlayerFinishLevel(int player)
 //
 // G_SetPlayerColour
 
-#include "r_draw.h"
+#include "r_draw.hh"
 
 void G_ChangedPlayerColour(int pn, int cl)
 {
@@ -1535,7 +1482,8 @@ static dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
         static int queuesize;
         if (queuesize < bodyquesize)
         {
-            bodyque = realloc(bodyque, bodyquesize * sizeof *bodyque);
+            bodyque = static_cast<mobj_t **>(
+                realloc(bodyque, bodyquesize * sizeof *bodyque));
             memset(bodyque + queuesize, 0,
                    (bodyquesize - queuesize) * sizeof *bodyque);
             queuesize = bodyquesize;
@@ -1726,7 +1674,7 @@ void G_DoCompleted(void)
         if (playeringame[i])
             G_PlayerFinishLevel(i); // take away cards and stuff
 
-    if (automapmode & am_active)
+    if (static_cast<bool>(automapmode & am_active))
         AM_Stop();
 
     wminfo.nextep = wminfo.epsd = gameepisode - 1;
@@ -2021,7 +1969,7 @@ static uint_64_t G_UpdateSignature(uint_64_t s, const char *name)
         do
         {
             int size = W_LumpLength(i);
-            const byte *p = W_CacheLumpNum(i);
+            auto *p = static_cast<const byte *>(W_CacheLumpNum(i));
             while (size--)
                 s <<= 1, s += *p++;
             W_UnlockLumpNum(i);
@@ -2076,7 +2024,9 @@ void G_LoadGame(int slot, dboolean command)
         //         - Delay load so it can be communicated in net game
         //         - store info in special_event
         special_event = BT_SPECIAL | (BTS_LOADGAME & BT_SPECIALMASK) |
-                        ((slot << BTS_SAVESHIFT) & BTS_SAVEMASK);
+                        (static_cast<buttoncode_t>(
+                             slot << static_cast<byte>(BTS_SAVESHIFT)) &
+                         BTS_SAVEMASK);
         forced_loadgame = netgame; // CPhipps - always force load netgames
     }
     else
@@ -2128,7 +2078,7 @@ const char *comp_lev_str[MAX_COMPATIBILITY_LEVEL] = {"Doom v1.2",
                                                      "PrBoom v2.1.2-v2.2.6",
                                                      "PrBoom v2.3.x",
                                                      "PrBoom 2.4.0",
-                                                     "Current PrBoom"};
+                                                     "Current PrBoom+UM"};
 
 // comp_options_by_version removed - see G_Compatibility
 
@@ -2280,7 +2230,7 @@ void G_DoLoadGame(void)
     int time, ttime;
 
     length = G_SaveGameName(NULL, 0, savegameslot, demoplayback);
-    name = malloc(length + 1);
+    name = static_cast<char *>(malloc(length + 1));
     G_SaveGameName(name, length + 1, savegameslot, demoplayback);
 
     gameaction = ga_nothing;
@@ -2332,8 +2282,8 @@ void G_DoLoadGame(void)
         {
             if (!forced_loadgame)
             {
-                char *msg =
-                    malloc(strlen((char *)save_p + sizeof checksum) + 128);
+                auto *msg = static_cast<char *>(
+                    malloc(strlen((char *)save_p + sizeof checksum) + 128));
                 strcpy(msg, "Incompatible Savegame!!!\n");
                 if (save_p[sizeof checksum])
                     strcat(strcat(msg, "Wads expected:\n\n"),
@@ -2378,7 +2328,7 @@ void G_DoLoadGame(void)
         compatibility_level = map_old_comp_levels[compatibility_level];
     save_p++;
 
-    gameskill = *save_p++;
+    gameskill = static_cast<skill_t>(*save_p++);
     gameepisode = *save_p++;
     gamemap = *save_p++;
     gamemapinfo = G_LookupMapinfo(gameepisode, gamemap);
@@ -2492,8 +2442,10 @@ void G_SaveGame(int slot, char *description)
         G_DoSaveGame(true);
     }
     // CPhipps - store info in special_event
-    special_event = BT_SPECIAL | (BTS_SAVEGAME & BT_SPECIALMASK) |
-                    ((slot << BTS_SAVESHIFT) & BTS_SAVEMASK);
+    special_event =
+        BT_SPECIAL | (BTS_SAVEGAME & BT_SPECIALMASK) |
+        (static_cast<buttoncode_t>(slot << static_cast<byte>(BTS_SAVESHIFT)) &
+         BTS_SAVEMASK);
 #ifdef HAVE_NET
     D_NetSendMisc(nm_savegamename, strlen(savedescription) + 1,
                   savedescription);
@@ -2522,8 +2474,8 @@ void(CheckSaveGame)(size_t size, const char *file, int line)
 
     size += 1024; // breathing room
     if (pos + size > savegamesize)
-        save_p = (savebuffer = realloc(savebuffer,
-                                       savegamesize += (size + 1023) & ~1023)) +
+        save_p = (savebuffer = static_cast<byte *>(realloc(
+                      savebuffer, savegamesize += (size + 1023) & ~1023))) +
                  pos;
 }
 
@@ -2553,12 +2505,12 @@ static void G_DoSaveGame(dboolean menu)
                              // in case later problems cause a premature exit
 
     length = G_SaveGameName(NULL, 0, savegameslot, demoplayback && !menu);
-    name = malloc(length + 1);
+    name = static_cast<char *>(malloc(length + 1));
     G_SaveGameName(name, length + 1, savegameslot, demoplayback && !menu);
 
     description = savedescription;
 
-    save_p = savebuffer = malloc(savegamesize);
+    save_p = savebuffer = static_cast<byte *>(malloc(savegamesize));
 
     CheckSaveGame(SAVESTRINGSIZE + VERSIONSIZE + sizeof(uint_64_t));
     memcpy(save_p, description, SAVESTRINGSIZE);
@@ -2705,7 +2657,7 @@ static char *G_NewDemoName(const char *name)
     static unsigned int j = 0;
 
     demoname_size = strlen(name) + 11; // + 11 for "-00000.lmp\0"
-    demoname = malloc(demoname_size);
+    demoname = static_cast<char *>(malloc(demoname_size));
     snprintf(demoname, demoname_size, "%s.lmp", name);
 
     // prevent overriding demos by adding a file name suffix
@@ -2934,7 +2886,7 @@ void G_ReloadDefaults(void)
                 compatibility_level = l;
         }
     }
-    if (compatibility_level == -1)
+    if (compatibility_level == complevel_t{-1})
         compatibility_level = best_compatibility;
 
     if (mbf_features)
@@ -3010,7 +2962,7 @@ struct MapEntry *G_LookupMapinfo(int gameepisode, int gamemap)
         snprintf(lumpname, 9, "E%dM%d", gameepisode, gamemap);
     for (i = 0; i < Maps.mapcount; i++)
     {
-        if (!stricmp(lumpname, Maps.maps[i].mapname))
+        if (!M_CaseInsensitiveCompare(lumpname, Maps.maps[i].mapname))
         {
             return &Maps.maps[i];
         }
@@ -3023,7 +2975,7 @@ struct MapEntry *G_LookupMapinfoByName(const char *lumpname)
     unsigned i;
     for (i = 0; i < Maps.mapcount; i++)
     {
-        if (!stricmp(lumpname, Maps.maps[i].mapname))
+        if (!M_CaseInsensitiveCompare(lumpname, Maps.maps[i].mapname))
         {
             return &Maps.maps[i];
         }
@@ -3228,7 +3180,7 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
 
     if (compatibility_level == tasdoom_compatibility)
     {
-        *p++ = cmd->buttons;
+        *p++ = byte(cmd->buttons);
         *p++ = cmd->forwardmove;
         *p++ = cmd->sidemove;
         *p++ = (cmd->angleturn + 128) >> 8;
@@ -3248,7 +3200,7 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
             *p++ = a & 0xff;
             *p++ = (a >> 8) & 0xff;
         }
-        *p++ = cmd->buttons;
+        *p++ = byte(cmd->buttons);
 
     } // e6y
 
@@ -3256,7 +3208,7 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
         I_Error("G_WriteDemoTiccmd: error writing demo");
 
     /* cph - alias demo_p to it so we can read it back */
-    demo_p = buf;
+    demo_p = reinterpret_cast<const byte *>(buf);
     G_ReadDemoTiccmd(cmd); // make SURE it is exactly the same
 }
 
@@ -3268,7 +3220,7 @@ void G_RecordDemo(const char *name)
 {
     char *demoname;
     usergame = false;
-    demoname = malloc(strlen(name) + 4 + 1);
+    demoname = static_cast<char *>(malloc(strlen(name) + 4 + 1));
     AddDefaultExtension(strcpy(demoname, name), ".lmp"); // 1/18/98 killough
     demorecording = true;
 
@@ -3277,7 +3229,7 @@ void G_RecordDemo(const char *name)
     {
         char *ext;
         orig_demoname = strdup(name);
-        ext = strrchr(orig_demoname, '.');
+        ext = const_cast<char *>(strrchr(orig_demoname, '.'));
         if (ext)
             *ext = '\0';
     }
@@ -3337,13 +3289,15 @@ void G_RecordDemo(const char *name)
                         break;
                     }
 
-                    if (buf[bytes_per_tic - 1] & BT_SPECIAL)
+                    if (buf[bytes_per_tic - 1] & static_cast<byte>(BT_SPECIAL))
                     {
-                        if ((buf[bytes_per_tic - 1] & BT_SPECIALMASK) ==
-                            BTS_SAVEGAME)
+                        if ((buf[bytes_per_tic - 1] &
+                             static_cast<byte>(BT_SPECIALMASK)) ==
+                            byte(BTS_SAVEGAME))
                         {
-                            slot = (buf[bytes_per_tic - 1] & BTS_SAVEMASK) >>
-                                   BTS_SAVESHIFT;
+                            slot = (buf[bytes_per_tic - 1] &
+                                    static_cast<byte>(BTS_SAVEMASK)) >>
+                                   static_cast<byte>(BTS_SAVESHIFT);
                         }
                     }
                 } while (rc == bytes_per_tic);
@@ -3551,7 +3505,7 @@ void G_BeginRecording(void)
     int i;
     byte *demostart, *demo_p;
     int num_extensions = 0;
-    demostart = demo_p = malloc(1000);
+    demostart = demo_p = static_cast<byte *>(malloc(1000));
     longtics = 0;
 
     // ano - jun2019 - add the extension format if needed
@@ -4219,14 +4173,15 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         // killough 3/6/98: rearrange to fix savegame bugs (moved fastparm,
         // respawnparm, nomonsters flags to G_LoadOptions()/G_SaveOptions())
 
-        if ((skill = demover) >= 100) // For demos from versions >= 1.4
+        if (static_cast<int>(skill = static_cast<skill_t>(demover)) >=
+            100) // For demos from versions >= 1.4
         {
             // e6y: check for overrun
             if (CheckForOverrun(header_p, demo_p, size, 8, failonerror))
                 return NULL;
 
             compatibility_level = G_GetOriginalDoomCompatLevel(demover);
-            skill = *demo_p++;
+            skill = static_cast<skill_t>(*demo_p++);
 
             if (!using_umapinfo)
             {
@@ -4236,8 +4191,8 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
             }
             else
             {
-                *demo_p++;
-                *demo_p++;
+                demo_p++;
+                demo_p++;
             }
             deathmatch = *demo_p++;
             respawnparm = *demo_p++;
@@ -4353,7 +4308,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         if (CheckForOverrun(header_p, demo_p, size, 5, failonerror))
             return NULL;
 
-        skill = *demo_p++;
+        skill = static_cast<skill_t>(*demo_p++);
         episode = *demo_p++;
         map = *demo_p++;
         deathmatch = *demo_p++;
@@ -4508,44 +4463,37 @@ dboolean G_CheckDemoStatus(void)
         return false; // killough
     }
 
-    // e6y
-    G_WriteDemoFooter(demofp);
-
-    lprintf(LO_INFO, "G_CheckDemoStatus: Demo recorded\n");
-    return false; // killough
-}
-
-if (timingdemo)
-{
-    int endtime = I_GetTime_RealTime();
-    // killough -- added fps information and made it work for longer demos:
-    unsigned realtics = endtime - starttime;
-
-    M_SaveDefaults();
-
-    I_Error("Timed %u gametics in %u realtics = %-.1f frames per second",
-            (unsigned)gametic, realtics,
-            (unsigned)gametic * (double)TICRATE / realtics);
-}
-
-if (demoplayback)
-{
-    if (singledemo)
-        exit(0); // killough
-
-    if (demolumpnum != -1)
+    if (timingdemo)
     {
-        // cph - unlock the demo lump
-        W_UnlockLumpNum(demolumpnum);
-        demolumpnum = -1;
+        int endtime = I_GetTime_RealTime();
+        // killough -- added fps information and made it work for longer demos:
+        unsigned realtics = endtime - starttime;
+
+        M_SaveDefaults();
+
+        I_Error("Timed %u gametics in %u realtics = %-.1f frames per second",
+                (unsigned)gametic, realtics,
+                (unsigned)gametic * (double)TICRATE / realtics);
     }
-    G_ReloadDefaults(); // killough 3/1/98
-    netgame = false;    // killough 3/29/98
-    deathmatch = false;
-    D_AdvanceDemo();
-    return true;
-}
-return false;
+
+    if (demoplayback)
+    {
+        if (singledemo)
+            exit(0); // killough
+
+        if (demolumpnum != -1)
+        {
+            // cph - unlock the demo lump
+            W_UnlockLumpNum(demolumpnum);
+            demolumpnum = -1;
+        }
+        G_ReloadDefaults(); // killough 3/1/98
+        netgame = false;    // killough 3/29/98
+        deathmatch = false;
+        D_AdvanceDemo();
+        return true;
+    }
+    return false;
 }
 
 // killough 1/22/98: this is a "Doom printf" for messages. I've gotten
@@ -4751,7 +4699,7 @@ void G_ReadDemoContinueTiccmd(ticcmd_t *cmd)
         democontinue = false;
         // Sometimes this bit is not available
         if ((demo_compatibility && !prboom_comp[PC_ALLOW_SSG_DIRECT].state) ||
-            (cmd->buttons & BT_CHANGE) == 0)
+            !(cmd->buttons & BT_CHANGE))
             cmd->buttons |= BT_JOIN;
     }
 }

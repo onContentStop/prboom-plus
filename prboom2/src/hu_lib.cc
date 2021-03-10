@@ -31,13 +31,13 @@
  *-----------------------------------------------------------------------------
  */
 
-#include "hu_lib.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "hu_stuff.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "v_video.h"
+#include "hu_lib.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "hu_stuff.hh"
+#include "r_draw.hh"
+#include "r_main.hh"
+#include "v_video.hh"
 
 extern int key_backspace; // phares
 extern int key_enter;     // phares
@@ -82,7 +82,7 @@ void HUlib_clearTextLine(hu_textline_t *t)
 // Returns nothing
 //
 void HUlib_initTextLine(hu_textline_t *t, int x, int y, const patchnum_t *f,
-                        int sc, int cm, enum patch_translation_e flags)
+                        int sc, int cm, const patch_translation_e &flags)
 // jff 2/16/98 add color range parameter
 {
     t->x = x;
@@ -253,7 +253,7 @@ void HUlib_eraseTextLine(hu_textline_t *l)
         if (l->flags & VPT_STRETCH_MASK)
         {
             stretch_param_t *params =
-                &stretch_params[l->flags & VPT_ALIGN_MASK];
+                &stretch_params[(l->flags & VPT_ALIGN_MASK).value()];
             top = params->video->y1lookup[top] + params->deltay1;
             bottom = params->video->y2lookup[bottom] + params->deltay1;
         }
@@ -294,7 +294,7 @@ void HUlib_eraseTextLine(hu_textline_t *l)
 void HUlib_initSText(hu_stext_t *s, int x, int y, int h, const patchnum_t *font,
                      int startchar,
                      int cm, // jff 2/16/98 add color range parameter
-                     enum patch_translation_e flags, dboolean *on)
+                     const patch_translation_e &flags, dboolean *on)
 {
 
     int i;
@@ -421,7 +421,7 @@ void HUlib_eraseSText(hu_stext_t *s)
 //
 void HUlib_initMText(hu_mtext_t *m, int x, int y, int w, int h,
                      const patchnum_t *font, int startchar, int cm,
-                     const patchnum_t *bgfont, enum patch_translation_e flags,
+                     const patchnum_t *bgfont, const patch_translation_e &flags,
                      dboolean *on)
 {
     int i;
@@ -640,7 +640,7 @@ void HUlib_eraseMText(hu_mtext_t *m)
 void HUlib_initIText(hu_itext_t *it, int x, int y, const patchnum_t *font,
                      int startchar,
                      int cm, // jff 2/16/98 add color range parameter
-                     enum patch_translation_e flags, dboolean *on)
+                     const patch_translation_e &flags, dboolean *on)
 {
     it->lm = 0; // default left margin is start of text
     it->on = on;

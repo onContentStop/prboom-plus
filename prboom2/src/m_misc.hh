@@ -36,6 +36,7 @@
 #define __M_MISC__
 
 #include "doomtype.hh"
+#include "m_menu.hh"
 
 #include <cstddef>
 
@@ -43,6 +44,8 @@
 //
 // MISC
 //
+
+struct default_t;
 
 dboolean M_WriteFile(char const *name, const void *source, size_t length);
 
@@ -55,14 +58,16 @@ void M_LoadDefaults(void);
 
 void M_SaveDefaults(void);
 
-struct default_s *M_LookupDefault(const char *name); /* killough 11/98 */
+default_t *M_LookupDefault(const char *name); /* killough 11/98 */
 
 // phares 4/21/98:
 // Moved from m_misc.c so m_menu.c could see it.
 
 // CPhipps - struct to hold a value in a config file
 // Cannot be a union, as it must be initialised
-typedef struct default_s
+struct setup_menu_t;
+
+struct default_t
 {
     const char *name;
     /* cph -
@@ -113,10 +118,10 @@ typedef struct default_s
     // cph - removed the help strings from the config file
     // const char* help;       // jff 3/3/98 description of parameter
     // CPhipps - remove unused "lousy hack" code
-    struct setup_menu_s *setup_menu; /* Xref to setup menu item, if any */
-} default_t;
+    setup_menu_t *setup_menu; /* Xref to setup menu item, if any */
+};
 
-#define IS_STRING(dv) ((dv).type == def_str)
+#define IS_STRING(dv) ((dv).type == default_t::def_str)
 // CPhipps - What is the max. key code that X will send us?
 #define MAX_KEY 65536
 #define MAX_MOUSEB 8

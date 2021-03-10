@@ -35,22 +35,22 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #ifdef HAVE_LIBSDL2_IMAGE
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #endif
-#include "doomstat.h"
-#include "e6y.h"
-#include "gl_intern.h"
-#include "hu_lib.h"
-#include "hu_stuff.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "lprintf.h"
-#include "r_main.h"
-#include "v_video.h"
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "hu_lib.hh"
+#include "hu_stuff.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "lprintf.hh"
+#include "r_main.hh"
+#include "v_video.hh"
 
 typedef struct
 {
@@ -125,8 +125,8 @@ static void gld_PreprocessFakeSector(int ceiling, sector_t *sector, int groupid)
         sector->fakegroup[ceiling] = groupid;
         if (groupid >= numfakeplanes)
         {
-            fakeplanes =
-                realloc(fakeplanes, (numfakeplanes + 1) * sizeof(fakegroup_t));
+            fakeplanes = static_cast<fakegroup_t *>(
+                realloc(fakeplanes, (numfakeplanes + 1) * sizeof(fakegroup_t)));
             memset(&fakeplanes[numfakeplanes], 0, sizeof(fakegroup_t));
             numfakeplanes++;
         }
@@ -188,7 +188,8 @@ void gld_PreprocessFakeSectors(void)
     {
         free(sectors2);
     }
-    sectors2 = malloc(numsectors * sizeof(sector_t *));
+    sectors2 =
+        static_cast<sector_t **>(malloc(numsectors * sizeof(sector_t *)));
 
     // reset all groups with fake floors and ceils
     // 0 - floor; 1 - ceil;
@@ -217,8 +218,8 @@ void gld_PreprocessFakeSectors(void)
                 {
                     gld_PreprocessFakeSector(ceiling, &sectors[i], groupid);
                     fakeplanes[groupid].ceiling = ceiling;
-                    fakeplanes[groupid].list =
-                        malloc(fakeplanes[groupid].count * sizeof(sector_t *));
+                    fakeplanes[groupid].list = static_cast<sector_t **>(
+                        malloc(fakeplanes[groupid].count * sizeof(sector_t *)));
                     for (j = 0, k = 0; k < fakeplanes[groupid].count; k++)
                     {
                         if (!(sectors2[k]->flags & no_texture_flag))

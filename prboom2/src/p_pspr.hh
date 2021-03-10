@@ -75,13 +75,13 @@ typedef enum
     NUMPSPRITES
 } psprnum_t;
 
-typedef struct
+struct pspdef_t
 {
     state_t *state; /* a NULL state means not active */
     int tics;
     fixed_t sx;
     fixed_t sy;
-} pspdef_t;
+};
 
 enum
 {
@@ -96,19 +96,19 @@ extern int weapon_preferences[2][NUMWEAPONS + 1]; /* killough 5/2/98 */
 extern int weapon_attack_alignment;
 int P_WeaponPreferred(int w1, int w2);
 
-struct player_s;
-int P_SwitchWeapon(struct player_s *player);
-dboolean P_CheckAmmo(struct player_s *player);
-void P_SetupPsprites(struct player_s *curplayer);
-void P_MovePsprites(struct player_s *curplayer);
-void P_DropWeapon(struct player_s *player);
+struct player_t;
+int P_SwitchWeapon(player_t *player);
+dboolean P_CheckAmmo(player_t *player);
+void P_SetupPsprites(player_t *curplayer);
+void P_MovePsprites(player_t *curplayer);
+void P_DropWeapon(player_t *player);
 
 void A_Light0();
 void A_WeaponReady();
 void A_Lower();
 void A_Raise();
 void A_Punch();
-void A_ReFire();
+void A_ReFire(player_t *player, pspdef_t *psp);
 void A_FirePistol();
 void A_Light1();
 void A_FireShotgun();

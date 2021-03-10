@@ -4,7 +4,7 @@
  *
  *  PrBoom: a Doom port merged with LxDoom and LSDLDoom
  *  based on BOOM, a modified and improved DOOM engine
- *  Copyright 2006 - 2008 G Jackson, Jaakko Kerônen
+ *  Copyright 2006 - 2008 G Jackson, Jaakko Kerï¿½nen
  *  Copyright 2009 - Andrey Budko
  *
  *  This program is free software; you can redistribute it and/or
@@ -31,22 +31,23 @@
 #include "config.h"
 #endif
 
-#include "doomstat.h"
-#include "gl_intern.h"
-#include "gl_opengl.h"
-#include "lprintf.h"
-#include "p_maputl.h"
-#include "r_bsp.h"
-#include "r_fps.h"
-#include "r_main.h"
-#include "r_sky.h"
-#include "w_wad.h"
+#include "doomstat.hh"
+#include "gl_intern.hh"
+#include "gl_opengl.hh"
+#include "gl_struct.hh"
+#include "lprintf.hh"
+#include "p_maputl.hh"
+#include "r_bsp.hh"
+#include "r_fps.hh"
+#include "r_main.hh"
+#include "r_sky.hh"
+#include "w_wad.hh"
 
 int gl_shadows_maxdist;
 int gl_shadows_factor;
 
-simple_shadow_params_t simple_shadows = {0,  0,    -1,   0,      0,
-                                         80, 1000, 0.5f, 0.0044f};
+simple_shadow_params_t simple_shadows = {
+    0, 0, static_cast<GLuint>(-1), 0, 0, 80, 1000, 0.5f, 0.0044f};
 
 //===========================================================================
 // GL_PrepareLightTexture

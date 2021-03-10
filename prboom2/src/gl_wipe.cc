@@ -35,13 +35,13 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
 
-#include "e6y.h"
-#include "gl_intern.h"
-#include "lprintf.h"
-#include "m_random.h"
-#include "v_video.h"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "lprintf.hh"
+#include "m_random.hh"
+#include "v_video.hh"
 
 static GLuint wipe_scr_start_tex = 0;
 static GLuint wipe_scr_end_tex = 0;

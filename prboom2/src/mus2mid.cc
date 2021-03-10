@@ -29,11 +29,12 @@
 
 #include <stdio.h>
 
-#include "doomtype.h"
-#include "m_swap.h"
+#include "b_bitops.hh"
+#include "doomtype.hh"
+#include "m_swap.hh"
 
-#include "memio.h"
-#include "mus2mid.h"
+#include "memio.hh"
+#include "mus2mid.hh"
 
 #define NUM_CHANNELS 16
 
@@ -41,15 +42,13 @@
 #define MUS_PERCUSSION_CHAN 15
 
 // MUS event codes
-typedef enum
-{
-    mus_releasekey = 0x00,
-    mus_presskey = 0x10,
-    mus_pitchwheel = 0x20,
-    mus_systemevent = 0x30,
-    mus_changecontroller = 0x40,
-    mus_scoreend = 0x60
-} musevent;
+using musevent = Bitset<int>;
+constexpr musevent mus_releasekey = 0x00;
+constexpr musevent mus_presskey = 0x10;
+constexpr musevent mus_pitchwheel = 0x20;
+constexpr musevent mus_systemevent = 0x30;
+constexpr musevent mus_changecontroller = 0x40;
+constexpr musevent mus_scoreend = 0x60;
 
 // MIDI event codes
 typedef enum
@@ -499,7 +498,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
             channel = GetMIDIChannel(eventdescriptor & 0x0F);
             event = eventdescriptor & 0x70;
 
-            switch (event)
+            switch (event.value())
             {
             case mus_releasekey:
                 if (mem_fread(&key, 1, 1, musinput) != 1)
@@ -656,10 +655,5 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
     tracksizebuffer[2] = (tracksize >> 8) & 0xff;
     tracksizebuffer[3] = tracksize & 0xff;
 
-    if (mem_fwrite(tracksizebuffer, 1, 4, midioutput) != 4)
-    {
-        return true;
-    }
-
-    return false;
+    return mem_fwrite(tracksizebuffer, 1, 4, midioutput) != 4;
 }

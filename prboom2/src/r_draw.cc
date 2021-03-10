@@ -35,16 +35,16 @@
 
 #include <stdint.h>
 
-#include "am_map.h"
-#include "doomstat.h"
-#include "g_game.h"
-#include "lprintf.h"
-#include "r_draw.h"
-#include "r_filter.h"
-#include "r_main.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "am_map.hh"
+#include "doomstat.hh"
+#include "g_game.hh"
+#include "lprintf.hh"
+#include "r_draw.hh"
+#include "r_filter.hh"
+#include "r_main.hh"
+#include "st_stuff.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -849,7 +849,7 @@ void R_InitTranslationTables(void)
     // Remove dependency of colormaps aligned on 256-byte boundary
 
     if (translationtables == NULL) // CPhipps - allow multiple calls
-        translationtables = Z_Malloc(256 * MAXTRANS, PU_STATIC, 0);
+        translationtables = (byte *)Z_Malloc(256 * MAXTRANS, PU_STATIC, 0);
 
     for (i = 0; i < MAXTRANS; i++)
         transtocolour[i] = 255;
@@ -1154,10 +1154,13 @@ void R_InitBuffersRes(void)
     if (int_tempbuf)
         free(int_tempbuf);
 
-    solidcol = calloc(1, SCREENWIDTH * sizeof(*solidcol));
-    byte_tempbuf = calloc(1, (SCREENHEIGHT * 4) * sizeof(*byte_tempbuf));
-    short_tempbuf = calloc(1, (SCREENHEIGHT * 4) * sizeof(*short_tempbuf));
-    int_tempbuf = calloc(1, (SCREENHEIGHT * 4) * sizeof(*int_tempbuf));
+    solidcol = (byte *)calloc(1, SCREENWIDTH * sizeof(*solidcol));
+    byte_tempbuf =
+        (byte *)calloc(1, (SCREENHEIGHT * 4) * sizeof(*byte_tempbuf));
+    short_tempbuf = (unsigned short *)calloc(1, (SCREENHEIGHT * 4) *
+                                                    sizeof(*short_tempbuf));
+    int_tempbuf =
+        (unsigned int *)calloc(1, (SCREENHEIGHT * 4) * sizeof(*int_tempbuf));
 }
 
 //
@@ -1344,7 +1347,7 @@ void R_DrawViewBorder(void)
     }
 
     if (viewheight >= (SCREENHEIGHT - ST_SCALED_HEIGHT))
-        return; // if high-res, don´t go any further!
+        return; // if high-res, donï¿½t go any further!
 
     top = ((SCREENHEIGHT - ST_SCALED_HEIGHT) - viewheight) / 2;
     side = (SCREENWIDTH - scaledviewwidth) / 2;

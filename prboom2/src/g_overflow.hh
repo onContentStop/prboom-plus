@@ -34,9 +34,10 @@
 #ifndef __G_OVERFLOW__
 #define __G_OVERFLOW__
 
-#include "doomdata.h"
-#include "doomtype.h"
-#include "p_maputl.h"
+#include "b_bitops.hh"
+#include "doomdata.hh"
+#include "doomtype.hh"
+#include "p_maputl.hh"
 
 typedef struct overrun_param_s
 {
@@ -48,17 +49,15 @@ typedef struct overrun_param_s
     int shit_happens;
 } overrun_param_t;
 
-typedef enum overrun_list_s
-{
-    OVERFLOW_SPECHIT,
-    OVERFLOW_REJECT,
-    OVERFLOW_INTERCEPT,
-    OVERFLOW_PLYERINGAME,
-    OVERFLOW_DONUT,
-    OVERFLOW_MISSEDBACKSIDE,
+using overrun_list_t = SequentialEnum<int>;
+constexpr overrun_list_t OVERFLOW_SPECHIT{0};
+constexpr overrun_list_t OVERFLOW_REJECT{1};
+constexpr overrun_list_t OVERFLOW_INTERCEPT{2};
+constexpr overrun_list_t OVERFLOW_PLYERINGAME{3};
+constexpr overrun_list_t OVERFLOW_DONUT{4};
+constexpr overrun_list_t OVERFLOW_MISSEDBACKSIDE{5};
 
-    OVERFLOW_MAX // last
-} overrun_list_t;
+constexpr overrun_list_t OVERFLOW_MAX{6};
 
 extern int overflows_enabled;
 extern overrun_param_t overflows[];

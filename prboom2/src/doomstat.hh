@@ -42,6 +42,7 @@
 // We need the playr data structure as well.
 #include "d_player.hh"
 #include "umapinfo.hh"
+#include "b_bitops.hh"
 
 #ifdef __GNUG__
 #pragma interface
@@ -196,58 +197,28 @@ extern int desired_screenwidth, desired_screenheight;
 // Status flags for refresh.
 //
 
-enum class automapmode_e
-{
-    am_active = 1,  // currently shown
-    am_overlay = 2, // covers the screen, i.e. not overlay mode
-    am_rotate = 4,  // rotates to the player facing direction
-    am_follow = 8,  // keep the player centred
-    am_grid = 16,   // show grid
-};
+using automapmode_e = Bitset<int>;
 
-inline automapmode_e operator&(automapmode_e a, automapmode_e b)
-{
-    return static_cast<automapmode_e>(static_cast<int>(a) &
-                                      static_cast<int>(b));
-}
-
-inline automapmode_e operator&=(automapmode_e a, automapmode_e b)
-{
-    return a = static_cast<automapmode_e>(static_cast<int>(a) &
-                                          static_cast<int>(b));
-}
-
-inline automapmode_e operator|=(automapmode_e a, automapmode_e b)
-{
-    return a = static_cast<automapmode_e>(static_cast<int>(a) |
-                                          static_cast<int>(b));
-}
-
-inline automapmode_e operator^=(automapmode_e a, automapmode_e b)
-{
-    return a = static_cast<automapmode_e>(static_cast<int>(a) ^
-                                          static_cast<int>(b));
-}
-
-inline automapmode_e operator~(automapmode_e automapMode)
-{
-    return static_cast<automapmode_e>(~static_cast<int>(automapMode));
-}
-
-inline bool operator!(automapmode_e automapMode)
-{
-    return static_cast<int>(automapMode) != 0;
-}
+// currently shown
+constexpr automapmode_e am_active{1};
+// covers the screen, i.e. not overlay mode
+constexpr automapmode_e am_overlay{2};
+// rotates to the player facing direction
+constexpr automapmode_e am_rotate{4};
+// keep the player centred
+constexpr automapmode_e am_follow{8};
+// show grid
+constexpr automapmode_e am_grid{16};
 
 extern automapmode_e automapmode; // Mode that the automap is in
 
-enum menuactive_e
-{
-    mnact_inactive, // no menu
-    mnact_float,    // doom-style large font menu, doesn't overlap anything
-    mnact_full,     // boom-style small font menu, may overlap status bar
-};
-extern enum menuactive_e menuactive; // Type of menu overlaid, if any
+using menuactive_e = SequentialEnum<int>;
+constexpr menuactive_e mnact_inactive{0}; // no menu
+constexpr menuactive_e mnact_float{
+    1}; // doom-style large font menu, doesn't overlap anything
+constexpr menuactive_e mnact_full{
+    2}; // boom-style small font menu, may overlap status bar
+extern menuactive_e menuactive; // Type of menu overlaid, if any
 
 extern dboolean paused; // Game Pause?
 extern dboolean nodrawers;

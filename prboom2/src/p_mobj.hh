@@ -263,6 +263,9 @@ enum
 /* cph 2006/08/28 - move Prev[XYZ] fields to the end of the struct. Add any
  * other new fields to the end, and make sure you don't break savegames! */
 
+struct player_t;
+struct msecnode_t;
+
 struct mobj_t
 {
     // List: thinker links.
@@ -341,7 +344,7 @@ struct mobj_t
 
     // Additional info record for player avatars only.
     // Only valid if type == MT_PLAYER
-    struct player_s *player;
+    player_t *player;
 
     // Player number last looked for.
     short lastlook;
@@ -363,7 +366,7 @@ struct mobj_t
     int movefactor;
 
     // a linked list of sectors where this object appears
-    struct msecnode_s *touching_sectorlist; // phares 3/14/98
+    msecnode_t *touching_sectorlist; // phares 3/14/98
 
     fixed_t PrevX;
     fixed_t PrevY;

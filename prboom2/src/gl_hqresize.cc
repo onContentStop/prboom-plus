@@ -71,13 +71,13 @@
 #include "config.h"
 #endif
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
-#include "doomstat.h"
-#include "gl_intern.h"
-#include "v_video.h"
+#include "doomstat.hh"
+#include "gl_intern.hh"
+#include "gl_struct.hh"
+#include "v_video.hh"
 
-int gl_texture_hqresize;
 const char *gl_hqresizemodes[hq_scale_max] = {"Off", "Scale2x", "Scale3x",
                                               "Scale4x"};
 
@@ -204,8 +204,8 @@ static void scale4x(unsigned int *inputBuffer, unsigned int *outputBuffer,
                     int inWidth, int inHeight, int seamlessWidth,
                     int seamlessHeight)
 {
-    unsigned int *buffer2x =
-        malloc((2 * inWidth) * (2 * inHeight) * sizeof(unsigned int));
+    auto *buffer2x = (unsigned int *)malloc((2 * inWidth) * (2 * inHeight) *
+                                            sizeof(unsigned int));
     scale2x(inputBuffer, buffer2x, inWidth, inHeight, seamlessWidth,
             seamlessHeight);
     scale2x(buffer2x, outputBuffer, 2 * inWidth, 2 * inHeight, seamlessWidth,
@@ -223,7 +223,8 @@ static unsigned char *HQScaleHelper(
 
     (*outWidth) = N * inWidth;
     (*outHeight) = N * inHeight;
-    newBuffer = malloc((*outWidth) * (*outHeight) * 4 * sizeof(unsigned char));
+    newBuffer = (unsigned char *)malloc((*outWidth) * (*outHeight) * 4 *
+                                        sizeof(unsigned char));
 
     scaleNxFunction((unsigned int *)inputBuffer, (unsigned int *)newBuffer,
                     inWidth, inHeight, seamlessWidth, seamlessHeight);
@@ -273,21 +274,25 @@ unsigned char *gld_HQResize(GLTexture *gltexture, unsigned char *inputBuffer,
     case GLDT_PATCH:
         sw = sh = 0;
         if (gltexture->flags & GLTEXTURE_SPRITE)
-            scale_mode = gl_texture_hqresize_sprites;
+            scale_mode =
+                static_cast<gl_hqresizemode_t>(gl_texture_hqresize_sprites);
         else
-            scale_mode = gl_texture_hqresize_patches;
+            scale_mode =
+                static_cast<gl_hqresizemode_t>(gl_texture_hqresize_patches);
         break;
 
     case GLDT_FLAT:
         sw = sh = 1;
-        scale_mode = gl_texture_hqresize_textures;
+        scale_mode =
+            static_cast<gl_hqresizemode_t>(gl_texture_hqresize_textures);
         break;
 
     case GLDT_TEXTURE:
         // sw = gltexture->flags & GLTEXTURE_SKY;
         // sh = 0;
         sw = sh = 1;
-        scale_mode = gl_texture_hqresize_textures;
+        scale_mode =
+            static_cast<gl_hqresizemode_t>(gl_texture_hqresize_textures);
         break;
     }
 

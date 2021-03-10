@@ -41,21 +41,22 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
+#include "gl_struct.hh"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
-#include "doomstat.h"
-#include "gl_intern.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "r_main.h"
-#include "r_plane.h"
-#include "r_sky.h"
-#include "sc_man.h"
-#include "v_video.h"
+#include "doomstat.hh"
+#include "gl_intern.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "r_main.hh"
+#include "r_plane.hh"
+#include "r_sky.hh"
+#include "sc_man.hh"
+#include "v_video.hh"
 
-#include "e6y.h"
+#include "e6y.hh"
 
 typedef struct
 {
@@ -573,7 +574,7 @@ void gld_DrawScreenSkybox(void)
 
 // The texture offset to be applied to the texture coordinates in SkyVertex().
 static int rows, columns;
-static dboolean yflip;
+static int yflip;
 static int texw;
 static float yMult, yAdd;
 static dboolean foglayer;
@@ -610,7 +611,7 @@ void gld_GetSkyCapColors(void)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 
-    buffer = malloc(width * height * 4);
+    buffer = static_cast<unsigned char *>(malloc(width * height * 4));
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
     averageColor(ceiling_rgb, (unsigned int *)buffer, width * MIN(30, height),
@@ -728,9 +729,11 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky,
     if (!vbo->data)
     {
         memset(vbo, 0, sizeof(vbo[0]));
-        vbo->loops = malloc((row_count * 2 + 2) * sizeof(vbo->loops[0]));
+        vbo->loops = static_cast<GLSkyLoopDef *>(
+            malloc((row_count * 2 + 2) * sizeof(vbo->loops[0])));
         // create vertex array
-        vbo->data = malloc(vertex_count * sizeof(vbo->data[0]));
+        vbo->data = static_cast<vbo_vertex_t *>(
+            malloc(vertex_count * sizeof(vbo->data[0])));
     }
 
     vbo->columns = col_count;
@@ -743,7 +746,7 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky,
 
     vertex_p = &vbo->data[0];
     vbo->loopcount = 0;
-    for (yflip = 0; yflip < 2; yflip++)
+    for (yflip = false; static_cast<int>(yflip) < 2; yflip = true)
     {
         vbo->loops[vbo->loopcount].mode = GL_TRIANGLE_FAN;
         vbo->loops[vbo->loopcount].vertexindex = vertex_p - &vbo->data[0];
@@ -1081,8 +1084,8 @@ void gld_ParseSkybox(void)
                 if (ok)
                 {
                     BoxSkyboxCount++;
-                    BoxSkybox = realloc(BoxSkybox,
-                                        BoxSkyboxCount * sizeof(BoxSkybox[0]));
+                    BoxSkybox = static_cast<box_skybox_t *>(realloc(
+                        BoxSkybox, BoxSkyboxCount * sizeof(BoxSkybox[0])));
                     memcpy(&BoxSkybox[BoxSkyboxCount - 1], &sb, sizeof(sb));
                 }
             }

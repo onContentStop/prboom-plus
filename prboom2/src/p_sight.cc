@@ -31,16 +31,16 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h"
-#include "doomtype.h"
-#include "e6y.h" //e6y
-#include "g_overflow.h"
-#include "lprintf.h"
-#include "m_bbox.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_setup.h"
-#include "r_main.h"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "e6y.hh" //e6y
+#include "g_overflow.hh"
+#include "lprintf.hh"
+#include "m_bbox.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_setup.hh"
+#include "r_main.hh"
 
 /*
 ==============================================================================
@@ -395,8 +395,9 @@ INLINE static int P_DivlineSide(fixed_t x, fixed_t y, const divline_t *node)
                        : x <= node->x ? node->dy > 0
                                       : node->dy < 0
            : !node->dy
-               ? (compatibility_level < prboom_4_compatibility ? x : y) ==
-                         node->y
+               ? (compatibility_level < prboom_4_compatibility
+                      ? x
+                      : y) == node->y
                      ? 2
                  : y <= node->y ? node->dx < 0
                                 : node->dx > 0
@@ -568,10 +569,11 @@ dboolean P_CrossSubsector_PrBoom(int num)
         { // crosses a two sided line
             /* cph 2006/07/15 - oops, we missed this in 2.4.0 & .1;
              *  use P_InterceptVector2 for those compat levels only. */
-            fixed_t frac = (compatibility_level == prboom_5_compatibility ||
-                            compatibility_level == prboom_6_compatibility)
-                               ? P_InterceptVector2(&los.strace, &divl)
-                               : P_InterceptVector(&los.strace, &divl);
+            fixed_t frac =
+                (compatibility_level == prboom_5_compatibility ||
+                 compatibility_level == prboom_6_compatibility)
+                    ? P_InterceptVector2(&los.strace, &divl)
+                    : P_InterceptVector(&los.strace, &divl);
 
             if (front->floorheight != back->floorheight)
             {

@@ -52,13 +52,13 @@ const music_player_t mp_player = {mp_name, mp_init, NULL, NULL, NULL, NULL,
 
 #else // HAVE_LIBMAD
 
-#include "lprintf.h"
+#include "lprintf.hh"
 #include <stdlib.h>
 #include <string.h>
 
 #include <mad.h>
 
-#include "i_sound.h"
+#include "i_sound.hh"
 
 static struct mad_stream Stream;
 static struct mad_frame Frame;

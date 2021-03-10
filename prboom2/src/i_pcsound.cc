@@ -23,18 +23,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 
-#include "doomdef.h"
-#include "doomtype.h"
+#include "doomdef.hh"
+#include "doomtype.hh"
 
-#include "i_pcsound.h"
-#include "i_sound.h"
-#include "sounds.h"
+#include "i_pcsound.hh"
+#include "i_sound.hh"
+#include "sounds.hh"
 
-#include "w_wad.h"
+#include "w_wad.hh"
 
-#include "PCSOUND/pcsound.h"
+#include "PCSOUND/pcsound.hh"
 
 static dboolean pcs_initialised = false;
 
@@ -121,8 +121,8 @@ static dboolean CachePCSLump(int sound_id)
 
     // Load from WAD
 
-    current_sound_lump =
-        W_CacheLumpNum(S_sfx[sound_id].lumpnum /* e6y, PU_STATIC*/);
+    current_sound_lump = static_cast<const uint8_t *>(
+        W_CacheLumpNum(S_sfx[sound_id].lumpnum /* e6y, PU_STATIC*/));
     lumplen = W_LumpLength(S_sfx[sound_id].lumpnum);
 
     // Read header

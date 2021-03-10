@@ -32,18 +32,18 @@
  *-----------------------------------------------------------------------------
  */
 
-#include "wi_stuff.h"
-#include "doomstat.h"
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "lprintf.h" // jff 08/03/98 - declaration of lprintf
-#include "m_random.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "wi_stuff.hh"
+#include "doomstat.hh"
+#include "g_game.hh"
+#include "hu_stuff.hh"
+#include "lprintf.hh" // jff 08/03/98 - declaration of lprintf
+#include "m_random.hh"
+#include "r_draw.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 // Ty 03/17/98: flag that new par times have been loaded in d_deh
 extern dboolean deh_pars;
@@ -1108,8 +1108,8 @@ void WI_initDeathmatchStats(void)
     int i; // looping variables
 
     // CPhipps - allocate data structures needed
-    dm_frags = calloc(MAXPLAYERS, sizeof(*dm_frags));
-    dm_totals = calloc(MAXPLAYERS, sizeof(*dm_totals));
+    dm_frags = (short **)calloc(MAXPLAYERS, sizeof(*dm_frags));
+    dm_totals = (short *)calloc(MAXPLAYERS, sizeof(*dm_totals));
 
     state = StatCount; // We're doing stats
     acceleratestage = 0;
@@ -1122,8 +1122,8 @@ void WI_initDeathmatchStats(void)
         if (playeringame[i])
         {
             // CPhipps - allocate frags line
-            dm_frags[i] = calloc(MAXPLAYERS,
-                                 sizeof(**dm_frags)); // set all counts to zero
+            // set all counts to zero
+            dm_frags[i] = (short *)calloc(MAXPLAYERS, sizeof(**dm_frags));
 
             dm_totals[i] = 0;
         }
@@ -1301,10 +1301,10 @@ void WI_drawDeathmatchStats(void)
             // int trans = playernumtotrans[i];
             V_DrawNamePatch(x - halfface, DM_MATRIXY - WI_SPACINGY, FB,
                             facebackp, i ? CR_LIMIT + i : CR_DEFAULT,
-                            VPT_STRETCH | (i ? VPT_TRANS : 0));
+                            VPT_STRETCH | (i ? VPT_TRANS : VPT_ZERO));
             V_DrawNamePatch(DM_MATRIXX - halfface, y, FB, facebackp,
                             i ? CR_LIMIT + i : CR_DEFAULT,
-                            VPT_STRETCH | (i ? VPT_TRANS : 0));
+                            VPT_STRETCH | (i ? VPT_TRANS : VPT_ZERO));
 
             if (i == me)
             {
@@ -1404,10 +1404,10 @@ void WI_initNetgameStats(void)
     cnt_pause = TICRATE;
 
     // CPhipps - allocate these dynamically, blank with calloc
-    cnt_kills = calloc(MAXPLAYERS, sizeof(*cnt_kills));
-    cnt_items = calloc(MAXPLAYERS, sizeof(*cnt_items));
-    cnt_secret = calloc(MAXPLAYERS, sizeof(*cnt_secret));
-    cnt_frags = calloc(MAXPLAYERS, sizeof(*cnt_frags));
+    cnt_kills = (int *)calloc(MAXPLAYERS, sizeof(*cnt_kills));
+    cnt_items = (int *)calloc(MAXPLAYERS, sizeof(*cnt_items));
+    cnt_secret = (int *)calloc(MAXPLAYERS, sizeof(*cnt_secret));
+    cnt_frags = (int *)calloc(MAXPLAYERS, sizeof(*cnt_frags));
 
     for (i = 0; i < MAXPLAYERS; i++)
         if (playeringame[i])
@@ -1525,8 +1525,9 @@ void WI_updateNetgameStats(void)
 
             if (cnt_secret[i] >=
                 (wbs->maxsecret ? (plrs[i].ssecret * 100) / wbs->maxsecret
-                 : compatibility_level < lxdoom_1_compatibility ? 0
-                                                                : 100))
+                 : compatibility_level < lxdoom_1_compatibility
+                     ? 0
+                     : 100))
                 cnt_secret[i] = wbs->maxsecret
                                     ? (plrs[i].ssecret * 100) / wbs->maxsecret
                                     : 100;
@@ -1636,7 +1637,7 @@ void WI_drawNetgameStats(void)
         x = NG_STATSX;
         V_DrawNamePatch(x - fwidth, y, FB, facebackp,
                         i ? CR_LIMIT + i : CR_DEFAULT,
-                        VPT_STRETCH | (i ? VPT_TRANS : 0));
+                        VPT_STRETCH | (i ? VPT_TRANS : VPT_ZERO));
 
         if (i == me)
             V_DrawNamePatch(x - fwidth, y, FB, star, CR_DEFAULT, VPT_STRETCH);
@@ -1682,9 +1683,9 @@ void WI_initStats(void)
 
     // CPhipps - allocate (awful code, I know, but saves changing it all) and
     // initialise
-    *(cnt_kills = malloc(sizeof(*cnt_kills))) =
-        *(cnt_items = malloc(sizeof(*cnt_items))) =
-            *(cnt_secret = malloc(sizeof(*cnt_secret))) = -1;
+    *(cnt_kills = (int *)malloc(sizeof(*cnt_kills))) =
+        *(cnt_items = (int *)malloc(sizeof(*cnt_items))) =
+            *(cnt_secret = (int *)malloc(sizeof(*cnt_secret))) = -1;
     cnt_time = cnt_par = cnt_total_time = -1;
     cnt_pause = TICRATE;
 

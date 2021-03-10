@@ -33,21 +33,21 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "st_stuff.h"
-#include "am_map.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "dstrings.h"
-#include "e6y.h" //e6y
-#include "i_video.h"
-#include "m_cheat.h"
-#include "m_random.h"
-#include "r_draw.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "st_lib.h"
-#include "w_wad.h"
+#include "st_stuff.hh"
+#include "am_map.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "dstrings.hh"
+#include "e6y.hh" //e6y
+#include "i_video.hh"
+#include "m_cheat.hh"
+#include "m_random.hh"
+#include "r_draw.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "st_lib.hh"
+#include "w_wad.hh"
 
 //
 // STATUS BAR DATA
@@ -398,11 +398,10 @@ static void ST_Stop(void);
 static void ST_refreshBackground(void)
 {
     int y = ST_Y;
-    enum patch_translation_e flags = VPT_ALIGN_LEFT_TOP;
 
     if (st_statusbaron)
     {
-        flags = VPT_ALIGN_BOTTOM;
+        patch_translation_e flags = VPT_ALIGN_BOTTOM;
 
         V_DrawNumPatch(ST_X, y, BG, stbarbg.lumpnum, CR_DEFAULT, flags);
         if (!deathmatch)

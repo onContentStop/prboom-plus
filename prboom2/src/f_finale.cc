@@ -32,15 +32,18 @@
  *-----------------------------------------------------------------------------
  */
 
-#include "f_finale.h" // CPhipps - hmm...
-#include "d_deh.h"    // Ty 03/22/98 - externalizations
-#include "d_event.h"
-#include "doomstat.h"
-#include "g_game.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "f_finale.hh" // CPhipps - hmm...
+#include "d_deh.hh"    // Ty 03/22/98 - externalizations
+#include "d_event.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "g_game.hh"
+#include "info.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 // The implementation for UMAPINFO is kept separate to avoid demo sync issues
 void FMI_Ticker(void);
@@ -235,39 +238,43 @@ void F_Ticker(void)
         return;
     }
 
+    bool next_level = false;
     if (!demo_compatibility)
         WI_checkForAccelerate(); // killough 3/28/98: check for acceleration
     else if (gamemode == commercial && finalecount > 50) // check for skipping
         for (i = 0; i < MAXPLAYERS; i++)
             if (players[i].cmd.buttons)
-                goto next_level; // go on to the next level
+            {
+                next_level = true;
+                break;
+            }
 
     // advance animation
     finalecount++;
 
-    if (finalestage == 2)
+    if (!next_level && finalestage == 2)
         F_CastTicker();
 
-    if (!finalestage)
+    if (!finalestage || next_level)
     {
         float speed = demo_compatibility ? TEXTSPEED : Get_TextSpeed();
         /* killough 2/28/98: changed to allow acceleration */
         if (finalecount > strlen(finaletext) * speed +
                               (midstage ? NEWTEXTWAIT : TEXTWAIT) ||
-            (midstage && acceleratestage))
+            (midstage && acceleratestage) || next_level)
         {
-            if (gamemode != commercial) // Doom 1 / Ultimate Doom episode end
+            if (!next_level &&
+                gamemode != commercial) // Doom 1 / Ultimate Doom episode end
             {                           // with enough time, it's automatic
                 finalecount = 0;
                 finalestage = 1;
-                wipegamestate = -1; // force a wipe
+                wipegamestate = GS_FORCEWIPE; // force a wipe
                 if (gameepisode == 3)
                     S_StartMusic(mus_bunny);
             }
             else // you must press a button to continue in Doom 2
-                if (!demo_compatibility && midstage)
+                if (next_level || !demo_compatibility && midstage)
             {
-            next_level:
                 if (gamemap == 30 ||
                     (gamemission == pack_nerve && singleplayer && gamemap == 8))
                     F_StartCast(); // cast of Doom 2 characters
@@ -290,7 +297,7 @@ void F_Ticker(void)
 // written.                                                         // phares
 // CPhipps - reformatted
 
-#include "hu_stuff.h"
+#include "hu_stuff.hh"
 extern patchnum_t hu_font[HU_FONTSIZE];
 
 void F_TextWrite(void)
@@ -368,7 +375,7 @@ static const castinfo_t castorder[] =
         {&s_CC_PAIN, MT_PAIN},        {&s_CC_REVEN, MT_UNDEAD},
         {&s_CC_MANCU, MT_FATSO},      {&s_CC_ARCH, MT_VILE},
         {&s_CC_SPIDER, MT_SPIDER},    {&s_CC_CYBER, MT_CYBORG},
-        {&s_CC_HERO, MT_PLAYER},      {NULL, 0}};
+        {&s_CC_HERO, MT_PLAYER},      {NULL, MT_NULL}};
 
 int castnum;
 int casttics;
@@ -384,7 +391,7 @@ dboolean castattacking;
 
 void F_StartCast(void)
 {
-    wipegamestate = -1; // force a screen wipe
+    wipegamestate = GS_FORCEWIPE; // force a screen wipe
     castnum = 0;
     caststate = &states[mobjinfo[castorder[castnum].type].seestate];
     casttics = caststate->tics;
@@ -639,7 +646,7 @@ void F_CastDrawer(void)
 
     // CPhipps - patch drawing updated
     V_DrawNumPatch(160, 170, 0, lump + firstspritelump, CR_DEFAULT,
-                   VPT_STRETCH | (flip ? VPT_FLIP : 0));
+                   VPT_STRETCH | (flip ? VPT_FLIP : VPT_ZERO));
 }
 
 //

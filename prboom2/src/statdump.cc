@@ -19,15 +19,15 @@ buffer to a file.
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-#include "d_player.h"
-#include "doomdef.h"
-#include "m_argv.h"
+#include "d_player.hh"
+#include "doomdef.hh"
+#include "m_argv.hh"
 
-#include "statdump.h"
+#include "statdump.hh"
 
 /* Par times for E1M1-E1M9. */
 static const int doom1_par_times[] = {

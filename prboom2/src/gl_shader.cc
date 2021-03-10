@@ -37,19 +37,19 @@
 
 #ifdef USE_SHADERS
 
-#include "doomstat.h"
-#include "e6y.h"
-#include "gl_intern.h"
-#include "gl_opengl.h"
-#include "i_system.h"
-#include "lprintf.h"
-#include "r_bsp.h"
-#include "r_main.h"
-#include "r_things.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include "doomstat.hh"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "gl_opengl.hh"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "r_bsp.hh"
+#include "r_main.hh"
+#include "r_things.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include <math.h>
 
 GLShader *sh_main = NULL;
@@ -78,8 +78,7 @@ int glsl_Init(void)
     return (sh_main != NULL);
 }
 
-static int ReadLump(const char *filename, const char *lumpname,
-                    unsigned char **buffer)
+static int ReadLump(const char *filename, const char *lumpname, char **buffer)
 {
     FILE *file = NULL;
     int size = 0;
@@ -92,7 +91,7 @@ static int ReadLump(const char *filename, const char *lumpname,
         fseek(file, 0, SEEK_END);
         size = ftell(file);
         fseek(file, 0, SEEK_SET);
-        *buffer = malloc(size + 1);
+        *buffer = (char *)malloc(size + 1);
         size = fread(*buffer, 1, size, file);
         if (size > 0)
         {
@@ -115,8 +114,8 @@ static int ReadLump(const char *filename, const char *lumpname,
         if (lump != -1)
         {
             size = W_LumpLength(lump);
-            data = W_CacheLumpNum(lump);
-            *buffer = calloc(1, size + 1);
+            data = static_cast<const unsigned char *>(W_CacheLumpNum(lump));
+            *buffer = (char *)calloc(1, size + 1);
             memcpy(*buffer, data, size);
             (*buffer)[size] = 0;
             W_UnlockLumpNum(lump);
@@ -143,7 +142,7 @@ static GLShader *gld_LoadShader(const char *vpname, const char *fpname)
         doom_snprintf(NULL, 0, "%s/shaders/%s.txt", I_DoomExeDir(), vpname);
     fp_fnlen =
         doom_snprintf(NULL, 0, "%s/shaders/%s.txt", I_DoomExeDir(), fpname);
-    filename = malloc(MAX(vp_fnlen, fp_fnlen) + 1);
+    filename = (char *)malloc(MAX(vp_fnlen, fp_fnlen) + 1);
 
     sprintf(filename, "%s/shaders/%s.txt", I_DoomExeDir(), vpname);
     vp_size = ReadLump(filename, vpname, &vp_data);
@@ -153,14 +152,19 @@ static GLShader *gld_LoadShader(const char *vpname, const char *fpname)
 
     if (vp_data && fp_data)
     {
-        shader = calloc(1, sizeof(GLShader));
+        shader = (GLShader *)calloc(1, sizeof(GLShader));
 
         shader->hVertProg = GLEXT_glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
         shader->hFragProg =
             GLEXT_glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-        GLEXT_glShaderSourceARB(shader->hVertProg, 1, &vp_data, &vp_size);
-        GLEXT_glShaderSourceARB(shader->hFragProg, 1, &fp_data, &fp_size);
+        // FIXME wtf?
+        GLEXT_glShaderSourceARB(shader->hVertProg, 1,
+                                const_cast<const GLcharARB **>(&vp_data),
+                                &vp_size);
+        GLEXT_glShaderSourceARB(shader->hFragProg, 1,
+                                const_cast<const GLcharARB **>(&fp_data),
+                                &fp_size);
 
         GLEXT_glCompileShaderARB(shader->hVertProg);
         GLEXT_glCompileShaderARB(shader->hFragProg);

@@ -44,27 +44,28 @@
 #include <sys/mman.h>
 #endif
 
-#include "doomstat.h"
-#include "doomtype.h"
+#include "doomstat.hh"
+#include "doomtype.hh"
 
 #ifdef __GNUG__
-#pragma implementation "w_wad.h"
+#pragma implementation "w_wad.hh"
 #endif
-#include "i_system.h"
-#include "lprintf.h"
-#include "w_wad.h"
-#include "z_zone.h"
+#include "i_system.hh"
+#include "lprintf.hh"
+#include "w_wad.hh"
+#include "z_zone.hh"
 
-#include "e6y.h" //e6y
+#include "e6y.hh" //e6y
 
-static struct
+struct cachelump_t
 {
     void *cache;
 #ifdef TIMEDIAG
     int locktic;
 #endif
     int locks;
-} * cachelump;
+};
+static cachelump_t *cachelump;
 
 #ifdef HEAPDUMP
 void W_PrintLump(FILE *fp, void *p)
@@ -225,7 +226,7 @@ void W_InitCache(void)
 {
     int maxfd = 0;
     // set up caching
-    cachelump = calloc(numlumps, sizeof *cachelump);
+    cachelump = static_cast<cachelump_t *>(calloc(numlumps, sizeof *cachelump));
     if (!cachelump)
         I_Error("W_Init: Couldn't allocate lumpcache");
 
@@ -240,7 +241,7 @@ void W_InitCache(void)
                 if (lumpinfo[i].wadfile->handle > maxfd)
                     maxfd = lumpinfo[i].wadfile->handle;
     }
-    mapped_wad = calloc(maxfd + 1, sizeof *mapped_wad);
+    mapped_wad = static_cast<void **>(calloc(maxfd + 1, sizeof *mapped_wad));
     {
         int i;
         for (i = 0; i < numlumps; i++)

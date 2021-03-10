@@ -35,6 +35,7 @@
 #define __D_TICCMD__
 
 #include "doomtype.hh"
+#include "d_event.hh"
 
 #ifdef __GNUG__
 #pragma interface
@@ -47,14 +48,14 @@
  * CPhipps - explicitely signed the elements, since they have to be signed to
  * work right
  */
-typedef struct
+struct ticcmd_t
 {
     signed char forwardmove; /* *2048 for move       */
     signed char sidemove;    /* *2048 for move       */
     signed short angleturn;  /* <<16 for angle delta */
     short consistancy;       /* checks for net game  */
     byte chatchar;
-    byte buttons;
-} ticcmd_t;
+    buttoncode_t buttons;
+};
 
 #endif

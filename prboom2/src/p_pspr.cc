@@ -32,21 +32,23 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "p_pspr.h"
-#include "d_event.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "lprintf.h"
-#include "m_random.h"
-#include "p_enemy.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_tick.h"
-#include "r_demo.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "p_pspr.hh"
+#include "d_event.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "info.hh"
+#include "lprintf.hh"
+#include "m_random.hh"
+#include "p_enemy.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_tick.hh"
+#include "r_demo.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "unions.hh"
 
 #define LOWERSPEED (FRACUNIT * 6)
 #define RAISESPEED (FRACUNIT * 6)
@@ -119,9 +121,9 @@ static void P_SetPsprite(player_t *player, int position, statenum_t stnum)
 
         // Call action routine.
         // Modified handling.
-        if (state->action)
+        if (state->action != ACTION_NULL)
         {
-            state->action(player, psp);
+            state->action.plps()(player, psp);
             if (!psp->state)
                 break;
         }
@@ -292,7 +294,8 @@ dboolean P_CheckAmmo(player_t *player)
 
     if (demo_compatibility)
     {
-        player->pendingweapon = P_SwitchWeapon(player); // phares
+        player->pendingweapon =
+            static_cast<weapontype_t>(P_SwitchWeapon(player)); // phares
         // Now set appropriate weapon overlay.
         P_SetPsprite(player, ps_weapon,
                      weaponinfo[player->readyweapon].downstate);
@@ -417,7 +420,8 @@ void A_CheckReload(player_t *player, pspdef_t *psp)
 {
     CHECK_WEAPON_CODEPOINTER("A_CheckReload", player);
 
-    if (!P_CheckAmmo(player) && compatibility_level >= prboom_4_compatibility)
+    if (!P_CheckAmmo(player) &&
+        compatibility_level >= prboom_4_compatibility)
     {
         /* cph 2002/08/08 - In old Doom, P_CheckAmmo would start the weapon
          * lowering immediately. This was lost in Boom when the weapon switching
@@ -504,7 +508,8 @@ void A_Raise(player_t *player, pspdef_t *psp)
 static void A_FireSomething(player_t *player, int adder)
 {
     P_SetPsprite(player, ps_flash,
-                 weaponinfo[player->readyweapon].flashstate + adder);
+                 static_cast<statenum_t>(
+                     weaponinfo[player->readyweapon].flashstate + adder));
 
     // killough 3/27/98: prevent recoil in no-clipping mode
     if (!(player->mo->flags & MF_NOCLIP))
@@ -667,7 +672,7 @@ void A_FireBFG(player_t *player, pspdef_t *psp)
 int autoaim = 0; // killough 7/19/98: autoaiming was not in original beta
 void A_FireOldBFG(player_t *player, pspdef_t *psp)
 {
-    int type = MT_PLASMA1;
+    mobjtype_t type = MT_PLASMA1;
 
     if (compatibility_level < mbf_compatibility)
         return;

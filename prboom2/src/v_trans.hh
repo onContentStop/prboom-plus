@@ -1,7 +1,7 @@
 #ifndef __V_TRANS__
 #define __V_TRANS__
 
-#include "d_ticcmd.h"
+#include "d_ticcmd.hh"
 enum
 {
     CR_NONE,

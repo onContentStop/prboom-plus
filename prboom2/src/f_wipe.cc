@@ -32,20 +32,21 @@
  *-----------------------------------------------------------------------------
  */
 
+#include "doomtype.hh"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "doomdef.h"
-#include "f_wipe.h"
-#include "i_video.h"
-#include "m_random.h"
-#include "v_video.h"
-#include "z_zone.h"
+#include "doomdef.hh"
+#include "f_wipe.hh"
+#include "i_video.hh"
+#include "m_random.hh"
+#include "v_video.hh"
+#include "z_zone.hh"
 #ifdef GL_DOOM
-#include "gl_struct.h"
+#include "gl_struct.hh"
 #endif
-#include "e6y.h" //e6y
+#include "e6y.hh" //e6y
 
 //
 // SCREEN WIPE PACKAGE
@@ -71,7 +72,7 @@ void R_InitMeltRes(void)
     if (y_lookup)
         free(y_lookup);
 
-    y_lookup = calloc(1, SCREENWIDTH * sizeof(*y_lookup));
+    y_lookup = static_cast<int *>(calloc(1, SCREENWIDTH * sizeof(*y_lookup)));
 }
 
 static int wipe_initMelt(int ticks)
@@ -224,8 +225,8 @@ int wipe_StartScreen(void)
     wipe_scr_start.not_on_heap = false;
     V_AllocScreen(&wipe_scr_start);
     screens[SRC_SCR] = wipe_scr_start;
-    V_CopyRect(0, SRC_SCR, 0, 0, SCREENWIDTH, SCREENHEIGHT,
-               VPT_NONE); // Copy start screen to buffer
+    // Copy start screen to buffer
+    V_CopyRect(0, SRC_SCR, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_NONE);
     return 0;
 }
 
@@ -256,10 +257,10 @@ int wipe_EndScreen(void)
     wipe_scr_end.not_on_heap = false;
     V_AllocScreen(&wipe_scr_end);
     screens[DEST_SCR] = wipe_scr_end;
-    V_CopyRect(0, DEST_SCR, 0, 0, SCREENWIDTH, SCREENHEIGHT,
-               VPT_NONE); // Copy end screen to buffer
-    V_CopyRect(SRC_SCR, 0, 0, 0, SCREENWIDTH, SCREENHEIGHT,
-               VPT_NONE); // restore start screen
+    // Copy end screen to buffer
+    V_CopyRect(0, DEST_SCR, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_NONE);
+    // restore start screen
+    V_CopyRect(SRC_SCR, 0, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_NONE);
     return 0;
 }
 

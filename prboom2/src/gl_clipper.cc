@@ -68,11 +68,12 @@
  **
  */
 
-#include "e6y.h"
-#include "gl_intern.h"
-#include "r_main.h"
-#include "v_video.h"
-#include <SDL_opengl.h>
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "r_main.hh"
+#include "tables.hh"
+#include "v_video.hh"
+#include <SDL2/SDL_opengl.h>
 #include <math.h>
 
 float frustum[6][4];
@@ -105,7 +106,7 @@ static clipnode_t *gld_clipnode_GetNew(void)
     }
     else
     {
-        return malloc(sizeof(clipnode_t));
+        return static_cast<clipnode_t *>(malloc(sizeof(clipnode_t)));
     }
 }
 
@@ -346,7 +347,7 @@ angle_t gld_FrustumAngle(void)
     }
 
     // If the pitch is larger than this you can look all around at a FOV of 90
-    if (D_abs(viewpitch) > 46 * ANG1)
+    if (D_abs(static_cast<int>(viewpitch)) > 46 * ANG1)
         return 0xffffffff;
 
     // ok, this is a gross hack that barely works...

@@ -33,19 +33,19 @@
 #ifndef __HU_TRACERS__
 #define __HU_TRACERS__
 
-#include "hu_lib.h"
+#include "hu_lib.hh"
 
 #define MAXTRACEITEMS 8
 
-typedef enum
+enum class tracertype_t
 {
-    TRACE_HEALTH,
-    TRACE_PICKUP,
-    TRACE_CROSS,
-    TRACE_DAMAGE,
+    TRACE_HEALTH = 0,
+    TRACE_PICKUP = 1,
+    TRACE_CROSS = 2,
+    TRACE_DAMAGE = 3,
 
-    NUMTRACES
-} tracertype_t;
+    NUMTRACES = 4,
+};
 
 typedef struct
 {

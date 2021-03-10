@@ -31,13 +31,13 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 // the list of ceilings moving currently, including crushers
 ceilinglist_t *activeceilings;
@@ -286,7 +286,8 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
 
         // create a new ceiling thinker
         rtn = 1;
-        ceiling = Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0);
+        ceiling =
+            static_cast<ceiling_t *>(Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0));
         memset(ceiling, 0, sizeof(*ceiling));
         P_AddThinker(&ceiling->thinker);
         sec->ceilingdata = ceiling; // jff 2/22/98
@@ -415,7 +416,7 @@ int EV_CeilingCrushStop(line_t *line)
         {
             ceiling->olddirection = ceiling->direction;
             ceiling->direction = 0;
-            ceiling->thinker.function = NULL;
+            ceiling->thinker.function = {};
             rtn = 1;
         }
     }
@@ -432,11 +433,13 @@ int EV_CeilingCrushStop(line_t *line)
 //
 void P_AddActiveCeiling(ceiling_t *ceiling)
 {
-    ceilinglist_t *list = malloc(sizeof *list);
+    auto *list = static_cast<ceilinglist_t *>(malloc(sizeof(ceilinglist_t)));
     list->ceiling = ceiling;
     ceiling->list = list;
-    if ((list->next = activeceilings))
+    if ((list->next = activeceilings) != NULL)
+    {
         list->next->prev = &list->next;
+    }
     list->prev = &activeceilings;
     activeceilings = list;
 }

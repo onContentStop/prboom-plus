@@ -50,41 +50,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #ifdef _WIN32
-#include <SDL_syswm.h>
+#include <SDL2/SDL_syswm.h>
 #endif
 
-#include "hu_lib.h"
+#include "hu_lib.hh"
 
-#include "am_map.h"
-#include "d_main.h"
-#include "doomstat.h"
-#include "doomtype.h"
-#include "hu_tracers.h"
-#include "i_main.h"
-#include "i_sound.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "info.h"
-#include "lprintf.h"
-#include "m_argv.h"
-#include "m_menu.h"
-#include "m_misc.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "r_main.h"
-#include "r_sky.h"
-#include "r_things.h"
-#include "s_sound.h"
+#include "am_map.hh"
+#include "d_main.hh"
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "hu_tracers.hh"
+#include "i_main.hh"
+#include "i_sound.hh"
+#include "i_system.hh"
+#include "i_video.hh"
+#include "info.hh"
+#include "lprintf.hh"
+#include "m_argv.hh"
+#include "m_menu.hh"
+#include "m_misc.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "r_main.hh"
+#include "r_sky.hh"
+#include "r_things.hh"
+#include "s_sound.hh"
 #ifdef GL_DOOM
-#include "gl_intern.h"
-#include "gl_struct.h"
+#include "gl_intern.hh"
+#include "gl_struct.hh"
 #endif
-#include "d_deh.h"
-#include "e6y.h"
-#include "g_game.h"
-#include "r_demo.h"
+#include "d_deh.hh"
+#include "e6y.hh"
+#include "g_game.hh"
+#include "r_demo.hh"
 
 dboolean wasWiped = false;
 
@@ -482,42 +482,6 @@ int G_GotoNextLevel(int *e, int *m)
     }
 
     return changed;
-}
-
-// shareware doom has only episode 1
-doom_next[0][7] = (gamemode == shareware ? 11 : 21);
-
-doom_next[2][7] = ((gamemode == registered) ||
-                           // the fourth episode for pre-ultimate complevels
-                           // is not allowed.
-                           (compatibility_level < ultdoom_compatibility)
-                       ? 11
-                       : 41);
-
-if ((gamestate == GS_LEVEL) && !deathmatch && !netgame && !demorecording &&
-    !demoplayback && !menuactive)
-{
-    // doom2_next and doom_next are 0 based, unlike gameepisode and gamemap
-    epsd = gameepisode - 1;
-    map = gamemap - 1;
-
-    if (gamemode == commercial)
-    {
-        epsd = 1;
-        map = doom2_next[BETWEEN(0, 32, map)];
-    }
-    else
-    {
-        int next = doom_next[BETWEEN(0, 3, epsd)][BETWEEN(0, 9, map)];
-        epsd = next / 10;
-        map = next % 10;
-    }
-}
-}
-G_DeferedInitNew(gameskill, epsd, map);
-changed = true;
-
-return changed;
 }
 
 void M_ChangeSpeed(void)
@@ -920,7 +884,8 @@ void e6y_G_DoCompleted(void)
     if (numlevels >= levels_max)
     {
         levels_max = levels_max ? levels_max * 2 : 32;
-        stats = realloc(stats, sizeof(*stats) * levels_max);
+        stats = static_cast<timetable_t *>(
+            realloc(stats, sizeof(*stats) * levels_max));
     }
 
     memset(&stats[numlevels], 0, sizeof(timetable_t));

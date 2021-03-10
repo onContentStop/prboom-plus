@@ -31,16 +31,16 @@
 #ifndef R_PATCH_H
 #define R_PATCH_H
 
+#include "b_bitops.hh"
+
 // Used to specify the sloping of the top and bottom of a column post
-typedef enum
-{
-    RDRAW_EDGESLOPE_TOP_UP = (1 << 0),
-    RDRAW_EDGESLOPE_TOP_DOWN = (1 << 1),
-    RDRAW_EDGESLOPE_BOT_UP = (1 << 2),
-    RDRAW_EDGESLOPE_BOT_DOWN = (1 << 3),
-    RDRAW_EDGESLOPE_TOP_MASK = 0x3,
-    RDRAW_EDGESLOPE_BOT_MASK = 0xc,
-} edgeslope_t;
+using edgeslope_t = Bitset<int>;
+constexpr edgeslope_t RDRAW_EDGESLOPE_TOP_UP = (1 << 0);
+constexpr edgeslope_t RDRAW_EDGESLOPE_TOP_DOWN = (1 << 1);
+constexpr edgeslope_t RDRAW_EDGESLOPE_BOT_UP = (1 << 2);
+constexpr edgeslope_t RDRAW_EDGESLOPE_BOT_DOWN = (1 << 3);
+constexpr edgeslope_t RDRAW_EDGESLOPE_TOP_MASK = 0x3;
+constexpr edgeslope_t RDRAW_EDGESLOPE_BOT_MASK = 0xc;
 
 // e6y
 typedef enum

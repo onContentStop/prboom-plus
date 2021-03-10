@@ -37,15 +37,17 @@
  *-----------------------------------------------------------------------------
  */
 
-#include "d_deh.h" // Ty 03/22/98 - externalizations
-#include "d_event.h"
-#include "doomstat.h"
-#include "f_finale.h" // CPhipps - hmm...
-#include "g_game.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "d_deh.hh" // Ty 03/22/98 - externalizations
+#include "d_event.hh"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "f_finale.hh" // CPhipps - hmm...
+#include "g_game.hh"
+#include "m_misc.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 void F_StartCast(void);
 void F_TextWrite(void);
@@ -115,30 +117,33 @@ void FMI_StartFinale(void)
 void FMI_Ticker(void)
 {
     int i;
+    bool next_level = false;
     if (!demo_compatibility)
         WI_checkForAccelerate(); // killough 3/28/98: check for acceleration
     else
         for (i = 0; i < MAXPLAYERS; i++)
             if (players[i].cmd.buttons)
-                goto next_level; // go on to the next level
+            {
+                next_level = true;
+                break;
+            }
 
     // advance animation
     finalecount++;
 
-    if (!finalestage)
+    if (next_level || !finalestage)
     {
         float speed = demo_compatibility ? TEXTSPEED : Get_TextSpeed();
         /* killough 2/28/98: changed to allow acceleration */
         if (finalecount > strlen(finaletext) * speed +
                               (midstage ? NEWTEXTWAIT : TEXTWAIT) ||
-            (midstage && acceleratestage))
+            (midstage && acceleratestage) || next_level)
         {
 
-        next_level:
             if (gamemapinfo->endpic[0] &&
                 (strcmp(gamemapinfo->endpic, "-") != 0))
             {
-                if (!stricmp(gamemapinfo->endpic, "$CAST"))
+                if (!M_CaseInsensitiveCompare(gamemapinfo->endpic, "$CAST"))
                 {
                     F_StartCast();
                     using_FMI = false;
@@ -147,8 +152,9 @@ void FMI_Ticker(void)
                 {
                     finalecount = 0;
                     finalestage = 1;
-                    wipegamestate = -1; // force a wipe
-                    if (!stricmp(gamemapinfo->endpic, "$BUNNY"))
+                    wipegamestate = GS_FORCEWIPE; // force a wipe
+                    if (!M_CaseInsensitiveCompare(gamemapinfo->endpic,
+                                                  "$BUNNY"))
                     {
                         S_StartMusic(mus_bunny);
                         using_FMI = false;

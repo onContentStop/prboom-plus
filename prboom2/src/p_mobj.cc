@@ -31,26 +31,26 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "doomdef.h"
-#include "doomstat.h"
-#include "e6y.h" //e6y
-#include "g_game.h"
-#include "g_overflow.h"
-#include "hu_stuff.h"
-#include "hu_tracers.h"
-#include "info.h"
-#include "lprintf.h"
-#include "m_random.h"
-#include "p_inter.h"
-#include "p_map.h"
-#include "p_maputl.h"
-#include "p_tick.h"
-#include "r_demo.h"
-#include "r_main.h"
-#include "s_advsound.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "st_stuff.h"
+#include "doomdef.hh"
+#include "doomstat.hh"
+#include "e6y.hh" //e6y
+#include "g_game.hh"
+#include "g_overflow.hh"
+#include "hu_stuff.hh"
+#include "hu_tracers.hh"
+#include "info.hh"
+#include "lprintf.hh"
+#include "m_random.hh"
+#include "p_inter.hh"
+#include "p_map.hh"
+#include "p_maputl.hh"
+#include "p_tick.hh"
+#include "r_demo.hh"
+#include "r_main.hh"
+#include "s_advsound.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
+#include "st_stuff.hh"
 
 // [FG] colored blood and gibs
 dboolean colored_blood;
@@ -80,7 +80,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
     {
         if (state == S_NULL)
         {
-            mobj->state = (state_t *)S_NULL;
+            mobj->state = NULL;
             P_RemoveMobj(mobj);
             ret = false;
             break; // killough 4/9/98
@@ -95,10 +95,11 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         // Modified handling.
         // Call action functions when the state is set
 
-        if (st->action)
-            st->action(mobj);
+        if (st->action != ACTION_NULL)
+            st->action.mobj()(mobj);
 
-        seenstate[state] = 1 + st->nextstate; // killough 4/9/98
+        seenstate[state] =
+            static_cast<statenum_t>(1 + st->nextstate); // killough 4/9/98
 
         state = st->nextstate;
     } while (!mobj->tics && !seenstate[state]); // killough 4/9/98
@@ -107,8 +108,8 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         doom_printf("Warning: State Cycle Detected");
 
     if (!--recursion)
-        for (; (state = seenstate[i]); i = state - 1)
-            seenstate[i] = 0; // killough 4/9/98: erase memory of states
+        for (; (state = seenstate[i]); i = static_cast<statenum_t>(state - 1))
+            seenstate[i] = S_NULL; // killough 4/9/98: erase memory of states
 
     return ret;
 }
@@ -321,7 +322,8 @@ static void P_XYMovement(mobj_t *mo)
     if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED &&
         mo->momy > -STOPSPEED && mo->momy < STOPSPEED &&
         (!player || !(player->cmd.forwardmove | player->cmd.sidemove) ||
-         (player->mo != mo && compatibility_level >= lxdoom_1_compatibility)))
+         (player->mo != mo &&
+          compatibility_level >= lxdoom_1_compatibility)))
     {
         // if in a walking frame, stop moving
 
@@ -330,7 +332,8 @@ static void P_XYMovement(mobj_t *mo)
 
         if (player &&
             (unsigned)(player->mo->state - states - S_PLAY_RUN1) < 4 &&
-            (player->mo == mo || compatibility_level >= lxdoom_1_compatibility))
+            (player->mo == mo ||
+             compatibility_level >= lxdoom_1_compatibility))
             P_SetMobjState(player->mo, S_PLAY);
 
         mo->momx = mo->momy = 0;
@@ -903,7 +906,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     state_t *st;
     mobjinfo_t *info;
 
-    mobj = Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL);
+    mobj = static_cast<mobj_t *>(Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL));
     memset(mobj, 0, sizeof(*mobj));
     info = &mobjinfo[type];
     mobj->type = type;
@@ -1046,15 +1049,17 @@ void P_RemoveMobj(mobj_t *mobj)
 
 static PUREFUNC int P_FindDoomedNum(unsigned type)
 {
-    static struct
+    struct hash_t
     {
         int first, next;
-    } * hash;
+    };
+    static hash_t *hash;
     register int i;
 
     if (!hash)
     {
-        hash = Z_Malloc(sizeof *hash * NUMMOBJTYPES, PU_CACHE, (void **)&hash);
+        hash = static_cast<hash_t *>(
+            Z_Malloc(sizeof *hash * NUMMOBJTYPES, PU_CACHE, (void **)&hash));
         for (i = 0; i < NUMMOBJTYPES; i++)
             hash[i].first = NUMMOBJTYPES;
         for (i = 0; i < NUMMOBJTYPES; i++)
@@ -1084,7 +1089,6 @@ void P_RespawnSpecials(void)
     subsector_t *ss;
     mobj_t *mo;
     mapthing_t *mthing;
-    int i;
 
     // only respawn items in deathmatch
 
@@ -1115,7 +1119,7 @@ void P_RespawnSpecials(void)
     // find which type to spawn
 
     /* killough 8/23/98: use table for faster lookup */
-    i = P_FindDoomedNum(mthing->type);
+    int i = P_FindDoomedNum(mthing->type);
 
     // spawn it
 
@@ -1124,7 +1128,7 @@ void P_RespawnSpecials(void)
     else
         z = ONFLOORZ;
 
-    mo = P_SpawnMobj(x, y, z, i);
+    mo = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(i));
     mo->spawnpoint = *mthing;
     mo->angle = ANG45 * (mthing->angle / 45);
 
@@ -1291,8 +1295,9 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     // bits that weren't used in Doom (such as HellMaker wads). So we should
     // then simply ignore all upper bits.
 
-    if (demo_compatibility || (compatibility_level >= lxdoom_1_compatibility &&
-                               options & MTF_RESERVED))
+    if (demo_compatibility ||
+        (compatibility_level >= lxdoom_1_compatibility &&
+         options & MTF_RESERVED))
     {
         if (!demo_compatibility) // cph - Add warning about bad thing flags
             lprintf(
@@ -1324,9 +1329,9 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
             {
                 num_deathmatchstarts =
                     num_deathmatchstarts ? num_deathmatchstarts * 2 : 16;
-                deathmatchstarts =
+                deathmatchstarts = static_cast<mapthing_t *>(
                     realloc(deathmatchstarts,
-                            num_deathmatchstarts * sizeof(*deathmatchstarts));
+                            num_deathmatchstarts * sizeof(*deathmatchstarts)));
                 deathmatch_p = deathmatchstarts + offset;
             }
             memcpy(deathmatch_p++, mthing, sizeof(*mthing));
@@ -1455,7 +1460,7 @@ spawnit:
     else
         z = ONFLOORZ;
 
-    mobj = P_SpawnMobj(x, y, z, i);
+    mobj = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(i));
     mobj->spawnpoint = *mthing;
     mobj->index = index; // e6y
     mobj->iden_nums = iden_num;

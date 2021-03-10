@@ -41,8 +41,8 @@
 #define USE_VERTEX_ARRAYS
 //#define USE_VBO
 
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 #if SDL_VERSION_ATLEAST(1, 3, 0)
 #if defined(__MACOSX__)
@@ -57,7 +57,7 @@
 #endif
 #endif
 
-#include "doomtype.h"
+#include "doomtype.hh"
 
 #if !defined(GL_DEPTH_STENCIL_EXT)
 #define GL_DEPTH_STENCIL_EXT 0x84F9
@@ -170,9 +170,9 @@ extern PFNGLGETUNIFORMFVARBPROC GLEXT_glGetUniformfvARB;
 void gld_InitOpenGL(dboolean compatibility_mode);
 
 // states
-void gld_EnableTexture2D(GLenum texture, int enable);
-void gld_EnableClientCoordArray(GLenum texture, int enable);
-void gld_EnableMultisample(int enable);
+void gld_EnableTexture2D(GLenum texture, bool enable);
+void gld_EnableClientCoordArray(GLenum texture, bool enable);
+void gld_EnableMultisample(bool enable);
 
 typedef enum
 {

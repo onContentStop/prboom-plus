@@ -35,26 +35,27 @@
 #include "config.h"
 #endif
 
-#include "gl_opengl.h"
+#include "gl_opengl.hh"
+#include "gl_struct.hh"
 
-#include "z_zone.h"
-#include <SDL.h>
+#include "z_zone.hh"
+#include <SDL2/SDL.h>
 
 #ifdef HAVE_LIBSDL2_IMAGE
-#include <SDL_image.h>
+#include <SDL2/SDL_image.h>
 #endif
 
 #include <math.h>
 
-#include "e6y.h"
-#include "gl_intern.h"
-#include "lprintf.h"
-#include "m_misc.h"
-#include "p_spec.h"
-#include "r_main.h"
-#include "sc_man.h"
-#include "v_video.h"
-#include "w_wad.h"
+#include "e6y.hh"
+#include "gl_intern.hh"
+#include "lprintf.hh"
+#include "m_misc.hh"
+#include "p_spec.hh"
+#include "r_main.hh"
+#include "sc_man.hh"
+#include "v_video.hh"
+#include "w_wad.hh"
 
 int render_usedetail;
 int gl_allow_detail_textures;
@@ -871,8 +872,8 @@ void gld_ParseDetailItem(tag_detail_e item)
                     {
                         details_size =
                             (details_size == 0 ? 128 : details_size * 2);
-                        details =
-                            realloc(details, details_size * sizeof(details[0]));
+                        details = static_cast<detail_t *>(realloc(
+                            details, details_size * sizeof(details[0])));
                     }
                     details[details_count] = detail;
                     details_count++;
@@ -888,7 +889,7 @@ void gld_ParseDetail(void)
 
     details_count = 2; // reserved for default wall and flat
     details_size = 128;
-    details = calloc(details_size, sizeof(details[0]));
+    details = static_cast<detail_t *>(calloc(details_size, sizeof(details[0])));
 
     // skip "Detail" params
     while (SC_Check() && !SC_Compare("{"))

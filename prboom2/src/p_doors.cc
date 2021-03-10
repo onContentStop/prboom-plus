@@ -31,16 +31,17 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#include "d_deh.h" // Ty 03/27/98 - externalized
-#include "doomstat.h"
-#include "dstrings.h"
-#include "e6y.h" //e6y
-#include "lprintf.h"
-#include "p_spec.h"
-#include "p_tick.h"
-#include "r_main.h"
-#include "s_sound.h"
-#include "sounds.h"
+#include "d_deh.hh" // Ty 03/27/98 - externalized
+#include "doomstat.hh"
+#include "doomtype.hh"
+#include "dstrings.hh"
+#include "e6y.hh" //e6y
+#include "lprintf.hh"
+#include "p_spec.hh"
+#include "p_tick.hh"
+#include "r_main.hh"
+#include "s_sound.hh"
+#include "sounds.hh"
 
 ///////////////////////////////////////////////////////////////
 //
@@ -378,7 +379,7 @@ int EV_DoDoor(line_t *line, vldoor_e type)
 
         // new door thinker
         rtn = 1;
-        door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+        door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
         memset(door, 0, sizeof(*door));
         P_AddThinker(&door->thinker);
         sec->ceilingdata = door; // jff 2/22/98
@@ -523,13 +524,13 @@ int EV_VerticalDoor(line_t *line, mobj_t *thing)
      * Secondly, original Doom didn't distinguish floor/lighting/ceiling
      *  actions, so we need to do the same in demo compatibility mode.
      */
-    door = sec->ceilingdata;
+    door = static_cast<vldoor_t *>(sec->ceilingdata);
     if (demo_compatibility)
     {
         if (!door)
-            door = sec->floordata;
+            door = static_cast<vldoor_t *>(sec->floordata);
         if (!door)
-            door = sec->lightingdata;
+            door = static_cast<vldoor_t *>(sec->lightingdata);
     }
     /* If this is a repeatable line, and the door is already moving, then we can
      * just reverse the current action. Note that in prboom 2.3.0 I erroneously
@@ -577,9 +578,9 @@ int EV_VerticalDoor(line_t *line, mobj_t *thing)
                 {
                     door->direction = outval;
                 }
-                else if (door->thinker.function == T_PlatRaise)
+                else if (door->thinker.function == Action{T_PlatRaise})
                 {
-                    plat_t *p = (plat_t *)door;
+                    plat_t *p = reinterpret_cast<plat_t *>(door);
                     p->wait = outval;
                 }
                 else
@@ -612,7 +613,7 @@ int EV_VerticalDoor(line_t *line, mobj_t *thing)
     }
 
     // new door thinker
-    door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+    door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
     memset(door, 0, sizeof(*door));
     P_AddThinker(&door->thinker);
     sec->ceilingdata = door; // jff 2/22/98
@@ -683,7 +684,7 @@ void P_SpawnDoorCloseIn30(sector_t *sec)
 {
     vldoor_t *door;
 
-    door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+    door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
 
     memset(door, 0, sizeof(*door));
     P_AddThinker(&door->thinker);
@@ -713,7 +714,7 @@ void P_SpawnDoorRaiseIn5Mins(sector_t *sec, int secnum)
 {
     vldoor_t *door;
 
-    door = Z_Malloc(sizeof(*door), PU_LEVSPEC, 0);
+    door = static_cast<vldoor_t *>(Z_Malloc(sizeof(*door), PU_LEVSPEC, 0));
 
     memset(door, 0, sizeof(*door));
     P_AddThinker(&door->thinker);
