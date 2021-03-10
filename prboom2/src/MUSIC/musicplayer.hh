@@ -45,7 +45,7 @@ calls to render, and not some external timing source.  That's why things stay
 synced.
 */
 
-typedef struct
+struct music_player_t
 {
     // descriptive name of the player, such as "OPL2 Synth"
     const char *(*name)(void);
@@ -82,7 +82,7 @@ typedef struct
     // able to handle just about anything for nsamp.  render can be called even
     // during pause+stop.
     void (*render)(void *dest, unsigned nsamp);
-} music_player_t;
+};
 
 // helper for deferred load dll
 

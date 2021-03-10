@@ -33,6 +33,21 @@
 
 #include "musicplayer.hh"
 
-extern const music_player_t vorb_player;
+const char *vorb_name(void);
+int vorb_init(int samplerate);
+void vorb_shutdown(void);
+void vorb_setvolume(int v);
+void vorb_pause(void);
+void vorb_resume(void);
+const void *vorb_registersong(const void *data, unsigned len);
+void vorb_unregistersong(const void *handle);
+void vorb_play(const void *handle, int looping);
+void vorb_stop(void);
+void vorb_render(void *dest, unsigned nsamp);
+
+constexpr music_player_t vorb_player{
+    vorb_name,  vorb_init,   vorb_shutdown,     vorb_setvolume,
+    vorb_pause, vorb_resume, vorb_registersong, vorb_unregistersong,
+    vorb_play,  vorb_stop,   vorb_render};
 
 #endif // VORBISPLAYER_H

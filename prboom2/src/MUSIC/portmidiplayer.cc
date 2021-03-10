@@ -36,6 +36,7 @@
 #endif
 
 #include "musicplayer.hh"
+#include "portmidiplayer.hh"
 
 #ifndef HAVE_LIBPORTMIDI
 #include <string.h>
@@ -92,18 +93,13 @@ static int sysexbufflen;
 // in latency time
 #define DRIVER_BUFFER 100 // events
 
-static const char *pm_name(void)
-{
-    return "portmidi midi player";
-}
-
 #ifdef _MSC_VER
 #define WIN32_LEAN_AND_MEAN
 #include <delayimp.h>
 #include <windows.h>
 #endif
 
-static int pm_init(int samplerate)
+int pm_init(int samplerate)
 {
     PmDeviceID outputdevice;
     const PmDeviceInfo *oinfo;
@@ -163,9 +159,7 @@ static int pm_init(int samplerate)
     return 1;
 }
 
-static void pm_stop(void);
-
-static void pm_shutdown(void)
+void pm_shutdown(void)
 {
     if (pm_stream)
     {
@@ -206,7 +200,7 @@ static void pm_shutdown(void)
     }
 }
 
-static const void *pm_registersong(const void *data, unsigned len)
+const void *pm_registersong(const void *data, unsigned len)
 {
     midimem_t mf;
 
@@ -283,7 +277,7 @@ static void pm_clearchvolume(void)
         channelvol[i] = 127; // default: max
 }
 
-static void pm_setvolume(int v)
+void pm_setvolume(int v)
 {
     static int firsttime = 1;
 
@@ -307,7 +301,7 @@ static void pm_setvolume(int v)
         pm_refreshvolume();
 }
 
-static void pm_unregistersong(const void *handle)
+void pm_unregistersong(const void *handle)
 {
     if (events)
     {
@@ -321,7 +315,7 @@ static void pm_unregistersong(const void *handle)
     }
 }
 
-static void pm_pause(void)
+void pm_pause(void)
 {
     int i;
     unsigned long when = Pt_Time();
@@ -331,12 +325,12 @@ static void pm_pause(void)
         writeevent(when, MIDI_EVENT_CONTROLLER, i, 123, 0); // all notes off
     }
 }
-static void pm_resume(void)
+void pm_resume(void)
 {
     pm_paused = 0;
     trackstart = Pt_Time();
 }
-static void pm_play(const void *handle, int looping)
+void pm_play(const void *handle, int looping)
 {
     eventpos = 0;
     pm_looping = looping;
@@ -371,7 +365,7 @@ static void writesysex(unsigned long when, int etype, unsigned char *data,
     }
 }
 
-static void pm_stop(void)
+void pm_stop(void)
 {
     int i;
     unsigned long when = Pt_Time();
@@ -398,7 +392,7 @@ static void pm_stop(void)
     sysexbufflen = 0;
 }
 
-static void pm_render(void *vdest, unsigned bufflen)
+void pm_render(void *vdest, unsigned bufflen)
 {
     // wherever you see samples in here, think milliseconds
 
@@ -508,10 +502,5 @@ static void pm_render(void *vdest, unsigned bufflen)
 
     trackstart = newtime;
 }
-
-const music_player_t pm_player = {
-    pm_name,  pm_init,   pm_shutdown,     pm_setvolume,
-    pm_pause, pm_resume, pm_registersong, pm_unregistersong,
-    pm_play,  pm_stop,   pm_render};
 
 #endif // HAVE_LIBPORTMIDI

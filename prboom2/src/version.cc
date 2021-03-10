@@ -40,4 +40,4 @@
 #define BUILD_TIME __TIME__
 #endif
 
-const char version_date[] = BUILD_DATE " " BUILD_TIME;
+const char *version_date = BUILD_DATE " " BUILD_TIME;

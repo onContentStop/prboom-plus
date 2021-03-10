@@ -26,13 +26,13 @@
 #ifndef OPL_OPL_H
 #define OPL_OPL_H
 
-typedef void (*opl_callback_t)(void *data);
+#include "b_bitops.hh"
 
-typedef enum
-{
-    OPL_REGISTER_PORT = 0,
-    OPL_DATA_PORT = 1
-} opl_port_t;
+using opl_callback_t = void (*)(void *);
+
+using opl_port_t = SequentialEnum<int>;
+constexpr opl_port_t OPL_REGISTER_PORT = 0;
+constexpr opl_port_t OPL_DATA_PORT = 1;
 
 #define OPL_NUM_OPERATORS 21
 #define OPL_NUM_VOICES 9

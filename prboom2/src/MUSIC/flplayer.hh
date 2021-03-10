@@ -33,6 +33,25 @@
 
 #include "musicplayer.hh"
 
-extern const music_player_t fl_player;
+constexpr const char *fl_name(void)
+{
+    return "fluidsynth midi player";
+}
+
+int fl_init(int samplerate);
+void fl_shutdown(void);
+void fl_setvolume(int v);
+void fl_pause(void);
+void fl_resume(void);
+const void *fl_registersong(const void *data, unsigned len);
+void fl_unregistersong(const void *handle);
+void fl_play(const void *handle, int looping);
+void fl_stop(void);
+void fl_render(void *vdest, unsigned length);
+
+constexpr music_player_t fl_player = {
+    fl_name,  fl_init,   fl_shutdown,     fl_setvolume,
+    fl_pause, fl_resume, fl_registersong, fl_unregistersong,
+    fl_play,  fl_stop,   fl_render};
 
 #endif // FLPLAYER_H

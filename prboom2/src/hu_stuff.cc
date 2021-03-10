@@ -217,11 +217,6 @@ static char hud_monsecstr[80];
 // Ty 03/27/98 - externalized map name arrays - now in d_deh.c
 // and converted to arrays of pointers to char *
 // See modified HUTITLEx macros
-extern char **mapnames[];
-extern char **mapnames2[];
-extern char **mapnamesp[];
-extern char **mapnamest[];
-
 extern int map_point_coordinates;
 extern int map_level_stat;
 
@@ -1968,7 +1963,8 @@ void HU_widget_draw_gkeys(void)
     HUlib_drawTextLine(&w_keys_icon, false);
 }
 
-const char *crosshair_nam[HU_CROSSHAIRS] = {nullptr, "CROSS1", "CROSS2", "CROSS3"};
+const char *crosshair_nam[HU_CROSSHAIRS] = {nullptr, "CROSS1", "CROSS2",
+                                            "CROSS3"};
 const char *crosshair_str[HU_CROSSHAIRS] = {"none", "cross", "angle", "dot"};
 crosshair_t crosshair;
 

@@ -1151,27 +1151,6 @@ static void InitVoices(void)
 
 // Set music volume (0 - 15)
 
-void I_OPL_SetMusicVolume(int volume)
-{
-    int opl_vol = volume * 127 / 15; // OPL synth internally uses 0-127
-
-    unsigned int i;
-
-    // Internal state variable.
-
-    current_music_volume = opl_vol;
-
-    // Update the volume of all voices.
-
-    for (i = 0; i < OPL_NUM_VOICES; ++i)
-    {
-        if (voices[i].channel != nullptr)
-        {
-            SetVoiceVolume(&voices[i], voices[i].note_volume);
-        }
-    }
-}
-
 static void VoiceKeyOff(opl_voice_t *voice)
 {
     OPL_WriteRegister(OPL_REGS_FREQ_2 + voice->index, voice->freq >> 8);
@@ -1744,10 +1723,7 @@ static void ScheduleTrack(opl_track_data_t *track)
 
     OPL_SetCallback(ms, TrackTimerCallback, track);
 }
-
-// Initialize a channel.
-
-static void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel)
+void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel)
 {
     // TODO: Work out sensible defaults?
 
@@ -1755,10 +1731,7 @@ static void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel)
     channel->volume = 127;
     channel->bend = 0;
 }
-
-// Start a MIDI track playing:
-
-static void StartTrack(const midi_file_t *file, unsigned int track_num)
+void StartTrack(const midi_file_t *file, unsigned int track_num)
 {
     opl_track_data_t *track;
     unsigned int i;
@@ -1781,10 +1754,11 @@ static void StartTrack(const midi_file_t *file, unsigned int track_num)
 
     ScheduleTrack(track);
 }
-
-// Start playing a mid
-
-static void I_OPL_PlaySong(const void *handle, int looping)
+void I_OPL_RenderSamples(void *dest, unsigned int nsamp)
+{
+    OPL_Render_Samples(dest, nsamp);
+}
+void I_OPL_PlaySong(const void *handle, int looping)
 {
     const midi_file_t *file;
     unsigned int i;
@@ -1810,44 +1784,54 @@ static void I_OPL_PlaySong(const void *handle, int looping)
         StartTrack(file, i);
     }
 }
-
-static void I_OPL_PauseSong(void)
-{
-    unsigned int i;
-
-    if (!music_initialized)
-    {
-        return;
-    }
-
-    // Pause OPL callbacks.
-
-    OPL_SetPaused(1);
-
-    // Turn off all main instrument voices (not percussion).
-    // This is what Vanilla does.
-
-    for (i = 0; i < OPL_NUM_VOICES; ++i)
-    {
-        if (voices[i].channel != nullptr &&
-            voices[i].current_instr < percussion_instrs)
-        {
-            VoiceKeyOff(&voices[i]);
-        }
-    }
-}
-
-static void I_OPL_ResumeSong(void)
+void I_OPL_UnRegisterSong(const void *handle)
 {
     if (!music_initialized)
     {
         return;
     }
 
-    OPL_SetPaused(0);
+    if (handle != nullptr)
+    {
+        MIDI_FreeFile((midi_file_t *)handle);
+    }
 }
+const void *I_OPL_RegisterSong(const void *data, unsigned int len)
+{
+    midi_file_t *result;
+    midimem_t mf;
 
-static void I_OPL_StopSong(void)
+    if (!music_initialized)
+    {
+        return nullptr;
+    }
+    mf.len = len;
+    mf.pos = 0;
+    mf.data = (byte *)data;
+
+    // NSM: if a file has a miniscule timecode we have to not load it.
+    // if it's 0, we'll hang in scheduling and never finish.  if it's
+    // very small but close to 0, there's probably something wrong with it
+
+    // this check of course isn't very accurate, but to actually get the
+    // time numbers we have to traverse the tracks and everything
+    if (mf.len < 100)
+    {
+        lprintf(LO_WARN, "I_OPL_RegisterSong: Very short MIDI (%li bytes)\n",
+                mf.len);
+        return nullptr;
+    }
+
+    result = MIDI_LoadFileSpecial(&mf);
+
+    if (result == nullptr)
+    {
+        lprintf(LO_WARN, "I_OPL_RegisterSong: Failed to load MID.\n");
+    }
+
+    return result;
+}
+void I_OPL_StopSong(void)
 {
     unsigned int i;
 
@@ -1883,65 +1867,61 @@ static void I_OPL_StopSong(void)
     tracks = nullptr;
     num_tracks = 0;
 }
-
-static void I_OPL_UnRegisterSong(const void *handle)
+void I_OPL_ResumeSong(void)
 {
     if (!music_initialized)
     {
         return;
     }
 
-    if (handle != nullptr)
-    {
-        MIDI_FreeFile((midi_file_t *)handle);
-    }
+    OPL_SetPaused(0);
 }
-
-// Determine whether memory block is a .mid file
-
-static dboolean IsMid(byte *mem, int len)
+void I_OPL_PauseSong(void)
 {
-    return len > 4 && !memcmp(mem, "MThd", 4);
-}
-
-// now only takes files in MIDI format
-static const void *I_OPL_RegisterSong(const void *data, unsigned len)
-{
-    midi_file_t *result;
-    midimem_t mf;
+    unsigned int i;
 
     if (!music_initialized)
     {
-        return nullptr;
+        return;
     }
-    mf.len = len;
-    mf.pos = 0;
-    mf.data = (byte *)data;
 
-    // NSM: if a file has a miniscule timecode we have to not load it.
-    // if it's 0, we'll hang in scheduling and never finish.  if it's
-    // very small but close to 0, there's probably something wrong with it
+    // Pause OPL callbacks.
 
-    // this check of course isn't very accurate, but to actually get the
-    // time numbers we have to traverse the tracks and everything
-    if (mf.len < 100)
+    OPL_SetPaused(1);
+
+    // Turn off all main instrument voices (not percussion).
+    // This is what Vanilla does.
+
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
     {
-        lprintf(LO_WARN, "I_OPL_RegisterSong: Very short MIDI (%li bytes)\n",
-                mf.len);
-        return nullptr;
+        if (voices[i].channel != nullptr &&
+            voices[i].current_instr < percussion_instrs)
+        {
+            VoiceKeyOff(&voices[i]);
+        }
     }
-
-    result = MIDI_LoadFileSpecial(&mf);
-
-    if (result == nullptr)
-    {
-        lprintf(LO_WARN, "I_OPL_RegisterSong: Failed to load MID.\n");
-    }
-
-    return result;
 }
+void I_OPL_SetMusicVolume(int volume)
+{
+    int opl_vol = volume * 127 / 15; // OPL synth internally uses 0-127
 
-static void I_OPL_ShutdownMusic(void)
+    unsigned int i;
+
+    // Internal state variable.
+
+    current_music_volume = opl_vol;
+
+    // Update the volume of all voices.
+
+    for (i = 0; i < OPL_NUM_VOICES; ++i)
+    {
+        if (voices[i].channel != nullptr)
+        {
+            SetVoiceVolume(&voices[i], voices[i].note_volume);
+        }
+    }
+}
+void I_OPL_ShutdownMusic(void)
 {
     if (music_initialized)
     {
@@ -1958,9 +1938,6 @@ static void I_OPL_ShutdownMusic(void)
         music_initialized = false;
     }
 }
-
-// Initialize music subsystem
-
 int I_OPL_InitMusic(int samplerate)
 {
 
@@ -1987,18 +1964,8 @@ int I_OPL_InitMusic(int samplerate)
     return 1;
 }
 
-const char *I_OPL_SynthName(void)
+// Determine whether memory block is a .mid file
+static dboolean IsMid(byte *mem, int len)
 {
-    return "opl2 synth player";
+    return len > 4 && !memcmp(mem, "MThd", 4);
 }
-
-void I_OPL_RenderSamples(void *dest, unsigned nsamp)
-{
-    OPL_Render_Samples(dest, nsamp);
-}
-
-const music_player_t opl_synth_player = {
-    I_OPL_SynthName,      I_OPL_InitMusic,      I_OPL_ShutdownMusic,
-    I_OPL_SetMusicVolume, I_OPL_PauseSong,      I_OPL_ResumeSong,
-    I_OPL_RegisterSong,   I_OPL_UnRegisterSong, I_OPL_PlaySong,
-    I_OPL_StopSong,       I_OPL_RenderSamples};

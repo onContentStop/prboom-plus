@@ -34,6 +34,6 @@
 #ifndef __DOOMVERSION__
 #define __DOOMVERSION__
 
-extern const char version_date[];
+extern const char *version_date;
 
 #endif
