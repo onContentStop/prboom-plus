@@ -96,7 +96,7 @@ int deh_apply_cheats = true;
 typedef struct
 {
     /* cph 2006/08/06 -
-     * if lump != NULL, lump is the start of the lump,
+     * if lump != nullptr, lump is the start of the lump,
      * inp is the current read pos. */
     const byte *inp, *lump;
     long size;
@@ -111,7 +111,7 @@ static char *dehfgets(char *buf, size_t n, DEHFILE *fp)
     if (!fp->lump)                        // If this is a real file,
         return (fgets)(buf, n, fp->f);    // return regular fgets
     if (!n || !*fp->inp || fp->size <= 0) // If no more characters
-        return NULL;
+        return nullptr;
     if (n == 1)
         fp->size--, *buf = *fp->inp++;
     else
@@ -1288,7 +1288,7 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
                                                   // souls attacked different
         {A_Stop, "A_Stop"},
 
-        // This NULL entry must be the last in the list
+        // This nullptr entry must be the last in the list
         {{}, "A_NULL"}, // Ty 05/16/98
 };
 
@@ -1325,25 +1325,25 @@ void D_BuildBEXTables(void)
 
     for (i = 0; i < NUMSPRITES; i++)
         deh_spritenames[i] = strdup(sprnames[i]);
-    deh_spritenames[NUMSPRITES] = NULL;
+    deh_spritenames[NUMSPRITES] = nullptr;
 
     for (i = 1; i < NUMMUSIC; i++)
         deh_musicnames[i] = strdup(S_music[i].name);
-    deh_musicnames[0] = deh_musicnames[NUMMUSIC] = NULL;
+    deh_musicnames[0] = deh_musicnames[NUMMUSIC] = nullptr;
 
     for (i = 1; i < NUMSFX; i++)
     {
-        if (S_sfx[i].name != NULL)
+        if (S_sfx[i].name != nullptr)
         {
             deh_soundnames[i] = strdup(S_sfx[i].name);
         }
         else
         { // This is possible due to how DEHEXTRA has turned S_sfx into a sparse
           // array
-            deh_soundnames[i] = NULL;
+            deh_soundnames[i] = nullptr;
         }
     }
-    deh_soundnames[0] = deh_soundnames[NUMSFX] = NULL;
+    deh_soundnames[0] = deh_soundnames[NUMSFX] = nullptr;
 
     // ferk: initialize Thing extra properties (keeping vanilla props in info.c)
     for (i = 0; i < NUMMOBJTYPES; i++)
@@ -1483,7 +1483,7 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
             lprintf(LO_WARN, "-deh file %s not found\n", filename);
             return; // should be checked up front anyway
         }
-        infile.lump = NULL;
+        infile.lump = nullptr;
         file_or_lump = "file";
     }
     else // DEH file comes from lump indicated by third argument
@@ -1500,7 +1500,7 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
         filename = lumpinfo[lumpnum].wadfile->name;
         file_or_lump = "lump from";
     }
-    infile.lump = NULL;
+    infile.lump = nullptr;
     file_or_lump = "file";
 
     lprintf(LO_INFO, "Loading DEH %s %s\n", file_or_lump, filename);
@@ -1560,9 +1560,9 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
                 fprintf(fileout, "Branching to include file %s...\n", nextfile);
 
             // killough 10/98:
-            // Second argument must be NULL to prevent closing fileout too soon
+            // Second argument must be nullptr to prevent closing fileout too soon
 
-            ProcessDehFile(nextfile, NULL, 0); // do the included file
+            ProcessDehFile(nextfile, nullptr, 0); // do the included file
 
             includenotext = oldnotext;
             if (fileout)
@@ -1607,7 +1607,7 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
     {
         if (fileout != stdout)
             fclose(fileout);
-        fileout = NULL;
+        fileout = nullptr;
     }
 
     deh_applyCompatibility();
@@ -1978,7 +1978,7 @@ static void deh_procThing(DEHFILE *fpin, FILE *fpout, char *line)
                     //
                     // Use OR logic instead of addition, to allow repetition
                     for (; (strval = strtok(strval, deh_getBitsDelims()));
-                         strval = NULL)
+                         strval = nullptr)
                     {
                         size_t iy;
                         for (iy = 0; iy < DEH_MOBJFLAGMAX; iy++)
@@ -2060,7 +2060,7 @@ static void deh_procFrame(DEHFILE *fpin, FILE *fpout, char *line)
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2162,7 +2162,7 @@ static void deh_procPointer(DEHFILE *fpin, FILE *fpout, char *line) // done
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2240,7 +2240,7 @@ static void deh_procSounds(DEHFILE *fpin, FILE *fpout, char *line)
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2306,7 +2306,7 @@ static void deh_procAmmo(DEHFILE *fpin, FILE *fpout, char *line)
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2355,7 +2355,7 @@ static void deh_procWeapon(DEHFILE *fpin, FILE *fpout, char *line)
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2632,7 +2632,7 @@ static void deh_procMisc(DEHFILE *fpin, FILE *fpout, char *line) // done
         lfstrip(inbuffer);
         if (!*inbuffer)
             break; // killough 11/98
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -2712,7 +2712,7 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
     int fromlen, tolen;     // as specified on the text block line
     int usedlen;            // shorter of fromlen and tolen if not matched
     dboolean found = FALSE; // to allow early exit once found
-    char *line2 = NULL;     // duplicate line for rerouting
+    char *line2 = nullptr;     // duplicate line for rerouting
 
     // e6y
     // Correction for DEHs which swap the values of two strings. For example:
@@ -2867,9 +2867,9 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
             inbuffer[fromlen] = '\0';
         }
 
-        deh_procStringSub(NULL, inbuffer, line2, fpout);
+        deh_procStringSub(nullptr, inbuffer, line2, fpout);
     }
-    free(line2); // may be NULL, ignored by free()
+    free(line2); // may be nullptr, ignored by free()
     return;
 }
 
@@ -2900,7 +2900,7 @@ static void deh_procStrings(DEHFILE *fpin, FILE *fpout, char *line)
     static size_t maxstrlen = 128; // maximum string length, bumped 128 at
     // a time as needed
     // holds the final result of the string after concatenation
-    static char *holdstring = NULL;
+    static char *holdstring = nullptr;
     dboolean found = false; // looking for string continuation
 
     if (fpout)
@@ -2964,7 +2964,7 @@ static void deh_procStrings(DEHFILE *fpin, FILE *fpout, char *line)
                          // catch that
         {
             // go process the current string
-            found = deh_procStringSub(key, NULL, holdstring,
+            found = deh_procStringSub(key, nullptr, holdstring,
                                       fpout); // supply keyand not search string
 
             if (!found)
@@ -2999,7 +2999,7 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring,
     found = false;
     for (i = 0; i < deh_numstrlookup; i++)
     {
-        if (deh_strlookup[i].orig == NULL)
+        if (deh_strlookup[i].orig == nullptr)
         {
             deh_strlookup[i].orig = *deh_strlookup[i].ppstr;
         }
@@ -3079,7 +3079,7 @@ static void deh_procHelperThing(DEHFILE *fpin, FILE *fpout, char *line)
         lfstrip(inbuffer);
         if (!*inbuffer)
             break;
-        if (!deh_GetData(inbuffer, key, &value, NULL,
+        if (!deh_GetData(inbuffer, key, &value, nullptr,
                          fpout)) // returns TRUE if ok
         {
             if (fpout)
@@ -3362,7 +3362,7 @@ char *ptr_lstrip(char *p) // point past leading whitespace
 //          k -- a place to put the key
 //          l -- pointer to a long integer to store the number
 //          strval -- a pointer to the place in s where the number
-//                    value comes from.  Pass NULL to not use this.
+//                    value comes from.  Pass nullptr to not use this.
 //          fpout  -- stream pointer to output log (DEHOUT.TXT)
 // Notes:   Expects a key phrase, optional space, equal sign,
 //          optional space and a value, mostly an int but treated
@@ -3402,7 +3402,7 @@ dboolean deh_GetData(char *s, char *k, uint_64_t *l, char **strval, FILE *fpout)
         // we've incremented t
         // e6y: Correction of wrong processing of Bits parameter if its
         // value is equal to zero No more desync on HACX demos. Old
-        // code: e6y val = strtol(t,NULL,0);  // killough 8/9/98: allow
+        // code: e6y val = strtol(t,nullptr,0);  // killough 8/9/98: allow
         // hex or octal input
         if (!M_StrToInt(t, &val))
         {
@@ -3417,7 +3417,7 @@ dboolean deh_GetData(char *s, char *k, uint_64_t *l, char **strval, FILE *fpout)
     // if spaces between key and equal sign, strip them
     strcpy(k, ptr_lstrip(buffer)); // could be a zero-length string
 
-    if (strval != NULL) // pass NULL if you don't want this back
+    if (strval != nullptr) // pass nullptr if you don't want this back
         *strval = t;    // pointer, has to be somewhere in s,
     // even if pointing at the zero byte.
 

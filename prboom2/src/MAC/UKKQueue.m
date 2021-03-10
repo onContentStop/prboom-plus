@@ -237,7 +237,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
         {
             [watchedPaths addObject: path];
             [watchedFDs addObject: [NSNumber numberWithInt: fd]];
-            kevent( queueFD, &ev, 1, NULL, 0, &nullts );
+            kevent( queueFD, &ev, 1, nullptr, 0, &nullts );
         }
     }
 }
@@ -339,7 +339,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
 		NSAutoreleasePool*  pool = [[NSAutoreleasePool alloc] init];
 		
 		NS_DURING
-			n = kevent( queueFD, NULL, 0, &ev, 1, &timeout );
+			n = kevent( queueFD, nullptr, 0, &ev, 1, &timeout );
 			if( n > 0 )
 			{
 				if( ev.filter == EVFILT_VNODE )

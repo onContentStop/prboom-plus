@@ -147,7 +147,7 @@ void T_VerticalDoor(vldoor_t *door)
             case blazeClose:
             case genBlazeRaise:
             case genBlazeClose:
-                door->sector->ceilingdata = NULL; // jff 2/22/98
+                door->sector->ceilingdata = nullptr; // jff 2/22/98
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 // killough 4/15/98: remove double-closing sound of blazing
                 // doors
@@ -159,7 +159,7 @@ void T_VerticalDoor(vldoor_t *door)
             case closeDoor:
             case genRaise:
             case genClose:
-                door->sector->ceilingdata = NULL; // jff 2/22/98
+                door->sector->ceilingdata = nullptr; // jff 2/22/98
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 break;
 
@@ -253,7 +253,7 @@ void T_VerticalDoor(vldoor_t *door)
             case genOpen:
             case genCdO:
             case genBlazeCdO:
-                door->sector->ceilingdata = NULL; // jff 2/22/98
+                door->sector->ceilingdata = nullptr; // jff 2/22/98
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 break;
 
@@ -698,7 +698,7 @@ void P_SpawnDoorCloseIn30(sector_t *sec)
     door->type = normal;
     door->speed = VDOORSPEED;
     door->topcountdown = 30 * 35;
-    door->line = NULL;  // jff 1/31/98 remember line that triggered us
+    door->line = nullptr;  // jff 1/31/98 remember line that triggered us
     door->lighttag = 0; /* killough 10/98: no lighting changes */
 }
 
@@ -731,6 +731,6 @@ void P_SpawnDoorRaiseIn5Mins(sector_t *sec, int secnum)
     door->topheight -= 4 * FRACUNIT;
     door->topwait = VDOORWAIT;
     door->topcountdown = 5 * 60 * 35;
-    door->line = NULL;  // jff 1/31/98 remember line that triggered us
+    door->line = nullptr;  // jff 1/31/98 remember line that triggered us
     door->lighttag = 0; /* killough 10/98: no lighting changes */
 }

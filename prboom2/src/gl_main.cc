@@ -209,7 +209,7 @@ void gld_InitTextureParams(void)
     tex_format_t tex_formats[] = {
         {GL_RGBA2, "GL_RGBA2"},     {GL_RGBA4, "GL_RGBA4"},
         {GL_RGB5_A1, "GL_RGB5_A1"}, {GL_RGBA8, "GL_RGBA8"},
-        {GL_RGBA, "GL_RGBA"},       {0, NULL}};
+        {GL_RGBA, "GL_RGBA"},       {0, nullptr}};
 
     int i;
     int *var[MIP_COUNT] = {&gl_texture_filter, &gl_sprite_filter,
@@ -308,7 +308,7 @@ int gld_LoadGLDefs(const char *defsLump)
     // these are the core types available in the *DEFS lump
     static const char *CoreKeywords[TAG_MAX + 1] = {"skybox", "detail",
 
-                                                    NULL};
+                                                    nullptr};
 
     int result = false;
 
@@ -468,7 +468,7 @@ void gld_MapDrawSubsectors(player_t *plr, int fx, int fy, fixed_t mx,
 {
     extern int ddt_cheating;
 
-    static subsector_t **visible_subsectors = NULL;
+    static subsector_t **visible_subsectors = nullptr;
     static int visible_subsectors_size = 0;
     int visible_subsectors_count;
 
@@ -578,7 +578,7 @@ void gld_MapDrawSubsectors(player_t *plr, int fx, int fy, fixed_t mx,
 
             // For lighting and texture determination
             sector_t *sec =
-                R_FakeFlat(sub->sector, &tempsec, &floorlight, NULL, false);
+                R_FakeFlat(sub->sector, &tempsec, &floorlight, nullptr, false);
 
             gld_BindFlat(gltexture, 0);
             light = gld_Calc2DLightLevel(floorlight);
@@ -1053,8 +1053,8 @@ void gld_SetPalette(int palette)
 
 unsigned char *gld_ReadScreen(void)
 { // NSM convert to static
-    static unsigned char *scr = NULL;
-    static unsigned char *buffer = NULL;
+    static unsigned char *scr = nullptr;
+    static unsigned char *buffer = nullptr;
     static int scr_size = 0;
     static int buffer_size = 0;
 
@@ -1129,10 +1129,10 @@ void gld_Finish(void)
 
 GLuint flats_vbo_id = 0; // ID of VBO
 
-vbo_xyz_uv_t *flats_vbo = NULL;
+vbo_xyz_uv_t *flats_vbo = nullptr;
 
-GLSeg *gl_segs = NULL;
-GLSeg *gl_lines = NULL;
+GLSeg *gl_segs = nullptr;
+GLSeg *gl_lines = nullptr;
 
 byte rendermarker = 0;
 byte *segrendered;     // true if sector rendered (only here for malloc)
@@ -1352,7 +1352,7 @@ void gld_EndDrawScene(void)
     { // don't draw on side views
         glsl_SetActiveShader(sh_main);
         R_DrawPlayerSprites();
-        glsl_SetActiveShader(NULL);
+        glsl_SetActiveShader(nullptr);
     }
 
     // e6y
@@ -1698,7 +1698,7 @@ void gld_AddWall(seg_t *seg)
 
     if (!seg->frontsector)
         return;
-    frontsector = R_FakeFlat(seg->frontsector, &ftempsec, NULL, NULL,
+    frontsector = R_FakeFlat(seg->frontsector, &ftempsec, nullptr, nullptr,
                              false); // for boom effects
     if (!frontsector)
         return;
@@ -1720,7 +1720,7 @@ void gld_AddWall(seg_t *seg)
             (gl_lightmode == gl_lightmode_fogbased ? rellight : 0),
         GLDIT_WALL);
     wall.alpha = 1.0f;
-    wall.gltexture = NULL;
+    wall.gltexture = nullptr;
     wall.seg = seg; // e6y
 
     if (!seg->backsector) /* onesided */
@@ -1761,7 +1761,7 @@ void gld_AddWall(seg_t *seg)
         fixed_t max_ceiling, min_ceiling;
         // fixed_t max_floor_tex, min_ceiling_tex;
 
-        backsector = R_FakeFlat(seg->backsector, &btempsec, NULL, NULL,
+        backsector = R_FakeFlat(seg->backsector, &btempsec, nullptr, nullptr,
                                 true); // for boom effects
         if (!backsector)
             return;
@@ -3342,7 +3342,7 @@ void gld_DrawScene(player_t *player)
     {
         rendered_segs += gld_drawinfo.num_items[GLDIT_SWALL];
         // fake strips of sky
-        glsl_SetActiveShader(NULL);
+        glsl_SetActiveShader(nullptr);
         gld_DrawStripsSky();
         glsl_SetActiveShader(sh_main);
     }
@@ -3383,7 +3383,7 @@ void gld_DrawScene(player_t *player)
 
     if (health_bar)
     {
-        glsl_SetActiveShader(NULL);
+        glsl_SetActiveShader(nullptr);
         gld_DrawHealthBars();
         glsl_SetActiveShader(sh_main);
     }
@@ -3436,7 +3436,7 @@ void gld_DrawScene(player_t *player)
         gld_DrawProjectedWalls(GLDIT_FAWALL);
     }
 
-    glsl_SetActiveShader(NULL);
+    glsl_SetActiveShader(nullptr);
     gld_RenderShadows();
     glsl_SetActiveShader(sh_main);
 
@@ -3503,5 +3503,5 @@ void gld_DrawScene(player_t *player)
     }
 #endif
 
-    glsl_SetActiveShader(NULL);
+    glsl_SetActiveShader(nullptr);
 }

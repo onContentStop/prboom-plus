@@ -48,8 +48,8 @@
 
 #define BASEYCENTER 100
 
-static int *clipbot = NULL; // killough 2/8/98: // dropoff overflow
-static int *cliptop = NULL; // change to MAX_*  // dropoff overflow
+static int *clipbot = nullptr; // killough 2/8/98: // dropoff overflow
+static int *cliptop = nullptr; // change to MAX_*  // dropoff overflow
 
 //
 // Sprite rotation 0 is facing the viewer,
@@ -255,7 +255,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
     numsprites = i;
 
     sprites = static_cast<spritedef_t *>(
-        Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL));
+        Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, nullptr));
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
@@ -390,7 +390,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
 
                 // allocate space for the frames present and copy sprtemp to it
                 sprites[i].spriteframes = static_cast<spriteframe_t *>(Z_Malloc(
-                    maxframe * sizeof(spriteframe_t), PU_STATIC, NULL));
+                    maxframe * sizeof(spriteframe_t), PU_STATIC, nullptr));
                 memcpy(sprites[i].spriteframes, sprtemp,
                        maxframe * sizeof(spriteframe_t));
             }
@@ -553,7 +553,7 @@ static void R_DrawVisSprite(vissprite_t *vis)
     // killough 4/11/98: rearrange and handle translucent sprites
     // mixed with translucent/non-translucenct 2s normals
 
-    if (!dcvars.colormap) // NULL colormap = shadow draw
+    if (!dcvars.colormap) // nullptr colormap = shadow draw
         colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_FUZZ, filter,
                                       filterz); // killough 3/14/98
     else
@@ -825,7 +825,7 @@ static void R_ProjectSprite(mobj_t *thing, int lightlevel)
 
     // killough 3/27/98: save sector for special clipping later
     vis->heightsec = heightsec;
-    vis->translation = NULL;
+    vis->translation = nullptr;
 
     vis->mobjflags = thing->flags;
     // proff 11/06/98: Changed for high-res
@@ -855,7 +855,7 @@ static void R_ProjectSprite(mobj_t *thing, int lightlevel)
 
     // get light level
     if (thing->flags & MF_SHADOW)
-        vis->colormap = NULL; // shadow draw
+        vis->colormap = nullptr; // shadow draw
     else if (fixedcolormap)
         vis->colormap = fixedcolormap; // fixed map
     else if (thing->frame & FF_FULLBRIGHT)
@@ -1019,13 +1019,13 @@ static void R_DrawPSprite(pspdef_t *psp)
         const int state = viewplayer->psprites[ps_weapon].state - states;
 
         R_ApplyWeaponBob(&psp_sx, weapon_attack_alignment == CENTERWEAPON_BOB,
-                         NULL, false);
+                         nullptr, false);
 
         // [crispy] don't center vertically during lowering and raising states
         if (weapon_attack_alignment >= CENTERWEAPON_HORVER &&
             state != winfo->downstate && state != winfo->upstate)
         {
-            R_ApplyWeaponBob(NULL, false, &psp_sy,
+            R_ApplyWeaponBob(nullptr, false, &psp_sy,
                              weapon_attack_alignment == CENTERWEAPON_BOB);
         }
     }
@@ -1084,7 +1084,7 @@ static void R_DrawPSprite(pspdef_t *psp)
 
     if (viewplayer->powers[pw_invisibility] > 4 * 32 ||
         viewplayer->powers[pw_invisibility] & 8)
-        vis->colormap = NULL; // shadow draw
+        vis->colormap = nullptr; // shadow draw
     else if (fixedcolormap)
         vis->colormap = fixedcolormap; // fixed color
     else if (psp->state->frame & FF_FULLBRIGHT)
@@ -1092,7 +1092,7 @@ static void R_DrawPSprite(pspdef_t *psp)
     else
         // e6y: original code is restored
         vis->colormap = spritelights[MAXLIGHTSCALE - 1]; // local light
-    vis->translation = NULL;
+    vis->translation = nullptr;
 
     // e6y: interpolation for weapon bobbing
     if (movement_smooth)

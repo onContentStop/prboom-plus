@@ -178,11 +178,11 @@ class setup_menu_var_t
     using def_t = default_t *;
     using menu_t = setup_menu_t *;
 
-    var_t m_var = NULL;
-    key_t m_key = NULL;
-    name_t m_name = NULL;
-    def_t m_def = NULL;
-    menu_t m_menu = NULL;
+    var_t m_var = nullptr;
+    key_t m_key = nullptr;
+    name_t m_name = nullptr;
+    def_t m_def = nullptr;
+    menu_t m_menu = nullptr;
 
     enum class d
     {

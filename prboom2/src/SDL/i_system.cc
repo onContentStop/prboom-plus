@@ -210,7 +210,7 @@ void I_GetTime_SaveMS(void)
  */
 unsigned long I_GetRandomTimeSeed(void)
 {
-    return (unsigned long)time(NULL);
+    return (unsigned long)time(nullptr);
 }
 
 /* cphipps - I_GetVersionString
@@ -243,7 +243,7 @@ dboolean I_FileToBuffer(const char *filename, byte **data, int *size)
     FILE *hfile;
 
     dboolean result = false;
-    byte *buffer = NULL;
+    byte *buffer = nullptr;
     size_t filesize = 0;
 
     hfile = fopen(filename, "rb");
@@ -278,7 +278,7 @@ dboolean I_FileToBuffer(const char *filename, byte **data, int *size)
     if (!result)
     {
         free(buffer);
-        buffer = NULL;
+        buffer = nullptr;
     }
 
     return result;
@@ -330,7 +330,7 @@ int I_Filelength(int handle)
 void I_SwitchToWindow(HWND hwnd)
 {
     typedef BOOL(WINAPI * TSwitchToThisWindow)(HWND wnd, BOOL restore);
-    static TSwitchToThisWindow SwitchToThisWindow = NULL;
+    static TSwitchToThisWindow SwitchToThisWindow = nullptr;
 
     if (!SwitchToThisWindow)
         SwitchToThisWindow = (TSwitchToThisWindow)GetProcAddress(
@@ -485,14 +485,14 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
         const char *(*func)(); // for I_DoomExeDir
     };
     static std::array<Search, 12> search0 = {{
-        {NULL},
-        {NULL, NULL, NULL, I_DoomExeDir},  // config directory
-        {NULL},                      // current working directory
-        {NULL, NULL, "DOOMWADDIR"},  // run-time $DOOMWADDIR
+        {nullptr},
+        {nullptr, nullptr, nullptr, I_DoomExeDir},  // config directory
+        {nullptr},                      // current working directory
+        {nullptr, nullptr, "DOOMWADDIR"},  // run-time $DOOMWADDIR
         {DOOMWADDIR},                // build-time configured DOOMWADDIR
-        {NULL, "doom", "HOME"},      // ~/doom
-        {NULL, "doom/iwad", "HOME"}, // ~/doom/iwad
-        {NULL, NULL, "HOME"},        // ~
+        {nullptr, "doom", "HOME"},      // ~/doom
+        {nullptr, "doom/iwad", "HOME"}, // ~/doom/iwad
+        {nullptr, nullptr, "HOME"},        // ~
         {"/usr/local/share/games/doom"},
         {"/usr/share/games/doom"},
         {"/usr/local/share/doom"},
@@ -505,11 +505,11 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
     size_t pl;
 
     static char static_p[PATH_MAX];
-    char *dinamic_p = NULL;
+    char *dinamic_p = nullptr;
     char *p = (isStatic ? static_p : dinamic_p);
 
     if (!wfname)
-        return NULL;
+        return nullptr;
 
     if (!num_search)
     {
@@ -531,7 +531,7 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
             for (;;)
             {
                 ptr = strchr(left, PATH_SEPARATOR);
-                if (ptr != NULL)
+                if (ptr != nullptr)
                 {
                     *ptr = '\0';
 
@@ -564,8 +564,8 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
 
     for (i = 0; i < num_search; i++)
     {
-        const char *d = NULL;
-        const char *s = NULL;
+        const char *d = nullptr;
+        const char *s = nullptr;
         /* Each entry in the switch sets d to the directory to look in,
          * and optionally s to a subdirectory of d */
         // switch replaced with lookup table
@@ -597,7 +597,7 @@ char *I_FindFileInternal(const char *wfname, const char *ext, dboolean isStatic)
         if (!isStatic)
             free(p);
     }
-    return NULL;
+    return nullptr;
 }
 
 char *I_FindFile(const char *wfname, const char *ext)

@@ -80,7 +80,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
     {
         if (state == S_NULL)
         {
-            mobj->state = NULL;
+            mobj->state = nullptr;
             P_RemoveMobj(mobj);
             ret = false;
             break; // killough 4/9/98
@@ -230,7 +230,7 @@ static void P_XYMovement(mobj_t *mo)
                 (mo->flags & MF_BOUNCES ||
                  (!player && blockline && variable_friction &&
                   mo->z <= mo->floorz &&
-                  P_GetFriction(mo, NULL) > ORIG_FRICTION)))
+                  P_GetFriction(mo, nullptr) > ORIG_FRICTION)))
             {
                 if (blockline)
                 {
@@ -398,7 +398,7 @@ static void P_XYMovement(mobj_t *mo)
         else
         {
 
-            fixed_t friction = P_GetFriction(mo, NULL);
+            fixed_t friction = P_GetFriction(mo, nullptr);
 
             mo->momx = FixedMul(mo->momx, friction);
             mo->momy = FixedMul(mo->momy, friction);
@@ -468,7 +468,7 @@ static void P_ZMovement(mobj_t *mo)
                 /* killough 11/98: touchy objects explode on impact */
                 if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED &&
                     mo->health > 0)
-                    P_DamageMobj(mo, NULL, NULL, mo->health);
+                    P_DamageMobj(mo, nullptr, nullptr, mo->health);
                 else if (mo->flags & MF_FLOAT && sentient(mo))
                     goto floater;
                 return;
@@ -598,7 +598,7 @@ floater:
             /* killough 11/98: touchy objects explode on impact */
             if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED &&
                 mo->health > 0)
-                P_DamageMobj(mo, NULL, NULL, mo->health);
+                P_DamageMobj(mo, nullptr, nullptr, mo->health);
             else
             {
                 if (mo->player)
@@ -875,14 +875,14 @@ void P_MobjThinker(mobj_t *mobj)
     }
 }
 
-// Certain functions assume that a mobj_t pointer is non-NULL,
-// causing a crash in some situations where it is NULL.  Vanilla
+// Certain functions assume that a mobj_t pointer is non-nullptr,
+// causing a crash in some situations where it is nullptr.  Vanilla
 // Doom did not crash because of the lack of proper memory
-// protection. This function substitutes NULL pointers for
+// protection. This function substitutes nullptr pointers for
 // pointers to a dummy mobj, to avoid a crash.
 mobj_t *P_SubstNullMobj(mobj_t *mobj)
 {
-    if (mobj == NULL)
+    if (mobj == nullptr)
     {
         static mobj_t dummy_mobj;
 
@@ -906,7 +906,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     state_t *st;
     mobjinfo_t *info;
 
-    mobj = static_cast<mobj_t *>(Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL));
+    mobj = static_cast<mobj_t *>(Z_Malloc(sizeof(*mobj), PU_LEVEL, nullptr));
     memset(mobj, 0, sizeof(*mobj));
     info = &mobjinfo[type];
     mobj->type = type;
@@ -942,7 +942,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     mobj->sprite = st->sprite;
     mobj->frame = st->frame;
     mobj->touching_sectorlist =
-        NULL; // NULL head of sector list // phares 3/13/98
+        nullptr; // nullptr head of sector list // phares 3/13/98
 
     // set subsector and/or block links
 
@@ -966,7 +966,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     mobj->friction = ORIG_FRICTION; // phares 3/17/98
     mobj->index = -1;
 
-    mobj->target = mobj->tracer = mobj->lastenemy = NULL;
+    mobj->target = mobj->tracer = mobj->lastenemy = nullptr;
     P_AddThinker(&mobj->thinker);
     if (!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
         totallive++;
@@ -1006,7 +1006,7 @@ void P_RemoveMobj(mobj_t *mobj)
     if (sector_list)
     {
         P_DelSeclist(sector_list);
-        sector_list = NULL;
+        sector_list = nullptr;
     }
 
     // stop any playing sound
@@ -1030,9 +1030,9 @@ void P_RemoveMobj(mobj_t *mobj)
     if ((compatibility_level >= lxdoom_1_compatibility) ||
         (!demorecording && !demoplayback))
     {
-        P_SetTarget(&mobj->target, NULL);
-        P_SetTarget(&mobj->tracer, NULL);
-        P_SetTarget(&mobj->lastenemy, NULL);
+        P_SetTarget(&mobj->target, nullptr);
+        P_SetTarget(&mobj->tracer, nullptr);
+        P_SetTarget(&mobj->lastenemy, nullptr);
     }
     // free block
 
@@ -1201,7 +1201,7 @@ void P_SpawnPlayer(int n, const mapthing_t *mthing)
     p->mo = mobj;
     p->playerstate = PST_LIVE;
     p->refire = 0;
-    p->message = NULL;
+    p->message = nullptr;
     p->damagecount = 0;
     p->bonuscount = 0;
     p->extralight = 0;
@@ -1284,7 +1284,7 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     case DEN_PLAYER6:
     case DEN_PLAYER7:
     case DEN_PLAYER8:
-        return NULL;
+        return nullptr;
     }
 
     // killough 11/98: clear flags unused by Doom
@@ -1315,7 +1315,7 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     {
         if (!(!compatibility || deathmatch_p - deathmatchstarts < 10))
         {
-            return NULL;
+            return nullptr;
         }
         else
         {
@@ -1324,7 +1324,7 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
             size_t offset = deathmatch_p - deathmatchstarts;
 
             if (compatibility && deathmatch_p - deathmatchstarts >= 10)
-                return NULL; // e6y
+                return nullptr; // e6y
             if (offset >= num_deathmatchstarts)
             {
                 num_deathmatchstarts =
@@ -1340,7 +1340,7 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
             TracerAddDeathmatchStart(deathmatch_p - deathmatchstarts - 1,
                                      index);
 
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -1390,31 +1390,31 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
 
         if (!deathmatch)
             P_SpawnPlayer(thingtype - 1, &playerstarts[thingtype - 1]);
-        return NULL;
+        return nullptr;
     }
 
     // check for apropriate skill level
 
     /* jff "not single" thing flag */
     if (!netgame && options & MTF_NOTSINGLE)
-        return NULL;
+        return nullptr;
 
     // jff 3/30/98 implement "not deathmatch" thing flag
 
     if (netgame && deathmatch && options & MTF_NOTDM)
-        return NULL;
+        return nullptr;
 
     // jff 3/30/98 implement "not cooperative" thing flag
 
     if (netgame && !deathmatch && options & MTF_NOTCOOP)
-        return NULL;
+        return nullptr;
 
     // killough 11/98: simplify
     if (gameskill == sk_baby || gameskill == sk_easy ? !(options & MTF_EASY)
         : gameskill == sk_hard || gameskill == sk_nightmare
             ? !(options & MTF_HARD)
             : !(options & MTF_NORMAL))
-        return NULL;
+        return nullptr;
 
     if (thingtype >= 14100 && thingtype <= 14164)
     {
@@ -1436,18 +1436,18 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     {
         lprintf(LO_INFO, "P_SpawnMapThing: Unknown Thing type %i at (%i, %i)\n",
                 thingtype, mthing->x, mthing->y);
-        return NULL;
+        return nullptr;
     }
 
     // don't spawn keycards and players in deathmatch
 
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
-        return NULL;
+        return nullptr;
 
     // don't spawn any monsters if -nomonsters
 
     if (nomonsters && (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL)))
-        return NULL;
+        return nullptr;
 
     // spawn it
 spawnit:

@@ -61,7 +61,7 @@ std::array<am_icon_t, am_icon_count + 1> am_icons{{
     {static_cast<GLuint>(-1), "M_ARROW"},
     {static_cast<GLuint>(-1), "M_MARK"},
     {static_cast<GLuint>(-1), "M_NORMAL"},
-    {static_cast<GLuint>(-1), NULL},
+    {static_cast<GLuint>(-1), nullptr},
 }};
 
 typedef struct map_nice_thing_s
@@ -82,7 +82,7 @@ void gld_InitMapPics(void)
         am_icons[i].lumpnum = lump;
         if (lump != -1)
         {
-            SDL_Surface *surf = NULL;
+            SDL_Surface *surf = nullptr;
 #ifdef HAVE_LIBSDL2_IMAGE
             SDL_Surface *surf_raw;
 

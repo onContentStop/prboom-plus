@@ -99,9 +99,9 @@ void P_UnArchivePlayers(void)
             save_p += sizeof(player_t);
 
             // will be set when unarc thinker
-            players[i].mo = NULL;
-            players[i].message = NULL;
-            players[i].attacker = NULL;
+            players[i].mo = nullptr;
+            players[i].message = nullptr;
+            players[i].attacker = nullptr;
 
             for (j = 0; j < NUMPSPRITES; j++)
                 if (players[i].psprites[j].state)
@@ -346,19 +346,19 @@ void P_ArchiveThinkers(void)
 
             // killough 2/14/98: convert pointers into indices.
             // Fixes many savegame problems, by properly saving
-            // target and tracer fields. Note: we store NULL if
+            // target and tracer fields. Note: we store nullptr if
             // the thinker pointed to by these fields is not a
             // mobj thinker.
 
             if (mobj->target)
                 mobj->target = mobj->target->thinker.function == P_MobjThinker
                                    ? (mobj_t *)mobj->target->thinker.prev
-                                   : NULL;
+                                   : nullptr;
 
             if (mobj->tracer)
                 mobj->tracer = mobj->tracer->thinker.function == P_MobjThinker
                                    ? (mobj_t *)mobj->tracer->thinker.prev
-                                   : NULL;
+                                   : nullptr;
 
             // killough 2/14/98: new field: save last known enemy. Prevents
             // monsters from going to sleep after killing monsters and not
@@ -368,7 +368,7 @@ void P_ArchiveThinkers(void)
                 mobj->lastenemy =
                     mobj->lastenemy->thinker.function == P_MobjThinker
                         ? (mobj_t *)mobj->lastenemy->thinker.prev
-                        : NULL;
+                        : nullptr;
 
             // killough 2/14/98: end changes
 
@@ -391,7 +391,7 @@ void P_ArchiveThinkers(void)
             if (target && target->thinker.function == P_MobjThinker)
                 target = (mobj_t *)target->thinker.prev;
             else
-                target = NULL;
+                target = nullptr;
             memcpy(save_p, &target, sizeof target);
             save_p += sizeof target;
         }
@@ -408,7 +408,7 @@ void P_ArchiveThinkers(void)
 
 static void P_SetNewTarget(mobj_t **mop, mobj_t *targ)
 {
-    *mop = NULL;
+    *mop = nullptr;
     P_SetTarget(mop, targ);
 }
 
@@ -467,7 +467,7 @@ void P_UnArchiveThinkers(void)
             I_Error("P_UnArchiveThinkers: Unknown tclass %i in savegame",
                     *save_p);
 
-        // first table entry special: 0 maps to NULL
+        // first table entry special: 0 maps to nullptr
         *(mobj_p = static_cast<mobj_t **>(malloc(size * sizeof *mobj_p))) =
             0;       // table of pointers
         save_p = sp; // restore save pointer
@@ -477,7 +477,7 @@ void P_UnArchiveThinkers(void)
     for (size = 1; *save_p++ == tc_mobj; size++) // killough 2/14/98
     {
         auto *mobj =
-            static_cast<mobj_t *>(Z_Malloc(sizeof(mobj_t), PU_LEVEL, NULL));
+            static_cast<mobj_t *>(Z_Malloc(sizeof(mobj_t), PU_LEVEL, nullptr));
 
         // killough 2/14/98 -- insert pointers to thinkers into table, in order:
         mobj_p[size] = mobj;
@@ -510,7 +510,7 @@ void P_UnArchiveThinkers(void)
 
     // killough 2/14/98: adjust target and tracer fields, plus
     // lastenemy field, to correctly point to mobj thinkers.
-    // NULL entries automatically handled by first table entry.
+    // nullptr entries automatically handled by first table entry.
     //
     // killough 11/98: use P_SetNewTarget() to set fields
 
@@ -647,7 +647,7 @@ void P_ArchiveSpecials(void)
             ceilinglist_t *cl; // jff 2/22/98 add iter variable for ceilings
 
             // killough 2/8/98: fix plat original height bug.
-            // Since acv==NULL, this could be a plat in stasis.
+            // Since acv==nullptr, this could be a plat in stasis.
             // so check the active plats list, and save this
             // plat (jff: or ceiling) even if it is in stasis.
 
@@ -828,7 +828,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *ceiling = static_cast<ceiling_t *>(
-                    Z_Malloc(sizeof(ceiling_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(ceiling_t), PU_LEVEL, nullptr));
                 memcpy(ceiling, save_p, sizeof(*ceiling));
                 save_p += sizeof(*ceiling);
                 ceiling->sector = &sectors[(size_t)ceiling->sector];
@@ -846,7 +846,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *door = static_cast<vldoor_t *>(
-                    Z_Malloc(sizeof(vldoor_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(vldoor_t), PU_LEVEL, nullptr));
                 memcpy(door, save_p, sizeof(*door));
                 save_p += sizeof(*door);
                 door->sector = &sectors[(size_t)door->sector];
@@ -854,7 +854,7 @@ void P_UnArchiveSpecials(void)
                 // jff 1/31/98 unarchive line remembered by door as well
                 door->line = (intptr_t)door->line != -1
                                  ? &lines[(size_t)door->line]
-                                 : NULL;
+                                 : nullptr;
 
                 door->sector->ceilingdata = door; // jff 2/22/98
                 door->thinker.function = T_VerticalDoor;
@@ -866,7 +866,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *floor = static_cast<floormove_t *>(
-                    Z_Malloc(sizeof(floormove_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(floormove_t), PU_LEVEL, nullptr));
                 memcpy(floor, save_p, sizeof(*floor));
                 save_p += sizeof(*floor);
                 floor->sector = &sectors[(size_t)floor->sector];
@@ -880,7 +880,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *plat = static_cast<plat_t *>(
-                    Z_Malloc(sizeof(plat_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(plat_t), PU_LEVEL, nullptr));
                 memcpy(plat, save_p, sizeof(*plat));
                 save_p += sizeof(*plat);
                 plat->sector = &sectors[(size_t)plat->sector];
@@ -898,7 +898,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *flash = static_cast<lightflash_t *>(
-                    Z_Malloc(sizeof(lightflash_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(lightflash_t), PU_LEVEL, nullptr));
                 memcpy(flash, save_p, sizeof(*flash));
                 save_p += sizeof(*flash);
                 flash->sector = &sectors[(size_t)flash->sector];
@@ -911,7 +911,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *strobe = static_cast<strobe_t *>(
-                    Z_Malloc(sizeof(strobe_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(strobe_t), PU_LEVEL, nullptr));
                 memcpy(strobe, save_p, sizeof(*strobe));
                 save_p += sizeof(*strobe);
                 strobe->sector = &sectors[(size_t)strobe->sector];
@@ -924,7 +924,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *glow = static_cast<glow_t *>(
-                    Z_Malloc(sizeof(glow_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(glow_t), PU_LEVEL, nullptr));
                 memcpy(glow, save_p, sizeof(*glow));
                 save_p += sizeof(*glow);
                 glow->sector = &sectors[(size_t)glow->sector];
@@ -937,7 +937,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *flicker = static_cast<fireflicker_t *>(
-                    Z_Malloc(sizeof(fireflicker_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(fireflicker_t), PU_LEVEL, nullptr));
                 memcpy(flicker, save_p, sizeof(*flicker));
                 save_p += sizeof(*flicker);
                 flicker->sector = &sectors[(size_t)flicker->sector];
@@ -951,7 +951,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *elevator = static_cast<elevator_t *>(
-                    Z_Malloc(sizeof(elevator_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(elevator_t), PU_LEVEL, nullptr));
                 memcpy(elevator, save_p, sizeof(*elevator));
                 save_p += sizeof(*elevator);
                 elevator->sector = &sectors[(size_t)elevator->sector];
@@ -965,7 +965,7 @@ void P_UnArchiveSpecials(void)
         case tc_scroll: // killough 3/7/98: scroll effect thinkers
         {
             auto *scroll = static_cast<scroll_t *>(
-                Z_Malloc(sizeof(scroll_t), PU_LEVEL, NULL));
+                Z_Malloc(sizeof(scroll_t), PU_LEVEL, nullptr));
             memcpy(scroll, save_p, sizeof(scroll_t));
             save_p += sizeof(scroll_t);
             scroll->thinker.function = T_Scroll;
@@ -976,7 +976,7 @@ void P_UnArchiveSpecials(void)
         case tc_pusher: // phares 3/22/98: new Push/Pull effect thinkers
         {
             auto *pusher = static_cast<pusher_t *>(
-                Z_Malloc(sizeof(pusher_t), PU_LEVEL, NULL));
+                Z_Malloc(sizeof(pusher_t), PU_LEVEL, nullptr));
             memcpy(pusher, save_p, sizeof(pusher_t));
             save_p += sizeof(pusher_t);
             pusher->thinker.function = T_Pusher;
@@ -990,7 +990,7 @@ void P_UnArchiveSpecials(void)
             PADSAVEP();
             {
                 auto *friction = static_cast<friction_t *>(
-                    Z_Malloc(sizeof(friction_t), PU_LEVEL, NULL));
+                    Z_Malloc(sizeof(friction_t), PU_LEVEL, nullptr));
                 memcpy(friction, save_p, sizeof(friction_t));
                 save_p += sizeof(friction_t);
                 friction->thinker.function = T_Friction;

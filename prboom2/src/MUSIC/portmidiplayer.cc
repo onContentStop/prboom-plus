@@ -50,8 +50,8 @@ static int pm_init(int samplerate)
     return 0;
 }
 
-const music_player_t pm_player = {pm_name, pm_init, NULL, NULL, NULL, NULL,
-                                  NULL,    NULL,    NULL, NULL, NULL};
+const music_player_t pm_player = {pm_name, pm_init, nullptr, nullptr, nullptr, nullptr,
+                                  nullptr,    nullptr,    nullptr, nullptr, nullptr};
 
 #else // HAVE_LIBPORTMIDI
 
@@ -152,7 +152,7 @@ static int pm_init(int samplerate)
     lprintf(LO_INFO, "portmidiplayer: Opening device %s:%s for output\n",
             oinfo->interf, oinfo->name);
 
-    if (Pm_OpenOutput(&pm_stream, outputdevice, NULL, DRIVER_BUFFER, NULL, NULL,
+    if (Pm_OpenOutput(&pm_stream, outputdevice, nullptr, DRIVER_BUFFER, nullptr, nullptr,
                       DRIVER_LATENCY) != pmNoError)
     {
         lprintf(LO_WARN, "portmidiplayer: Pm_OpenOutput () failed\n");
@@ -202,7 +202,7 @@ static void pm_shutdown(void)
 
         Pm_Close(pm_stream);
         Pm_Terminate();
-        pm_stream = NULL;
+        pm_stream = nullptr;
     }
 }
 
@@ -219,20 +219,20 @@ static const void *pm_registersong(const void *data, unsigned len)
     if (!midifile)
     {
         lprintf(LO_WARN, "pm_registersong: Failed to load MIDI.\n");
-        return NULL;
+        return nullptr;
     }
 
     events = MIDI_GenerateFlatList(midifile);
     if (!events)
     {
         MIDI_FreeFile(midifile);
-        return NULL;
+        return nullptr;
     }
     eventpos = 0;
 
     // implicit 120BPM (this is correct to spec)
     // spmc = compute_spmc (MIDI_GetFileTimeDivision (midifile), 500000, 1000);
-    spmc = MIDI_spmc(midifile, NULL, 1000);
+    spmc = MIDI_spmc(midifile, nullptr, 1000);
 
     // handle not used
     return data;
@@ -312,12 +312,12 @@ static void pm_unregistersong(const void *handle)
     if (events)
     {
         MIDI_DestroyFlatList(events);
-        events = NULL;
+        events = nullptr;
     }
     if (midifile)
     {
         MIDI_FreeFile(midifile);
-        midifile = NULL;
+        midifile = nullptr;
     }
 }
 

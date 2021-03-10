@@ -49,7 +49,7 @@ static void ATTR((noreturn)) usage(int exitcode)
 int main(int argc, char **argv)
 {
     enum argtype argtype = ARG_NONE;
-    const char *output = NULL;
+    const char *output = nullptr;
 
     if (argc <= 1)
         usage(0);
@@ -108,39 +108,39 @@ int main(int argc, char **argv)
                 break;
 
             case ARG_MARKER:
-                output_add(arg, NULL, 0);
+                output_add(arg, nullptr, 0);
                 break;
 
             case ARG_LUMP: {
-                void *data = NULL;
+                void *data = nullptr;
                 size_t size = read_or_die(&data, arg);
                 output_add(arg, data, size);
             }
             break;
 
             case ARG_GRAPHIC: {
-                void *data = NULL;
+                void *data = nullptr;
                 size_t size = ppm_to_patch(&data, arg, 0, 0);
                 output_add(arg, data, size);
             }
             break;
 
             case ARG_SOUND: {
-                void *data = NULL;
+                void *data = nullptr;
                 size_t size = wav_to_doom(&data, arg);
                 output_add(arg, data, size);
             }
             break;
 
             case ARG_FLAT: {
-                void *data = NULL;
+                void *data = nullptr;
                 size_t size = ppm_to_bitmap(&data, arg);
                 output_add(arg, data, size);
             }
             break;
 
             case ARG_SPRITE: {
-                void *data = NULL;
+                void *data = nullptr;
                 char *pos = arg;
                 size_t size;
                 int x, y;

@@ -39,25 +39,25 @@ class Action
     using t_p1 = void (*)(void *);
     using t_p2 = void (*)(void *, void *);
   private:
-    t_ceiling m_ceiling = NULL;
-    t_elevator m_elevator = NULL;
-    t_fireflicker m_fireflicker = NULL;
-    t_floormove m_floormove = NULL;
-    t_friction m_friction = NULL;
-    t_glow m_glow = NULL;
-    t_lightflash m_lightflash = NULL;
-    t_mobj m_mobj = NULL;
-    t_message_thinker m_message_thinker = NULL;
-    t_plat m_plat = NULL;
-    t_plps m_plps = NULL;
-    t_pusher m_pusher = NULL;
-    t_scroll m_scroll = NULL;
-    t_strobe m_strobe = NULL;
-    t_thinker m_thinker = NULL;
-    t_vldoor m_vldoor = NULL;
-    t_v m_v = NULL;
-    t_p1 m_p1 = NULL;
-    t_p2 m_p2 = NULL;
+    t_ceiling m_ceiling = nullptr;
+    t_elevator m_elevator = nullptr;
+    t_fireflicker m_fireflicker = nullptr;
+    t_floormove m_floormove = nullptr;
+    t_friction m_friction = nullptr;
+    t_glow m_glow = nullptr;
+    t_lightflash m_lightflash = nullptr;
+    t_mobj m_mobj = nullptr;
+    t_message_thinker m_message_thinker = nullptr;
+    t_plat m_plat = nullptr;
+    t_plps m_plps = nullptr;
+    t_pusher m_pusher = nullptr;
+    t_scroll m_scroll = nullptr;
+    t_strobe m_strobe = nullptr;
+    t_thinker m_thinker = nullptr;
+    t_vldoor m_vldoor = nullptr;
+    t_v m_v = nullptr;
+    t_p1 m_p1 = nullptr;
+    t_p2 m_p2 = nullptr;
     enum class discriminant
     {
         undefined,
@@ -297,11 +297,11 @@ class SetupMenuVar
     using t_def = default_t *;
     using t_menu = setup_menu_t *;
   private:
-    t_other m_other = NULL;
-    t_key m_key = NULL;
-    t_name m_name = NULL;
-    t_def m_def = NULL;
-    t_menu m_menu = NULL;
+    t_other m_other = nullptr;
+    t_key m_key = nullptr;
+    t_name m_name = nullptr;
+    t_def m_def = nullptr;
+    t_menu m_menu = nullptr;
     enum class discriminant
     {
         undefined,
@@ -385,9 +385,9 @@ class CheatSequenceFunction
     using t_i1 = void (*)(int);
     using t_buf = void (*)(const char *);
   private:
-    t_v m_v = NULL;
-    t_i1 m_i1 = NULL;
-    t_buf m_buf = NULL;
+    t_v m_v = nullptr;
+    t_i1 m_i1 = nullptr;
+    t_buf m_buf = nullptr;
     enum class discriminant
     {
         undefined,

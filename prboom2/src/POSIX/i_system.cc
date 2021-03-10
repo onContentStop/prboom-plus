@@ -66,7 +66,7 @@ void I_uSleep(unsigned long usecs)
     /* Fall back on select(2) */
     struct timeval tv = {static_cast<__time_t>(usecs / 1000000),
                          static_cast<__suseconds_t>(usecs % 1000000)};
-    select(0, NULL, NULL, NULL, &tv);
+    select(0, nullptr, nullptr, nullptr, &tv);
 #endif
 }
 

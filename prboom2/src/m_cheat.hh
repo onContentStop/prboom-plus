@@ -76,7 +76,7 @@ struct CheatSequence
     char parameter_buf[CHEAT_ARGS_MAX];
 
     explicit CheatSequence(const char * /* arg */)
-        : cheat(NULL), deh_cheat(NULL), when(cht_never), arg(0), code(0),
+        : cheat(nullptr), deh_cheat(nullptr), when(cht_never), arg(0), code(0),
           mask(0), sequence_len(0), deh_sequence_len(0), chars_read(0),
           param_chars_read(0), parameter_buf("")
     {

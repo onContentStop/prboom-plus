@@ -111,7 +111,7 @@ void D_InitNetGame(void)
     {
         // Get game info from server
         packet_header_t *packet =
-            (packet_header_t *)Z_Malloc(1000, PU_STATIC, NULL);
+            (packet_header_t *)Z_Malloc(1000, PU_STATIC, nullptr);
         setup_packet_t *sinfo = (setup_packet_t *)(packet + 1);
         struct
         {
@@ -181,7 +181,7 @@ void D_InitNetGame(void)
     int i;
 
     doomcom =
-        static_cast<doomcom_t *>(Z_Malloc(sizeof *doomcom, PU_STATIC, NULL));
+        static_cast<doomcom_t *>(Z_Malloc(sizeof *doomcom, PU_STATIC, nullptr));
     doomcom->consoleplayer = 0;
     doomcom->numnodes = 0;
     doomcom->numplayers = 1;
@@ -201,7 +201,7 @@ void D_InitNetGame(void)
 void D_CheckNetGame(void)
 {
     packet_header_t *packet = (packet_header_t *)Z_Malloc(
-        sizeof(packet_header_t) + 1, PU_STATIC, NULL);
+        sizeof(packet_header_t) + 1, PU_STATIC, nullptr);
 
     if (server)
     {
@@ -234,7 +234,7 @@ dboolean D_NetGetWad(const char *name)
     do
     {
         // Send WAD request to remote
-        packet = Z_Malloc(psize, PU_STATIC, NULL);
+        packet = Z_Malloc(psize, PU_STATIC, nullptr);
         packet_set(packet, PKT_WAD, 0);
         *(byte *)(packet + 1) = consoleplayer;
         strcpy(1 + (byte *)(packet + 1), name);
@@ -261,7 +261,7 @@ dboolean D_NetGetWad(const char *name)
         else if (!pid)
         {
             /* Child chains to wget, does the download */
-            execlp("wget", "wget", p, NULL);
+            execlp("wget", "wget", p, nullptr);
         }
         /* This is the parent, i.e. main LxDoom process */
         wait(&rv);
@@ -275,7 +275,7 @@ dboolean D_NetGetWad(const char *name)
                 else if (!pid)
                 {
                     /* Child executes decompressor */
-                    execlp("unzip", "unzip", p, name, NULL);
+                    execlp("unzip", "unzip", p, name, nullptr);
                 }
                 /* Parent waits for the file */
                 wait(&rv);
@@ -300,7 +300,7 @@ void NetUpdate(void)
     { // Receive network packets
         size_t recvlen;
         packet_header_t *packet =
-            (packet_header_t *)Z_Malloc(10000, PU_STATIC, NULL);
+            (packet_header_t *)Z_Malloc(10000, PU_STATIC, nullptr);
         while ((recvlen = I_GetPacket(packet, 10000)))
         {
             switch (packet->type)
@@ -353,9 +353,9 @@ void NetUpdate(void)
                 // Queue packet to be processed when its tic time is reached
                 queuedpacket = (packet_header_t **)Z_Realloc(
                     queuedpacket, ++numqueuedpackets * sizeof *queuedpacket,
-                    PU_STATIC, NULL);
+                    PU_STATIC, nullptr);
                 queuedpacket[numqueuedpackets - 1] =
-                    (packet_header_t *)Z_Malloc(recvlen, PU_STATIC, NULL);
+                    (packet_header_t *)Z_Malloc(recvlen, PU_STATIC, nullptr);
                 memcpy(queuedpacket[numqueuedpackets - 1], packet, recvlen);
                 break;
             case PKT_BACKOFF:
@@ -406,7 +406,7 @@ void NetUpdate(void)
                 size_t pkt_size =
                     sizeof(packet_header_t) + 2 + sendtics * sizeof(ticcmd_t);
                 packet_header_t *packet =
-                    (packet_header_t *)Z_Malloc(pkt_size, PU_STATIC, NULL);
+                    (packet_header_t *)Z_Malloc(pkt_size, PU_STATIC, nullptr);
 
                 packet_set(packet, PKT_TICC, maketic - sendtics);
                 *(byte *)(packet + 1) = sendtics;
@@ -451,7 +451,7 @@ void D_NetSendMisc(netmisctype_t type, size_t len, void *data)
     {
         size_t size = sizeof(packet_header_t) + 3 * sizeof(int) + len;
         packet_header_t *packet =
-            (packet_header_t *)Z_Malloc(size, PU_STATIC, NULL);
+            (packet_header_t *)Z_Malloc(size, PU_STATIC, nullptr);
         int *p = (int *)(packet + 1);
 
         packet_set(packet, PKT_EXTRA, gametic);
@@ -505,13 +505,13 @@ static void CheckQueuedPackets(void)
 
     { // Requeue remaining packets
         int newnum = 0;
-        packet_header_t **newqueue = NULL;
+        packet_header_t **newqueue = nullptr;
 
         for (i = 0; (unsigned)i < numqueuedpackets; i++)
             if (doom_ntohl(queuedpacket[i]->tic) > gametic)
             {
                 newqueue = (packet_header_t **)Z_Realloc(
-                    newqueue, ++newnum * sizeof *newqueue, PU_STATIC, NULL);
+                    newqueue, ++newnum * sizeof *newqueue, PU_STATIC, nullptr);
                 newqueue[newnum - 1] = queuedpacket[i];
             }
             else

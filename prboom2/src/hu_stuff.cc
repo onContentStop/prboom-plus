@@ -552,7 +552,7 @@ void HU_Start(void)
                     HU_FONTSTART, hudcolor_list, hu_msgbg, VPT_ALIGN_LEFT_TOP,
                     &message_list);
 
-    if (gamemapinfo != NULL)
+    if (gamemapinfo != nullptr)
     {
         s = gamemapinfo->mapname;
         while (*s)
@@ -792,7 +792,7 @@ static hud_widget_t hud_name_widget[] = {
     {&w_keys_icon, 0, 0, 0, HU_widget_build_gkeys, HU_widget_draw_gkeys,
      "gkeys"},
 
-    {&w_traces[0], 0, 0, 0, NULL, NULL, "tracers"},
+    {&w_traces[0], 0, 0, 0, nullptr, nullptr, "tracers"},
 
     {&w_health_big, 0, 0, VPT_NOOFFSET, HU_widget_build_health_big,
      HU_widget_draw_health_big, "health_big"},
@@ -831,7 +831,7 @@ static hud_widget_t hud_name_widget[] = {
     {&w_ammo_icon, 0, 0, VPT_NOOFFSET, HU_widget_build_ammo_icon,
      HU_widget_draw_ammo_icon, "ammo_icon"},
 
-    {NULL, 0, 0, 0, NULL, NULL, NULL}};
+    {nullptr, 0, 0, 0, nullptr, nullptr, nullptr}};
 
 void HU_LoadHUDDefs(void)
 {
@@ -839,7 +839,7 @@ void HU_LoadHUDDefs(void)
 
     int lump, i, params_count;
     hud_cfg_item_t cfg_item;
-    hud_widgets_list_t *list = NULL;
+    hud_widgets_list_t *list = nullptr;
     char st[200];
 
     if (init)
@@ -848,7 +848,7 @@ void HU_LoadHUDDefs(void)
     init = true;
 
     huds_count = 0;
-    huds = NULL;
+    huds = nullptr;
 
     lump = (W_CheckNumForName)("-PRBHUD-", ns_prboom);
     if (lump != -1)
@@ -870,7 +870,7 @@ void HU_LoadHUDDefs(void)
                 huds = static_cast<hud_widgets_list_t *>(
                     realloc(huds, huds_count * sizeof(huds[0])));
                 list = &huds[huds_count - 1];
-                list->items = NULL;
+                list->items = nullptr;
                 list->count = 0;
 
                 // definition of hud is below
@@ -1968,7 +1968,7 @@ void HU_widget_draw_gkeys(void)
     HUlib_drawTextLine(&w_keys_icon, false);
 }
 
-const char *crosshair_nam[HU_CROSSHAIRS] = {NULL, "CROSS1", "CROSS2", "CROSS3"};
+const char *crosshair_nam[HU_CROSSHAIRS] = {nullptr, "CROSS1", "CROSS2", "CROSS3"};
 const char *crosshair_str[HU_CROSSHAIRS] = {"none", "cross", "angle", "dot"};
 crosshair_t crosshair;
 
@@ -2428,11 +2428,11 @@ void HU_Ticker(void)
         }
         HUlib_setTextXCenter(&w_centermsg);
         w_centermsg.cm = custom_message_p->cm;
-        custom_message_p->msg = NULL;
+        custom_message_p->msg = nullptr;
 
         if (custom_message_p->sfx > 0 && custom_message_p->sfx < NUMSFX)
         {
-            S_StartSound(NULL, custom_message_p->sfx);
+            S_StartSound(nullptr, custom_message_p->sfx);
         }
     }
 
@@ -2718,7 +2718,7 @@ int SetCustomMessage(int plr, const char *msg, int delay, int ticks, int cm,
     else
     {
         auto *message = static_cast<message_thinker_t *>(
-            Z_Calloc(1, sizeof(message_thinker_t), PU_LEVEL, NULL));
+            Z_Calloc(1, sizeof(message_thinker_t), PU_LEVEL, nullptr));
         message->thinker.function = T_ShowMessage;
         message->delay = delay;
         message->plr = plr;

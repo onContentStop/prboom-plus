@@ -45,7 +45,7 @@
 // Information about all the music
 //
 
-musicinfo_t S_music[] = {{NULL},
+musicinfo_t S_music[] = {{nullptr},
                          {"e1m1", 0},
                          {"e1m2", 0},
                          {"e1m3", 0},

@@ -118,7 +118,7 @@ static const crdef_t crdefs[] = {
     {"CRBROWN", &colrngs[CR_BROWN]},   {"CRGOLD", &colrngs[CR_GOLD]},
     {"CRRED", &colrngs[CR_RED]},       {"CRBLUE", &colrngs[CR_BLUE]},
     {"CRORANGE", &colrngs[CR_ORANGE]}, {"CRYELLOW", &colrngs[CR_YELLOW]},
-    {"CRBLUE2", &colrngs[CR_BLUE2]},   {NULL}};
+    {"CRBLUE2", &colrngs[CR_BLUE2]},   {nullptr}};
 
 // haleyjd: DOSDoom-style single translucency lookup-up table
 // generation code. This code has a 32k (plus a bit more)
@@ -380,7 +380,7 @@ void V_Init(void)
     // reset the all
     for (i = 0; i < NUM_SCREENS; i++)
     {
-        screens[i].data = NULL;
+        screens[i].data = nullptr;
         screens[i].not_on_heap = false;
         screens[i].width = 0;
         screens[i].height = 0;
@@ -762,12 +762,12 @@ static void FUNC_V_DrawNumPatchPrecise(float x, float y, int scrn, int lump,
     R_UnlockPatchNum(lump);
 }
 
-unsigned short *V_Palette15 = NULL;
-unsigned short *V_Palette16 = NULL;
-unsigned int *V_Palette32 = NULL;
-static unsigned short *Palettes15 = NULL;
-static unsigned short *Palettes16 = NULL;
-static unsigned int *Palettes32 = NULL;
+unsigned short *V_Palette15 = nullptr;
+unsigned short *V_Palette16 = nullptr;
+unsigned int *V_Palette32 = nullptr;
+static unsigned short *Palettes15 = nullptr;
+static unsigned short *Palettes16 = nullptr;
+static unsigned int *Palettes32 = nullptr;
 static int currentPaletteIndex = 0;
 
 //
@@ -802,9 +802,9 @@ void V_UpdateTrueColorPalette(video_mode_t mode)
             free(Palettes16);
         if (Palettes32)
             free(Palettes32);
-        Palettes15 = NULL;
-        Palettes16 = NULL;
-        Palettes32 = NULL;
+        Palettes15 = nullptr;
+        Palettes16 = nullptr;
+        Palettes32 = nullptr;
         usegammaOnLastPaletteGeneration = usegamma;
     }
 
@@ -930,22 +930,22 @@ static void V_DestroyTrueColorPalette(video_mode_t mode)
     {
         if (Palettes15)
             free(Palettes15);
-        Palettes15 = NULL;
-        V_Palette15 = NULL;
+        Palettes15 = nullptr;
+        V_Palette15 = nullptr;
     }
     if (mode == VID_MODE16)
     {
         if (Palettes16)
             free(Palettes16);
-        Palettes16 = NULL;
-        V_Palette16 = NULL;
+        Palettes16 = nullptr;
+        V_Palette16 = nullptr;
     }
     if (mode == VID_MODE32)
     {
         if (Palettes32)
             free(Palettes32);
-        Palettes32 = NULL;
-        V_Palette32 = NULL;
+        Palettes32 = nullptr;
+        V_Palette32 = nullptr;
     }
 }
 
@@ -1357,7 +1357,7 @@ void V_FreeScreen(screeninfo_t *scrn)
     if (!scrn->not_on_heap)
     {
         free(scrn->data);
-        scrn->data = NULL;
+        scrn->data = nullptr;
     }
 }
 
@@ -1651,7 +1651,7 @@ void WRAP_V_DrawLineWu(fline_t *fl, int color)
     PUTDOT(fl->b.x, fl->b.y, color);
 }
 
-static unsigned char *playpal_data = NULL;
+static unsigned char *playpal_data = nullptr;
 const unsigned char *V_GetPlaypal(void)
 {
     if (!playpal_data)
@@ -1672,7 +1672,7 @@ void V_FreePlaypal(void)
     if (playpal_data)
     {
         free(playpal_data);
-        playpal_data = NULL;
+        playpal_data = nullptr;
     }
 }
 

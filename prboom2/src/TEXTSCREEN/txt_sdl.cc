@@ -114,7 +114,7 @@ static SDL_Color ega_colors[] = {
 
 static int Win32_UseLargeFont(void)
 {
-    HDC hdc = GetDC(NULL);
+    HDC hdc = GetDC(nullptr);
     int dpix;
 
     if (!hdc)
@@ -123,7 +123,7 @@ static int Win32_UseLargeFont(void)
     }
 
     dpix = GetDeviceCaps(hdc, LOGPIXELSX);
-    ReleaseDC(NULL, hdc);
+    ReleaseDC(nullptr, hdc);
 
     // 144 is the DPI when using "150%" scaling. If the user has this set
     // then consider this an appropriate threshold for using the large font.
@@ -149,7 +149,7 @@ static txt_font_t *FontForName(char *name)
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -169,11 +169,11 @@ static void ChooseFont(void)
 
     env = getenv("TEXTSCREEN_FONT");
 
-    if (env != NULL)
+    if (env != nullptr)
     {
         font = FontForName(env);
 
-        if (font != NULL)
+        if (font != nullptr)
         {
             return;
         }
@@ -240,7 +240,7 @@ int TXT_Init(void)
         SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                          TXT_SCREEN_W * font->w, TXT_SCREEN_H * font->h, 0);
 
-    if (TXT_SDLWindow == NULL)
+    if (TXT_SDLWindow == nullptr)
         return 0;
 
     // Instead, we draw everything into an intermediate 8-bit surface
@@ -272,9 +272,9 @@ int TXT_Init(void)
 void TXT_Shutdown(void)
 {
     free(screendata);
-    screendata = NULL;
+    screendata = nullptr;
     SDL_FreeSurface(screenbuffer);
-    screenbuffer = NULL;
+    screenbuffer = nullptr;
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
@@ -676,7 +676,7 @@ signed int TXT_GetChar(void)
         // If there is an event callback, allow it to intercept this
         // event.
 
-        if (event_callback != NULL)
+        if (event_callback != nullptr)
         {
             if (event_callback(&ev, event_callback_data))
             {
@@ -830,7 +830,7 @@ static const char *SpecialKeyName(int key)
           */
 
     default:
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -840,7 +840,7 @@ void TXT_GetKeyDescription(int key, char *buf, size_t buf_len)
 
     keyname = SpecialKeyName(key);
 
-    if (keyname != NULL)
+    if (keyname != nullptr)
     {
         TXT_StringCopy(buf, keyname, buf_len);
     }
@@ -912,7 +912,7 @@ void TXT_Sleep(int timeout)
     {
         // We can just wait forever until an event occurs
 
-        SDL_WaitEvent(NULL);
+        SDL_WaitEvent(nullptr);
     }
     else
     {
@@ -923,7 +923,7 @@ void TXT_Sleep(int timeout)
 
         while (SDL_GetTicks() < start_time + timeout)
         {
-            if (SDL_PollEvent(NULL) != 0)
+            if (SDL_PollEvent(nullptr) != 0)
             {
                 // Received an event, so stop waiting
 

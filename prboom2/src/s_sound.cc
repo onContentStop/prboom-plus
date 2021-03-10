@@ -710,7 +710,7 @@ int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, int *vol, int *sep,
   // P_SpawnPlayer(players[0]) - P_SetupPsprites() - P_BringUpWeapon() -
     // S_StartSound(players[0]->mo, sfx_sawup) - S_StartSoundAtVolume() -
     // S_AdjustSoundParams(players[displayplayer]->mo, ...);
-    // players[displayplayer]->mo is NULL
+    // players[displayplayer]->mo is nullptr
     //
     // There is no more crash on e1cmnet3.lmp between e1m2 and e1m3
     // http://competn.doom2.net/pub/compet-n/doom/coop/movies/e1cmnet3.zip

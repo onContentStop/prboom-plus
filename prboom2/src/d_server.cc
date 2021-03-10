@@ -148,7 +148,7 @@ int getopt(int nargc, const char *nargv[], const char *ostr)
             /* Solitary '-', treat as a '-' option
                if the program (eg su) is looking for it. */
             place = EMSG;
-            if (strchr(ostr, '-') == NULL)
+            if (strchr(ostr, '-') == nullptr)
                 return (-1);
             optopt = '-';
         }
@@ -157,7 +157,7 @@ int getopt(int nargc, const char *nargv[], const char *ostr)
         optopt = *place++;
 
     /* See if option letter is one the caller wanted... */
-    if (optopt == ':' || (oli = strchr(ostr, optopt)) == NULL)
+    if (optopt == ':' || (oli = strchr(ostr, optopt)) == nullptr)
     {
         if (*place == 0)
             ++optind;
@@ -171,7 +171,7 @@ int getopt(int nargc, const char *nargv[], const char *ostr)
     if (oli[1] != ':')
     {
         /* don't need argument */
-        optarg = NULL;
+        optarg = nullptr;
         if (*place == 0)
             ++optind;
     }
@@ -209,7 +209,7 @@ int getopt(int nargc, const char *nargv[], const char *ostr)
 // Dummies to forfill l_udp.c unused client stuff
 int M_CheckParm(const char *p)
 {
-    p = NULL;
+    p = nullptr;
     return 1;
 }
 int myargc;
@@ -428,8 +428,8 @@ int main(int argc, char **argv)
     int exectics = 0; // gametics completed
     struct setup_packet_s setupinfo = {2, 0, 1, 1, 1, 0, best_compatibility,
                                        0, 0};
-    char **wadname = NULL;
-    char **wadget = NULL;
+    char **wadname = nullptr;
+    char **wadget = nullptr;
     int numwads = 0;
     {
         int opt;
@@ -511,7 +511,7 @@ int main(int argc, char **argv)
                         wadget[numwads - 1] = p;
                     }
                     else
-                        wadget[numwads - 1] = NULL;
+                        wadget[numwads - 1] = nullptr;
                 }
                 break;
             }
@@ -521,7 +521,7 @@ int main(int argc, char **argv)
     setupinfo.extratic = xtratics;
     { /* Random number seed
        * Mirrors the corresponding code in G_ReadOptions */
-        int rngseed = (int)time(NULL);
+        int rngseed = (int)time(nullptr);
         setupinfo.game_options[13] = rngseed & 0xff;
         rngseed >>= 8;
         setupinfo.game_options[12] = rngseed & 0xff;

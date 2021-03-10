@@ -303,7 +303,7 @@ int map_level_stat;
 
 default_t defaults[] = {
     // e6y
-    {"System settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"System settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"process_priority",
      {&process_priority},
      {0},
@@ -312,7 +312,7 @@ default_t defaults[] = {
      default_t::def_int,
      ss_none},
 
-    {"Misc settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Misc settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"default_compatibility_level",
      {(int *)&default_compatibility_level},
      {-1},
@@ -393,38 +393,38 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_none},
 
-    {"Files", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Files", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     /* cph - MBF-like wad/deh/bex autoload code */
     {"wadfile_1",
-     {NULL, &wad_files[1]},
+     {nullptr, &wad_files[1]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"wadfile_2",
-     {NULL, &wad_files[2]},
+     {nullptr, &wad_files[2]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"dehfile_1",
-     {NULL, &deh_files[0]},
+     {nullptr, &deh_files[0]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"dehfile_2",
-     {NULL, &deh_files[1]},
+     {nullptr, &deh_files[1]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
 
-    {"Game settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Game settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"default_skill",
      {&defaultskill},
      {3},
@@ -614,7 +614,7 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_none},
 
-    {"Dehacked settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Dehacked settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"deh_apply_cheats",
      {&deh_apply_cheats},
      {1},
@@ -624,7 +624,7 @@ default_t defaults[] = {
      ss_stat}, // if 0, dehacked cheat replacements are ignored.
 
     {"Compatibility settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -824,7 +824,7 @@ default_t defaults[] = {
      &comp[comp_maskedanim]},
     // e6y
     {"PrBoom-plus compatibility settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -863,7 +863,7 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_comp},
 
-    {"Sound settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Sound settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"snd_pcspeaker",
      {&snd_pcspeaker},
      {0},
@@ -927,14 +927,14 @@ default_t defaults[] = {
      ss_none}, // number of audio events simultaneously // killough
 #ifdef _WIN32
     {"snd_midiplayer",
-     {NULL, &snd_midiplayer},
+     {nullptr, &snd_midiplayer},
      {0, "fluidsynth"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"snd_soundfont",
-     {NULL, &snd_soundfont},
+     {nullptr, &snd_soundfont},
      {0, "TimGM6mb.sf2"},
      UL,
      UL,
@@ -942,14 +942,14 @@ default_t defaults[] = {
      ss_none}, // soundfont name for synths that support it
 #else
     {"snd_midiplayer",
-     {NULL, &snd_midiplayer},
+     {nullptr, &snd_midiplayer},
      {0, "sdl"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"snd_soundfont",
-     {NULL, &snd_soundfont},
+     {nullptr, &snd_soundfont},
      {0, "/usr/share/sounds/sf3/default_t::default-GM.sf3"},
      UL,
      UL,
@@ -957,7 +957,7 @@ default_t defaults[] = {
      ss_none}, // soundfont name for synths that support it
 #endif
     {"snd_mididev",
-     {NULL, &snd_mididev},
+     {nullptr, &snd_mididev},
      {0, ""},
      UL,
      UL,
@@ -1017,9 +1017,9 @@ default_t defaults[] = {
      default_t::def_int,
      ss_none}, // NSM  fine tune opl output level
 
-    {"Video settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Video settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"videomode",
-     {NULL, &default_videomode},
+     {nullptr, &default_videomode},
      {0, "8bit"},
      UL,
      UL,
@@ -1027,7 +1027,7 @@ default_t defaults[] = {
      ss_none},
     /* 640x480 default_t::default resolution */
     {"screen_resolution",
-     {NULL, &screen_resolution},
+     {nullptr, &screen_resolution},
      {0, "640x480"},
      UL,
      UL,
@@ -1147,7 +1147,7 @@ default_t defaults[] = {
      default_t::def_int,
      ss_none},
 
-    {"OpenGL settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"OpenGL settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"gl_compatibility",
      {&gl_compatibility},
      {0},
@@ -1294,7 +1294,7 @@ default_t defaults[] = {
      default_t::def_int,
      ss_none},
     {"gl_tex_format_string",
-     {NULL, &gl_tex_format_string},
+     {nullptr, &gl_tex_format_string},
      {0, "GL_RGBA"},
      UL,
      UL,
@@ -1350,7 +1350,7 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_none},
 
-    {"Mouse settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Mouse settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"use_mouse",
      {&usemouse},
      {1},
@@ -1486,7 +1486,7 @@ default_t defaults[] = {
     // CPhipps - now they're the doom codes, so default_t::default.cfg can be
     // portable
 
-    {"Key bindings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Key bindings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"key_right",
      {&key_right},
      {KEYD_RIGHTARROW},
@@ -2013,7 +2013,7 @@ default_t defaults[] = {
      default_t::def_key,
      ss_keys}, // key to take a screenshot
 
-    {"Joystick settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Joystick settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"use_joystick",
      {&usejoystick},
      {0},
@@ -2068,7 +2068,7 @@ default_t defaults[] = {
      default_t::def_int,
      ss_keys}, // joystick button number to use for use/open
 
-    {"Chat macros", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Chat macros", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"chatmacro0",
      {0, &chat_macros[0]},
      {0, HUSTR_CHATMACRO0},
@@ -2140,7 +2140,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_chat}, // chat string associated with 9 key
 
-    {"Automap settings", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Automap settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     // jff 1/7/98 default_t::defaults for automap colors
     // jff 4/3/98 remove -1 in lower range, 0 now disables new map features
     {"mapcolor_back",
@@ -2435,7 +2435,7 @@ default_t defaults[] = {
      ss_auto},
 
     {"Heads-up display settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2592,7 +2592,7 @@ default_t defaults[] = {
 
     // e6y
     {"Prboom-plus key bindings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2671,7 +2671,7 @@ default_t defaults[] = {
      ss_keys},
 
     {"Prboom-plus heads-up display settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2771,7 +2771,7 @@ default_t defaults[] = {
 
     // e6y
     {"Prboom-plus mouse settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2807,7 +2807,7 @@ default_t defaults[] = {
      ss_stat},
 
     {"Prboom-plus demos settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2821,14 +2821,14 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_stat},
     {"demo_demoex_filename",
-     {NULL, &demo_demoex_filename},
+     {nullptr, &demo_demoex_filename},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"getwad_cmdline",
-     {NULL, &getwad_cmdline},
+     {nullptr, &getwad_cmdline},
      {0, ""},
      UL,
      UL,
@@ -2850,7 +2850,7 @@ default_t defaults[] = {
      ss_stat},
 
     {"Prboom-plus game settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2879,7 +2879,7 @@ default_t defaults[] = {
      ss_stat},
 
     {"Prboom-plus misc settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -2887,7 +2887,7 @@ default_t defaults[] = {
      ss_none},
     {"showendoom", {&showendoom}, {0}, 0, 1, default_t::def_bool, ss_stat},
     {"screenshot_dir",
-     {NULL, &screenshot_dir},
+     {nullptr, &screenshot_dir},
      {0, ""},
      UL,
      UL,
@@ -2925,21 +2925,21 @@ default_t defaults[] = {
 
     // NSM
     {"Video capture encoding settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
      default_t::def_none,
      ss_none},
     {"cap_soundcommand",
-     {NULL, &cap_soundcommand},
+     {nullptr, &cap_soundcommand},
      {0, "ffmpeg -f s16le -ar %s -ac 2 -i - -c:a libopus -y temp_a.nut"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"cap_videocommand",
-     {NULL, &cap_videocommand},
+     {nullptr, &cap_videocommand},
      {0, "ffmpeg -f rawvideo -pix_fmt rgb24 -r %r -s %wx%h -i - -c:v libx264 "
          "-y temp_v.nut"},
      UL,
@@ -2947,21 +2947,21 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"cap_muxcommand",
-     {NULL, &cap_muxcommand},
+     {nullptr, &cap_muxcommand},
      {0, "ffmpeg -i temp_v.nut -i temp_a.nut -c copy -y %f"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"cap_tempfile1",
-     {NULL, &cap_tempfile1},
+     {nullptr, &cap_tempfile1},
      {0, "temp_a.nut"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"cap_tempfile2",
-     {NULL, &cap_tempfile2},
+     {nullptr, &cap_tempfile2},
      {0, "temp_v.nut"},
      UL,
      UL,
@@ -2977,14 +2977,14 @@ default_t defaults[] = {
     {"cap_fps", {&cap_fps}, {60}, 16, 300, default_t::def_int, ss_none},
 
     {"Prboom-plus video settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
      default_t::def_none,
      ss_none},
     {"sdl_video_window_pos",
-     {NULL, &sdl_video_window_pos},
+     {nullptr, &sdl_video_window_pos},
      {0, "center"},
      UL,
      UL,
@@ -3120,7 +3120,7 @@ default_t defaults[] = {
      ss_stat},
 
     {"Prboom-plus OpenGL settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -3212,7 +3212,7 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_stat},
     {"gl_texture_hires_dir",
-     {NULL, &gl_texture_hires_dir},
+     {nullptr, &gl_texture_hires_dir},
      {0, ""},
      UL,
      UL,
@@ -3254,35 +3254,35 @@ default_t defaults[] = {
      default_t::def_bool,
      ss_stat},
     {"gl_motionblur_min_speed",
-     {NULL, &motion_blur.str_min_speed},
+     {nullptr, &motion_blur.str_min_speed},
      {0, "21.36"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"gl_motionblur_min_angle",
-     {NULL, &motion_blur.str_min_angle},
+     {nullptr, &motion_blur.str_min_angle},
      {0, "20.0"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"gl_motionblur_att_a",
-     {NULL, &motion_blur.str_att_a},
+     {nullptr, &motion_blur.str_att_a},
      {0, "55.0"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"gl_motionblur_att_b",
-     {NULL, &motion_blur.str_att_b},
+     {nullptr, &motion_blur.str_att_b},
      {0, "1.8"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"gl_motionblur_att_c",
-     {NULL, &motion_blur.str_att_c},
+     {nullptr, &motion_blur.str_att_c},
      {0, "0.9"},
      UL,
      UL,
@@ -3354,7 +3354,7 @@ default_t defaults[] = {
      ss_none},
 
     {"Prboom-plus emulation settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -3446,7 +3446,7 @@ default_t defaults[] = {
      ss_stat},
 
     {"Prboom-plus 'bad' compatibility settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -3497,7 +3497,7 @@ default_t defaults[] = {
 
 #ifdef USE_WINDOWS_LAUNCHER
     {"Prboom-plus launcher settings",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
@@ -3511,70 +3511,70 @@ default_t defaults[] = {
      default_t::def_int,
      ss_none},
     {"launcher_history0",
-     {NULL, &launcher_history[0]},
+     {nullptr, &launcher_history[0]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history1",
-     {NULL, &launcher_history[1]},
+     {nullptr, &launcher_history[1]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history2",
-     {NULL, &launcher_history[2]},
+     {nullptr, &launcher_history[2]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history3",
-     {NULL, &launcher_history[3]},
+     {nullptr, &launcher_history[3]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history4",
-     {NULL, &launcher_history[4]},
+     {nullptr, &launcher_history[4]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history5",
-     {NULL, &launcher_history[5]},
+     {nullptr, &launcher_history[5]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history6",
-     {NULL, &launcher_history[6]},
+     {nullptr, &launcher_history[6]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history7",
-     {NULL, &launcher_history[7]},
+     {nullptr, &launcher_history[7]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history8",
-     {NULL, &launcher_history[8]},
+     {nullptr, &launcher_history[8]},
      {0, ""},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"launcher_history9",
-     {NULL, &launcher_history[9]},
+     {nullptr, &launcher_history[9]},
      {0, ""},
      UL,
      UL,
@@ -3582,21 +3582,21 @@ default_t defaults[] = {
      ss_none},
 #endif
     {"Prboom-plus demo patterns list. Put your patterns here",
-     {NULL},
+     {nullptr},
      {0},
      UL,
      UL,
      default_t::def_none,
      ss_none},
     {"demo_patterns_mask",
-     {NULL, &demo_patterns_mask, &demo_patterns_count, &demo_patterns_list},
+     {nullptr, &demo_patterns_mask, &demo_patterns_count, &demo_patterns_list},
      {0, "demo_pattern", 9, &demo_patterns_list_def[0]},
      UL,
      UL,
      default_t::def_arr,
      ss_none},
     {"demo_pattern0",
-     {NULL, &demo_patterns_list_def[0]},
+     {nullptr, &demo_patterns_list_def[0]},
      {0, "DOOM 2: Hell on "
          "Earth/((lv)|(nm)|(pa)|(ty))\\d\\d.\\d\\d\\d\\.lmp/doom2.wad"},
      UL,
@@ -3604,7 +3604,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern1",
-     {NULL, &demo_patterns_list_def[1]},
+     {nullptr, &demo_patterns_list_def[1]},
      {0, "DOOM 2: Plutonia "
          "Experiment/p(c|f|l|n|p|r|s|t)\\d\\d.\\d\\d\\d\\.lmp/"
          "doom2.wad|plutonia.wad"},
@@ -3613,7 +3613,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern2",
-     {NULL, &demo_patterns_list_def[2]},
+     {nullptr, &demo_patterns_list_def[2]},
      {0, "DOOM 2: TNT - "
          "Evilution/((e(c|f|v|p|r|s|t))|(tn))\\d\\d.\\d\\d\\d\\.lmp/"
          "doom2.wad|tnt.wad"},
@@ -3622,7 +3622,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern3",
-     {NULL, &demo_patterns_list_def[3]},
+     {nullptr, &demo_patterns_list_def[3]},
      {0, "The Ultimate "
          "DOOM/(((e|f|n|p|r|t|u)\\dm\\d)|(n\\ds\\d)).\\d\\d\\d\\.lmp/doom.wad"},
      UL,
@@ -3630,7 +3630,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern4",
-     {NULL, &demo_patterns_list_def[4]},
+     {nullptr, &demo_patterns_list_def[4]},
      {0, "Alien "
          "Vendetta/a(c|f|n|p|r|s|t|v)\\d\\d.\\d\\d\\d\\.lmp/"
          "doom2.wad|av.wad|av.deh"},
@@ -3639,7 +3639,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern5",
-     {NULL, &demo_patterns_list_def[5]},
+     {nullptr, &demo_patterns_list_def[5]},
      {0, "Requiem/r(c|f|n|p|q|r|s|t)\\d\\d.\\d\\d\\d\\.lmp/"
          "doom2.wad|requiem.wad|req21fix.wad|reqmus.wad"},
      UL,
@@ -3647,7 +3647,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern6",
-     {NULL, &demo_patterns_list_def[6]},
+     {nullptr, &demo_patterns_list_def[6]},
      {0, "Hell "
          "Revealed/h(c|e|f|n|p|r|s|t)\\d\\d.\\d\\d\\d\\.lmp/"
          "doom2.wad|hr.wad|hrmus.wad"},
@@ -3656,14 +3656,14 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
     {"demo_pattern7",
-     {NULL, &demo_patterns_list_def[7]},
+     {nullptr, &demo_patterns_list_def[7]},
      {0, "Memento Mori/mm\\d\\d.\\d\\d\\d\\.lmp/doom2.wad|mm.wad|mmmus.wad"},
      UL,
      UL,
      default_t::def_str,
      ss_none},
     {"demo_pattern8",
-     {NULL, &demo_patterns_list_def[8]},
+     {nullptr, &demo_patterns_list_def[8]},
      {0,
       "Memento Mori 2/m2\\d\\d.\\d\\d\\d\\.lmp/doom2.wad|mm2.wad|mm2mus.wad"},
      UL,
@@ -3671,7 +3671,7 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
 
-    {"Weapon preferences", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Weapon preferences", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     // killough 2/8/98: weapon preferences set by user:
     {"weapon_choice_1",
      {&weapon_preferences[0][0]},
@@ -3738,7 +3738,7 @@ default_t defaults[] = {
      ss_weap}, // ninth choice for weapon (worst)
 
     // cournia - support for arbitrary music file (default_t::defaults are mp3)
-    {"Music", {NULL}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Music", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"mus_e1m1",
      {0, &S_music_files[mus_e1m1]},
      {0, "e1m1.mp3"},
@@ -4317,7 +4317,7 @@ default_t *M_LookupDefault(const char *name)
     }
 
     I_Error("M_LookupDefault: %s not found", name);
-    return NULL;
+    return nullptr;
 }
 
 //
@@ -4336,11 +4336,11 @@ void M_LoadDefaults(void)
     char def[80];
     char *strparm = static_cast<char *>(malloc(CFG_BUFFERMAX));
     char *cfgline = static_cast<char *>(malloc(CFG_BUFFERMAX));
-    char *newstring = NULL; // killough
+    char *newstring = nullptr; // killough
     int parm;
     dboolean isstring;
     // e6y: arrays
-    default_t *item = NULL;
+    default_t *item = nullptr;
 
     // set everything to base values
 
@@ -4367,11 +4367,11 @@ void M_LoadDefaults(void)
                 if ((*arr)[k])
                 {
                     free((*arr)[k]);
-                    (*arr)[k] = NULL;
+                    (*arr)[k] = nullptr;
                 }
             }
             free(*arr);
-            *arr = NULL;
+            *arr = nullptr;
             *(item->location.array_size) = 0;
             // load predefined data
             *arr = static_cast<char **>(
@@ -4401,7 +4401,7 @@ void M_LoadDefaults(void)
     {
         const char *exedir = I_DoomExeDir();
         /* get config file from same directory as executable */
-        int len = doom_snprintf(NULL, 0, "%s/" BOOM_CFG, exedir);
+        int len = doom_snprintf(nullptr, 0, "%s/" BOOM_CFG, exedir);
         defaultfile = static_cast<char *>(malloc(len + 1));
         doom_snprintf(defaultfile, len + 1, "%s/" BOOM_CFG, exedir);
     }
@@ -4470,7 +4470,7 @@ void M_LoadDefaults(void)
                             if ((*arr)[(*index)])
                             {
                                 free((*arr)[(*index)]);
-                                (*arr)[(*index)] = NULL;
+                                (*arr)[(*index)] = nullptr;
                             }
                         }
                         (*arr)[(*index)] = newstring;
@@ -4479,7 +4479,7 @@ void M_LoadDefaults(void)
                     }
                     else
                     {
-                        item = NULL;
+                        item = nullptr;
                     }
                 }
 
@@ -4593,15 +4593,15 @@ void M_DoScreenShot(const char *fname)
 
 const char *M_CheckWritableDir(const char *dir)
 {
-    static char *base = NULL;
+    static char *base = nullptr;
     static int base_len = 0;
 
-    const char *result = NULL;
+    const char *result = nullptr;
     int len;
 
     if (!dir || !(len = strlen(dir)))
     {
-        return NULL;
+        return nullptr;
     }
 
     if (len + 1 > base_len)
@@ -4629,9 +4629,9 @@ const char *M_CheckWritableDir(const char *dir)
 void M_ScreenShot(void)
 {
     static int shot;
-    char *lbmname = NULL;
+    char *lbmname = nullptr;
     int startshot;
-    const char *shot_dir = NULL;
+    const char *shot_dir = nullptr;
     int p;
     int success = 0;
 
@@ -4643,7 +4643,7 @@ void M_ScreenShot(void)
 #ifdef _WIN32
         shot_dir = M_CheckWritableDir(I_DoomExeDir());
 #else
-        shot_dir = (!access(SCREENSHOT_DIR, 2) ? SCREENSHOT_DIR : NULL);
+        shot_dir = (!access(SCREENSHOT_DIR, 2) ? SCREENSHOT_DIR : nullptr);
 #endif
 
     if (shot_dir)
@@ -4652,7 +4652,7 @@ void M_ScreenShot(void)
 
         do
         {
-            int size = doom_snprintf(NULL, 0, "%s/doom%02d" SCREENSHOT_EXT,
+            int size = doom_snprintf(nullptr, 0, "%s/doom%02d" SCREENSHOT_EXT,
                                      shot_dir, shot);
             lbmname = static_cast<char *>(realloc(lbmname, size + 1));
             doom_snprintf(lbmname, size + 1, "%s/doom%02d" SCREENSHOT_EXT,
@@ -4662,7 +4662,7 @@ void M_ScreenShot(void)
 
         if (access(lbmname, 0))
         {
-            S_StartSound(NULL, gamemode == commercial ? sfx_radio : sfx_tink);
+            S_StartSound(nullptr, gamemode == commercial ? sfx_radio : sfx_tink);
             M_DoScreenShot(lbmname); // cph
             success = 1;
         }
@@ -4742,7 +4742,7 @@ void M_ArrayFree(array_t *data)
     if (data->data)
     {
         free(data->data);
-        data->data = NULL;
+        data->data = nullptr;
     }
 
     data->capacity = 0;

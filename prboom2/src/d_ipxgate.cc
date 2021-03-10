@@ -188,7 +188,7 @@ void ipx_receive(int s)
             if (!connected++)
             {
                 connect(s, &from, sl);
-                send_udp_packet(PKT_INIT, 0, NULL, 0);
+                send_udp_packet(PKT_INIT, 0, nullptr, 0);
             }
         }
         else
@@ -199,7 +199,7 @@ void ipx_receive(int s)
             }
             else if (buf.u.d.checksum & NCMD_EXIT)
             {
-                send_udp_packet(PKT_QUIT, buf.u.d.starttic, NULL, 0);
+                send_udp_packet(PKT_QUIT, buf.u.d.starttic, nullptr, 0);
                 exit(0);
             }
             else if ((buf.u.d.checksum & NCMD_CHECKSUM) == buf.u.d.checksum)
@@ -239,7 +239,7 @@ void udp_receive(int s)
             struct setup_packet_s *sinfo =
                 reinterpret_cast<struct setup_packet_s *>(p + 1);
             consoleplayer = sinfo->yourplayer;
-            send_udp_packet(PKT_GO, 0, NULL, 0);
+            send_udp_packet(PKT_GO, 0, nullptr, 0);
             write(ipxs,
                   "\xff\xff\xff\xff\x00\x00\x00\x00\x02\x00\x02\x00\x00\x00\x00"
                   "\x00",
@@ -303,7 +303,7 @@ void loop(int ipxs, int udps)
         FD_ZERO(&fds);
         FD_SET(ipxs, &fds);
         FD_SET(udps, &fds);
-        rc = select(ipxs + udps, &fds, NULL, NULL, &wt);
+        rc = select(ipxs + udps, &fds, nullptr, nullptr, &wt);
         if (rc < 0)
         {
             fprintf(stderr, "select: %s\n", strerror(errno));

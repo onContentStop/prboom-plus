@@ -176,12 +176,12 @@ static void I_SignalHandler(int s)
 static ExeptionsList_t current_exception_index;
 
 ExeptionParam_t ExeptionsParams[EXEPTION_MAX + 1] = {
-    {NULL},
+    {nullptr},
     {"gld_CreateScreenSizeFBO: Access violation in "
      "glFramebufferTexture2DEXT.\n\n"
      "Are you using ATI graphics? Try to update your drivers "
      "or change gl_compatibility variable in cfg to 1.\n"},
-    {NULL}};
+    {nullptr}};
 
 void I_ExeptionBegin(ExeptionsList_t exception_index)
 {
@@ -396,10 +396,10 @@ static void I_SetAffinityMask(void)
     // SDL_mixer that causes occasional crashes.
     if (process_affinity_mask)
     {
-        const char *errbuf = NULL;
+        const char *errbuf = nullptr;
 #ifdef _WIN32
         HMODULE kernel32_dll;
-        SetAffinityFunc SetAffinity = NULL;
+        SetAffinityFunc SetAffinity = nullptr;
         int ok = false;
 
         // Find the kernel interface DLL.
@@ -447,7 +447,7 @@ static void I_SetAffinityMask(void)
         return;
 #endif
 
-        if (errbuf == NULL)
+        if (errbuf == nullptr)
         {
             lprintf(LO_INFO, "I_SetAffinityMask: manual affinity mask is %d\n",
                     process_affinity_mask);
@@ -470,7 +470,7 @@ void I_SetProcessPriority(void)
 {
     if (process_priority)
     {
-        const char *errbuf = NULL;
+        const char *errbuf = nullptr;
 
 #ifdef _WIN32
         {
@@ -490,7 +490,7 @@ void I_SetProcessPriority(void)
         return;
 #endif
 
-        if (errbuf == NULL)
+        if (errbuf == nullptr)
         {
             lprintf(LO_INFO,
                     "I_SetProcessPriority: priority for the process is %d\n",

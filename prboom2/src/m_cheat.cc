@@ -105,7 +105,7 @@ static void cheat_shorttics();
 //
 // The first argument is the cheat code.
 //
-// The second argument is its DEH name, or NULL if it's not supported by -deh.
+// The second argument is its DEH name, or nullptr if it's not supported by -deh.
 //
 // The third argument is a combination of the bitmasks:
 // {always, not_dm, not_coop, not_net, not_menu, not_demo, not_deh},
@@ -149,67 +149,67 @@ CheatSequence cheat[] = {
     {"idmypos", "Player Position", CheatSequence::not_dm, cheat_mypos, 0},
     {"idrate", "Frame rate", CheatSequence::always, cheat_rate, 0},
     // phares
-    {"tntcomp", NULL, CheatSequence::cht_never, cheat_comp, 0},
+    {"tntcomp", nullptr, CheatSequence::cht_never, cheat_comp, 0},
     // jff 2/01/98 kill all monsters
-    {"tntem", NULL, CheatSequence::cht_never, cheat_massacre, 0},
+    {"tntem", nullptr, CheatSequence::cht_never, cheat_massacre, 0},
     // killough 2/07/98: moved from am_map.c
     {"iddt", "Map cheat", CheatSequence::not_dm, cheat_ddt, 0},
     // killough 2/07/98: HOM autodetector
-    {"tnthom", NULL, CheatSequence::always, cheat_hom, 0},
+    {"tnthom", nullptr, CheatSequence::always, cheat_hom, 0},
     // killough 2/16/98: generalized key cheats
-    {"tntkey", NULL, CheatSequence::cht_never, cheat_tntkey, 0},
-    {"tntkeyr", NULL, CheatSequence::cht_never, cheat_tntkeyx, 0},
-    {"tntkeyy", NULL, CheatSequence::cht_never, cheat_tntkeyx, 0},
-    {"tntkeyb", NULL, CheatSequence::cht_never, cheat_tntkeyx, 0},
-    {"tntkeyrc", NULL, CheatSequence::cht_never, cheat_tntkeyxx, it_redcard},
-    {"tntkeyyc", NULL, CheatSequence::cht_never, cheat_tntkeyxx, it_yellowcard},
-    {"tntkeybc", NULL, CheatSequence::cht_never, cheat_tntkeyxx, it_bluecard},
-    {"tntkeyrs", NULL, CheatSequence::cht_never, cheat_tntkeyxx, it_redskull},
-    {"tntkeyys", NULL, CheatSequence::cht_never, cheat_tntkeyxx,
+    {"tntkey", nullptr, CheatSequence::cht_never, cheat_tntkey, 0},
+    {"tntkeyr", nullptr, CheatSequence::cht_never, cheat_tntkeyx, 0},
+    {"tntkeyy", nullptr, CheatSequence::cht_never, cheat_tntkeyx, 0},
+    {"tntkeyb", nullptr, CheatSequence::cht_never, cheat_tntkeyx, 0},
+    {"tntkeyrc", nullptr, CheatSequence::cht_never, cheat_tntkeyxx, it_redcard},
+    {"tntkeyyc", nullptr, CheatSequence::cht_never, cheat_tntkeyxx, it_yellowcard},
+    {"tntkeybc", nullptr, CheatSequence::cht_never, cheat_tntkeyxx, it_bluecard},
+    {"tntkeyrs", nullptr, CheatSequence::cht_never, cheat_tntkeyxx, it_redskull},
+    {"tntkeyys", nullptr, CheatSequence::cht_never, cheat_tntkeyxx,
      it_yellowskull},
     // killough 2/16/98: end generalized keys
-    {"tntkeybs", NULL, CheatSequence::cht_never, cheat_tntkeyxx, it_blueskull},
+    {"tntkeybs", nullptr, CheatSequence::cht_never, cheat_tntkeyxx, it_blueskull},
     // Ty 04/11/98 - Added TNTKA
-    {"tntka", NULL, CheatSequence::cht_never, cheat_k, 0},
+    {"tntka", nullptr, CheatSequence::cht_never, cheat_k, 0},
     // killough 2/16/98: generalized weapon cheats
-    {"tntweap", NULL, CheatSequence::cht_never, cheat_tntweap, 0},
-    {"tntweap", NULL, CheatSequence::cht_never, cheat_tntweapx, -1},
-    {"tntammo", NULL, CheatSequence::cht_never, cheat_tntammo, 0},
+    {"tntweap", nullptr, CheatSequence::cht_never, cheat_tntweap, 0},
+    {"tntweap", nullptr, CheatSequence::cht_never, cheat_tntweapx, -1},
+    {"tntammo", nullptr, CheatSequence::cht_never, cheat_tntammo, 0},
     // killough 2/16/98: end generalized weapons
-    {"tntammo", NULL, CheatSequence::cht_never, cheat_tntammox, -1},
+    {"tntammo", nullptr, CheatSequence::cht_never, cheat_tntammox, -1},
     // invoke translucency         // phares
-    {"tnttran", NULL, CheatSequence::always, cheat_tnttran, 0},
+    {"tnttran", nullptr, CheatSequence::always, cheat_tnttran, 0},
     // killough 2/21/98: smart monster toggle
-    {"tntsmart", NULL, CheatSequence::cht_never, cheat_smart, 0},
+    {"tntsmart", nullptr, CheatSequence::cht_never, cheat_smart, 0},
     // killough 2/21/98: pitched sound toggle
-    {"tntpitch", NULL, CheatSequence::always, cheat_pitch, 0},
+    {"tntpitch", nullptr, CheatSequence::always, cheat_pitch, 0},
     // killough 2/21/98: reduce RSI injury by adding simpler alias sequences:
     // killough 2/21/98: same as tnttran
-    {"tntran", NULL, CheatSequence::always, cheat_tnttran, 0},
+    {"tntran", nullptr, CheatSequence::always, cheat_tnttran, 0},
     // killough 2/21/98: same as tntammo
-    {"tntamo", NULL, CheatSequence::cht_never, cheat_tntammo, 0},
+    {"tntamo", nullptr, CheatSequence::cht_never, cheat_tntammo, 0},
     // killough 2/21/98: same as tntammo
-    {"tntamo", NULL, CheatSequence::cht_never, cheat_tntammox, -1},
+    {"tntamo", nullptr, CheatSequence::cht_never, cheat_tntammox, -1},
     // killough 3/6/98: -fast toggle
-    {"tntfast", NULL, CheatSequence::cht_never, cheat_fast, 0},
+    {"tntfast", nullptr, CheatSequence::cht_never, cheat_fast, 0},
     // phares 3/10/98: toggle variable friction effects
-    {"tntice", NULL, CheatSequence::cht_never, cheat_friction, 0},
+    {"tntice", nullptr, CheatSequence::cht_never, cheat_friction, 0},
     // phares 3/10/98: toggle pushers
-    {"tntpush", NULL, CheatSequence::cht_never, cheat_pushers, 0},
+    {"tntpush", nullptr, CheatSequence::cht_never, cheat_pushers, 0},
 
     // [RH] Monsters don't target
-    {"notarget", NULL, CheatSequence::cht_never, cheat_notarget, 0},
+    {"notarget", nullptr, CheatSequence::cht_never, cheat_notarget, 0},
     // fly mode is active
-    {"fly", NULL, CheatSequence::cht_never, cheat_fly, 0},
+    {"fly", nullptr, CheatSequence::cht_never, cheat_fly, 0},
 
     // Complevels with parameters
-    {"tntcl", NULL, CheatSequence::cht_never, cheat_comp_ext, -2},
+    {"tntcl", nullptr, CheatSequence::cht_never, cheat_comp_ext, -2},
 
     // Enable/disable shorttics in-game
-    {"tntshort", NULL, CheatSequence::cht_never, cheat_shorttics, 0},
+    {"tntshort", nullptr, CheatSequence::cht_never, cheat_shorttics, 0},
 
     // end-of-list marker
-    CheatSequence{NULL}};
+    CheatSequence{nullptr}};
 
 //-----------------------------------------------------------------------------
 
@@ -542,14 +542,14 @@ static void cheat_massacre() // jff 2/01/98 kill all monsters
     // fixed lost soul bug (LSs left behind when PEs are killed)
 
     int killcount = 0;
-    thinker_t *currentthinker = NULL;
+    thinker_t *currentthinker = nullptr;
     extern void A_PainDie(mobj_t *);
 
     // killough 7/20/98: kill friendly monsters only if no others to kill
     uint_64_t mask = MF_FRIEND;
     P_MapStart();
     do
-        while ((currentthinker = P_NextThinker(currentthinker, th_all)) != NULL)
+        while ((currentthinker = P_NextThinker(currentthinker, th_all)) != nullptr)
             if (currentthinker->function == Action{P_MobjThinker} &&
                 !(((mobj_t *)currentthinker)->flags &
                   mask) && // killough 7/20/98
@@ -559,7 +559,7 @@ static void cheat_massacre() // jff 2/01/98 kill all monsters
                 if (((mobj_t *)currentthinker)->health > 0)
                 {
                     killcount++;
-                    P_DamageMobj((mobj_t *)currentthinker, NULL, NULL, 10000);
+                    P_DamageMobj((mobj_t *)currentthinker, nullptr, nullptr, 10000);
                 }
                 if (((mobj_t *)currentthinker)->type == MT_PAIN)
                 {
@@ -705,7 +705,7 @@ static void cheat_notarget()
 
 static void cheat_fly()
 {
-    if (plyr->mo != NULL)
+    if (plyr->mo != nullptr)
     {
         plyr->cheats ^= CF_FLY;
         if (plyr->cheats & CF_FLY)

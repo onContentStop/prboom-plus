@@ -97,7 +97,7 @@ if __name__ == "__main__":
                         o.write("private:")
 
                         for var in variants:
-                            o.write(f"t_{var.name} m_{var.name} = NULL;")
+                            o.write(f"t_{var.name} m_{var.name} = nullptr;")
 
                         o.write("enum class discriminant {")
                         o.write("undefined,")

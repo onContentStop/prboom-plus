@@ -110,7 +110,7 @@ static int demolength;         // check for overrun (missing DEMOMARKER)
 static FILE *demofp;           /* cph - record straight to file */
 // e6y static
 const byte *demo_p;
-const byte *demo_continue_p = NULL;
+const byte *demo_continue_p = nullptr;
 static short consistancy[MAXPLAYERS][BACKUPTICS];
 
 gameaction_t gameaction;
@@ -977,7 +977,7 @@ dboolean G_Responder(event_t *ev)
             HU_Start();
             S_UpdateSounds(players[displayplayer].mo);
             R_ActivateSectorInterpolations();
-            R_SmoothPlaying_Reset(NULL);
+            R_SmoothPlaying_Reset(nullptr);
         }
         return true;
     }
@@ -1347,7 +1347,7 @@ static void G_PlayerFinishLevel(int player)
     player_t *p = &players[player];
     memset(p->powers, 0, sizeof p->powers);
     memset(p->cards, 0, sizeof p->cards);
-    p->mo = NULL;         // cph - this is allocated PU_LEVEL so it's gone
+    p->mo = nullptr;         // cph - this is allocated PU_LEVEL so it's gone
     p->extralight = 0;    // cancel gun flashes
     p->fixedcolormap = 0; // cancel ir gogles
     p->damagecount = 0;   // no palette changes
@@ -1376,7 +1376,7 @@ void G_ChangedPlayerColour(int pn, int cl)
     for (i = 0; i < MAXPLAYERS; i++)
     {
         if ((gamestate == GS_LEVEL) && playeringame[i] &&
-            (players[i].mo != NULL))
+            (players[i].mo != nullptr))
         {
             players[i].mo->flags &= ~MF_TRANSLATION;
             players[i].mo->flags |= ((uint_64_t)playernumtotrans[i])
@@ -1590,7 +1590,7 @@ void G_DoReborn(int playernum)
         int i;
 
         // first dissasociate the corpse
-        players[playernum].mo->player = NULL;
+        players[playernum].mo->player = nullptr;
 
         // spawn at random spot if in death match
         if (deathmatch)
@@ -1681,7 +1681,7 @@ void G_DoCompleted(void)
     wminfo.last = gamemap - 1;
 
     wminfo.lastmapinfo = gamemapinfo;
-    wminfo.nextmapinfo = NULL;
+    wminfo.nextmapinfo = nullptr;
     if (gamemapinfo)
     {
         const char *next = "";
@@ -2041,7 +2041,7 @@ void G_LoadGame(int slot, dboolean command)
         netgame = false;
     }
     command_loadgame = command;
-    R_SmoothPlaying_Reset(NULL); // e6y
+    R_SmoothPlaying_Reset(nullptr); // e6y
 }
 
 // killough 5/15/98:
@@ -2229,7 +2229,7 @@ void G_DoLoadGame(void)
     char maplump[8];
     int time, ttime;
 
-    length = G_SaveGameName(NULL, 0, savegameslot, demoplayback);
+    length = G_SaveGameName(nullptr, 0, savegameslot, demoplayback);
     name = static_cast<char *>(malloc(length + 1));
     G_SaveGameName(name, length + 1, savegameslot, demoplayback);
 
@@ -2373,7 +2373,7 @@ void G_DoLoadGame(void)
     P_UnArchiveMap(); // killough 1/22/98: load automap information
     P_MapEnd();
     R_ActivateSectorInterpolations(); // e6y
-    R_SmoothPlaying_Reset(NULL);      // e6y
+    R_SmoothPlaying_Reset(nullptr);      // e6y
 
     if (musinfo.current_item != -1)
     {
@@ -2504,7 +2504,7 @@ static void G_DoSaveGame(dboolean menu)
     gameaction = ga_nothing; // cph - cancel savegame at top of this function,
                              // in case later problems cause a premature exit
 
-    length = G_SaveGameName(NULL, 0, savegameslot, demoplayback && !menu);
+    length = G_SaveGameName(nullptr, 0, savegameslot, demoplayback && !menu);
     name = static_cast<char *>(malloc(length + 1));
     G_SaveGameName(name, length + 1, savegameslot, demoplayback && !menu);
 
@@ -2639,7 +2639,7 @@ static void G_DoSaveGame(dboolean menu)
             ttime / 3600, (ttime % 3600) / 60, ttime % 60);
 
     free(savebuffer); // killough
-    savebuffer = save_p = NULL;
+    savebuffer = save_p = nullptr;
 
     savedescription[0] = 0;
     free(name);
@@ -2653,7 +2653,7 @@ static char *G_NewDemoName(const char *name)
 {
     size_t demoname_size;
     char *demoname;
-    FILE *fp = NULL;
+    FILE *fp = nullptr;
     static unsigned int j = 0;
 
     demoname_size = strlen(name) + 11; // + 11 for "-00000.lmp\0"
@@ -2661,7 +2661,7 @@ static char *G_NewDemoName(const char *name)
     snprintf(demoname, demoname_size, "%s.lmp", name);
 
     // prevent overriding demos by adding a file name suffix
-    for (; j <= 99999 && (fp = fopen(demoname, "rb")) != NULL; j++)
+    for (; j <= 99999 && (fp = fopen(demoname, "rb")) != nullptr; j++)
     {
         snprintf(demoname, demoname_size, "%s-%05d.lmp", name, j);
         fclose(fp);
@@ -2670,7 +2670,7 @@ static char *G_NewDemoName(const char *name)
     return demoname;
 }
 
-static const char *orig_demoname = NULL;
+static const char *orig_demoname = nullptr;
 
 void G_DeferedInitNew(skill_t skill, int episode, int map)
 {
@@ -2967,7 +2967,7 @@ struct MapEntry *G_LookupMapinfo(int gameepisode, int gamemap)
             return &Maps.maps[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 struct MapEntry *G_LookupMapinfoByName(const char *lumpname)
@@ -2980,7 +2980,7 @@ struct MapEntry *G_LookupMapinfoByName(const char *lumpname)
             return &Maps.maps[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 int G_ValidateMapName(const char *mapname, int *pEpi, int *pMap)
@@ -3238,7 +3238,7 @@ void G_RecordDemo(const char *name)
      * If file already exists, try to continue existing demo
      */
 
-    demofp = NULL;
+    demofp = nullptr;
     if (access(demoname, F_OK) || democontinue ||
         (demo_compatibility && demo_overwriteexisting))
     {
@@ -3846,7 +3846,7 @@ void G_SaveRestoreGameOptions(int save)
                                          {1, 0, &monkeys},
 
                                          {2, 0, (int *)&forceOldBsp},
-                                         {-1, -1, NULL}};
+                                         {-1, -1, nullptr}};
 
     static dboolean was_saved_once = false;
 
@@ -3949,7 +3949,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
 
     // e6y: check for overrun
     if (CheckForOverrun(header_p, demo_p, size, 1, failonerror))
-        return NULL;
+        return nullptr;
 
     demover = *demo_p++;
     longtics = 0;
@@ -3984,7 +3984,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         // then finally the "real" demover byte is present here
 
         if (CheckForOverrun(header_p, demo_p, size, 10, failonerror))
-            return NULL;
+            return nullptr;
 
         // we check for the PR+UM signature as mentioned.
         // Eternity Engine also uses 255 demover, with other signatures.
@@ -4009,14 +4009,14 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
 
         if (CheckForOverrun(header_p, demo_p, size, num_extensions,
                             failonerror))
-            return NULL;
+            return nullptr;
 
         for (i = 0; i < num_extensions; i++)
         {
             int r_len = *demo_p++;
 
             if (CheckForOverrun(header_p, demo_p, size, r_len, failonerror))
-                return NULL;
+                return nullptr;
 
             // ano - jun2019 - when more potential extension strings get added,
             // this section can become more complex
@@ -4043,7 +4043,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
             const byte *string_end = demo_p + 8;
 
             if (CheckForOverrun(header_p, demo_p, size, 8, failonerror))
-                return NULL;
+                return nullptr;
 
             if (strncmp((const char *)demo_p, "MAP", 3) == 0)
             {
@@ -4178,7 +4178,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         {
             // e6y: check for overrun
             if (CheckForOverrun(header_p, demo_p, size, 8, failonerror))
-                return NULL;
+                return nullptr;
 
             compatibility_level = G_GetOriginalDoomCompatLevel(demover);
             skill = static_cast<skill_t>(*demo_p++);
@@ -4204,7 +4204,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         {
             // e6y: check for overrun
             if (CheckForOverrun(header_p, demo_p, size, 2, failonerror))
-                return NULL;
+                return nullptr;
 
             compatibility_level = doom_12_compatibility;
             episode = *demo_p++;
@@ -4249,7 +4249,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         case 201:
             // e6y: check for overrun
             if (CheckForOverrun(header_p, demo_p, size, 1, failonerror))
-                return NULL;
+                return nullptr;
 
             if (!*demo_p++)
                 compatibility_level = boom_201_compatibility;
@@ -4259,7 +4259,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         case 202:
             // e6y: check for overrun
             if (CheckForOverrun(header_p, demo_p, size, 1, failonerror))
-                return NULL;
+                return nullptr;
 
             if (!*demo_p++)
                 compatibility_level = boom_202_compatibility;
@@ -4306,7 +4306,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         }
         // e6y: check for overrun
         if (CheckForOverrun(header_p, demo_p, size, 5, failonerror))
-            return NULL;
+            return nullptr;
 
         skill = static_cast<skill_t>(*demo_p++);
         episode = *demo_p++;
@@ -4317,7 +4317,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
         // e6y: check for overrun
         if (CheckForOverrun(header_p, demo_p, size, GAME_OPTION_SIZE,
                             failonerror))
-            return NULL;
+            return nullptr;
 
         demo_p = G_ReadOptions(demo_p); // killough 3/1/98: Read game options
 
@@ -4336,7 +4336,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
     {
         // e6y: check for overrun
         if (CheckForOverrun(header_p, demo_p, size, 4, failonerror))
-            return NULL;
+            return nullptr;
 
         for (i = 0; i < 4; i++) // intentionally hard-coded 4 -- killough
             playeringame[i] = *demo_p++;
@@ -4347,7 +4347,7 @@ const byte *G_ReadDemoHeaderEx(const byte *demo_p, size_t size,
     {
         // e6y: check for overrun
         if (CheckForOverrun(header_p, demo_p, size, MAXPLAYERS, failonerror))
-            return NULL;
+            return nullptr;
 
         for (i = 0; i < MAXPLAYERS; i++)
             playeringame[i] = *demo_p++;
@@ -4419,7 +4419,7 @@ void G_DoPlayDemo(void)
         usergame = false;
 
         demoplayback = true;
-        R_SmoothPlaying_Reset(NULL); // e6y
+        R_SmoothPlaying_Reset(nullptr); // e6y
     }
     else
     {
@@ -4695,7 +4695,7 @@ void G_ReadDemoContinueTiccmd(ticcmd_t *cmd)
         demo_continue_p > demobuffer + demolength ||
         gamekeydown[key_demo_jointogame] || joybuttons[joybuse])
     {
-        demo_continue_p = NULL;
+        demo_continue_p = nullptr;
         democontinue = false;
         // Sometimes this bit is not available
         if ((demo_compatibility && !prboom_comp[PC_ALLOW_SSG_DIRECT].state) ||

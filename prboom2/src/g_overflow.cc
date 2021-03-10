@@ -131,7 +131,7 @@ static void InterceptsMemoryOverrun(int location, int value)
             // Write the value to the memory location.
             // 16-bit and 32-bit values are written differently.
 
-            if (addr != NULL)
+            if (addr != nullptr)
             {
                 if (intercepts_overrun[i].int16_array)
                 {
@@ -353,7 +353,7 @@ void RejectOverrun(int rejectlump, const byte **rejectmatrix, int totallines)
     {
         // allocate a new block and copy the reject table into it; zero the rest
         // PU_LEVEL => will be freed on level exit
-        newreject = static_cast<byte *>(Z_Malloc(required, PU_LEVEL, NULL));
+        newreject = static_cast<byte *>(Z_Malloc(required, PU_LEVEL, nullptr));
         *rejectmatrix =
             static_cast<byte *>(memmove(newreject, *rejectmatrix, length));
 

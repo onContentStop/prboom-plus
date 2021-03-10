@@ -155,7 +155,7 @@ int gld_SetGammaRamp(int gamma)
             // and trust that we will be able to properly set the gamma later
             first = false;
             memset(gammatable, 0, sizeof(gammatable));
-            SDL_SetWindowGammaRamp(sdl_window, NULL, NULL, gammatable);
+            SDL_SetWindowGammaRamp(sdl_window, nullptr, nullptr, gammatable);
         }
 
         SDL_CalculateGammaRamp(g, gammatable);

@@ -95,10 +95,10 @@ int IsDemoContinue(void)
 int LoadDemo(const char *name, const byte **buffer, int *length, int *lump)
 {
     char basename[9];
-    char *filename = NULL;
+    char *filename = nullptr;
     int num = -1;
     int len = 0;
-    const byte *buf = NULL;
+    const byte *buf = nullptr;
 
     ExtractFileBase(name, basename);
     basename[8] = 0;
@@ -113,14 +113,14 @@ int LoadDemo(const char *name, const byte **buffer, int *length, int *lump)
     if (num < 0)
     {
         // Allow for demos not loaded as lumps
-        static byte *sbuf = NULL;
+        static byte *sbuf = nullptr;
         filename = I_FindFile(name, ".lmp");
         if (filename)
         {
             if (sbuf)
             {
                 free(sbuf);
-                sbuf = NULL;
+                sbuf = nullptr;
             }
 
             len = M_ReadFile(filename, &sbuf);
@@ -255,7 +255,7 @@ typedef struct
     size_t tick;
 } mlooklump_t;
 
-mlooklump_t mlook_lump = {DEMOEX_MLOOK_LUMPNAME, NULL, -2, 0, 0};
+mlooklump_t mlook_lump = {DEMOEX_MLOOK_LUMPNAME, nullptr, -2, 0, 0};
 
 int AddString(char **str, const char *val);
 
@@ -307,10 +307,10 @@ void W_InitPWADTable(wadtbl_t *wadtbl)
     wadtbl->header.numlumps = 0;
 
     // clear PWAD lookup table
-    wadtbl->lumps = NULL;
+    wadtbl->lumps = nullptr;
 
     // clear PWAD data
-    wadtbl->data = NULL;
+    wadtbl->data = nullptr;
     wadtbl->datasize = 0;
 }
 
@@ -534,7 +534,7 @@ static void R_DemoEx_GetParams(const byte *pwad_p, waddata_t *waddata)
     data = (const char *)W_CacheLumpNum(lump);
     strncpy(str, data, size);
 
-    M_ParseCmdLine(str, NULL, NULL, &paramscount, &i);
+    M_ParseCmdLine(str, nullptr, nullptr, &paramscount, &i);
 
     params =
         (char **)malloc(paramscount * sizeof(char *) + i * sizeof(char) + 1);
@@ -547,7 +547,7 @@ static void R_DemoEx_GetParams(const byte *pwad_p, waddata_t *waddata)
         } files[] = {{"-iwad", source_iwad},
                      {"-file", source_pwad},
                      {"-deh", source_deh},
-                     {NULL}};
+                     {nullptr}};
 
         M_ParseCmdLine(str, params,
                        ((char *)params) + sizeof(char *) * paramscount,
@@ -694,10 +694,10 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
     char *filename_p;
     char *fileext_p;
 
-    char *files = NULL;
-    char *iwad = NULL;
-    char *pwads = NULL;
-    char *dehs = NULL;
+    char *files = nullptr;
+    char *iwad = nullptr;
+    char *pwads = nullptr;
+    char *dehs = nullptr;
     char **item;
 
     // iwad and pwads
@@ -710,7 +710,7 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
         if (fileext_p == filename_p)
             continue;
 
-        item = NULL;
+        item = nullptr;
 
         if (wadfiles[i].src == source_iwad && !iwad &&
             !strcasecmp(fileext_p, "wad"))
@@ -733,7 +733,7 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
     {
         while (++p != myargc && *myargv[p] != '-')
         {
-            char *file = NULL;
+            char *file = nullptr;
             if ((file = I_FindFile(myargv[p], ".bex")) ||
                 (file = I_FindFile(myargv[p], ".deh")))
             {
@@ -867,10 +867,10 @@ void I_DemoExShutdown(void)
 
 byte *G_GetDemoFooter(const char *filename, const byte **footer, size_t *size)
 {
-    byte *result = NULL;
+    byte *result = nullptr;
 
     FILE *hfile;
-    byte *buffer = NULL;
+    byte *buffer = nullptr;
     const byte *p;
     size_t file_size;
 
@@ -938,8 +938,8 @@ byte *G_GetDemoFooter(const char *filename, const byte **footer, size_t *size)
 void G_SetDemoFooter(const char *filename, wadtbl_t *wadtbl)
 {
     FILE *hfile;
-    byte *buffer = NULL;
-    const byte *demoex_p = NULL;
+    byte *buffer = nullptr;
+    const byte *demoex_p = nullptr;
     size_t size;
 
     buffer = G_GetDemoFooter(filename, &demoex_p, &size);
@@ -1019,7 +1019,7 @@ int CheckWadFileIntegrity(const char *filename)
     int i;
     unsigned int length;
     wadinfo_t header;
-    filelump_t *fileinfo, *fileinfo2free = NULL;
+    filelump_t *fileinfo, *fileinfo2free = nullptr;
     int result = false;
 
     hfile = fopen(filename, "rb");
@@ -1064,8 +1064,8 @@ static int G_ReadDemoFooter(const char *filename)
 {
     int result = false;
 
-    byte *buffer = NULL;
-    const byte *demoex_p = NULL;
+    byte *buffer = nullptr;
+    const byte *demoex_p = nullptr;
     size_t size;
 
     M_ChangeDemoExtendedFormat();
@@ -1082,7 +1082,7 @@ static int G_ReadDemoFooter(const char *filename)
     else
     {
         const char *tmp_dir;
-        char *tmp_path = NULL;
+        char *tmp_path = nullptr;
         const char *template_format = "%sprboom-plus-demoex-XXXXXX";
 
         tmp_dir = I_GetTempDir();
@@ -1210,33 +1210,33 @@ void G_WriteDemoFooter(FILE *file)
     //
 
     // separators for eye-friendly looking
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
 
     // process format version
     W_AddLump(&demoex, DEMOEX_VERSION_LUMPNAME, (const byte *)DEMOEX_VERSION,
               strlen(DEMOEX_VERSION));
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
 
     // process mlook
     R_DemoEx_AddMouseLookData(&demoex);
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
 
     // process port name
     W_AddLump(&demoex, DEMOEX_PORTNAME_LUMPNAME,
               (const byte *)(PACKAGE_NAME " " PACKAGE_VERSION),
               strlen(PACKAGE_NAME " " PACKAGE_VERSION));
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
 
     // process iwad, pwads, dehs and critical for demos params like -spechit,
     // etc
     R_DemoEx_AddParams(&demoex);
-    W_AddLump(&demoex, NULL, (const byte *)DEMOEX_SEPARATOR,
+    W_AddLump(&demoex, nullptr, (const byte *)DEMOEX_SEPARATOR,
               strlen(DEMOEX_SEPARATOR));
 
     // write pwad header, all data and lookup table to the end of a demo
@@ -1271,11 +1271,11 @@ void WadDataFree(waddata_t *waddata)
                 if (waddata->wadfiles[i].name)
                 {
                     free(waddata->wadfiles[i].name);
-                    waddata->wadfiles[i].name = NULL;
+                    waddata->wadfiles[i].name = nullptr;
                 }
             }
             free(waddata->wadfiles);
-            waddata->wadfiles = NULL;
+            waddata->wadfiles = nullptr;
         }
     }
 }
@@ -1301,19 +1301,19 @@ int ParseDemoPattern(const char *str, waddata_t *waddata, char **missed,
                      dboolean trytodownload)
 {
     int processed = 0;
-    wadfile_info_t *wadfiles = NULL;
+    wadfile_info_t *wadfiles = nullptr;
     size_t numwadfiles = 0;
     char *pStr = strdup(str);
     char *pToken = pStr;
 
     if (missed)
     {
-        *missed = NULL;
+        *missed = nullptr;
     }
 
-    for (; (pToken = strtok(pToken, "|")); pToken = NULL)
+    for (; (pToken = strtok(pToken, "|")); pToken = nullptr)
     {
-        char *token = NULL;
+        char *token = nullptr;
         processed++;
 
         if (trytodownload && !I_FindFile2(pToken, ".wad"))
@@ -1433,7 +1433,7 @@ int DemoNameToWadData(const char *demoname, waddata_t *waddata,
                 {
                     numwadfiles_required = ParseDemoPattern(
                         buf + pmatch[3].rm_so, waddata,
-                        (patterndata ? &patterndata->missed : NULL), true);
+                        (patterndata ? &patterndata->missed : nullptr), true);
 
                     waddata->wadfiles = (wadfile_info_t *)realloc(
                         waddata->wadfiles,
@@ -1474,7 +1474,7 @@ void WadDataToWadFiles(waddata_t *waddata)
 
     int i, iwadindex = -1;
 
-    wadfile_info_t *old_wadfiles = NULL;
+    wadfile_info_t *old_wadfiles = nullptr;
     size_t old_numwadfiles = numwadfiles;
 
     old_numwadfiles = numwadfiles;
@@ -1482,7 +1482,7 @@ void WadDataToWadFiles(waddata_t *waddata)
     memcpy(old_wadfiles, wadfiles, sizeof(*(wadfiles)) * numwadfiles);
 
     free(wadfiles);
-    wadfiles = NULL;
+    wadfiles = nullptr;
     numwadfiles = 0;
 
     for (i = 0; (size_t)i < waddata->numwadfiles; i++)
@@ -1603,7 +1603,7 @@ int CheckDemoExDemo(void)
         strcpy(filename, myargv[p + 1]);
         AddDefaultExtension(filename, ".lmp");
 
-        demoname = I_FindFile(filename, NULL);
+        demoname = I_FindFile(filename, nullptr);
         if (demoname)
         {
             result = G_ReadDemoFooter(demoname);
@@ -1677,9 +1677,9 @@ dboolean D_TryGetWad(const char *name)
     dboolean result = false;
 
     char wadname[PATH_MAX];
-    char *cmdline = NULL;
-    const char *wadname_p = NULL;
-    char *msg = NULL;
+    char *cmdline = nullptr;
+    const char *wadname_p = nullptr;
+    char *msg = nullptr;
     const char *format =
         "The necessary wad has not been found\n"
         "Do you want to search for \'%s\'?\n\n"

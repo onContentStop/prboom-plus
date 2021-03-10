@@ -848,11 +848,11 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
 // P_DamageMobj
 // Damages both enemies and players
 // "inflictor" is the thing that caused the damage
-//  creature or missile, can be NULL (slime, etc)
+//  creature or missile, can be nullptr (slime, etc)
 // "source" is the thing to target after taking damage
-//  creature or NULL
+//  creature or nullptr
 // Source and inflictor are the same for melee attacks.
-// Source can be NULL for slime, barrel explosions
+// Source can be nullptr for slime, barrel explosions
 // and other environmental stuff.
 //
 
