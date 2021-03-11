@@ -400,7 +400,7 @@ struct mobj_t
     fixed_t pad{};
 
     // SEE WARNING ABOVE ABOUT POINTER FIELDS!!!
-} __attribute__((aligned(128))) __attribute__((packed));
+};
 
 constexpr bool ALIVE(mobj_t *thing)
 {

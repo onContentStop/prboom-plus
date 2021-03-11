@@ -37,18 +37,17 @@
  *-----------------------------------------------------------------------------
  */
 
+#ifdef __GNUG__
+#pragma implementation "info.hh"
+#endif
+#include "info.hh"
+
 #include "d_think.hh"
-#include "doomdef.hh"
 #include "m_fixed.hh"
 #include "p_enemy.hh"
 #include "p_mobj.hh"
 #include "p_pspr.hh"
 #include "sounds.hh"
-
-#ifdef __GNUG__
-#pragma implementation "info.hh"
-#endif
-#include "info.hh"
 
 // killough 10/98: beta lost souls attacked different
 

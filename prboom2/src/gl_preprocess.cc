@@ -1237,7 +1237,7 @@ void gld_PreprocessLevel(void)
         Z_Free(flats_vbo);
         flats_vbo = nullptr;
 
-        Z_Free(segrendered);
+        std::free(segrendered);
         Z_Free(linerendered[0]);
         Z_Free(linerendered[1]);
 

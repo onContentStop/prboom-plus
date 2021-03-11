@@ -420,12 +420,12 @@ void R_RenderMaskedSegRange(drawseg_t *ds, int x1, int x2)
 
 static int didsolidcol; /* True if at least one column was marked solid */
 
-static void R_RenderSegLoop(void)
+static void R_RenderSegLoop()
 {
     const rpatch_t *tex_patch;
     R_DrawColumn_f colfunc = R_GetDrawColumnFunc(
         RDC_PIPELINE_STANDARD, drawvars.filterwall, drawvars.filterz);
-    draw_column_vars_t dcvars;
+    draw_column_vars_t dcvars{};
     fixed_t texturecolumn = 0; // shut up compiler warning
 
     R_SetDefaultDrawColumnVars(&dcvars);

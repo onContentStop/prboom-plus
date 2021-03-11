@@ -31,6 +31,8 @@
 #ifndef R_PATCH_H
 #define R_PATCH_H
 
+#include <vector>
+
 #include "b_bitops.hh"
 
 // Used to specify the sloping of the top and bottom of a column post
@@ -57,37 +59,37 @@ typedef struct
     edgeslope_t slope;
 } rpost_t;
 
-typedef struct
+struct rcolumn_t
 {
     int numPosts;
     rpost_t *posts;
     unsigned char *pixels;
-} rcolumn_t;
+};
 
-typedef struct
+struct rpatch_t
 {
-    int width;
-    int height;
-    unsigned widthmask;
+    int width = 0;
+    int height = 0;
+    unsigned widthmask = 0x0;
 
-    int leftoffset;
-    int topoffset;
+    int leftoffset = 0;
+    int topoffset = 0;
 
     // this is the single malloc'ed/free'd array
     // for this patch
-    unsigned char *data;
+    std::vector<unsigned char> data;
 
     // these are pointers into the data array
-    unsigned char *pixels;
-    rcolumn_t *columns;
-    rpost_t *posts;
+    unsigned char *pixels = nullptr;
+    rcolumn_t *columns = nullptr;
+    rpost_t *posts = nullptr;
 
 #ifdef TIMEDIAG
     int locktic;
 #endif
-    unsigned int locks;
-    unsigned int flags; // e6y
-} rpatch_t;
+    unsigned int locks = 0;
+    unsigned int flags = 0x0; // e6y
+};
 
 const rpatch_t *R_CachePatchNum(int id);
 void R_UnlockPatchNum(int id);

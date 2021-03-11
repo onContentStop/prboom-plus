@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
-project("PrBoom-Plus"
-    VERSION 2.7
+project("PrBoom++"
+    VERSION 0.1
     HOMEPAGE_URL "https://github.com/coelckers/prboom-plus"
     LANGUAGES CXX
     )

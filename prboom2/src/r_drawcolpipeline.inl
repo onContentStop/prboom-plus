@@ -1,3 +1,4 @@
+#define RANGECHECK
 
 // no color mapping
 #define R_DRAWCOLUMN_FUNCNAME R_DRAWCOLUMN_FUNCNAME_COMPOSITE(_PointUV)
