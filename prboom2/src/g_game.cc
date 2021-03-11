@@ -562,7 +562,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 
     if (gamekeydown[key_use] || mousebuttons[mousebuse] || joybuttons[joybuse])
     {
-        cmd->buttons |= static_cast<byte>(BT_USE);
+        cmd->buttons |= BT_USE.value();
         // clear double clicks if hit use button
         dclicks = 0;
     }
@@ -691,7 +691,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
                 dclicks++;
             if (dclicks == 2)
             {
-                cmd->buttons |= static_cast<byte>(BT_USE);
+                cmd->buttons |= BT_USE.value();
                 dclicks = 0;
             }
             else
@@ -713,7 +713,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
                 dclicks2++;
             if (dclicks2 == 2)
             {
-                cmd->buttons |= static_cast<byte>(BT_USE);
+                cmd->buttons |= BT_USE.value();
                 dclicks2 = 0;
             }
             else
