@@ -36,6 +36,8 @@
 #ifndef __D_THINK__
 #define __D_THINK__
 
+#include <ostream>
+
 #include "unions.hh"
 
 #ifdef __GNUG__
@@ -64,20 +66,24 @@ using think_t = Action;
 /* Doubly linked list of actors. */
 struct thinker_t
 {
-    thinker_t *prev;
-    thinker_t *next;
+    thinker_t *prev = nullptr;
+    thinker_t *next = nullptr;
     think_t function;
 
     /* killough 8/29/98: we maintain thinkers in several equivalence classes,
      * according to various criteria, so as to allow quicker searches.
      */
 
-    thinker_t *cnext, *cprev; /* Next, previous thinkers in same class */
+    /* Next, previous thinkers in same class */
+    thinker_t *cnext = nullptr;
+    thinker_t *cprev = nullptr;
 
     /* killough 11/98: count of how many other objects reference
      * this one using pointers. Used for garbage collection.
      */
-    unsigned references;
+    unsigned references = 0;
 };
+
+std::ostream &operator<<(std::ostream &os, const thinker_t &thinker);
 
 #endif

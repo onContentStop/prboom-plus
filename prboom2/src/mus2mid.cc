@@ -500,7 +500,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
             switch (event.value())
             {
-            case mus_releasekey:
+            case mus_releasekey.value():
                 if (mem_fread(&key, 1, 1, musinput) != 1)
                 {
                     return true;
@@ -513,7 +513,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
                 break;
 
-            case mus_presskey:
+            case mus_presskey.value():
                 if (mem_fread(&key, 1, 1, musinput) != 1)
                 {
                     return true;
@@ -538,7 +538,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
                 break;
 
-            case mus_pitchwheel:
+            case mus_pitchwheel.value():
                 if (mem_fread(&key, 1, 1, musinput) != 1)
                 {
                     break;
@@ -550,7 +550,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
                 break;
 
-            case mus_systemevent:
+            case mus_systemevent.value():
                 if (mem_fread(&controllernumber, 1, 1, musinput) != 1)
                 {
                     return true;
@@ -603,7 +603,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
                 break;
 
-            case mus_scoreend:
+            case mus_scoreend.value():
                 hitscoreend = 1;
                 break;
 

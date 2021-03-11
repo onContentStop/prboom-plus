@@ -81,17 +81,17 @@ static const char *const ActorNames[] = {
 static void FreeMap(MapEntry *mape)
 {
     if (mape->mapname)
-        free(mape->mapname);
+        Z_Free(mape->mapname);
     if (mape->levelname)
-        free(mape->levelname);
+        Z_Free(mape->levelname);
     if (mape->intertext)
-        free(mape->intertext);
+        Z_Free(mape->intertext);
     if (mape->intertextsecret)
-        free(mape->intertextsecret);
+        Z_Free(mape->intertextsecret);
     if (mape->properties)
-        free(mape->properties);
+        Z_Free(mape->properties);
     if (mape->bossactions)
-        free(mape->bossactions);
+        Z_Free(mape->bossactions);
     mape->propertycount = 0;
     mape->mapname = nullptr;
     mape->properties = nullptr;
@@ -105,7 +105,7 @@ void FreeMapList()
     {
         FreeMap(&Maps.maps[i]);
     }
-    free(Maps.maps);
+    Z_Free(Maps.maps);
     Maps.maps = nullptr;
     Maps.mapcount = 0;
 }
@@ -113,7 +113,7 @@ void FreeMapList()
 void ReplaceString(char **pptr, const char *newstring)
 {
     if (*pptr != nullptr)
-        free(*pptr);
+        Z_Free(*pptr);
     *pptr = strdup(newstring);
 }
 
@@ -286,7 +286,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
         if (!lname)
             return 0;
         if (mape->intertext != nullptr)
-            free(mape->intertext);
+            Z_Free(mape->intertext);
         mape->intertext = lname;
     }
     else if (!stricmp(pname, "intertextsecret"))
@@ -295,7 +295,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
         if (!lname)
             return 0;
         if (mape->intertextsecret != nullptr)
-            free(mape->intertextsecret);
+            Z_Free(mape->intertextsecret);
         mape->intertextsecret = lname;
     }
     else if (!stricmp(pname, "interbackdrop"))
@@ -322,7 +322,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
             // mark level free of boss actions
             classnum = special = tag = -1;
             if (mape->bossactions)
-                free(mape->bossactions);
+                Z_Free(mape->bossactions);
             mape->bossactions = nullptr;
             mape->numbossactions = -1;
         }
@@ -376,7 +376,7 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape)
 
         } while (scanner.CheckToken(','));
     }
-    free(pname);
+    Z_Free(pname);
     return 1;
 }
 

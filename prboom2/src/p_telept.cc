@@ -49,7 +49,7 @@ static mobj_t *P_TeleportDestination(line_t *line)
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
     {
         register thinker_t *th = nullptr;
-        while ((th = P_NextThinker(th, th_misc)) != nullptr)
+        while ((th = P_NextThinker(th, TH_MISC)) != nullptr)
             if (th->function == P_MobjThinker)
             {
                 register mobj_t *m = (mobj_t *)th;
@@ -90,7 +90,7 @@ int EV_Teleport(line_t *line, int side, mobj_t *thing)
         if (!P_TeleportMove(thing, m->x, m->y, false)) /* killough 8/9/98 */
             return 0;
 
-        if (compatibility_level != finaldoom_compatibility)
+        if (COMPATIBILITY_LEVEL != finaldoom_compatibility)
             thing->z = thing->floorz;
         thing->PrevZ = thing->z;
 

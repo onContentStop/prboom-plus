@@ -133,8 +133,6 @@ void S_Init(int sfxVolume, int musicVolume)
     numChannels = default_numChannels;
     if (snd_card && !nosfxparm)
     {
-        int i;
-
         lprintf(LO_CONFIRM, "S_Init: default sfx volume %d\n", sfxVolume);
 
         // Whatever these did with DMX, these are rather dummies now.
@@ -150,8 +148,10 @@ void S_Init(int sfxVolume, int musicVolume)
         sobjs = (degenmobj_t *)calloc(numChannels, sizeof(degenmobj_t));
 
         // Note that sounds have not been cached (yet).
-        for (i = 1; i < NUMSFX; i++)
-            S_sfx[i].lumpnum = S_sfx[i].usefulness = -1;
+        for (sfxenum_t i = 1; i < NUMSFX; i++)
+        {
+            S_sfx[i.value()].lumpnum = S_sfx[i.value()].usefulness = -1;
+        }
     }
 
     // CPhipps - music init reformatted
@@ -160,7 +160,7 @@ void S_Init(int sfxVolume, int musicVolume)
         S_SetMusicVolume(musicVolume);
 
         // no sounds are playing, and they are not mus_paused
-        mus_paused = 0;
+        mus_paused = false;
     }
 }
 
@@ -235,7 +235,7 @@ void S_Start(void)
     S_ChangeMusic(mnum, true);
 }
 
-void S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume)
+void S_StartSoundAtVolume(void *origin_p, sfxenum_t sfx_id, int volume)
 {
     int sep, pitch, priority, cnum, is_pickup;
     sfxinfo_t *sfx;
@@ -245,8 +245,8 @@ void S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume)
     if (!snd_card || nosfxparm)
         return;
 
-    is_pickup = sfx_id & PICKUP_SOUND || sfx_id == sfx_oof ||
-                (compatibility_level >= prboom_2_compatibility &&
+    is_pickup = (sfx_id & PICKUP_SOUND).value() != 0 || sfx_id == sfx_oof ||
+                (COMPATIBILITY_LEVEL >= prboom_2_compatibility &&
                  sfx_id == sfx_noway); // killough 4/25/98
     sfx_id &= ~PICKUP_SOUND;
 
@@ -255,9 +255,9 @@ void S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume)
 
     // check for bogus sound #
     if (sfx_id < 1 || sfx_id > NUMSFX)
-        I_Error("S_StartSoundAtVolume: Bad sfx #: %d", sfx_id);
+        I_Error("S_StartSoundAtVolume: Bad sfx #: %d", sfx_id.value());
 
-    sfx = &S_sfx[sfx_id];
+    sfx = &S_sfx[sfx_id.value()];
 
     // Initialize sound parameters
     if (sfx->link)
@@ -340,7 +340,7 @@ void S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume)
     }
 }
 
-void S_StartSound(void *origin, int sfx_id)
+void S_StartSound(void *origin, sfxenum_t sfx_id)
 {
     S_StartSoundAtVolume(origin, sfx_id, snd_SfxVolume);
 }

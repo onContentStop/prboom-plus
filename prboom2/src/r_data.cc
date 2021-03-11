@@ -722,7 +722,7 @@ void R_PrecacheLevel(void)
 
     {
         thinker_t *th = nullptr;
-        while ((th = P_NextThinker(th, th_all)) != nullptr)
+        while ((th = P_NextThinker(th, TH_ALL)) != nullptr)
             if (th->function == P_MobjThinker)
                 hitlist[((mobj_t *)th)->sprite] = 1;
     }

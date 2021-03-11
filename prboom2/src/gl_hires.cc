@@ -430,7 +430,7 @@ GLGenericImage *ReadDDSFile(const char *filename, int *bufsize, int *numMipmaps)
     else
     {
         if (genericImage)
-            free(genericImage);
+            Z_Free(genericImage);
 
         return nullptr;
     }
@@ -963,7 +963,7 @@ int gld_HiRes_BuildTables(void)
             {
                 I_FileToBuffer(RGB2PAL_fname, &RGB2PAL, &size);
             }
-            free((void *)RGB2PAL_fname);
+            Z_Free((void *)RGB2PAL_fname);
 
             if (size == RGB2PAL_size)
                 return true;
@@ -1058,9 +1058,9 @@ int gld_HiRes_BuildTables(void)
             }
             gld_ProgressEnd();
 
-            free(z);
-            free(y);
-            free(x);
+            std::free(z);
+            std::free(y);
+            std::free(x);
 
             if (gl_hires_24bit_colormap)
             {
@@ -1146,8 +1146,8 @@ static int gld_HiRes_LoadDDSTexture(GLTexture *gltexture, GLuint *texid,
 
                 gld_SetTexFilters(gltexture);
 
-                free(ddsimage->pixels);
-                free(ddsimage);
+                Z_Free(ddsimage->pixels);
+                Z_Free(ddsimage);
 
                 result = true;
             }
@@ -1205,7 +1205,7 @@ static int gld_HiRes_LoadFromCache(GLTexture *gltexture, GLuint *texid,
         fclose(cachefp);
     }
 
-    free(cache_filename);
+    Z_Free(cache_filename);
 
     return result;
 }

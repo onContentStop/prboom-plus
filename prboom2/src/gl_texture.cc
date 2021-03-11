@@ -986,13 +986,13 @@ l_exit:
 
     if (tex_buffer && tex_buffer != data)
     {
-        free(tex_buffer);
+        Z_Free(tex_buffer);
         tex_buffer = nullptr;
     }
 
     if (!readonly)
     {
-        free(data);
+        Z_Free(data);
         data = nullptr;
     }
 
@@ -1377,7 +1377,7 @@ static void gld_CleanTexItems(int count, GLTexture ***items)
                 }
             }
 
-            Z_Free((*items)[i]->glTexExID);
+            std::free((*items)[i]->glTexExID);
             (*items)[i]->glTexExID = nullptr;
 
             Z_Free((*items)[i]);
@@ -1599,10 +1599,11 @@ void gld_Precache(void)
     // Precache sprites.
     memset(hitlist, 0, numsprites);
 
-    if (thinkercap.next)
+    if (THINKER_CLASS_CAP[TH_ALL.value()].next)
     {
         thinker_t *th;
-        for (th = thinkercap.next; th != &thinkercap; th = th->next)
+        for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+             th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
         {
             if (th->function == reinterpret_cast<void (*)()>(P_MobjThinker))
                 hitlist[((mobj_t *)th)->sprite] = 1;

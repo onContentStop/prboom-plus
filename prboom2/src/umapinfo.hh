@@ -20,6 +20,7 @@
 #ifndef __UMAPINFO_H
 #define __UMAPINFO_H
 
+#include "p_mobj.hh"
 #ifdef __cplusplus
 extern "C"
 {
@@ -27,9 +28,9 @@ extern "C"
 
     struct BossAction
     {
-        int type;
-        int special;
-        int tag;
+        mobjtype_t type;
+        int special{};
+        int tag{};
     };
 
     struct MapEntry

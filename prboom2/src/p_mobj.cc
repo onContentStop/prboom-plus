@@ -31,6 +31,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include <iostream>
 #include "doomdef.hh"
 #include "doomstat.hh"
 #include "e6y.hh" //e6y
@@ -66,15 +67,17 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
 
     // killough 4/9/98: remember states seen, to detect cycles:
 
-    static statenum_t seenstate_tab[NUMSTATES]; // fast transition table
-    statenum_t *seenstate = seenstate_tab;      // pointer to table
-    static int recursion;                       // detects recursion
-    statenum_t i = state;                       // initial state
-    dboolean ret = true;                        // return value
-    statenum_t tempstate[NUMSTATES];            // for use with recursion
+    static statenum_t seenstate_tab[NUMSTATES.value()]; // fast transition table
+    statenum_t *seenstate = seenstate_tab;              // pointer to table
+    static int recursion;                               // detects recursion
+    statenum_t i = state;                               // initial state
+    dboolean ret = true;                                // return value
+    statenum_t tempstate[NUMSTATES.value()]; // for use with recursion
 
-    if (recursion++) // if recursion detected,
-        memset(seenstate = tempstate, 0, sizeof tempstate); // clear state table
+    // if recursion detected,
+    if (recursion++)
+        // clear state table
+        memset(seenstate = tempstate, 0, sizeof(tempstate));
 
     do
     {
@@ -86,7 +89,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
             break; // killough 4/9/98
         }
 
-        st = &states[state];
+        st = &states[state.value()];
         mobj->state = st;
         mobj->tics = st->tics;
         mobj->sprite = st->sprite;
@@ -96,20 +99,29 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         // Call action functions when the state is set
 
         if (st->action != ACTION_NULL)
+        {
             st->action.mobj()(mobj);
+        }
 
-        seenstate[state] =
-            static_cast<statenum_t>(1 + st->nextstate); // killough 4/9/98
+        seenstate[state.value()] = static_cast<statenum_t>(
+            1 + st->nextstate.value()); // killough 4/9/98
 
         state = st->nextstate;
-    } while (!mobj->tics && !seenstate[state]); // killough 4/9/98
+    } while (!mobj->tics &&
+             seenstate[state.value()].value() == 0); // killough 4/9/98
 
     if (ret && !mobj->tics) // killough 4/9/98: detect state cycles
         doom_printf("Warning: State Cycle Detected");
 
     if (!--recursion)
-        for (; (state = seenstate[i]); i = static_cast<statenum_t>(state - 1))
-            seenstate[i] = S_NULL; // killough 4/9/98: erase memory of states
+    {
+        for (; (state = seenstate[i.value()]).value() != 0;
+             i = static_cast<statenum_t>(state.value() - 1))
+        {
+            // killough 4/9/98: erase memory of states
+            seenstate[i.value()] = S_NULL;
+        }
+    }
 
     return ret;
 }
@@ -122,7 +134,7 @@ void P_ExplodeMissile(mobj_t *mo)
 {
     mo->momx = mo->momy = mo->momz = 0;
 
-    P_SetMobjState(mo, mobjinfo[mo->type].deathstate);
+    P_SetMobjState(mo, mobjinfo[mo->type.value()].deathstate);
 
     mo->tics -= P_Random(pr_explode) & 3;
 
@@ -131,7 +143,7 @@ void P_ExplodeMissile(mobj_t *mo)
 
     mo->flags &= ~MF_MISSILE;
 
-    if (mo->info->deathsound)
+    if (mo->info->deathsound.value() != 0)
         S_StartSound(mo, mo->info->deathsound);
 }
 
@@ -226,7 +238,8 @@ static void P_XYMovement(mobj_t *mo)
             // killough 10/98:
             // Add ability for objects other than players to bounce on ice
 
-            if (!(mo->flags & MF_MISSILE) && mbf_features &&
+            if (!(mo->flags & MF_MISSILE) &&
+                COMPATIBILITY_LEVEL >= mbf_compatibility &&
                 (mo->flags & MF_BOUNCES ||
                  (!player && blockline && variable_friction &&
                   mo->z <= mo->floorz &&
@@ -268,7 +281,8 @@ static void P_XYMovement(mobj_t *mo)
 
                 if (ceilingline && ceilingline->backsector &&
                     ceilingline->backsector->ceilingpic == skyflatnum)
-                    if (demo_compatibility || // killough
+                    if (COMPATIBILITY_LEVEL <
+                            boom_compatibility_compatibility || // killough
                         mo->z > ceilingline->backsector->ceilingheight)
                     {
                         // Hack to prevent missiles exploding
@@ -322,8 +336,7 @@ static void P_XYMovement(mobj_t *mo)
     if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED &&
         mo->momy > -STOPSPEED && mo->momy < STOPSPEED &&
         (!player || !(player->cmd.forwardmove | player->cmd.sidemove) ||
-         (player->mo != mo &&
-          compatibility_level >= lxdoom_1_compatibility)))
+         (player->mo != mo && COMPATIBILITY_LEVEL >= lxdoom_1_compatibility)))
     {
         // if in a walking frame, stop moving
 
@@ -331,9 +344,8 @@ static void P_XYMovement(mobj_t *mo)
         // Don't affect main player when voodoo dolls stop, except in old demos:
 
         if (player &&
-            (unsigned)(player->mo->state - states - S_PLAY_RUN1) < 4 &&
-            (player->mo == mo ||
-             compatibility_level >= lxdoom_1_compatibility))
+            (unsigned)(player->mo->state - states - S_PLAY_RUN1.value()) < 4 &&
+            (player->mo == mo || COMPATIBILITY_LEVEL >= lxdoom_1_compatibility))
             P_SetMobjState(player->mo, S_PLAY);
 
         mo->momx = mo->momy = 0;
@@ -364,7 +376,7 @@ static void P_XYMovement(mobj_t *mo)
          */
 
         // e6y
-        if (compatibility_level <= boom_201_compatibility &&
+        if (COMPATIBILITY_LEVEL <= boom_201_compatibility &&
             !prboom_comp[PC_PRBOOM_FRICTION].state)
         {
             // phares 3/17/98
@@ -375,7 +387,7 @@ static void P_XYMovement(mobj_t *mo)
             mo->momy = FixedMul(mo->momy, mo->friction);
             mo->friction = ORIG_FRICTION; // reset to normal for next tic
         }
-        else if (compatibility_level <= lxdoom_1_compatibility &&
+        else if (COMPATIBILITY_LEVEL <= lxdoom_1_compatibility &&
                  !prboom_comp[PC_PRBOOM_FRICTION].state)
         {
             // phares 9/10/98: reduce bobbing/momentum when on ice & up against
@@ -528,7 +540,7 @@ static void P_ZMovement(mobj_t *mo)
 
     if (mo->player && // e6y: restoring original visual behaviour for
                       // demo_compatibility
-        (demo_compatibility ||
+        (COMPATIBILITY_LEVEL < boom_compatibility_compatibility ||
          mo->player->mo == mo) && // killough 5/12/98: exclude voodoo dolls
         mo->z < mo->floorz)
     {
@@ -589,8 +601,8 @@ floater:
 
         if (mo->flags & MF_SKULLFLY &&
             (!comp[comp_soul] ||
-             (compatibility_level > doom2_19_compatibility &&
-              compatibility_level < prboom_4_compatibility)))
+             (COMPATIBILITY_LEVEL > doom2_19_compatibility &&
+              COMPATIBILITY_LEVEL < prboom_4_compatibility)))
             mo->momz = -mo->momz; // the skull slammed into something
 
         if (mo->momz < 0)
@@ -613,7 +625,8 @@ floater:
                     // but can be applied globally for all demo_compatibility
                     // complevels, because original sources do not exclude
                     // voodoo dolls from condition above, but Boom does it.
-                    (demo_compatibility || mo->player->mo == mo) &&
+                    (COMPATIBILITY_LEVEL < boom_compatibility_compatibility ||
+                     mo->player->mo == mo) &&
                     mo->momz < -GRAVITY * 8)
                 {
                     // Squat down.
@@ -639,7 +652,7 @@ floater:
          * incorrectly reverse it, so we might still need this for demo sync
          */
         if (mo->flags & MF_SKULLFLY &&
-            compatibility_level <= doom2_19_compatibility)
+            COMPATIBILITY_LEVEL <= doom2_19_compatibility)
             mo->momz = -mo->momz; // the skull slammed into something
 
         if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
@@ -908,7 +921,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 
     mobj = static_cast<mobj_t *>(Z_Malloc(sizeof(*mobj), PU_LEVEL, nullptr));
     memset(mobj, 0, sizeof(*mobj));
-    info = &mobjinfo[type];
+    info = &mobjinfo[type.value()];
     mobj->type = type;
     mobj->info = info;
     mobj->x = x;
@@ -918,7 +931,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     mobj->flags = info->flags;
 
     /* killough 8/23/98: no friends, bouncers, or touchy things in old demos */
-    if (!mbf_features)
+    if (COMPATIBILITY_LEVEL < mbf_compatibility)
         mobj->flags &= ~(MF_BOUNCES | MF_FRIEND | MF_TOUCHY);
     else if (type == MT_PLAYER)   // Except in old demos, players
         mobj->flags |= MF_FRIEND; // are always friends.
@@ -935,7 +948,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     // do not set the state with P_SetMobjState,
     // because action routines can not be called yet
 
-    st = &states[info->spawnstate];
+    st = &states[info->spawnstate.value()];
 
     mobj->state = st;
     mobj->tics = st->tics;
@@ -1027,7 +1040,7 @@ void P_RemoveMobj(mobj_t *mobj)
     // CPhipps - only leave dead references in old demos; I hope lxdoom_1 level
     // demos are rare and don't rely on this. I hope.
 
-    if ((compatibility_level >= lxdoom_1_compatibility) ||
+    if ((COMPATIBILITY_LEVEL >= lxdoom_1_compatibility) ||
         (!demorecording && !demoplayback))
     {
         P_SetTarget(&mobj->target, nullptr);
@@ -1054,27 +1067,29 @@ static PUREFUNC int P_FindDoomedNum(unsigned type)
         int first, next;
     };
     static hash_t *hash;
-    register int i;
+    mobjtype_t i;
 
     if (!hash)
     {
-        hash = static_cast<hash_t *>(
-            Z_Malloc(sizeof *hash * NUMMOBJTYPES, PU_CACHE, (void **)&hash));
+        hash = static_cast<hash_t *>(Z_Malloc(
+            sizeof(*hash) * NUMMOBJTYPES.value(), PU_CACHE, (void **)&hash));
         for (i = 0; i < NUMMOBJTYPES; i++)
-            hash[i].first = NUMMOBJTYPES;
+            hash[i.value()].first = NUMMOBJTYPES.value();
         for (i = 0; i < NUMMOBJTYPES; i++)
-            if (mobjinfo[i].doomednum != -1)
+            if (mobjinfo[i.value()].doomednum != -1)
             {
-                unsigned h = (unsigned)mobjinfo[i].doomednum % NUMMOBJTYPES;
-                hash[i].next = hash[h].first;
-                hash[h].first = i;
+                unsigned h = (unsigned)mobjinfo[i.value()].doomednum %
+                             NUMMOBJTYPES.value();
+                hash[i.value()].next = hash[h].first;
+                hash[h].first = i.value();
             }
     }
 
-    i = hash[type % NUMMOBJTYPES].first;
-    while ((i < NUMMOBJTYPES) && ((unsigned)mobjinfo[i].doomednum != type))
-        i = hash[i].next;
-    return i;
+    i = hash[type % NUMMOBJTYPES.value()].first;
+    while ((i < NUMMOBJTYPES) &&
+           ((unsigned)mobjinfo[i.value()].doomednum != type))
+        i = hash[i.value()].next;
+    return i.value();
 }
 
 //
@@ -1295,11 +1310,13 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     // bits that weren't used in Doom (such as HellMaker wads). So we should
     // then simply ignore all upper bits.
 
-    if (demo_compatibility ||
-        (compatibility_level >= lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility ||
+        (COMPATIBILITY_LEVEL >= lxdoom_1_compatibility &&
          options & MTF_RESERVED))
     {
-        if (!demo_compatibility) // cph - Add warning about bad thing flags
+        if (COMPATIBILITY_LEVEL >=
+            boom_compatibility_compatibility) // cph - Add warning about bad
+                                              // thing flags
             lprintf(
                 LO_WARN,
                 "P_SpawnMapThing: correcting bad flags (%u) (thing type %d)\n",
@@ -1313,35 +1330,34 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     // doom2.exe has at most 10 deathmatch starts
     if (thingtype == 11)
     {
-        if (!(!compatibility || deathmatch_p - deathmatchstarts < 10))
+        if (!(COMPATIBILITY_LEVEL > boom_compatibility_compatibility ||
+              deathmatch_p - deathmatchstarts < 10))
         {
             return nullptr;
         }
-        else
+
+        // 1/11/98 killough -- new code removes limit on deathmatch starts:
+
+        size_t offset = deathmatch_p - deathmatchstarts;
+
+        if (COMPATIBILITY_LEVEL <= boom_compatibility_compatibility &&
+            deathmatch_p - deathmatchstarts >= 10)
+            return nullptr; // e6y
+        if (offset >= num_deathmatchstarts)
         {
-            // 1/11/98 killough -- new code removes limit on deathmatch starts:
-
-            size_t offset = deathmatch_p - deathmatchstarts;
-
-            if (compatibility && deathmatch_p - deathmatchstarts >= 10)
-                return nullptr; // e6y
-            if (offset >= num_deathmatchstarts)
-            {
-                num_deathmatchstarts =
-                    num_deathmatchstarts ? num_deathmatchstarts * 2 : 16;
-                deathmatchstarts = static_cast<mapthing_t *>(
-                    realloc(deathmatchstarts,
-                            num_deathmatchstarts * sizeof(*deathmatchstarts)));
-                deathmatch_p = deathmatchstarts + offset;
-            }
-            memcpy(deathmatch_p++, mthing, sizeof(*mthing));
-            (deathmatch_p - 1)->options = 1;
-
-            TracerAddDeathmatchStart(deathmatch_p - deathmatchstarts - 1,
-                                     index);
-
-            return nullptr;
+            num_deathmatchstarts =
+                num_deathmatchstarts ? num_deathmatchstarts * 2 : 16;
+            deathmatchstarts = static_cast<mapthing_t *>(
+                realloc(deathmatchstarts,
+                        num_deathmatchstarts * sizeof(*deathmatchstarts)));
+            deathmatch_p = deathmatchstarts + offset;
         }
+        memcpy(deathmatch_p++, mthing, sizeof(*mthing));
+        (deathmatch_p - 1)->options = 1;
+
+        TracerAddDeathmatchStart(deathmatch_p - deathmatchstarts - 1, index);
+
+        return nullptr;
     }
 
     // check for players specially
@@ -1359,21 +1375,21 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
             options |= MTF_FRIEND;
             if (HelperThing != -1) // haleyjd 9/22/99: deh substitution
             {
-                int type = HelperThing - 1;
+                mobjtype_t type = HelperThing - 1;
                 if (type >= 0 && type < NUMMOBJTYPES)
                 {
-                    i = type;
+                    i = type.value();
                 }
                 else
                 {
                     doom_printf("Invalid value %i for helper, ignored.",
                                 HelperThing);
-                    i = MT_DOGS;
+                    i = MT_DOGS.value();
                 }
             }
             else
             {
-                i = MT_DOGS;
+                i = MT_DOGS.value();
             }
             goto spawnit;
         }
@@ -1432,7 +1448,7 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
     // Do not abort because of an unknown thing. Ignore it, but post a
     // warning message for the player.
 
-    if (i == NUMMOBJTYPES)
+    if (i == NUMMOBJTYPES.value())
     {
         lprintf(LO_INFO, "P_SpawnMapThing: Unknown Thing type %i at (%i, %i)\n",
                 thingtype, mthing->x, mthing->y);
@@ -1446,7 +1462,8 @@ mobj_t *P_SpawnMapThing(const mapthing_t *mthing, int index)
 
     // don't spawn any monsters if -nomonsters
 
-    if (nomonsters && (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL)))
+    if (nomonsters &&
+        (i == MT_SKULL.value() || (mobjinfo[i].flags & MF_COUNTKILL)))
         return nullptr;
 
     // spawn it
@@ -1468,7 +1485,8 @@ spawnit:
     if (mobj->tics > 0)
         mobj->tics = 1 + (P_Random(pr_spawnthing) % mobj->tics);
 
-    if (!(mobj->flags & MF_FRIEND) && options & MTF_FRIEND && mbf_features)
+    if (!(mobj->flags & MF_FRIEND) && options & MTF_FRIEND &&
+        COMPATIBILITY_LEVEL >= mbf_compatibility)
     {
         mobj->flags |= MF_FRIEND;        // killough 10/98:
         P_UpdateThinker(&mobj->thinker); // transfer friendliness flag
@@ -1485,7 +1503,7 @@ spawnit:
     if (options & MTF_AMBUSH)
         mobj->flags |= MF_AMBUSH;
 
-    if (i == MT_SKULL)
+    if (i == MT_SKULL.value())
         mobj->flags |= MF_NOBLOOD;
 
     // RjY
@@ -1495,7 +1513,8 @@ spawnit:
           (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
                                         // invert everything, then both bits
                                         // should be clear
-        && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z) // head <= base
+        && mobj->floorz + mobjinfo[MT_PLAYER.value()].height <=
+               mobj->z) // head <= base
     // player under body's head height <= bottom of body
     {
         lprintf(LO_WARN,
@@ -1595,7 +1614,7 @@ void P_CheckMissileSpawn(mobj_t *th)
     th->z += (th->momz >> 1);
 
     // killough 8/12/98: for non-missile objects (e.g. grenades)
-    if (!(th->flags & MF_MISSILE) && mbf_features)
+    if (!(th->flags & MF_MISSILE) && COMPATIBILITY_LEVEL >= mbf_compatibility)
         return;
 
     // killough 3/15/98: no dropoff (really = don't care for missiles)
@@ -1616,7 +1635,7 @@ mobj_t *P_SpawnMissile(mobj_t *source, mobj_t *dest, mobjtype_t type)
 
     th = P_SpawnMobj(source->x, source->y, source->z + 4 * 8 * FRACUNIT, type);
 
-    if (th->info->seesound)
+    if (th->info->seesound != sfx_None)
         S_StartSound(th, th->info->seesound);
 
     P_SetTarget(&th->target, source); // where it came from
@@ -1667,7 +1686,8 @@ void P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type)
     else
     {
         // killough 8/2/98: prefer autoaiming at enemies
-        uint_64_t mask = mbf_features ? MF_FRIEND : 0;
+        uint_64_t mask =
+            COMPATIBILITY_LEVEL >= mbf_compatibility ? MF_FRIEND : MobjFlag{0};
 
         do
         {
@@ -1689,7 +1709,7 @@ void P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type)
 
     th = P_SpawnMobj(x, y, z, type);
 
-    if (th->info->seesound)
+    if (th->info->seesound != sfx_None)
         S_StartSound(th, th->info->seesound);
 
     P_SetTarget(&th->target, source);

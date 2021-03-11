@@ -101,14 +101,14 @@ static void P_SetPsprite(player_t *player, int position, statenum_t stnum)
     {
         state_t *state;
 
-        if (!stnum)
+        if (stnum == S_NULL)
         {
             // object removed itself
             psp->state = nullptr;
             break;
         }
 
-        state = &states[stnum];
+        state = &states[stnum.value()];
         psp->state = state;
         psp->tics = state->tics; // could be 0
 
@@ -155,8 +155,9 @@ static void P_BringUpWeapon(player_t *player)
 
     player->pendingweapon = wp_nochange;
     // killough 12/98: prevent pistol from starting visibly at bottom of screen:
-    player->psprites[ps_weapon].sy =
-        mbf_features ? WEAPONBOTTOM + FRACUNIT * 2 : WEAPONBOTTOM;
+    player->psprites[ps_weapon].sy = COMPATIBILITY_LEVEL >= mbf_compatibility
+                                         ? WEAPONBOTTOM + FRACUNIT * 2
+                                         : WEAPONBOTTOM;
 
     P_SetPsprite(player, ps_weapon, newstate);
 }
@@ -180,86 +181,114 @@ int weapon_attack_alignment = 0;
 // because the raised weapon has no ammo anyway. When called from
 // G_BuildTiccmd you want to toggle to a different weapon regardless.
 
-int P_SwitchWeapon(player_t *player)
+weapontype_t P_SwitchWeapon(player_t *player)
 {
-    int *prefer =
-        weapon_preferences[demo_compatibility != 0]; // killough 3/22/98
-    int currentweapon = player->readyweapon;
-    int newweapon = currentweapon;
+    // killough 3/22/98
+    int *prefer = weapon_preferences[COMPATIBILITY_LEVEL <
+                                     boom_compatibility_compatibility];
+    weapontype_t currentweapon = player->readyweapon;
+    weapontype_t newweapon = currentweapon;
     int i = NUMWEAPONS + 1; // killough 5/2/98
 
     // killough 2/8/98: follow preferences and fix BFG/SSG bugs
 
     do
+    {
         switch (*prefer++)
         {
         case 1:
-            if (!player->powers[pw_strength]) // allow chainsaw override
+            // allow chainsaw override
+            if (player->powers[pw_strength] == 0)
+            {
                 break;
+            }
             // fallthrough
         case 0:
             newweapon = wp_fist;
             break;
         case 2:
-            if (player->ammo[am_clip])
+            if (player->ammo[am_clip] != 0)
+            {
                 newweapon = wp_pistol;
+            }
             break;
         case 3:
             if (player->weaponowned[wp_shotgun] && player->ammo[am_shell])
+            {
                 newweapon = wp_shotgun;
+            }
             break;
         case 4:
             if (player->weaponowned[wp_chaingun] && player->ammo[am_clip])
+            {
                 newweapon = wp_chaingun;
+            }
             break;
         case 5:
             if (player->weaponowned[wp_missile] && player->ammo[am_misl])
+            {
                 newweapon = wp_missile;
+            }
             break;
         case 6:
             if (player->weaponowned[wp_plasma] && player->ammo[am_cell] &&
                 gamemode != shareware)
+            {
                 newweapon = wp_plasma;
+            }
             break;
         case 7:
             if (player->weaponowned[wp_bfg] && gamemode != shareware &&
-                player->ammo[am_cell] >= (demo_compatibility ? 41 : 40))
+                player->ammo[am_cell] >=
+                    (COMPATIBILITY_LEVEL < boom_compatibility_compatibility
+                         ? 41
+                         : 40))
+            {
                 newweapon = wp_bfg;
+            }
             break;
         case 8:
             if (player->weaponowned[wp_chainsaw])
+            {
                 newweapon = wp_chainsaw;
+            }
             break;
         case 9:
             if (player->weaponowned[wp_supershotgun] &&
                 gamemode == commercial &&
-                player->ammo[am_shell] >= (demo_compatibility ? 3 : 2))
+                player->ammo[am_shell] >=
+                    (COMPATIBILITY_LEVEL < boom_compatibility_compatibility
+                         ? 3
+                         : 2))
+            {
                 newweapon = wp_supershotgun;
+            }
             break;
         }
-    while (newweapon == currentweapon && --i); // killough 5/2/98
+    } while (newweapon == currentweapon && (--i != 0));
+    // killough 5/2/98
     return newweapon;
 }
 
 // killough 5/2/98: whether consoleplayer prefers weapon w1 over weapon w2.
-int P_WeaponPreferred(int w1, int w2)
+bool P_WeaponPreferred(int w1, int w2)
 {
-    return (weapon_preferences[0][0] != ++w2 &&
-            (weapon_preferences[0][0] == ++w1 ||
-             (weapon_preferences[0][1] != w2 &&
-              (weapon_preferences[0][1] == w1 ||
-               (weapon_preferences[0][2] != w2 &&
-                (weapon_preferences[0][2] == w1 ||
-                 (weapon_preferences[0][3] != w2 &&
-                  (weapon_preferences[0][3] == w1 ||
-                   (weapon_preferences[0][4] != w2 &&
-                    (weapon_preferences[0][4] == w1 ||
-                     (weapon_preferences[0][5] != w2 &&
-                      (weapon_preferences[0][5] == w1 ||
-                       (weapon_preferences[0][6] != w2 &&
-                        (weapon_preferences[0][6] == w1 ||
-                         (weapon_preferences[0][7] != w2 &&
-                          (weapon_preferences[0][7] == w1))))))))))))))));
+    return weapon_preferences[0][0] != ++w2 &&
+           (weapon_preferences[0][0] == ++w1 ||
+            (weapon_preferences[0][1] != w2 &&
+             (weapon_preferences[0][1] == w1 ||
+              (weapon_preferences[0][2] != w2 &&
+               (weapon_preferences[0][2] == w1 ||
+                (weapon_preferences[0][3] != w2 &&
+                 (weapon_preferences[0][3] == w1 ||
+                  (weapon_preferences[0][4] != w2 &&
+                   (weapon_preferences[0][4] == w1 ||
+                    (weapon_preferences[0][5] != w2 &&
+                     (weapon_preferences[0][5] == w1 ||
+                      (weapon_preferences[0][6] != w2 &&
+                       (weapon_preferences[0][6] == w1 ||
+                        (weapon_preferences[0][7] != w2 &&
+                         (weapon_preferences[0][7] == w1)))))))))))))));
 }
 
 //
@@ -292,7 +321,7 @@ dboolean P_CheckAmmo(player_t *player)
     // preferences across demos or networks, so we have to use the
     // G_BuildTiccmd() interface instead of making the switch here.
 
-    if (demo_compatibility)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
     {
         player->pendingweapon =
             static_cast<weapontype_t>(P_SwitchWeapon(player)); // phares
@@ -347,11 +376,12 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
     done_autoswitch = false;
 
     // get out of attack state
-    if (player->mo->state == &states[S_PLAY_ATK1] ||
-        player->mo->state == &states[S_PLAY_ATK2])
+    if (player->mo->state == &states[S_PLAY_ATK1.value()] ||
+        player->mo->state == &states[S_PLAY_ATK2.value()])
         P_SetMobjState(player->mo, S_PLAY);
 
-    if (player->readyweapon == wp_chainsaw && psp->state == &states[S_SAW])
+    if (player->readyweapon == wp_chainsaw &&
+        psp->state == &states[S_SAW.value()])
         S_StartSound(player->mo, sfx_sawidl);
 
     // check for change
@@ -420,8 +450,7 @@ void A_CheckReload(player_t *player, pspdef_t *psp)
 {
     CHECK_WEAPON_CODEPOINTER("A_CheckReload", player);
 
-    if (!P_CheckAmmo(player) &&
-        compatibility_level >= prboom_4_compatibility)
+    if (!P_CheckAmmo(player) && COMPATIBILITY_LEVEL >= prboom_4_compatibility)
     {
         /* cph 2002/08/08 - In old Doom, P_CheckAmmo would start the weapon
          * lowering immediately. This was lost in Boom when the weapon switching
@@ -507,13 +536,15 @@ void A_Raise(player_t *player, pspdef_t *psp)
 
 static void A_FireSomething(player_t *player, int adder)
 {
-    P_SetPsprite(player, ps_flash,
-                 static_cast<statenum_t>(
-                     weaponinfo[player->readyweapon].flashstate + adder));
+    P_SetPsprite(
+        player, ps_flash,
+        static_cast<statenum_t>(
+            weaponinfo[player->readyweapon].flashstate.value() + adder));
 
     // killough 3/27/98: prevent recoil in no-clipping mode
     if (!(player->mo->flags & MF_NOCLIP))
-        if (!compatibility && weapon_recoil)
+        if (COMPATIBILITY_LEVEL > boom_compatibility_compatibility &&
+            weapon_recoil)
             P_Thrust(player,
                      ANG180 + player->mo->angle,                 //   ^
                      2048 * recoil_values[player->readyweapon]); //   |
@@ -559,7 +590,7 @@ void A_Punch(player_t *player, pspdef_t *psp)
     angle += (t - P_Random(pr_punchangle)) << 18;
 
     /* killough 8/2/98: make autoaiming prefer enemies */
-    if (!mbf_features ||
+    if (COMPATIBILITY_LEVEL < mbf_compatibility ||
         (slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MF_FRIEND),
          !linetarget))
         slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
@@ -598,7 +629,7 @@ void A_Saw(player_t *player, pspdef_t *psp)
 
     /* Use meleerange + 1 so that the puff doesn't skip the flash
      * killough 8/2/98: make autoaiming prefer enemies */
-    if (!mbf_features ||
+    if (COMPATIBILITY_LEVEL < mbf_compatibility ||
         (slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1, MF_FRIEND),
          !linetarget))
         slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1, 0);
@@ -674,7 +705,7 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 {
     mobjtype_t type = MT_PLASMA1;
 
-    if (compatibility_level < mbf_compatibility)
+    if (COMPATIBILITY_LEVEL < mbf_compatibility)
         return;
 
     CHECK_WEAPON_CODEPOINTER("A_FireOldBFG", player);
@@ -698,7 +729,11 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         if (autoaim /* || !beta_emulation*/)
         {
             // killough 8/2/98: make autoaiming prefer enemies
-            uint_64_t mask = mbf_features ? MF_FRIEND : 0;
+            uint_64_t mask = 0;
+            if (COMPATIBILITY_LEVEL >= mbf_compatibility)
+            {
+                mask = MF_FRIEND.value();
+            }
             fixed_t slope;
             do
             {
@@ -725,8 +760,9 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         th->momy = finesine[an1 >> ANGLETOFINESHIFT] * 25;
         th->momz = finetangent[an2 >> ANGLETOFINESHIFT] * 25;
         P_CheckMissileSpawn(th);
-    } while ((type != MT_PLASMA2) && (type = MT_PLASMA2)); // killough:
-                                                           // obfuscated!
+    } while ((type != MT_PLASMA2) &&
+             (type = MT_PLASMA2) != MT_NULL); // killough:
+                                              // obfuscated!
 }
 
 //
@@ -761,7 +797,11 @@ static void P_BulletSlope(mobj_t *mo)
     else
     {
         /* killough 8/2/98: make autoaiming prefer enemies */
-        uint_64_t mask = mbf_features ? MF_FRIEND : 0;
+        uint_64_t mask = 0;
+        if (COMPATIBILITY_LEVEL >= mbf_compatibility)
+        {
+            mask = MF_FRIEND.value();
+        }
 
         do
         {
@@ -883,7 +923,7 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
     P_SetMobjState(player->mo, S_PLAY_ATK2);
     player->ammo[weaponinfo[player->readyweapon].ammo]--;
 
-    A_FireSomething(player, psp->state - &states[S_CHAIN1]); // phares
+    A_FireSomething(player, psp->state - &states[S_CHAIN1.value()]); // phares
 
     P_BulletSlope(player->mo);
 
@@ -928,7 +968,7 @@ void A_BFGSpray(mobj_t *mo)
         // mo->target is the originator (player) of the missile
 
         // killough 8/2/98: make autoaiming prefer enemies
-        if (!mbf_features ||
+        if (COMPATIBILITY_LEVEL < mbf_compatibility ||
             (P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, MF_FRIEND),
              !linetarget))
             P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, 0);

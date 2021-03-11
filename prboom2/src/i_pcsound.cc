@@ -106,7 +106,7 @@ void PCSCallbackFunc(int *duration, int *freq)
     SDL_UnlockMutex(sound_lock);
 }
 
-static dboolean CachePCSLump(int sound_id)
+static dboolean CachePCSLump(sfxenum_t sound_id)
 {
     int lumplen;
     int headerlen;
@@ -122,8 +122,8 @@ static dboolean CachePCSLump(int sound_id)
     // Load from WAD
 
     current_sound_lump = static_cast<const uint8_t *>(
-        W_CacheLumpNum(S_sfx[sound_id].lumpnum /* e6y, PU_STATIC*/));
-    lumplen = W_LumpLength(S_sfx[sound_id].lumpnum);
+        W_CacheLumpNum(S_sfx[sound_id.value()].lumpnum /* e6y, PU_STATIC*/));
+    lumplen = W_LumpLength(S_sfx[sound_id.value()].lumpnum);
 
     // Read header
 
@@ -147,7 +147,7 @@ static dboolean CachePCSLump(int sound_id)
     return true;
 }
 
-int I_PCS_StartSound(int id, int channel, int vol, int sep, int pitch,
+int I_PCS_StartSound(sfxenum_t id, int channel, int vol, int sep, int pitch,
                      int priority)
 {
     int result;

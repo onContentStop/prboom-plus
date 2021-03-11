@@ -326,7 +326,7 @@ static void P_GetNodesVersion(int lumpnum, int gl_lumpnum)
     nodesVersion = 0;
 
     if ((gl_lumpnum > lumpnum) && (forceOldBsp == false) &&
-        (compatibility_level >= prboom_2_compatibility))
+        (COMPATIBILITY_LEVEL >= prboom_2_compatibility))
     {
         if (CheckForIdentifier(gl_lumpnum + ML_GL_VERTS, "gNd2", 4))
         {
@@ -2468,7 +2468,7 @@ static void P_RemoveSlimeTrails(void) // killough 10/98
     // Correction of desync on dv04-423.lmp/dv.wad
     // http://www.doomworld.com/vb/showthread.php?s=&postid=627257#post627257
     int apply_for_real_vertexes =
-        (compatibility_level >= lxdoom_1_compatibility ||
+        (COMPATIBILITY_LEVEL >= lxdoom_1_compatibility ||
          prboom_comp[PC_REMOVE_SLIME_TRAILS].state);
 
     for (i = 0; i < numvertexes; i++)
@@ -2878,7 +2878,7 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     //
     // BlockMap should be reloaded after OVERFLOW_INTERCEPT,
     // because bmapwidth/bmapheight/bmaporgx/bmaporgy can be overwritten
-    if (!samelevel || overflows[OVERFLOW_INTERCEPT].shit_happens)
+    if (!samelevel || overflows[OVERFLOW_INTERCEPT.value()].shit_happens)
     {
         P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
     }

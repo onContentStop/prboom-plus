@@ -314,10 +314,10 @@ default_t defaults[] = {
 
     {"Misc settings", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
     {"default_compatibility_level",
-     {(int *)&default_compatibility_level},
+     {(int *)&DEFAULT_COMPATIBILITY_LEVEL},
      {-1},
      -1,
-     MAX_COMPATIBILITY_LEVEL - 1,
+     MAX_COMPATIBILITY_LEVEL.value() - 1,
      default_t::def_int,
      ss_none}, // compatibility level" - CPhipps
     {"realtic_clock_rate",
@@ -3049,9 +3049,9 @@ default_t defaults[] = {
      ss_stat}, /* cph - allow crappy fake contrast to be disabled */
     {"render_stretch_hud",
      {&render_stretch_hud_default},
-     {patch_stretch_16x10},
+     {PATCH_STRETCH_16_X_10.value()},
      0,
-     patch_stretch_max - 1,
+     PATCH_STRETCH_MAX.value() - 1,
      default_t::def_int,
      ss_stat},
     {"render_patches_scalex",
@@ -3361,84 +3361,84 @@ default_t defaults[] = {
      default_t::def_none,
      ss_none},
     {"overrun_spechit_warn",
-     {&overflows[OVERFLOW_SPECHIT].warn},
+     {&overflows[OVERFLOW_SPECHIT.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_spechit_emulate",
-     {&overflows[OVERFLOW_SPECHIT].emulate},
+     {&overflows[OVERFLOW_SPECHIT.value()].emulate},
      {1},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_reject_warn",
-     {&overflows[OVERFLOW_REJECT].warn},
+     {&overflows[OVERFLOW_REJECT.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_reject_emulate",
-     {&overflows[OVERFLOW_REJECT].emulate},
+     {&overflows[OVERFLOW_REJECT.value()].emulate},
      {1},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_intercept_warn",
-     {&overflows[OVERFLOW_INTERCEPT].warn},
+     {&overflows[OVERFLOW_INTERCEPT.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_intercept_emulate",
-     {&overflows[OVERFLOW_INTERCEPT].emulate},
+     {&overflows[OVERFLOW_INTERCEPT.value()].emulate},
      {1},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_playeringame_warn",
-     {&overflows[OVERFLOW_PLYERINGAME].warn},
+     {&overflows[OVERFLOW_PLYERINGAME.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_playeringame_emulate",
-     {&overflows[OVERFLOW_PLYERINGAME].emulate},
+     {&overflows[OVERFLOW_PLYERINGAME.value()].emulate},
      {1},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_donut_warn",
-     {&overflows[OVERFLOW_DONUT].warn},
+     {&overflows[OVERFLOW_DONUT.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_donut_emulate",
-     {&overflows[OVERFLOW_DONUT].emulate},
+     {&overflows[OVERFLOW_DONUT.value()].emulate},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_missedbackside_warn",
-     {&overflows[OVERFLOW_MISSEDBACKSIDE].warn},
+     {&overflows[OVERFLOW_MISSEDBACKSIDE.value()].warn},
      {0},
      0,
      1,
      default_t::def_bool,
      ss_stat},
     {"overrun_missedbackside_emulate",
-     {&overflows[OVERFLOW_MISSEDBACKSIDE].emulate},
+     {&overflows[OVERFLOW_MISSEDBACKSIDE.value()].emulate},
      {0},
      0,
      1,
@@ -3671,7 +3671,13 @@ default_t defaults[] = {
      default_t::def_str,
      ss_none},
 
-    {"Weapon preferences", {nullptr}, {0}, UL, UL, default_t::def_none, ss_none},
+    {"Weapon preferences",
+     {nullptr},
+     {0},
+     UL,
+     UL,
+     default_t::def_none,
+     ss_none},
     // killough 2/8/98: weapon preferences set by user:
     {"weapon_choice_1",
      {&weapon_preferences[0][0]},
@@ -4366,11 +4372,11 @@ void M_LoadDefaults(void)
             {
                 if ((*arr)[k])
                 {
-                    free((*arr)[k]);
+                    Z_Free((*arr)[k]);
                     (*arr)[k] = nullptr;
                 }
             }
-            free(*arr);
+            Z_Free(*arr);
             *arr = nullptr;
             *(item->location.array_size) = 0;
             // load predefined data
@@ -4469,7 +4475,7 @@ void M_LoadDefaults(void)
                         {
                             if ((*arr)[(*index)])
                             {
-                                free((*arr)[(*index)]);
+                                std::free((*arr)[(*index)]);
                                 (*arr)[(*index)] = nullptr;
                             }
                         }
@@ -4496,7 +4502,7 @@ void M_LoadDefaults(void)
                             } u; // type punning via unions
 
                             u.c = defaults[i].location.ppsz;
-                            free(*(u.s));
+                            std::free(*(u.s));
                             *(u.s) = newstring;
 
                             item = &defaults[i];
@@ -4531,7 +4537,7 @@ void M_LoadDefaults(void)
                             } u; // type punning via unions
 
                             u.c = defaults[i].location.ppsz;
-                            free(*(u.s));
+                            std::free(*(u.s));
                             *(u.s) = newstring;
                         }
                         break;
@@ -4542,8 +4548,8 @@ void M_LoadDefaults(void)
         fclose(f);
     }
 
-    free(strparm);
-    free(cfgline);
+    std::free(strparm);
+    std::free(cfgline);
 
     // jff 3/4/98 redundant range checks for hud deleted here
     /* proff 2001/7/1 - added prboom.wad as last entry so it's always loaded and
@@ -4662,11 +4668,12 @@ void M_ScreenShot(void)
 
         if (access(lbmname, 0))
         {
-            S_StartSound(nullptr, gamemode == commercial ? sfx_radio : sfx_tink);
+            S_StartSound(nullptr,
+                         gamemode == commercial ? sfx_radio : sfx_tink);
             M_DoScreenShot(lbmname); // cph
             success = 1;
         }
-        free(lbmname);
+        Z_Free(lbmname);
         if (success)
             return;
     }
@@ -4741,7 +4748,7 @@ void M_ArrayFree(array_t *data)
 {
     if (data->data)
     {
-        free(data->data);
+        Z_Free(data->data);
         data->data = nullptr;
     }
 

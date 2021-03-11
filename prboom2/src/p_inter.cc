@@ -305,7 +305,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
 {
     player_t *player;
     int i;
-    int sound;
+    sfxenum_t sound;
     fixed_t delta = special->z - toucher->z;
 
     if (delta > toucher->height || delta < -8 * FRACUNIT)
@@ -355,7 +355,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         // points if they are present and becomes equal to very large value in
         // this case
         if (player->armorpoints > max_armor &&
-            compatibility_level != doom_12_compatibility)
+            COMPATIBILITY_LEVEL != doom_12_compatibility)
             player->armorpoints = max_armor;
         // e6y
         // We always give armor type 1 for the armor bonuses;
@@ -677,7 +677,7 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
     target->flags |= MF_CORPSE | MF_DROPOFF;
     target->height >>= 2;
 
-    if (compatibility_level == mbf_compatibility &&
+    if (COMPATIBILITY_LEVEL == mbf_compatibility &&
         !prboom_comp[PC_MBF_REMOVE_THINKER_IN_KILLMOBJ].state)
     {
         // killough 8/29/98: remove from threaded list
@@ -698,11 +698,11 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
                 source->player->resurectedkillcount++;
         }
         if (target->player)
-            source->player->frags[target->player - players]++;
+            source->player->frags[target->player - players.data()]++;
     }
     else if (target->flags & MF_COUNTKILL)
     { /* Add to kills tally */
-        if ((compatibility_level < lxdoom_1_compatibility) || !netgame)
+        if ((COMPATIBILITY_LEVEL < lxdoom_1_compatibility) || !netgame)
         {
             if (!netgame)
             {
@@ -787,7 +787,7 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
     {
         // count environment kills against you
         if (!source)
-            target->player->frags[target->player - players]++;
+            target->player->frags[target->player - players.data()]++;
 
         target->flags &= ~MF_SOLID;
         target->player->playerstate = PST_DEAD;
@@ -805,7 +805,7 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
     else
     {
         if (target->health < -target->info->spawnhealth &&
-            target->info->xdeathstate)
+            target->info->xdeathstate != S_NULL)
             P_SetMobjState(target, target->info->xdeathstate);
         else
             P_SetMobjState(target, target->info->deathstate);
@@ -961,7 +961,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     }
 
     // killough 9/7/98: keep track of targets so that friends can help friends
-    if (mbf_features)
+    if (COMPATIBILITY_LEVEL >= mbf_compatibility)
     {
         /* If target is a player, set player's target to source,
          * so that a friend can tell who's hurting a player
@@ -977,9 +977,15 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
          */
         if (target->health * 2 < target->info->spawnhealth)
         {
-            thinker_t *cap =
-                &thinkerclasscap[target->flags & MF_FRIEND ? th_friends
-                                                           : th_enemies];
+            thinker_t *cap;
+            if (target->flags & MF_FRIEND)
+            {
+                cap = &THINKER_CLASS_CAP[TH_FRIENDS.value()];
+            }
+            else
+            {
+                cap = &THINKER_CLASS_CAP[TH_ENEMIES.value()];
+            }
             (target->thinker.cprev->cnext = target->thinker.cnext)->cprev =
                 target->thinker.cprev;
             (target->thinker.cnext = cap->cnext)->cprev = &target->thinker;
@@ -990,14 +996,14 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     if (P_Random(pr_painchance) < target->info->painchance &&
         !(target->flags & MF_SKULLFLY))
     { // killough 11/98: see below
-        if (mbf_features)
+        if (COMPATIBILITY_LEVEL >= mbf_compatibility)
             justhit = true;
         else
             target->flags |= MF_JUSTHIT; // fight back!
 
         // e6y
         {
-            if (demo_compatibility)
+            if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
                 if ((target->target == source || !target->target ||
                      !(target->flags & target->target->flags & MF_FRIEND)))
                     target->flags |= MF_JUSTHIT; // fight back!
@@ -1012,11 +1018,11 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     // e6y: Monsters could commit suicide in Doom v1.2 if they damaged
     // themselves by exploding a barrel
     if (source &&
-        (source != target || compatibility_level == doom_12_compatibility) &&
+        (source != target || COMPATIBILITY_LEVEL == doom_12_compatibility) &&
         source->type != MT_VILE &&
         (!target->threshold || target->type == MT_VILE) &&
         ((source->flags ^ target->flags) & MF_FRIEND || monster_infighting ||
-         !mbf_features))
+         COMPATIBILITY_LEVEL < mbf_compatibility))
     {
         /* if not intent on another player, chase after this one
          *
@@ -1026,7 +1032,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
          */
 
         if (!target->lastenemy || target->lastenemy->health <= 0 ||
-            (!mbf_features
+            (COMPATIBILITY_LEVEL < mbf_compatibility
                  ? !target->lastenemy->player
                  : !((target->flags ^ target->lastenemy->flags) & MF_FRIEND) &&
                        target->target !=
@@ -1035,14 +1041,14 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
 
         P_SetTarget(&target->target, source); // killough 11/98
         target->threshold = BASETHRESHOLD;
-        if (target->state == &states[target->info->spawnstate] &&
+        if (target->state == &states[target->info->spawnstate.value()] &&
             target->info->seestate != S_NULL)
             P_SetMobjState(target, target->info->seestate);
     }
 
     /* killough 11/98: Don't attack a friend, unless hit by that friend.
      * cph 2006/04/01 - implicitly this is only if mbf_features */
-    if (!demo_compatibility) // e6y
+    if (COMPATIBILITY_LEVEL >= boom_compatibility_compatibility) // e6y
         if (justhit && (target->target == source || !target->target ||
                         !(target->flags & target->target->flags & MF_FRIEND)))
             target->flags |= MF_JUSTHIT; // fight back!

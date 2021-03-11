@@ -393,7 +393,8 @@ void F_StartCast(void)
 {
     wipegamestate = GS_FORCEWIPE; // force a screen wipe
     castnum = 0;
-    caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+    caststate =
+        &states[mobjinfo[castorder[castnum].type.value()].seestate.value()];
     casttics = caststate->tics;
     castdeath = false;
     finalestage = 2;
@@ -408,8 +409,8 @@ void F_StartCast(void)
 //
 void F_CastTicker(void)
 {
-    int st;
-    int sfx;
+    statenum_t st;
+    sfxenum_t sfx;
 
     if (--casttics > 0)
         return; // not time to change state yet
@@ -421,81 +422,83 @@ void F_CastTicker(void)
         castdeath = false;
         if (castorder[castnum].name == nullptr)
             castnum = 0;
-        if (mobjinfo[castorder[castnum].type].seesound)
-            S_StartSound(nullptr, mobjinfo[castorder[castnum].type].seesound);
-        caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+        if (mobjinfo[castorder[castnum].type.value()].seesound.value() != 0)
+            S_StartSound(nullptr,
+                         mobjinfo[castorder[castnum].type.value()].seesound);
+        caststate =
+            &states[mobjinfo[castorder[castnum].type.value()].seestate.value()];
         castframes = 0;
     }
     else
     {
         // just advance to next state in animation
-        if (caststate == &states[S_PLAY_ATK1])
+        if (caststate == &states[S_PLAY_ATK1.value()])
             goto stopattack; // Oh, gross hack!
         st = caststate->nextstate;
-        caststate = &states[st];
+        caststate = &states[st.value()];
         castframes++;
 
         // sound hacks....
-        switch (st)
+        switch (st.value())
         {
-        case S_PLAY_ATK1:
+        case S_PLAY_ATK1.value():
             sfx = sfx_dshtgn;
             break;
-        case S_POSS_ATK2:
+        case S_POSS_ATK2.value():
             sfx = sfx_pistol;
             break;
-        case S_SPOS_ATK2:
+        case S_SPOS_ATK2.value():
             sfx = sfx_shotgn;
             break;
-        case S_VILE_ATK2:
+        case S_VILE_ATK2.value():
             sfx = sfx_vilatk;
             break;
-        case S_SKEL_FIST2:
+        case S_SKEL_FIST2.value():
             sfx = sfx_skeswg;
             break;
-        case S_SKEL_FIST4:
+        case S_SKEL_FIST4.value():
             sfx = sfx_skepch;
             break;
-        case S_SKEL_MISS2:
+        case S_SKEL_MISS2.value():
             sfx = sfx_skeatk;
             break;
-        case S_FATT_ATK8:
-        case S_FATT_ATK5:
-        case S_FATT_ATK2:
+        case S_FATT_ATK8.value():
+        case S_FATT_ATK5.value():
+        case S_FATT_ATK2.value():
             sfx = sfx_firsht;
             break;
-        case S_CPOS_ATK2:
-        case S_CPOS_ATK3:
-        case S_CPOS_ATK4:
+        case S_CPOS_ATK2.value():
+        case S_CPOS_ATK3.value():
+        case S_CPOS_ATK4.value():
             sfx = sfx_shotgn;
             break;
-        case S_TROO_ATK3:
+        case S_TROO_ATK3.value():
             sfx = sfx_claw;
             break;
-        case S_SARG_ATK2:
+        case S_SARG_ATK2.value():
             sfx = sfx_sgtatk;
             break;
-        case S_BOSS_ATK2:
-        case S_BOS2_ATK2:
-        case S_HEAD_ATK2:
+        case S_BOSS_ATK2.value():
+        case S_BOS2_ATK2.value():
+        case S_HEAD_ATK2.value():
             sfx = sfx_firsht;
             break;
-        case S_SKULL_ATK2:
+        case S_SKULL_ATK2.value():
             sfx = sfx_sklatk;
             break;
-        case S_SPID_ATK2:
-        case S_SPID_ATK3:
+        case S_SPID_ATK2.value():
+        case S_SPID_ATK3.value():
             sfx = sfx_shotgn;
             break;
-        case S_BSPI_ATK2:
+        case S_BSPI_ATK2.value():
             sfx = sfx_plasma;
             break;
-        case S_CYBER_ATK2:
-        case S_CYBER_ATK4:
-        case S_CYBER_ATK6:
+        case S_CYBER_ATK2.value():
+        case S_CYBER_ATK4.value():
+        case S_CYBER_ATK6.value():
             sfx = sfx_rlaunc;
             break;
-        case S_PAIN_ATK3:
+        case S_PAIN_ATK3.value():
             sfx = sfx_sklatk;
             break;
         default:
@@ -503,8 +506,10 @@ void F_CastTicker(void)
             break;
         }
 
-        if (sfx)
+        if (sfx.value() != 0)
+        {
             S_StartSound(nullptr, sfx);
+        }
     }
 
     if (castframes == 12)
@@ -512,30 +517,34 @@ void F_CastTicker(void)
         // go into attack frame
         castattacking = true;
         if (castonmelee)
-            caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
+            caststate = &states[mobjinfo[castorder[castnum].type.value()]
+                                    .meleestate.value()];
         else
-            caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
+            caststate = &states[mobjinfo[castorder[castnum].type.value()]
+                                    .missilestate.value()];
         castonmelee ^= 1;
-        if (caststate == &states[S_NULL])
+        if (caststate == &states[S_NULL.value()])
         {
             if (castonmelee)
-                caststate =
-                    &states[mobjinfo[castorder[castnum].type].meleestate];
+                caststate = &states[mobjinfo[castorder[castnum].type.value()]
+                                        .meleestate.value()];
             else
-                caststate =
-                    &states[mobjinfo[castorder[castnum].type].missilestate];
+                caststate = &states[mobjinfo[castorder[castnum].type.value()]
+                                        .missilestate.value()];
         }
     }
 
     if (castattacking)
     {
         if (castframes == 24 ||
-            caststate == &states[mobjinfo[castorder[castnum].type].seestate])
+            caststate == &states[mobjinfo[castorder[castnum].type.value()]
+                                     .seestate.value()])
         {
         stopattack:
             castattacking = false;
             castframes = 0;
-            caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+            caststate = &states[mobjinfo[castorder[castnum].type.value()]
+                                    .seestate.value()];
         }
     }
 
@@ -558,12 +567,14 @@ dboolean F_CastResponder(event_t *ev)
 
     // go into death frame
     castdeath = true;
-    caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
+    caststate =
+        &states[mobjinfo[castorder[castnum].type.value()].deathstate.value()];
     casttics = caststate->tics;
     castframes = 0;
     castattacking = false;
-    if (mobjinfo[castorder[castnum].type].deathsound)
-        S_StartSound(nullptr, mobjinfo[castorder[castnum].type].deathsound);
+    if (mobjinfo[castorder[castnum].type.value()].deathsound != sfx_None)
+        S_StartSound(nullptr,
+                     mobjinfo[castorder[castnum].type.value()].deathsound);
 
     return true;
 }

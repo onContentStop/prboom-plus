@@ -97,13 +97,13 @@ extern int hud_displayed; /* hud is displayed */
 extern int hud_num;
 extern int huds_count;
 
-typedef struct custom_message_s
+struct custom_message_t
 {
     int ticks;
     int cm;
-    int sfx;
+    sfxenum_t sfx;
     const char *msg;
-} custom_message_t;
+};
 
 struct message_thinker_t
 {
@@ -125,6 +125,6 @@ struct crosshair_t
 extern crosshair_t crosshair;
 
 int SetCustomMessage(int plr, const char *msg, int delay, int ticks, int cm,
-                     int sfx);
+                     sfxenum_t sfx);
 
 #endif

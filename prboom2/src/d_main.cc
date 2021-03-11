@@ -235,7 +235,7 @@ static void D_Wipe(void)
 //
 
 // wipegamestate can be set to -1 to force a wipe on the next draw
-gamestate_t wipegamestate = GS_DEMOSCREEN;
+GameState wipegamestate = GS_DEMOSCREEN;
 extern dboolean setsizeneeded;
 extern int showMessages;
 
@@ -243,7 +243,7 @@ void D_Display(fixed_t frac)
 {
     static dboolean isborderstate = false;
     static dboolean borderwillneedredraw = false;
-    static gamestate_t oldgamestate = GS_FORCEWIPE;
+    static GameState oldgamestate = GS_FORCEWIPE;
     dboolean wipe;
     dboolean viewactive = false, isborder = false;
 
@@ -287,24 +287,24 @@ void D_Display(fixed_t frac)
 
     if (gamestate != GS_LEVEL)
     { // Not a level
-        switch (oldgamestate)
+        switch (oldgamestate.value())
         {
-        case -1:
-        case GS_LEVEL:
+        case GS_FORCEWIPE.value():
+        case GS_LEVEL.value():
             V_SetPalette(0); // cph - use default (basic) palette
         default:
             break;
         }
 
-        switch (gamestate)
+        switch (gamestate.value())
         {
-        case GS_INTERMISSION:
+        case GS_INTERMISSION.value():
             WI_Drawer();
             break;
-        case GS_FINALE:
+        case GS_FINALE.value():
             F_Drawer();
             break;
-        case GS_DEMOSCREEN:
+        case GS_DEMOSCREEN.value():
             D_PageDrawer();
             break;
         default:
@@ -321,9 +321,8 @@ void D_Display(fixed_t frac)
         viewactive =
             (!(automapmode & am_active) || (automapmode & am_overlay)) &&
             !inhelpscreens;
-        isborder = viewactive
-                       ? (viewheight != SCREENHEIGHT)
-                       : (!inhelpscreens && (automapmode & am_active));
+        isborder = viewactive ? (viewheight != SCREENHEIGHT)
+                              : (!inhelpscreens && (automapmode & am_active));
 
         if (oldgamestate != GS_LEVEL)
         {
@@ -339,7 +338,8 @@ void D_Display(fixed_t frac)
                 isborder && (!isborderstate || borderwillneedredraw);
             // The border may need redrawing next time if the border surrounds
             // the screen, and there is a menu being displayed
-            borderwillneedredraw = menuactive && isborder && viewactive;
+            borderwillneedredraw =
+                menuactive != mnact_inactive && isborder && viewactive;
             // e6y
             // I should do it because I call R_RenderPlayerView in all cases,
             // not only if viewactive is true
@@ -380,8 +380,7 @@ void D_Display(fixed_t frac)
         R_RestoreInterpolations();
 
         ST_Drawer((viewheight != SCREENHEIGHT) ||
-                   (automapmode & am_active &&
-                    !(automapmode & am_overlay)),
+                      (automapmode & am_active && !(automapmode & am_overlay)),
                   redrawborderstuff || BorderNeedRefresh,
                   (menuactive == mnact_full));
 
@@ -521,12 +520,13 @@ static void D_DoomLoop(void)
             int len;
             char *avi_shot_curr_fname;
             avi_shot_num++;
-            len = snprintf(nullptr, 0, "%s%06d.tga", avi_shot_fname, avi_shot_num);
+            len = snprintf(nullptr, 0, "%s%06d.tga", avi_shot_fname,
+                           avi_shot_num);
             avi_shot_curr_fname = static_cast<char *>(malloc(len + 1));
             sprintf(avi_shot_curr_fname, "%s%06d.tga", avi_shot_fname,
                     avi_shot_num);
             M_DoScreenShot(avi_shot_curr_fname);
-            free(avi_shot_curr_fname);
+            Z_Free(avi_shot_curr_fname);
         }
     }
 }
@@ -855,7 +855,7 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec)
                         !strncmp(fileinfo[length].name, "POSSH0M0", 8))
                         cq++;
                 }
-                free(fileinfo);
+                std::free(fileinfo);
 
                 if (noiwad && !bfgedition && cq < 2)
                     I_Error("CheckIWAD: IWAD tag %s not present", iwadname);
@@ -1026,7 +1026,7 @@ static void IdentifyVersion(void)
         if (p == nullptr)
             p = I_DoomExeDir();
 
-        free(basesavegame);
+        Z_Free(basesavegame);
         basesavegame = strdup(p);
     }
     if ((i = M_CheckParm("-save")) &&
@@ -1035,7 +1035,7 @@ static void IdentifyVersion(void)
         if (!stat(myargv[i + 1], &sbuf) &&
             S_ISDIR(sbuf.st_mode)) // and is a dir
         {
-            free(basesavegame);
+            Z_Free(basesavegame);
             basesavegame =
                 strdup(myargv[i + 1]);      // jff 3/24/98 use that for savegame
             NormalizeSlashes(basesavegame); // jff 9/22/98 fix c:\ not working
@@ -1066,7 +1066,7 @@ static void IdentifyVersion(void)
     if (iwad && *iwad)
     {
         AddIWAD(iwad);
-        free(iwad);
+        std::free(iwad);
     }
     else
         I_Error("IdentifyVersion: IWAD not found\n");
@@ -1104,8 +1104,8 @@ static void FindResponseFile(void)
             // proff 04/05/2000: Added for searching responsefile
             if (size < 0)
             {
-                size_t fnlen = doom_snprintf(nullptr, 0, "%s/%s", I_DoomExeDir(),
-                                             &myargv[i][1]);
+                size_t fnlen = doom_snprintf(nullptr, 0, "%s/%s",
+                                             I_DoomExeDir(), &myargv[i][1]);
                 fname = static_cast<char *>(realloc(fname, fnlen + 4 + 1));
                 doom_snprintf(fname, fnlen + 1, "%s/%s", I_DoomExeDir(),
                               &myargv[i][1]);
@@ -1122,7 +1122,7 @@ static void FindResponseFile(void)
             }
             // jff 9/3/98 use logical output routine
             lprintf(LO_CONFIRM, "Found response file %s\n", fname);
-            free(fname);
+            Z_Free(fname);
             // proff 04/05/2000: Added check for empty rsp file
             if (size <= 0)
             {
@@ -1199,13 +1199,13 @@ static void FindResponseFile(void)
                     }
                 } while (size > 0);
             }
-            free(file);
+            Z_Free(file);
 
             newargv = static_cast<char **>(
                 realloc(newargv, sizeof(newargv[0]) * (indexinfile + index)));
             memcpy((void *)&newargv[indexinfile], moreargs,
                    index * sizeof(moreargs[0]));
-            free((void *)moreargs);
+            Z_Free((void *)moreargs);
 
             myargc = indexinfile + index;
             myargv = newargv;
@@ -1379,10 +1379,10 @@ static void DoLooseFiles(void)
         myargc = tmyargc;
     }
 
-    free(wads);
-    free(lmps);
-    free(dehs);
-    free(skip);
+    std::free(wads);
+    std::free(lmps);
+    std::free(dehs);
+    std::free(skip);
 }
 
 /* cph - MBF-like wad/deh/bex autoload code */
@@ -1543,7 +1543,7 @@ static void D_DoomMainSetup(void)
             strcpy(tempverstr, doomverstr);
             strcat(tempverstr, bfgverstr);
             doomverstr = strdup(tempverstr);
-            free(tempverstr);
+            Z_Free(tempverstr);
         }
 
         /* cphipps - the main display. This shows the build date, copyright, and
@@ -1723,7 +1723,7 @@ static void D_DoomMainSetup(void)
             else
             {
                 D_AddFile(fpath, source_auto_load);
-                free(fpath);
+                std::free(fpath);
             }
         }
     }
@@ -1751,7 +1751,7 @@ static void D_DoomMainSetup(void)
             if (file)
             {
                 D_AddFile(file, source_pwad);
-                free(file);
+                Z_Free(file);
             }
         }
     }
@@ -1788,7 +1788,7 @@ static void D_DoomMainSetup(void)
         {
             ffmap = atoi(myargv[p + 1]);
         }
-        free(file);
+        Z_Free(file);
     }
 
     // internal translucency set to config file value               // phares
@@ -1886,7 +1886,7 @@ static void D_DoomMainSetup(void)
             {
                 ProcessDehFile(fpath, D_dehout(), 0);
                 // this used to set modifiedgame here, but patches shouldn't
-                free(fpath);
+                Z_Free(fpath);
             }
         }
     }
@@ -1925,7 +1925,7 @@ static void D_DoomMainSetup(void)
             {
                 // during the beta we have debug output to dehout.txt
                 ProcessDehFile(file, D_dehout(), 0);
-                free(file);
+                Z_Free(file);
             }
             else
             {

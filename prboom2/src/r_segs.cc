@@ -68,8 +68,8 @@ static fixed_t toptexheight, midtexheight, bottomtexheight; // cph
 angle_t rw_normalangle; // angle to line origin
 int rw_angle1;
 fixed_t rw_distance;
-const lighttable_t **walllights;
-const lighttable_t **walllightsnext;
+const lighttable_t *const *walllights;
+const lighttable_t *const *walllightsnext;
 
 //
 // regular wall
@@ -221,7 +221,7 @@ static fixed_t R_ScaleFromGlobalAngle(angle_t visangle)
     return scale;
 }
 
-const lighttable_t **GetLightTable(int lightlevel)
+const lighttable_t *const *GetLightTable(int lightlevel)
 {
     int lightnum = (lightlevel >> LIGHTSEGSHIFT) + (extralight * LIGHTBRIGHT);
 
@@ -242,7 +242,7 @@ const lighttable_t **GetLightTable(int lightlevel)
         }
     }
 
-    return scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)];
+    return scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)].data();
 }
 
 //

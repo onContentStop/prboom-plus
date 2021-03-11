@@ -162,8 +162,6 @@ int P_GetFriction(const mobj_t *mo, int *frictionfactor)
 {
     int friction = ORIG_FRICTION;
     int movefactor = ORIG_FRICTION_FACTOR;
-    const msecnode_t *m;
-    const sector_t *sec;
 
     /* Assign the friction value to objects on the floor, non-floating,
      * and clipped. Normally the object's friction value is kept at
@@ -174,27 +172,39 @@ int P_GetFriction(const mobj_t *mo, int *frictionfactor)
      * friction value (muddy has precedence over icy).
      */
 
-    if (mo->flags & MF_FLY)
+    if ((mo->flags & MF_FLY) != 0U)
     {
         friction = FRICTION_FLY;
     }
     else
     {
-        if (!(mo->flags & (MF_NOCLIP | MF_NOGRAVITY)) &&
-            (mbf_features || (mo->player && !compatibility)) &&
-            variable_friction)
-            for (m = mo->touching_sectorlist; m; m = m->m_tnext)
-                if ((sec = m->m_sector)->special & FRICTION_MASK &&
+        if (((mo->flags & (MF_NOCLIP | MF_NOGRAVITY)) == 0U) &&
+            (COMPATIBILITY_LEVEL >= mbf_compatibility ||
+             ((mo->player != nullptr) &&
+              COMPATIBILITY_LEVEL > boom_compatibility_compatibility)) &&
+            (variable_friction != 0))
+        {
+            for (const msecnode_t *m = mo->touching_sectorlist; m != nullptr;
+                 m = m->m_tnext)
+            {
+                const sector_t *sec = m->m_sector;
+                if (((sec->special & FRICTION_MASK) != 0) &&
                     (sec->friction < friction || friction == ORIG_FRICTION) &&
                     (mo->z <= sec->floorheight ||
                      (sec->heightsec != -1 &&
                       mo->z <= sectors[sec->heightsec].floorheight &&
-                      mbf_features)))
+                      COMPATIBILITY_LEVEL >= mbf_compatibility)))
+                {
                     friction = sec->friction, movefactor = sec->movefactor;
+                }
+            }
+        }
     }
 
-    if (frictionfactor)
+    if (frictionfactor != nullptr)
+    {
         *frictionfactor = movefactor;
+    }
 
     return friction;
 }
@@ -217,8 +227,8 @@ int P_GetMoveFactor(mobj_t *mo, int *frictionp)
 
         movefactor = ORIG_FRICTION_FACTOR;
 
-        if (!compatibility && variable_friction &&
-            !(mo->flags & (MF_NOGRAVITY | MF_NOCLIP)))
+        if (COMPATIBILITY_LEVEL > boom_compatibility_compatibility &&
+            variable_friction && !(mo->flags & (MF_NOGRAVITY | MF_NOCLIP)))
         {
             friction = mo->friction;
             if (friction == ORIG_FRICTION) // normal floor
@@ -567,10 +577,10 @@ static dboolean PIT_CheckThing(mobj_t *thing) // killough 3/26/98: make static
          thing->type == MT_PLAYER) &&             // ... or different players
         thing->z + thing->height >= tmthing->z && // touches vertically
         tmthing->z + tmthing->height >= thing->z &&
-        (thing->type ^ MT_PAIN) |         // PEs and lost souls
-            (tmthing->type ^ MT_SKULL) && // are considered same
-        (thing->type ^ MT_SKULL) |        // (but Barons & Knights
-            (tmthing->type ^ MT_PAIN))    // are intentionally not)
+        ((thing->type ^ MT_PAIN) |                 // PEs and lost souls
+         (tmthing->type ^ MT_SKULL)) != MT_NULL && // are considered same
+        ((thing->type ^ MT_SKULL) |                // (but Barons & Knights
+         (tmthing->type ^ MT_PAIN)) != MT_NULL)    // are intentionally not)
     {
         P_DamageMobj(thing, nullptr, nullptr, thing->health); // kill object
         return true;
@@ -918,10 +928,10 @@ dboolean P_TryMove(
                 // Links:
                 // http://competn.doom2.net/pub/sda/t-z/v2-2822.zip
                 // http://www.doomworld.com/idgames/index.php?id=11138
-                if ((compatibility || !dropoff ||
+                if ((COMPATIBILITY_LEVEL <= boom_compatibility_compatibility ||
+                     !dropoff ||
                      (!prboom_comp[PC_NO_DROPOFF].state && mbf_features &&
-                      compatibility_level <=
-                          prboom_2_compatibility)) &&
+                      COMPATIBILITY_LEVEL <= prboom_2_compatibility)) &&
                     (tmfloorz - tmdropoffz > 24 * FRACUNIT))
                     return false; // don't stand over a dropoff
             }
@@ -1217,8 +1227,9 @@ void P_HitSlideLine(line_t *ld)
     else
     {
         extern dboolean onground;
-        icyfloor = !compatibility && variable_friction && slidemo->player &&
-                   onground && slidemo->friction > ORIG_FRICTION;
+        icyfloor = COMPATIBILITY_LEVEL > boom_compatibility_compatibility &&
+                   variable_friction && slidemo->player && onground &&
+                   slidemo->friction > ORIG_FRICTION;
     }
 
     if (ld->slopetype == ST_HORIZONTAL)
@@ -1408,8 +1419,7 @@ void P_SlideMove(mobj_t *mo)
 
             if (!P_TryMove(mo, mo->x, mo->y + mo->momy, true))
                 if (!P_TryMove(mo, mo->x + mo->momx, mo->y, true))
-                    if (compatibility_level ==
-                        boom_201_compatibility)
+                    if (COMPATIBILITY_LEVEL == boom_201_compatibility)
                         mo->momx = mo->momy = 0;
 
             break;
@@ -1468,7 +1478,7 @@ mobj_t *crosshair_target;
 static mobj_t *shootthing;
 
 /* killough 8/2/98: for more intelligent autoaiming */
-static uint_64_t aim_flags_mask;
+static MobjFlag AIM_FLAGS_MASK;
 
 // Height if not aiming up or down
 fixed_t shootz;
@@ -1552,7 +1562,7 @@ dboolean PTR_AimTraverse(intercept_t *in)
     /* killough 7/19/98, 8/2/98:
      * friends don't aim at friends (except players), at least not first
      */
-    if (th->flags & shootthing->flags & aim_flags_mask && !th->player)
+    if (th->flags & shootthing->flags & AIM_FLAGS_MASK && !th->player)
         return true;
 
     // check angles to see if the thing can be aimed at
@@ -1738,7 +1748,7 @@ fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance,
     linetarget = nullptr;
 
     /* killough 8/2/98: prevent friends from aiming at friends */
-    aim_flags_mask = mask;
+    AIM_FLAGS_MASK = mask;
 
     P_PathTraverse(t1->x, t1->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS,
                    PTR_AimTraverse);
@@ -1985,7 +1995,7 @@ dboolean PIT_ChangeSector(mobj_t *thing)
     {
         P_SetMobjState(thing, S_GIBS);
 
-        if (compatibility_level != doom_12_compatibility)
+        if (COMPATIBILITY_LEVEL != doom_12_compatibility)
         {
             thing->flags &= ~MF_SOLID;
         }
@@ -2010,7 +2020,7 @@ dboolean PIT_ChangeSector(mobj_t *thing)
         (thing->intflags & MIF_ARMED || sentient(thing)))
     {
         P_DamageMobj(thing, nullptr, nullptr, thing->health); // kill object
-        return true;                                    // keep checking
+        return true;                                          // keep checking
     }
 
     if (!(thing->flags & MF_SHOOTABLE))
@@ -2143,7 +2153,7 @@ inline static void P_PutSecnode(msecnode_t *node)
 {
     Z_BFree(&secnodezone, node);
 }
-#else  // USE_BLOCK_MEMORY_ALLOCATOR
+#else // USE_BLOCK_MEMORY_ALLOCATOR
 // phares 3/21/98
 //
 // Maintain a freelist of msecnode_t's to reduce memory allocs and frees.
@@ -2170,9 +2180,10 @@ static msecnode_t *P_GetSecnode(void)
 {
     msecnode_t *node;
 
-    return headsecnode ? node = headsecnode, headsecnode = node->m_snext,
-                         node
-                       : (msecnode_t *)(Z_Malloc(sizeof *node, PU_LEVEL, nullptr));
+    return headsecnode
+           ? node = headsecnode,
+             headsecnode = node->m_snext,
+             node : (msecnode_t *)(Z_Malloc(sizeof *node, PU_LEVEL, nullptr));
 }
 
 //
@@ -2219,14 +2230,14 @@ msecnode_t *P_AddSecnode(sector_t *s, mobj_t *thing, msecnode_t *nextnode)
 
     node->m_sector = s;       // sector
     node->m_thing = thing;    // mobj
-    node->m_tprev = nullptr;     // prev node on Thing thread
+    node->m_tprev = nullptr;  // prev node on Thing thread
     node->m_tnext = nextnode; // next node on Thing thread
     if (nextnode)
         nextnode->m_tprev = node; // set back link on Thing
 
     // Add new node at head of sector thread starting at s->touching_thinglist
 
-    node->m_sprev = nullptr;                  // prev node on sector thread
+    node->m_sprev = nullptr;               // prev node on sector thread
     node->m_snext = s->touching_thinglist; // next node on sector thread
     if (s->touching_thinglist)
         node->m_snext->m_sprev = node;
@@ -2409,13 +2420,12 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
      *  Fun. We restore its previous value unless we're in a Boom/MBF demo.
      */
     if (!prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
-        if ((compatibility_level <
-             boom_compatibility_compatibility) ||
-            (compatibility_level >= prboom_3_compatibility))
+        if ((COMPATIBILITY_LEVEL < boom_compatibility_compatibility) ||
+            (COMPATIBILITY_LEVEL >= prboom_3_compatibility))
             tmthing = saved_tmthing;
     /* And, duh, the same for tmx/y - cph 2002/09/22
      * And for tmbbox - cph 2003/08/10 */
-    if ((compatibility_level < boom_compatibility_compatibility) /* ||
+    if ((COMPATIBILITY_LEVEL < boom_compatibility_compatibility) /* ||
       (compatibility_level >= prboom_4_compatibility) */)
     {
         tmx = saved_tmx, tmy = saved_tmy;

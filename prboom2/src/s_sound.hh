@@ -34,6 +34,8 @@
 #ifndef __S_SOUND__
 #define __S_SOUND__
 
+#include "info.hh"
+
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -59,13 +61,13 @@ void S_Start(void);
 // Start sound for thing at <origin>
 //  using <sound_id> from sounds.h
 //
-void S_StartSound(void *origin, int sound_id);
+void S_StartSound(void *origin, sfxenum_t sound_id);
 
 // Will start a sound at a given volume.
-void S_StartSoundAtVolume(void *origin, int sound_id, int volume);
+void S_StartSoundAtVolume(void *origin_p, sfxenum_t sfx_id, int volume);
 
 // killough 4/25/98: mask used to indicate sound origin is player item pickup
-#define PICKUP_SOUND (0x8000)
+constexpr sfxenum_t PICKUP_SOUND = 0x8000;
 
 // Stop sound for thing at <origin>
 void S_StopSound(void *origin);

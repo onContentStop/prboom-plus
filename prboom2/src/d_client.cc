@@ -143,7 +143,7 @@ void D_InitNetGame(void)
 
         // Get info from the setup packet
         consoleplayer = sinfo->yourplayer;
-        compatibility_level = sinfo->complevel;
+        COMPATIBILITY_LEVEL = sinfo->complevel;
         G_Compatibility();
         startskill = static_cast<skill_t>(sinfo->skill);
         deathmatch = sinfo->deathmatch;

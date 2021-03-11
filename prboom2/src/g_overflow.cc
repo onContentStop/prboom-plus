@@ -49,8 +49,8 @@
 
 int overflows_enabled = true;
 
-overrun_param_t overflows[OVERFLOW_MAX];
-const char *overflow_cfgname[OVERFLOW_MAX] = {
+overrun_param_t overflows[OVERFLOW_MAX.value()];
+const char *overflow_cfgname[OVERFLOW_MAX.value()] = {
     "overrun_spechit_emulate",   "overrun_reject_emulate",
     "overrun_intercept_emulate", "overrun_playeringame_emulate",
     "overrun_donut_emulate",     "overrun_missedbackside_emulate"};
@@ -58,38 +58,41 @@ const char *overflow_cfgname[OVERFLOW_MAX] = {
 static void ShowOverflowWarning(overrun_list_t overflow, int fatal,
                                 const char *params, ...)
 {
-    overflows[overflow].shit_happens = true;
+    overflows[overflow.value()].shit_happens = true;
 
-    if (overflows[overflow].warn && !overflows[overflow].promted)
+    if (overflows[overflow.value()].warn &&
+        !overflows[overflow.value()].prompted)
     {
         va_list argptr;
         char buffer[1024];
 
-        static const char *name[OVERFLOW_MAX] = {"SPECHIT",   "REJECT",
-                                                 "INTERCEPT", "PLYERINGAME",
-                                                 "DONUT",     "MISSEDBACKSIDE"};
+        static constexpr const char *name[OVERFLOW_MAX.value()] = {
+            "SPECHIT",     "REJECT", "INTERCEPT",
+            "PLYERINGAME", "DONUT",  "MISSEDBACKSIDE"};
 
-        static const char str1[] =
+        static constexpr const char *str1 =
             "Too big or not supported %s overflow has been detected. "
             "Desync or crash can occur soon "
             "or during playback with the vanilla engine in case you're "
             "recording "
             "demo.%s%s";
 
-        static const char str2[] = "%s overflow has been detected.%s%s";
+        static constexpr const char *str2 =
+            "%s overflow has been detected.%s%s";
 
-        static const char str3[] = "%s overflow has been detected. "
-                                   "The option responsible for emulation of "
-                                   "this overflow is switched off "
-                                   "hence desync or crash can occur soon "
-                                   "or during playback with the vanilla engine "
-                                   "in case you're recording "
-                                   "demo.%s%s";
+        static constexpr const char *str3 =
+            "%s overflow has been detected. "
+            "The option responsible for emulation of "
+            "this overflow is switched off "
+            "hence desync or crash can occur soon "
+            "or during playback with the vanilla engine "
+            "in case you're recording "
+            "demo.%s%s";
 
-        overflows[overflow].promted = true;
+        overflows[overflow.value()].prompted = true;
 
         sprintf(buffer, (fatal ? str1 : (EMULATE(overflow) ? str2 : str3)),
-                name[overflow],
+                name[overflow.value()],
                 "\nYou can change PrBoom behaviour for this overflow through "
                 "in-game menu.",
                 params);
@@ -156,7 +159,8 @@ static void InterceptsMemoryOverrun(int location, int value)
 
 void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 {
-    if (num_intercepts > MAXINTERCEPTS_ORIGINAL && demo_compatibility &&
+    if (num_intercepts > MAXINTERCEPTS_ORIGINAL &&
+        COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
         PROCESS(OVERFLOW_INTERCEPT))
     {
         ShowOverflowWarning(OVERFLOW_INTERCEPT, false, "");
@@ -185,12 +189,13 @@ void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 // it detects and emulates overflows on vex6d.wad\bug_wald(toke).lmp, etc.
 // http://www.doom2.net/doom2/research/runningbody.zip
 
-int PlayeringameOverrun(const mapthing_t *mthing)
+bool PlayeringameOverrun(const mapthing_t *mthing)
 {
     if (mthing->type == 0 && PROCESS(OVERFLOW_PLYERINGAME))
     {
         // playeringame[-1] == players[3].didsecret
-        ShowOverflowWarning(OVERFLOW_PLYERINGAME, (players + 3)->didsecret, "");
+        ShowOverflowWarning(OVERFLOW_PLYERINGAME,
+                            static_cast<int>(players[3].didsecret), "");
 
         if (EMULATE(OVERFLOW_PLYERINGAME))
         {
@@ -217,14 +222,15 @@ void SpechitOverrun(spechit_overrun_param_t *params)
 {
     int numspechit = *(params->numspechit);
 
-    if (demo_compatibility && numspechit > 8)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+        numspechit > 8)
     {
         line_t **spechit = *(params->spechit);
 
         ShowOverflowWarning(
             OVERFLOW_SPECHIT,
-            numspechit > (compatibility_level == dosdoom_compatibility ||
-                                  compatibility_level == tasdoom_compatibility
+            numspechit > (COMPATIBILITY_LEVEL == dosdoom_compatibility ||
+                                  COMPATIBILITY_LEVEL == tasdoom_compatibility
                               ? 10
                               : 14),
             "\n\nThe list of LineID leading to overrun:\n%d, %d, %d, %d, %d, "
@@ -268,8 +274,8 @@ void SpechitOverrun(spechit_overrun_param_t *params)
 
             addr = spechit_baseaddr + (params->line - lines) * 0x3E;
 
-            if (compatibility_level == dosdoom_compatibility ||
-                compatibility_level == tasdoom_compatibility)
+            if (COMPATIBILITY_LEVEL == dosdoom_compatibility ||
+                COMPATIBILITY_LEVEL == tasdoom_compatibility)
             {
                 // There are no more desyncs in the following dosdoom demos:
                 // flsofdth.wad\fod3uv.lmp -
@@ -370,7 +376,8 @@ void RejectOverrun(int rejectlump, const byte **rejectmatrix, int totallines)
         W_UnlockLumpNum(rejectlump);
         rejectlump = -1;
 
-        if (demo_compatibility && PROCESS(OVERFLOW_REJECT))
+        if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+            PROCESS(OVERFLOW_REJECT))
         {
             ShowOverflowWarning(OVERFLOW_REJECT,
                                 (required - length > 16) || (length % 4 != 0),
@@ -498,7 +505,8 @@ static int GetMemoryValue(unsigned int offset, void *value, int size)
 #define DONUT_FLOORPIC_DEFAULT 0x16
 int DonutOverrun(fixed_t *pfloorheight, short *pfloorpic)
 {
-    if (demo_compatibility && PROCESS(OVERFLOW_DONUT))
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+        PROCESS(OVERFLOW_DONUT))
     {
         ShowOverflowWarning(OVERFLOW_DONUT, 0, "");
 
@@ -525,7 +533,7 @@ int DonutOverrun(fixed_t *pfloorheight, short *pfloorpic)
 
 int MissedBackSideOverrun(line_t *line)
 {
-    if (demo_compatibility)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
     {
         if (line)
         {
@@ -546,13 +554,14 @@ int MissedBackSideOverrun(line_t *line)
 //
 // GetSectorAtNullAddress
 //
-sector_t *GetSectorAtNullAddress(void)
+sector_t *GetSectorAtNullAddress()
 {
-    static int null_sector_is_initialized = false;
     static sector_t null_sector;
 
-    if (demo_compatibility && EMULATE(OVERFLOW_MISSEDBACKSIDE))
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+        EMULATE(OVERFLOW_MISSEDBACKSIDE))
     {
+        static bool null_sector_is_initialized = false;
         if (!null_sector_is_initialized)
         {
             memset(&null_sector, 0, sizeof(null_sector));
@@ -565,5 +574,5 @@ sector_t *GetSectorAtNullAddress(void)
         return &null_sector;
     }
 
-    return 0;
+    return nullptr;
 }

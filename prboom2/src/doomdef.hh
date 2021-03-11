@@ -45,7 +45,8 @@
 #define __attribute__(x)
 #endif
 
-// This must come first, since it redefines malloc(), free(), etc. -- killough:
+// This must come first, since it redefines malloc(), Z_Free(), etc. --
+// killough:
 #include "z_zone.hh"
 
 #include <ctype.h>
@@ -130,30 +131,28 @@ extern int WIDE_SCREENHEIGHT;
 extern int SCREEN_320x200;
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS 4
+constexpr int MAXPLAYERS = 4;
 
 // phares 5/14/98:
 // DOOM Editor Numbers (aka doomednum in mobj_t)
 
-#define DEN_PLAYER5 4001
-#define DEN_PLAYER6 4002
-#define DEN_PLAYER7 4003
-#define DEN_PLAYER8 4004
+constexpr int DEN_PLAYER5 = 4001;
+constexpr int DEN_PLAYER6 = 4002;
+constexpr int DEN_PLAYER7 = 4003;
+constexpr int DEN_PLAYER8 = 4004;
 
 // State updates, number of tics / second.
-#define TICRATE 35
+constexpr int TICRATE = 35;
 
 // The current state of the game: whether we are playing, gazing
 // at the intermission screen, the game final animation, or a demo.
 
-typedef enum
-{
-    GS_FORCEWIPE = -1,
-    GS_LEVEL,
-    GS_INTERMISSION,
-    GS_FINALE,
-    GS_DEMOSCREEN
-} gamestate_t;
+using GameState = SequentialEnum<int>;
+constexpr GameState GS_FORCEWIPE = -1;
+constexpr GameState GS_LEVEL = 0;
+constexpr GameState GS_INTERMISSION = 1;
+constexpr GameState GS_FINALE = 2;
+constexpr GameState GS_DEMOSCREEN = 3;
 
 //
 // Difficulty/skill settings/filters.
@@ -351,8 +350,8 @@ typedef enum
 // magnetized floors, etc. Less friction can create ice.
 
 #define MORE_FRICTION_MOMENTUM 15000 // mud factor based on momentum
-#define ORIG_FRICTION 0xE800         // original value
-#define ORIG_FRICTION_FACTOR 2048    // original value
+#define ORIG_FRICTION 0xE800 // original value
+#define ORIG_FRICTION_FACTOR 2048 // original value
 #define FRICTION_FLY 0xeb00
 
 #endif // __DOOMDEF__

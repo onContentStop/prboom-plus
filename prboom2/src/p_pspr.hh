@@ -94,10 +94,10 @@ enum
 
 extern int weapon_preferences[2][NUMWEAPONS + 1]; /* killough 5/2/98 */
 extern int weapon_attack_alignment;
-int P_WeaponPreferred(int w1, int w2);
+bool P_WeaponPreferred(int w1, int w2);
 
 struct player_t;
-int P_SwitchWeapon(player_t *player);
+weapontype_t P_SwitchWeapon(player_t *player);
 dboolean P_CheckAmmo(player_t *player);
 void P_SetupPsprites(player_t *curplayer);
 void P_MovePsprites(player_t *curplayer);

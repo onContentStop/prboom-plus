@@ -110,7 +110,8 @@ void MarkAnimatedTextures(void)
 #ifdef GL_DOOM
     anim_t *anim;
 
-    anim_textures = (TAnimItemParam *)calloc(numtextures, sizeof(TAnimItemParam));
+    anim_textures =
+        (TAnimItemParam *)calloc(numtextures, sizeof(TAnimItemParam));
     anim_flats = (TAnimItemParam *)calloc(numflats, sizeof(TAnimItemParam));
 
     for (anim = anims; anim < lastanim; anim++)
@@ -290,7 +291,7 @@ sector_t *getNextSector(line_t *line, sector_t *sec)
             return line
                 ->backsector; // jff 5/3/98 don't retn sec unless compatibility
         else                  // fixes an intra-sector line breaking functions
-            return nullptr;      // like floor->highest floor
+            return nullptr;   // like floor->highest floor
     }
     return line->frontsector;
 }
@@ -375,7 +376,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
     // e6y
     // Original P_FindNextHighestFloor() is restored for demo_compatibility
     // Adapted for prboom's complevels
-    if (demo_compatibility &&
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
         !prboom_comp[PC_FORCE_BOOM_FINDNEXTHIGHESTFLOOR].state)
     {
         int h;
@@ -418,7 +419,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
                 // 22..26: overflow affects saved registers - unpredictable
                 // behaviour, can crash; 27: overflow affects return address -
                 // crash with high probability;
-                if (compatibility_level < dosdoom_compatibility &&
+                if (COMPATIBILITY_LEVEL < dosdoom_compatibility &&
                     h >= MAX_ADJOINING_SECTORS)
                 {
                     lprintf(LO_WARN,
@@ -447,7 +448,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
             }
 
             // Check for overflow. Warning.
-            if (compatibility_level >= dosdoom_compatibility &&
+            if (COMPATIBILITY_LEVEL >= dosdoom_compatibility &&
                 h >= MAX_ADJOINING_SECTORS)
             {
                 lprintf(LO_WARN,
@@ -468,7 +469,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
             // It's not *quite* random stack noise. If this function is called
             // as part of a loop, heightlist will be at the same location as in
             // the previous call. Doing it this way fixes 1_ON_1.WAD.
-            return (compatibility_level < doom_1666_compatibility
+            return (COMPATIBILITY_LEVEL < doom_1666_compatibility
                         ? last_height_0
                         : currentheight);
         }
@@ -502,9 +503,7 @@ fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
      * If there are no higher neighbouring sectors, Heretic just returned
      * heightlist[0] (local variable), i.e. noise off the stack. 0 is right for
      * RETURN01 E1M2, so let's take that. */
-    return (compatibility_level < doom_1666_compatibility
-                ? 0
-                : currentheight);
+    return (COMPATIBILITY_LEVEL < doom_1666_compatibility ? 0 : currentheight);
 }
 
 //
@@ -770,9 +769,10 @@ sector_t *P_FindModelFloorSector(fixed_t floordestheight, int secnum)
     // jff 5/23/98 don't disturb sec->linecount while searching
     // but allow early exit in old demos
     linecount = sec->linecount;
-    for (i = 0;
-         i < (demo_compatibility && sec->linecount < linecount ? sec->linecount
-                                                               : linecount);
+    for (i = 0; i < (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+                             sec->linecount < linecount
+                         ? sec->linecount
+                         : linecount);
          i++)
     {
         if (twoSided(secnum, i))
@@ -814,9 +814,10 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum)
     // jff 5/23/98 don't disturb sec->linecount while searching
     // but allow early exit in old demos
     linecount = sec->linecount;
-    for (i = 0;
-         i < (demo_compatibility && sec->linecount < linecount ? sec->linecount
-                                                               : linecount);
+    for (i = 0; i < (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+                             sec->linecount < linecount
+                         ? sec->linecount
+                         : linecount);
          i++)
     {
         if (twoSided(secnum, i))
@@ -865,7 +866,7 @@ int P_FindLineFromLineTag(const line_t *line, int start)
 // Hash the sector tags across the sectors and linedefs.
 static void P_InitTagLists(void)
 {
-    register int i;
+    int i;
 
     for (i = numsectors; --i >= 0;) // Initially make all slots empty.
         sectors[i].firsttag = -1;
@@ -1031,7 +1032,7 @@ dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
              // only 2 keys There is no more desync on 10sector.wad\ts27-137.lmp
              // http://www.doomworld.com/tas/ts27-137.zip
              (!player->cards[it_yellowcard] &&
-              (compatibility_level == mbf_compatibility &&
+              (COMPATIBILITY_LEVEL == mbf_compatibility &&
                        !prboom_comp
                             [PC_FORCE_CORRECT_CODE_FOR_3_KEYS_DOORS_IN_MBF]
                                 .state
@@ -1060,7 +1061,9 @@ dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
 //
 dboolean PUREFUNC P_SectorActive(special_e t, const sector_t *sec)
 {
-    if (demo_compatibility) // return whether any thinker is active
+    if (COMPATIBILITY_LEVEL <
+        boom_compatibility_compatibility) // return whether any thinker is
+                                          // active
         return sec->floordata != nullptr || sec->ceilingdata != nullptr ||
                sec->lightingdata != nullptr;
     else
@@ -1214,7 +1217,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
     //  Things that should never trigger lines
     //
     // e6y: Improved support for Doom v1.2
-    if (compatibility_level == doom_12_compatibility)
+    if (COMPATIBILITY_LEVEL == doom_12_compatibility)
     {
         if (line->special > 98 && line->special != 104)
         {
@@ -1226,16 +1229,15 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
         if (!thing->player && !bossaction)
         {
             // Things that should NOT trigger specials...
-            switch (thing->type)
+            switch (thing->type.value())
             {
-            case MT_ROCKET:
-            case MT_PLASMA:
-            case MT_BFG:
-            case MT_TROOPSHOT:
-            case MT_HEADSHOT:
-            case MT_BRUISERSHOT:
+            case MT_ROCKET.value():
+            case MT_PLASMA.value():
+            case MT_BFG.value():
+            case MT_TROOPSHOT.value():
+            case MT_HEADSHOT.value():
+            case MT_BRUISERSHOT.value():
                 return;
-                break;
 
             default:
                 break;
@@ -1244,7 +1246,9 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
     }
 
     // jff 02/04/98 add check here for generalized lindef types
-    if (!demo_compatibility) // generalized types not recognized if old demo
+    if (COMPATIBILITY_LEVEL >=
+        boom_compatibility_compatibility) // generalized types not recognized if
+                                          // old demo
     {
         // pointer to line function is nullptr by default, set non-null if
         // line special is walkover generalized linedef type
@@ -1398,128 +1402,148 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
 
     case 2:
         // Open Door
-        if (EV_DoDoor(line, openDoor) || demo_compatibility)
+        if (EV_DoDoor(line, openDoor) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 3:
         // Close Door
-        if (EV_DoDoor(line, closeDoor) || demo_compatibility)
+        if (EV_DoDoor(line, closeDoor) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 4:
         // Raise Door
-        if (EV_DoDoor(line, normal) || demo_compatibility)
+        if (EV_DoDoor(line, normal) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 5:
         // Raise Floor
-        if (EV_DoFloor(line, raiseFloor) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloor) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 6:
         // Fast Ceiling Crush & Raise
-        if (EV_DoCeiling(line, fastCrushAndRaise) || demo_compatibility)
+        if (EV_DoCeiling(line, fastCrushAndRaise) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 8:
         // Build Stairs
-        if (EV_BuildStairs(line, build8) || demo_compatibility)
+        if (EV_BuildStairs(line, build8) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 10:
         // PlatDownWaitUp
-        if (EV_DoPlat(line, downWaitUpStay, 0) || demo_compatibility)
+        if (EV_DoPlat(line, downWaitUpStay, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 12:
         // Light Turn On - brightest near
-        if (EV_LightTurnOn(line, 0) || demo_compatibility)
+        if (EV_LightTurnOn(line, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 13:
         // Light Turn On 255
-        if (EV_LightTurnOn(line, 255) || demo_compatibility)
+        if (EV_LightTurnOn(line, 255) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 16:
         // Close Door 30
-        if (EV_DoDoor(line, close30ThenOpen) || demo_compatibility)
+        if (EV_DoDoor(line, close30ThenOpen) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 17:
         // Start Light Strobing
-        if (EV_StartLightStrobing(line) || demo_compatibility)
+        if (EV_StartLightStrobing(line) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 19:
         // Lower Floor
-        if (EV_DoFloor(line, lowerFloor) || demo_compatibility)
+        if (EV_DoFloor(line, lowerFloor) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 22:
         // Raise floor to nearest height and change texture
-        if (EV_DoPlat(line, raiseToNearestAndChange, 0) || demo_compatibility)
+        if (EV_DoPlat(line, raiseToNearestAndChange, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 25:
         // Ceiling Crush and Raise
-        if (EV_DoCeiling(line, crushAndRaise) || demo_compatibility)
+        if (EV_DoCeiling(line, crushAndRaise) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 30:
         // Raise floor to shortest texture height
         //  on either side of lines.
-        if (EV_DoFloor(line, raiseToTexture) || demo_compatibility)
+        if (EV_DoFloor(line, raiseToTexture) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 35:
         // Lights Very Dark
-        if (EV_LightTurnOn(line, 35) || demo_compatibility)
+        if (EV_LightTurnOn(line, 35) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 36:
         // Lower Floor (TURBO)
-        if (EV_DoFloor(line, turboLower) || demo_compatibility)
+        if (EV_DoFloor(line, turboLower) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 37:
         // LowerAndChange
-        if (EV_DoFloor(line, lowerAndChange) || demo_compatibility)
+        if (EV_DoFloor(line, lowerAndChange) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 38:
         // Lower Floor To Lowest
-        if (EV_DoFloor(line, lowerFloorToLowest) || demo_compatibility)
+        if (EV_DoFloor(line, lowerFloorToLowest) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 39:
         // TELEPORT! //jff 02/09/98 fix using up with wrong side crossing
-        if (EV_Teleport(line, side, thing) || demo_compatibility)
+        if (EV_Teleport(line, side, thing) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 40:
         // RaiseCeilingLowerFloor
-        if (demo_compatibility)
+        if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
         {
             EV_DoCeiling(line, raiseToHighest);
             EV_DoFloor(line, lowerFloorToLowest); // jff 02/12/98 doesn't work
@@ -1531,7 +1555,8 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
 
     case 44:
         // Ceiling Crush
-        if (EV_DoCeiling(line, lowerAndCrush) || demo_compatibility)
+        if (EV_DoCeiling(line, lowerAndCrush) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
@@ -1545,79 +1570,92 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
 
     case 53:
         // Perpetual Platform Raise
-        if (EV_DoPlat(line, perpetualRaise, 0) || demo_compatibility)
+        if (EV_DoPlat(line, perpetualRaise, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 54:
         // Platform Stop
-        if (EV_StopPlat(line) || demo_compatibility)
+        if (EV_StopPlat(line) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 56:
         // Raise Floor Crush
-        if (EV_DoFloor(line, raiseFloorCrush) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloorCrush) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 57:
         // Ceiling Crush Stop
-        if (EV_CeilingCrushStop(line) || demo_compatibility)
+        if (EV_CeilingCrushStop(line) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 58:
         // Raise Floor 24
-        if (EV_DoFloor(line, raiseFloor24) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloor24) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 59:
         // Raise Floor 24 And Change
-        if (EV_DoFloor(line, raiseFloor24AndChange) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloor24AndChange) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 100:
         // Build Stairs Turbo 16
-        if (EV_BuildStairs(line, turbo16) || demo_compatibility)
+        if (EV_BuildStairs(line, turbo16) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 104:
         // Turn lights off in sector(tag)
-        if (EV_TurnTagLightsOff(line) || demo_compatibility)
+        if (EV_TurnTagLightsOff(line) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 108:
         // Blazing Door Raise (faster than TURBO!)
-        if (EV_DoDoor(line, blazeRaise) || demo_compatibility)
+        if (EV_DoDoor(line, blazeRaise) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 109:
         // Blazing Door Open (faster than TURBO!)
-        if (EV_DoDoor(line, blazeOpen) || demo_compatibility)
+        if (EV_DoDoor(line, blazeOpen) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 110:
         // Blazing Door Close (faster than TURBO!)
-        if (EV_DoDoor(line, blazeClose) || demo_compatibility)
+        if (EV_DoDoor(line, blazeClose) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 119:
         // Raise floor to nearest surr. floor
-        if (EV_DoFloor(line, raiseFloorToNearest) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloorToNearest) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 121:
         // Blazing PlatDownWaitUpStay
-        if (EV_DoPlat(line, blazeDWUS, 0) || demo_compatibility)
+        if (EV_DoPlat(line, blazeDWUS, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
@@ -1633,19 +1671,22 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
     case 125:
         // TELEPORT MonsterONLY
         if (!thing->player &&
-            (EV_Teleport(line, side, thing) || demo_compatibility))
+            (EV_Teleport(line, side, thing) ||
+             COMPATIBILITY_LEVEL < boom_compatibility_compatibility))
             line->special = 0;
         break;
 
     case 130:
         // Raise Floor Turbo
-        if (EV_DoFloor(line, raiseFloorTurbo) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloorTurbo) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
     case 141:
         // Silent Ceiling Crush & Raise
-        if (EV_DoCeiling(line, silentCrushAndRaise) || demo_compatibility)
+        if (EV_DoCeiling(line, silentCrushAndRaise) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             line->special = 0;
         break;
 
@@ -1826,7 +1867,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
         // killough 2/16/98: Fix problems with W1 types being cleared too early
 
     default:
-        if (!demo_compatibility)
+        if (COMPATIBILITY_LEVEL >= boom_compatibility_compatibility)
             switch (line->special)
             {
                 // Extended walk once triggers
@@ -2137,7 +2178,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing,
 void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 {
     // jff 02/04/98 add check here for generalized linedef
-    if (!demo_compatibility)
+    if (COMPATIBILITY_LEVEL >= boom_compatibility_compatibility)
     {
         // pointer to line function is nullptr by default, set non-null if
         // line special is gun triggered generalized linedef type
@@ -2279,7 +2320,8 @@ void P_ShootSpecialLine(mobj_t *thing, line_t *line)
     {
     case 24:
         // 24 G1 raise floor to highest adjacent
-        if (EV_DoFloor(line, raiseFloor) || demo_compatibility)
+        if (EV_DoFloor(line, raiseFloor) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             P_ChangeSwitchTexture(line, 0);
         break;
 
@@ -2291,7 +2333,8 @@ void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 
     case 47:
         // 47 G1 raise floor to nearest and change texture and type
-        if (EV_DoPlat(line, raiseToNearestAndChange, 0) || demo_compatibility)
+        if (EV_DoPlat(line, raiseToNearestAndChange, 0) ||
+            COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
             P_ChangeSwitchTexture(line, 0);
         break;
 
@@ -2299,7 +2342,7 @@ void P_ShootSpecialLine(mobj_t *thing, line_t *line)
         // killough 1/31/98: added demo_compatibility check, added inner switch
 
     default:
-        if (!demo_compatibility)
+        if (COMPATIBILITY_LEVEL >= boom_compatibility_compatibility)
             switch (line->special)
             {
             case 197:
@@ -2385,10 +2428,11 @@ void P_PlayerInSpecialSector(player_t *player)
             // e6y
             if (hudadd_secretarea)
             {
-                int sfx_id =
-                    (I_GetSfxLumpNum(&S_sfx[sfx_secret]) < 0 ? sfx_itmbk
-                                                             : sfx_secret);
-                SetCustomMessage(player - players, STSTR_SECRETFOUND, 0,
+                sfxenum_t sfx_id =
+                    (I_GetSfxLumpNum(&S_sfx[sfx_secret.value()]) < 0
+                         ? sfx_itmbk
+                         : sfx_secret);
+                SetCustomMessage(player - players.data(), STSTR_SECRETFOUND, 0,
                                  2 * TICRATE, CR_GOLD, sfx_id);
             }
 
@@ -2446,10 +2490,11 @@ void P_PlayerInSpecialSector(player_t *player)
             // e6y
             if (hudadd_secretarea)
             {
-                int sfx_id =
-                    (I_GetSfxLumpNum(&S_sfx[sfx_secret]) < 0 ? sfx_itmbk
-                                                             : sfx_secret);
-                SetCustomMessage(player - players, STSTR_SECRETFOUND, 0,
+                sfxenum_t sfx_id =
+                    (I_GetSfxLumpNum(&S_sfx[sfx_secret.value()]) < 0
+                         ? sfx_itmbk
+                         : sfx_secret);
+                SetCustomMessage(player - players.data(), STSTR_SECRETFOUND, 0,
                                  2 * TICRATE, CR_GOLD, sfx_id);
             }
         }
@@ -2562,8 +2607,7 @@ void P_UpdateSpecials(void)
                      * unless in a compatibility mode. */
                     mobj_t *so = (mobj_t *)buttonlist[i].soundorg;
                     if (comp[comp_sound] ||
-                        compatibility_level <
-                            prboom_6_compatibility)
+                        COMPATIBILITY_LEVEL < prboom_6_compatibility)
                         /* since the buttonlist array is usually zeroed out,
                          * button popouts generally appear to come from (0,0) */
                         so = (mobj_t *)&buttonlist[i].soundorg;
@@ -2634,7 +2678,7 @@ void P_SpawnSpecials(void)
         if (sector->special & SECRET_MASK) // jff 3/15/98 count extended
             totalsecret++;                 // secret sectors too
 
-        switch ((demo_compatibility &&
+        switch ((COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
                  !prboom_comp[PC_TRUNCATED_SECTOR_SPECIALS].state)
                     ? sector->special
                     : sector->special & 31)
@@ -2714,7 +2758,8 @@ void P_SpawnSpecials(void)
 
     // allow MBF sky transfers in all complevels
 
-    if (comp_skytransfers || !demo_compatibility)
+    if (comp_skytransfers ||
+        COMPATIBILITY_LEVEL >= boom_compatibility_compatibility)
         for (i = 0; i < numlines; i++)
             switch (lines[i].special)
             {
@@ -2736,7 +2781,7 @@ void P_SpawnSpecials(void)
             }
 
     // e6y
-    if (demo_compatibility)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
         return;
 
     P_SpawnFriction(); // phares 3/12/98: New friction model using linedefs
@@ -2817,7 +2862,7 @@ void T_Scroll(scroll_t *s)
     if (!(dx | dy)) // no-op if both (x,y) offsets 0
         return;
 
-    switch (s->type)
+    switch (s->type.value())
     {
         side_t *side;
         sector_t *sec;
@@ -2825,25 +2870,26 @@ void T_Scroll(scroll_t *s)
         msecnode_t *node;
         mobj_t *thing;
 
-    case scroll_t::sc_side: // killough 3/7/98: Scroll wall texture
+    case scroll_t::sc_side.value(): // killough 3/7/98: Scroll wall texture
         side = sides + s->affectee;
         side->textureoffset += dx;
         side->rowoffset += dy;
         break;
 
-    case scroll_t::sc_floor: // killough 3/7/98: Scroll floor texture
+    case scroll_t::sc_floor.value(): // killough 3/7/98: Scroll floor texture
         sec = sectors + s->affectee;
         sec->floor_xoffs += dx;
         sec->floor_yoffs += dy;
         break;
 
-    case scroll_t::sc_ceiling: // killough 3/7/98: Scroll ceiling texture
+    case scroll_t::sc_ceiling
+        .value(): // killough 3/7/98: Scroll ceiling texture
         sec = sectors + s->affectee;
         sec->ceiling_xoffs += dx;
         sec->ceiling_yoffs += dy;
         break;
 
-    case scroll_t::sc_carry:
+    case scroll_t::sc_carry.value():
 
         // killough 3/7/98: Carry things on floor
         // killough 3/20/98: use new sector list which reflects true members
@@ -2869,7 +2915,7 @@ void T_Scroll(scroll_t *s)
             }
         break;
 
-    case scroll_t::sc_carry_ceiling: // to be added later
+    case scroll_t::sc_carry_ceiling.value(): // to be added later
         break;
     }
 }
@@ -2892,13 +2938,13 @@ void T_Scroll(scroll_t *s)
 // accel: non-zero if this is an accelerative effect
 //
 
-static void Add_Scroller(int type, fixed_t dx, fixed_t dy, int control,
-                         int affectee, int accel)
+static void Add_Scroller(scroll_t::type_t type, fixed_t dx, fixed_t dy,
+                         int control, int affectee, int accel)
 {
     auto *s =
         static_cast<scroll_t *>(Z_Malloc(sizeof(scroll_t), PU_LEVSPEC, 0));
     s->thinker.function = T_Scroll;
-    s->type = static_cast<scroll_t::type_t>(type);
+    s->type = type;
     s->dx = dx;
     s->dy = dy;
     s->accel = accel;
@@ -2930,7 +2976,7 @@ static void Add_WallScroller(fixed_t dx, fixed_t dy, const line_t *l,
                              ANGLETOFINESHIFT]);
 
     // CPhipps - Import scroller calc overflow fix, compatibility optioned
-    if (compatibility_level >= lxdoom_1_compatibility)
+    if (COMPATIBILITY_LEVEL >= lxdoom_1_compatibility)
     {
         x = (fixed_t)(
             ((int_64_t)dy * -(int_64_t)l->dy - (int_64_t)dx * (int_64_t)l->dx) /
@@ -2966,7 +3012,8 @@ static void P_SpawnScrollers(void)
         fixed_t dy = l->dy >> SCROLL_SHIFT;
         int control = -1, accel = 0; // no control sector or acceleration
         int special = l->special;
-        if (demo_compatibility && special != 48)
+        if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+            special != 48)
             continue; // e6y
 
         // killough 3/7/98: Types 245-249 are same as 250-254 except that the
@@ -3082,7 +3129,8 @@ void T_Friction(friction_t *f)
     mobj_t *thing;
     msecnode_t *node;
 
-    if (compatibility || !variable_friction)
+    if (COMPATIBILITY_LEVEL <= boom_compatibility_compatibility ||
+        !variable_friction)
         return;
 
     sec = sectors + f->affectee;
@@ -3223,7 +3271,8 @@ static void P_SpawnFriction(void)
                 // at level startup, and then uses this friction value.
 
                 // e6y: boom's friction code for boom compatibility
-                if (!demo_compatibility && !mbf_features &&
+                if (COMPATIBILITY_LEVEL >= boom_compatibility_compatibility &&
+                    COMPATIBILITY_LEVEL < mbf_compatibility &&
                     !prboom_comp[PC_PRBOOM_FRICTION].state)
                     Add_Friction(friction, movefactor, s);
 
@@ -3513,10 +3562,10 @@ mobj_t *P_GetPushThing(int s)
     thing = sec->thinglist;
     while (thing)
     {
-        switch (thing->type)
+        switch (thing->type.value())
         {
-        case MT_PUSH:
-        case MT_PULL:
+        case MT_PUSH.value():
+        case MT_PULL.value():
             return thing;
         default:
             break;
@@ -3531,11 +3580,11 @@ mobj_t *P_GetPushThing(int s)
 // Initialize the sectors where pushers are present
 //
 
-static void P_SpawnPushers(void)
+static void P_SpawnPushers()
 {
     int i;
     line_t *l = lines;
-    register int s;
+    int s;
     mobj_t *thing;
 
     for (i = 0; i < numlines; i++, l++)

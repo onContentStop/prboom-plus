@@ -684,7 +684,7 @@ void gld_DrawNumPatch_f(float x, float y, int lump, int cm,
 
     if (!!(flags & VPT_STRETCH_MASK))
     {
-        stretch_param_t *params =
+        StretchParam *params =
             &stretch_params[(flags & VPT_ALIGN_MASK).value()];
 
         xpos = (float)((x - leftoffset) * params->video->width) / 320.0f +

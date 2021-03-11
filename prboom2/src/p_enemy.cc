@@ -150,7 +150,7 @@ static dboolean P_CheckMeleeRange(mobj_t *actor)
     return // killough 7/18/98: friendly monsters don't attack other friends
         pl && !(actor->flags & pl->flags & MF_FRIEND) &&
         (P_AproxDistance(pl->x - actor->x, pl->y - actor->y) <
-         (compatibility_level == doom_12_compatibility
+         (COMPATIBILITY_LEVEL == doom_12_compatibility
               ? MELEERANGE
               : MELEERANGE - 20 * FRACUNIT + pl->info->radius)) &&
         P_CheckSight(actor, actor->target);
@@ -217,7 +217,7 @@ static dboolean P_CheckMissileRange(mobj_t *actor)
                            actor->y - actor->target->y) -
            64 * FRACUNIT;
 
-    if (!actor->info->meleestate)
+    if (actor->info->meleestate == S_NULL)
         dist -= 128 * FRACUNIT; // no melee attack, so fire more
 
     dist >>= FRACBITS;
@@ -266,7 +266,7 @@ static dboolean P_CheckMissileRange(mobj_t *actor)
 static dboolean P_IsOnLift(const mobj_t *actor)
 {
     const sector_t *sec = actor->subsector->sector;
-    line_t line;
+    line_t line{};
     int l;
 
     // Short-circuit: it's on a lift which is active.
@@ -454,7 +454,7 @@ static dboolean P_Move(mobj_t *actor, dboolean dropoff) /* killough 9/12/98 */
          */
         if (!good || comp[comp_doorstuck])
             return good;
-        if (!mbf_features)
+        if (COMPATIBILITY_LEVEL < mbf_compatibility)
             return (P_Random(pr_trywalk) & 3); /* jff 8/13/98 */
         else                                   /* finally, MBF code */
             return ((P_Random(pr_opendoor) >= 230) ^ (good & 1));
@@ -463,7 +463,8 @@ static dboolean P_Move(mobj_t *actor, dboolean dropoff) /* killough 9/12/98 */
         actor->flags &= ~MF_INFLOAT;
 
     /* killough 11/98: fall more slowly, under gravity, if felldown==true */
-    if (!(actor->flags & MF_FLOAT) && (!felldown || !mbf_features))
+    if (!(actor->flags & MF_FLOAT) &&
+        (!felldown || COMPATIBILITY_LEVEL < mbf_compatibility))
         actor->z = actor->floorz;
 
     return true;
@@ -482,7 +483,9 @@ static dboolean P_SmartMove(mobj_t *actor)
     int tmp_monster_avoid_hazards =
         (prboom_comp[PC_MONSTER_AVOID_HAZARDS].state
              ? true
-             : (demo_compatibility ? false : monster_avoid_hazards)); // e6y
+             : (COMPATIBILITY_LEVEL < boom_compatibility_compatibility
+                    ? false
+                    : monster_avoid_hazards)); // e6y
 
     /* killough 9/12/98: Stay on a lift if target is on one */
     on_lift = !comp[comp_staylift] && target && target->health > 0 &&
@@ -736,9 +739,10 @@ static void P_NewChaseDir(mobj_t *actor)
             else if (target->health > 0 &&
                      (actor->flags ^ target->flags) & MF_FRIEND)
             { // Live enemy target
-                if (monster_backing && actor->info->missilestate &&
+                if (monster_backing && actor->info->missilestate != S_NULL &&
                     actor->type != MT_SKULL &&
-                    ((!target->info->missilestate && dist < MELEERANGE * 2) ||
+                    ((target->info->missilestate == S_NULL &&
+                      dist < MELEERANGE * 2) ||
                      (target->player && dist < MELEERANGE * 3 &&
                       (target->player->readyweapon == wp_fist ||
                        target->player->readyweapon == wp_chainsaw))))
@@ -816,8 +820,15 @@ static dboolean PIT_FindTarget(mobj_t *mo)
     // list, so that it gets searched last next time.
 
     {
-        thinker_t *cap =
-            &thinkerclasscap[mo->flags & MF_FRIEND ? th_friends : th_enemies];
+        thinker_t *cap = nullptr;
+        if (mo->flags & MF_FRIEND)
+        {
+            cap = &THINKER_CLASS_CAP[TH_FRIENDS.value()];
+        }
+        else
+        {
+            cap = &THINKER_CLASS_CAP[TH_ENEMIES.value()];
+        }
         (mo->thinker.cprev->cnext = mo->thinker.cnext)->cprev =
             mo->thinker.cprev;
         (mo->thinker.cprev = cap->cprev)->cnext = &mo->thinker;
@@ -860,7 +871,7 @@ static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
                     // get out of refiring loop, to avoid hitting player
                     // accidentally
 
-                    if (actor->info->missilestate)
+                    if (actor->info->missilestate != S_NULL)
                     {
                         P_SetMobjState(actor, actor->info->seestate);
                         actor->flags &= ~MF_JUSTHIT;
@@ -877,7 +888,9 @@ static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
 
     c = 0;
 
-    stopc = !mbf_features && !demo_compatibility && monsters_remember
+    stopc = !mbf_features &&
+                    COMPATIBILITY_LEVEL >= boom_compatibility_compatibility &&
+                    monsters_remember
                 ? MAXPLAYERS
                 : 2; // killough 9/9/98
 
@@ -894,7 +907,9 @@ static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
             // There are no more desyncs on Donce's demos on horror.wad
 
             // Use last known enemy if no players sighted -- killough 2/15/98:
-            if (!mbf_features && !demo_compatibility && monsters_remember)
+            if (!mbf_features &&
+                COMPATIBILITY_LEVEL >= boom_compatibility_compatibility &&
+                monsters_remember)
             {
                 if (actor->lastenemy && actor->lastenemy->health > 0)
                 {
@@ -942,7 +957,7 @@ static dboolean P_LookForMonsters(mobj_t *actor, dboolean allaround)
 {
     thinker_t *cap, *th;
 
-    if (demo_compatibility)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility)
         return false;
 
     if (actor->lastenemy && actor->lastenemy->health > 0 && monsters_remember &&
@@ -954,11 +969,18 @@ static dboolean P_LookForMonsters(mobj_t *actor, dboolean allaround)
     }
 
     /* Old demos do not support monster-seeking bots */
-    if (!mbf_features)
+    if (COMPATIBILITY_LEVEL < mbf_compatibility)
         return false;
 
     // Search the threaded list corresponding to this object's potential targets
-    cap = &thinkerclasscap[actor->flags & MF_FRIEND ? th_enemies : th_friends];
+    if (actor->flags & MF_FRIEND)
+    {
+        cap = &THINKER_CLASS_CAP[TH_ENEMIES.value()];
+    }
+    else
+    {
+        cap = &THINKER_CLASS_CAP[TH_FRIENDS.value()];
+    }
 
     // Search for new enemy
 
@@ -1046,7 +1068,14 @@ static dboolean P_HelpFriend(mobj_t *actor)
     current_allaround = true;
 
     // Possibly help a friend under 50% health
-    cap = &thinkerclasscap[actor->flags & MF_FRIEND ? th_friends : th_enemies];
+    if (actor->flags & MF_FRIEND)
+    {
+        cap = &THINKER_CLASS_CAP[TH_FRIENDS.value()];
+    }
+    else
+    {
+        cap = &THINKER_CLASS_CAP[TH_ENEMIES.value()];
+    }
 
     for (th = cap->cnext; th != cap; th = th->cnext)
         if (((mobj_t *)th)->health * 2 >= ((mobj_t *)th)->info->spawnhealth)
@@ -1073,20 +1102,24 @@ static dboolean P_HelpFriend(mobj_t *actor)
 //
 void A_KeenDie(mobj_t *mo)
 {
-    thinker_t *th;
     line_t junk;
 
     A_Fall(mo);
 
     // scan the remaining thinkers to see if all Keens are dead
 
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (thinker_t *th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
+    {
         if (th->function == P_MobjThinker)
         {
-            mobj_t *mo2 = (mobj_t *)th;
+            auto *mo2 = reinterpret_cast<mobj_t *>(th);
             if (mo2 != mo && mo2->type == mo->type && mo2->health > 0)
+            {
                 return; // other Keen not dead
+            }
         }
+    }
 
     junk.tag = 666;
     EV_DoDoor(&junk, openDoor);
@@ -1126,20 +1159,20 @@ void A_Look(mobj_t *actor)
 
     // go into chase state
 
-    if (actor->info->seesound)
+    if (actor->info->seesound != sfx_None)
     {
-        int sound;
-        switch (actor->info->seesound)
+        sfxenum_t sound;
+        switch (actor->info->seesound.value())
         {
-        case sfx_posit1:
-        case sfx_posit2:
-        case sfx_posit3:
-            sound = sfx_posit1 + P_Random(pr_see) % 3;
+        case sfx_posit1.value():
+        case sfx_posit2.value():
+        case sfx_posit3.value():
+            sound = sfx_posit1.value() + P_Random(pr_see) % 3;
             break;
 
-        case sfx_bgsit1:
-        case sfx_bgsit2:
-            sound = sfx_bgsit1 + P_Random(pr_see) % 2;
+        case sfx_bgsit1.value():
+        case sfx_bgsit2.value():
+            sound = sfx_bgsit1.value() + P_Random(pr_see) % 2;
             break;
 
         default:
@@ -1190,7 +1223,7 @@ void A_Chase(mobj_t *actor)
 
     if (actor->threshold)
     { /* modify target threshold */
-        if (compatibility_level == doom_12_compatibility)
+        if (COMPATIBILITY_LEVEL == doom_12_compatibility)
         {
             actor->threshold--;
         }
@@ -1211,7 +1244,8 @@ void A_Chase(mobj_t *actor)
         A_FaceTarget(actor);
     else if (actor->movedir < 8)
     {
-        int delta = (actor->angle &= (7 << 29)) - (actor->movedir << 29);
+        int delta = static_cast<int>(actor->angle &= (7 << 29)) -
+                    (actor->movedir << 29);
         if (delta > 0)
             actor->angle -= ANG90 / 2;
         else if (delta < 0)
@@ -1235,20 +1269,20 @@ void A_Chase(mobj_t *actor)
     }
 
     // check for melee attack
-    if (actor->info->meleestate && P_CheckMeleeRange(actor))
+    if (actor->info->meleestate != S_NULL && P_CheckMeleeRange(actor))
     {
-        if (actor->info->attacksound)
+        if (actor->info->attacksound != sfx_None)
             S_StartSound(actor, actor->info->attacksound);
         P_SetMobjState(actor, actor->info->meleestate);
         /* killough 8/98: remember an attack
          * cph - DEMOSYNC? */
-        if (!actor->info->missilestate)
+        if (actor->info->missilestate == S_NULL)
             actor->flags |= MF_JUSTHIT;
         return;
     }
 
     // check for missile attack
-    if (actor->info->missilestate)
+    if (actor->info->missilestate != S_NULL)
         if (!(gameskill < sk_nightmare && !fastparm && actor->movecount))
             if (P_CheckMissileRange(actor))
             {
@@ -1259,7 +1293,7 @@ void A_Chase(mobj_t *actor)
 
     if (!actor->threshold)
     {
-        if (!mbf_features)
+        if (COMPATIBILITY_LEVEL < mbf_compatibility)
         { /* killough 9/9/98: for backward demo compatibility */
             if (netgame && !P_CheckSight(actor, actor->target) &&
                 P_LookForPlayers(actor, true))
@@ -1296,7 +1330,7 @@ void A_Chase(mobj_t *actor)
              * return to player, if no attacks have occurred recently.
              */
 
-            if (!actor->info->missilestate && actor->flags & MF_FRIEND)
+            if (actor->info->missilestate == S_NULL && actor->flags & MF_FRIEND)
             {
                 if (actor->flags & MF_JUSTHIT)   /* if recent action, */
                     actor->flags &= ~MF_JUSTHIT; /* keep fighting */
@@ -1315,7 +1349,7 @@ void A_Chase(mobj_t *actor)
         P_NewChaseDir(actor);
 
     // make active sound
-    if (actor->info->activesound && P_Random(pr_see) < 3)
+    if (actor->info->activesound != sfx_None && P_Random(pr_see) < 3)
         S_StartSound(actor, actor->info->activesound);
 }
 
@@ -1475,7 +1509,7 @@ void A_SargAttack(mobj_t *actor)
     if (!actor->target)
         return;
     A_FaceTarget(actor);
-    if (compatibility_level == doom_12_compatibility)
+    if (COMPATIBILITY_LEVEL == doom_12_compatibility)
     {
         int damage = ((P_Random(pr_sargattack) % 10) + 1) * 4;
         P_LineAttack(actor, actor->angle, MELEERANGE, 0, damage);
@@ -1677,7 +1711,7 @@ static dboolean PIT_VileCheck(mobj_t *thing)
     if (thing->info->raisestate == S_NULL)
         return true; // monster doesn't have a raise state
 
-    maxdist = thing->info->radius + mobjinfo[MT_VILE].radius;
+    maxdist = thing->info->radius + mobjinfo[MT_VILE.value()].radius;
 
     if (D_abs(thing->x - viletryx) > maxdist ||
         D_abs(thing->y - viletryy) > maxdist)
@@ -1698,7 +1732,7 @@ static dboolean PIT_VileCheck(mobj_t *thing)
 
     corpsehit = thing;
     corpsehit->momx = corpsehit->momy = 0;
-    if (comp[comp_vile])         // phares
+    if (comp[comp_vile])         /* phares*/
     {                            //   |
         corpsehit->height <<= 2; //   V
         check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
@@ -1792,7 +1826,7 @@ void A_VileChase(mobj_t *actor)
                     corpsehit->health = info->spawnhealth;
                     P_SetTarget(&corpsehit->target, nullptr); // killough 11/98
 
-                    if (mbf_features)
+                    if (COMPATIBILITY_LEVEL >= mbf_compatibility)
                     { /* kilough 9/9/98 */
                         P_SetTarget(&corpsehit->lastenemy, nullptr);
                         corpsehit->flags &= ~MF_JUSTHIT;
@@ -1876,7 +1910,7 @@ void A_VileTarget(mobj_t *actor)
     // killough 12/98: fix Vile fog coordinates // CPhipps - compatibility
     // optioned
     fog = P_SpawnMobj(actor->target->x,
-                      (compatibility_level < lxdoom_1_compatibility)
+                      (COMPATIBILITY_LEVEL < lxdoom_1_compatibility)
                           ? actor->target->x
                           : actor->target->y,
                       actor->target->z, MT_FIRE);
@@ -2042,7 +2076,7 @@ void A_BetaSkullAttack(mobj_t *actor)
 {
     int damage;
 
-    if (compatibility_level < mbf_compatibility)
+    if (COMPATIBILITY_LEVEL < mbf_compatibility)
         return;
 
     if (!actor->target || actor->target->type == MT_SKULL)
@@ -2056,7 +2090,7 @@ void A_BetaSkullAttack(mobj_t *actor)
 
 void A_Stop(mobj_t *actor)
 {
-    if (compatibility_level < mbf_compatibility)
+    if (COMPATIBILITY_LEVEL < mbf_compatibility)
         return;
 
     actor->momx = actor->momy = actor->momz = 0;
@@ -2083,7 +2117,8 @@ static void A_PainShootSkull(mobj_t *actor, angle_t angle)
         // count total number of skulls currently on the level
         int count = 0;
         thinker_t *currentthinker = nullptr;
-        while ((currentthinker = P_NextThinker(currentthinker, th_all)) != nullptr)
+        while ((currentthinker = P_NextThinker(currentthinker, TH_ALL)) !=
+               nullptr)
             if ((currentthinker->function == P_MobjThinker) &&
                 ((mobj_t *)currentthinker)->type == MT_SKULL)
                 count++;
@@ -2096,7 +2131,7 @@ static void A_PainShootSkull(mobj_t *actor, angle_t angle)
     an = angle >> ANGLETOFINESHIFT;
 
     prestep = 4 * FRACUNIT +
-              3 * (actor->info->radius + mobjinfo[MT_SKULL].radius) / 2;
+              3 * (actor->info->radius + mobjinfo[MT_SKULL.value()].radius) / 2;
 
     x = actor->x + FixedMul(prestep, finecosine[an]);
     y = actor->y + FixedMul(prestep, finesine[an]);
@@ -2173,22 +2208,22 @@ void A_PainDie(mobj_t *actor)
 
 void A_Scream(mobj_t *actor)
 {
-    int sound;
+    sfxenum_t sound;
 
-    switch (actor->info->deathsound)
+    switch (actor->info->deathsound.value())
     {
     case 0:
         return;
 
-    case sfx_podth1:
-    case sfx_podth2:
-    case sfx_podth3:
-        sound = sfx_podth1 + P_Random(pr_scream) % 3;
+    case sfx_podth1.value():
+    case sfx_podth2.value():
+    case sfx_podth3.value():
+        sound = sfx_podth1.value() + P_Random(pr_scream) % 3;
         break;
 
-    case sfx_bgdth1:
-    case sfx_bgdth2:
-        sound = sfx_bgdth1 + P_Random(pr_scream) % 2;
+    case sfx_bgdth1.value():
+    case sfx_bgdth2.value():
+        sound = sfx_bgdth1.value() + P_Random(pr_scream) % 2;
         break;
 
     default:
@@ -2212,13 +2247,13 @@ void A_SkullPop(mobj_t *actor)
 {
     mobj_t *mo;
     player_t *player;
-    int sfx_id;
+    sfxenum_t sfx_id;
 
     if (demorecording || demoplayback)
         return;
 
-    sfx_id =
-        (I_GetSfxLumpNum(&S_sfx[sfx_gibdth]) < 0 ? sfx_pldeth : sfx_gibdth);
+    sfx_id = (I_GetSfxLumpNum(&S_sfx[sfx_gibdth.value()]) < 0 ? sfx_pldeth
+                                                              : sfx_gibdth);
     S_StartSound(actor, sfx_id);
 
     actor->flags &= ~MF_SOLID;
@@ -2260,7 +2295,7 @@ void A_SkullPop(mobj_t *actor)
 
 void A_Pain(mobj_t *actor)
 {
-    if (actor->info->painsound)
+    if (actor->info->painsound != sfx_None)
         S_StartSound(actor, actor->info->painsound);
 }
 
@@ -2297,33 +2332,48 @@ void A_BossDeath(mobj_t *mo)
     if (gamemapinfo && gamemapinfo->numbossactions != 0)
     {
         if (gamemapinfo->numbossactions < 0)
+        {
             return;
+        }
 
         // make sure there is a player alive for victory
         for (i = 0; i < MAXPLAYERS; i++)
+        {
             if (playeringame[i] && players[i].health > 0)
+            {
                 break;
+            }
+        }
 
         if (i == MAXPLAYERS)
+        {
             return; // no one left alive, so do not end game
+        }
 
         for (i = 0; i < gamemapinfo->numbossactions; i++)
         {
             if (gamemapinfo->bossactions[i].type == mo->type)
+            {
                 break;
+            }
         }
         if (i >= gamemapinfo->numbossactions)
+        {
             return; // no matches found
+        }
 
         // scan the remaining thinkers to see
         // if all bosses are dead
-        for (th = thinkercap.next; th != &thinkercap; th = th->next)
+        for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+             th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
+        {
             if (th->function == P_MobjThinker)
             {
                 mobj_t *mo2 = (mobj_t *)th;
                 if (mo2 != mo && mo2->type == mo->type && mo2->health > 0)
                     return; // other boss not dead
             }
+        }
         for (i = 0; i < gamemapinfo->numbossactions; i++)
         {
             if (gamemapinfo->bossactions[i].type == mo->type)
@@ -2434,7 +2484,8 @@ void A_BossDeath(mobj_t *mo)
 
     // scan the remaining thinkers to see
     // if all bosses are dead
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
         if (th->function == P_MobjThinker)
         {
             mobj_t *mo2 = (mobj_t *)th;
@@ -2545,8 +2596,8 @@ void P_SpawnBrainTargets(void) // killough 3/26/98: renamed old function
     brain.targeton = 0;
     brain.easy = 0; // killough 3/26/98: always init easy to 0
 
-    for (thinker = thinkercap.next; thinker != &thinkercap;
-         thinker = thinker->next)
+    for (thinker = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         thinker != &THINKER_CLASS_CAP[TH_ALL.value()]; thinker = thinker->next)
         if (thinker->function == P_MobjThinker)
         {
             mobj_t *m = (mobj_t *)thinker;
@@ -2559,7 +2610,7 @@ void P_SpawnBrainTargets(void) // killough 3/26/98: renamed old function
                         (numbraintargets_alloc = numbraintargets_alloc
                                                      ? numbraintargets_alloc * 2
                                                      : 32) *
-                            sizeof *braintargets));
+                            sizeof(*braintargets)));
                 braintargets[numbraintargets++] = m;
             }
         }
@@ -2568,7 +2619,8 @@ void P_SpawnBrainTargets(void) // killough 3/26/98: renamed old function
 void A_BrainAwake(mobj_t *mo)
 {
     // e6y
-    if (demo_compatibility && !prboom_comp[PC_BOOM_BRAINAWAKE].state)
+    if (COMPATIBILITY_LEVEL < boom_compatibility_compatibility &&
+        !prboom_comp[PC_BOOM_BRAINAWAKE].state)
     {
         brain.targeton = 0;
         brain.easy = 0;
@@ -2731,7 +2783,7 @@ void A_SpawnFly(mobj_t *mo)
 
 void A_PlayerScream(mobj_t *mo)
 {
-    int sound = sfx_pldeth; // Default death sound.
+    sfxenum_t sound = sfx_pldeth; // Default death sound.
     if (gamemode != shareware && mo->health < -50)
         sound = sfx_pdiehi; // IF THE PLAYER DIES LESS THAN -50% WITHOUT GIBBING
     S_StartSound(mo, sound);
@@ -2742,7 +2794,7 @@ void A_PlayerScream(mobj_t *mo)
 // killough 11/98: kill an object
 void A_Die(mobj_t *actor)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2756,7 +2808,7 @@ void A_Die(mobj_t *actor)
 
 void A_Detonate(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2774,7 +2826,7 @@ void A_Mushroom(mobj_t *actor)
 
     // Mushroom parameters are part of code pointer's state
     dboolean mbf =
-        (compatibility_level == mbf_compatibility &&
+        (COMPATIBILITY_LEVEL == mbf_compatibility &&
          !prboom_comp[PC_DO_NOT_USE_MISC12_FRAME_PARAMETERS_IN_A_MUSHROOM]
               .state);
     fixed_t misc1 =
@@ -2782,7 +2834,7 @@ void A_Mushroom(mobj_t *actor)
     fixed_t misc2 =
         ((mbf && actor->state->misc2) ? actor->state->misc2 : FRACUNIT / 2);
 
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2814,7 +2866,7 @@ void A_Mushroom(mobj_t *actor)
 
 void A_Spawn(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2823,7 +2875,7 @@ void A_Spawn(mobj_t *mo)
         mobj_t *newmobj =
             P_SpawnMobj(mo->x, mo->y, (mo->state->misc2 << FRACBITS) + mo->z,
                         static_cast<mobjtype_t>(mo->state->misc1 - 1));
-        if (compatibility_level == mbf_compatibility &&
+        if (COMPATIBILITY_LEVEL == mbf_compatibility &&
             !prboom_comp[PC_DO_NOT_INHERIT_FRIENDLYNESS_FLAG_ON_SPAWN].state)
             /* CPhipps - no friendlyness (yet)*/ // e6y: why not?
             newmobj->flags =
@@ -2833,7 +2885,7 @@ void A_Spawn(mobj_t *mo)
 
 void A_Turn(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2842,7 +2894,7 @@ void A_Turn(mobj_t *mo)
 
 void A_Face(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2851,7 +2903,7 @@ void A_Face(mobj_t *mo)
 
 void A_Scratch(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2862,7 +2914,7 @@ void A_Scratch(mobj_t *mo)
 
 void A_PlaySound(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2871,7 +2923,7 @@ void A_PlaySound(mobj_t *mo)
 
 void A_RandomJump(mobj_t *mo)
 {
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 
@@ -2886,10 +2938,10 @@ void A_RandomJump(mobj_t *mo)
 void A_LineEffect(mobj_t *mo)
 {
     static line_t junk;
-    player_t player;
+    player_t player{};
     player_t *oldplayer;
 
-    if (compatibility_level < lxdoom_1_compatibility &&
+    if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility &&
         !prboom_comp[PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL].state)
         return;
 

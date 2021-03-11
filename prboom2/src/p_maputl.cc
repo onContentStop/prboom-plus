@@ -161,7 +161,7 @@ fixed_t PUREFUNC P_InterceptVector2(const divline_t *v2, const divline_t *v1)
 
 fixed_t PUREFUNC P_InterceptVector(const divline_t *v2, const divline_t *v1)
 {
-    if (compatibility_level < prboom_4_compatibility)
+    if (COMPATIBILITY_LEVEL < prboom_4_compatibility)
         return P_InterceptVector2(v2, v1);
     else
     {

@@ -63,8 +63,8 @@
 int deh_strcasecmp(const char *str1, const char *str2)
 {
     if (prboom_comp[PC_BOOM_DEH_PARSER].state &&
-        compatibility_level >= boom_compatibility_compatibility &&
-        compatibility_level <= boom_202_compatibility)
+        COMPATIBILITY_LEVEL >= boom_compatibility_compatibility &&
+        COMPATIBILITY_LEVEL <= boom_202_compatibility)
     {
         return strcmp(str1, str2);
     }
@@ -76,8 +76,8 @@ int deh_strcasecmp(const char *str1, const char *str2)
 const char *deh_getBitsDelims(void)
 {
     if (prboom_comp[PC_BOOM_DEH_PARSER].state &&
-        compatibility_level >= boom_compatibility_compatibility &&
-        compatibility_level <= boom_202_compatibility)
+        COMPATIBILITY_LEVEL >= boom_compatibility_compatibility &&
+        COMPATIBILITY_LEVEL <= boom_202_compatibility)
     {
         return "+";
     }
@@ -109,7 +109,7 @@ typedef struct
 static char *dehfgets(char *buf, size_t n, DEHFILE *fp)
 {
     if (!fp->lump)                        // If this is a real file,
-        return (fgets)(buf, n, fp->f);    // return regular fgets
+        return fgets(buf, n, fp->f);      // return regular fgets
     if (!n || !*fp->inp || fp->size <= 0) // If no more characters
         return nullptr;
     if (n == 1)
@@ -1294,75 +1294,74 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
 
 // to hold startup code pointers from INFO.C
 // CPhipps - static
-static Action deh_codeptr[NUMSTATES];
+static Action deh_codeptr[NUMSTATES.value()];
 
 // haleyjd: support for BEX SPRITES, SOUNDS, and MUSIC
 char *deh_spritenames[NUMSPRITES + 1];
 char *deh_musicnames[NUMMUSIC + 1];
-char *deh_soundnames[NUMSFX + 1];
+char *deh_soundnames[NUMSFX.value() + 1];
 
 void D_BuildBEXTables(void)
 {
-    int i;
-
+    statenum_t i;
     // moved from ProcessDehFile, then we don't need the static int i
     for (i = 0; i < EXTRASTATES;
          i++) // remember what they start as for deh xref
-        deh_codeptr[i] = states[i].action;
+        deh_codeptr[i.value()] = states[i.value()].action;
 
     // initialize extra dehacked states
     for (; i < NUMSTATES; i++)
     {
-        states[i].sprite = SPR_TNT1;
-        states[i].frame = 0;
-        states[i].tics = -1;
-        states[i].action = {};
-        states[i].nextstate = static_cast<statenum_t>(i);
-        states[i].misc1 = 0;
-        states[i].misc2 = 0;
-        deh_codeptr[i] = states[i].action;
+        states[i.value()].sprite = SPR_TNT1;
+        states[i.value()].frame = 0;
+        states[i.value()].tics = -1;
+        states[i.value()].action = {};
+        states[i.value()].nextstate = static_cast<statenum_t>(i);
+        states[i.value()].misc1 = 0;
+        states[i.value()].misc2 = 0;
+        deh_codeptr[i.value()] = states[i.value()].action;
     }
 
     for (i = 0; i < NUMSPRITES; i++)
-        deh_spritenames[i] = strdup(sprnames[i]);
+        deh_spritenames[i.value()] = strdup(sprnames[i.value()]);
     deh_spritenames[NUMSPRITES] = nullptr;
 
     for (i = 1; i < NUMMUSIC; i++)
-        deh_musicnames[i] = strdup(S_music[i].name);
+        deh_musicnames[i.value()] = strdup(S_music[i.value()].name);
     deh_musicnames[0] = deh_musicnames[NUMMUSIC] = nullptr;
 
     for (i = 1; i < NUMSFX; i++)
     {
-        if (S_sfx[i].name != nullptr)
+        if (S_sfx[i.value()].name != nullptr)
         {
-            deh_soundnames[i] = strdup(S_sfx[i].name);
+            deh_soundnames[i.value()] = strdup(S_sfx[i.value()].name);
         }
         else
         { // This is possible due to how DEHEXTRA has turned S_sfx into a sparse
           // array
-            deh_soundnames[i] = nullptr;
+            deh_soundnames[i.value()] = nullptr;
         }
     }
-    deh_soundnames[0] = deh_soundnames[NUMSFX] = nullptr;
+    deh_soundnames[0] = deh_soundnames[NUMSFX.value()] = nullptr;
 
     // ferk: initialize Thing extra properties (keeping vanilla props in info.c)
     for (i = 0; i < NUMMOBJTYPES; i++)
     {
         // mobj id for item dropped on death
-        switch (i)
+        switch (i.value())
         {
-        case MT_WOLFSS:
-        case MT_POSSESSED:
-            mobjinfo[i].droppeditem = MT_CLIP;
+        case MT_WOLFSS.value():
+        case MT_POSSESSED.value():
+            mobjinfo[i.value()].droppeditem = MT_CLIP;
             break;
-        case MT_SHOTGUY:
-            mobjinfo[i].droppeditem = MT_SHOTGUN;
+        case MT_SHOTGUY.value():
+            mobjinfo[i.value()].droppeditem = MT_SHOTGUN;
             break;
-        case MT_CHAINGUY:
-            mobjinfo[i].droppeditem = MT_CHAINGUN;
+        case MT_CHAINGUY.value():
+            mobjinfo[i.value()].droppeditem = MT_CHAINGUN;
             break;
         default:
-            mobjinfo[i].droppeditem = MT_NULL;
+            mobjinfo[i.value()].droppeditem = MT_NULL;
         }
     }
 }
@@ -1374,12 +1373,12 @@ int deh_mega_health;
 dboolean IsDehMaxHealth = false;
 dboolean IsDehMaxSoul = false;
 dboolean IsDehMegaHealth = false;
-dboolean DEH_mobjinfo_bits[NUMMOBJTYPES] = {0};
+dboolean DEH_mobjinfo_bits[NUMMOBJTYPES.value()] = {0};
 
-void deh_changeCompTranslucency(void)
+void deh_changeCompTranslucency()
 {
     int i;
-    int predefined_translucency[] = {
+    mobjtype_t predefined_translucency[] = {
         MT_FIRE,      MT_SMOKE,    MT_FATSHOT, MT_BRUISERSHOT, MT_SPAWNFIRE,
         MT_TROOPSHOT, MT_HEADSHOT, MT_PLASMA,  MT_BFG,         MT_ARACHPLAZ,
         MT_PUFF,      MT_TFOG,     MT_IFOG,    MT_MISC12,      MT_INV,
@@ -1389,7 +1388,7 @@ void deh_changeCompTranslucency(void)
                                 sizeof(predefined_translucency[0]);
          i++)
     {
-        if (!DEH_mobjinfo_bits[predefined_translucency[i]])
+        if (!DEH_mobjinfo_bits[predefined_translucency[i].value()])
         {
             // Transparent sprites are not visible behind transparent walls in
             // OpenGL. It needs much work.
@@ -1400,21 +1399,24 @@ void deh_changeCompTranslucency(void)
                 // which are not changed by dehacked, because it's buggy for
                 // now. Global sorting of transparent sprites and walls is
                 // needed
-                mobjinfo[predefined_translucency[i]].flags &= ~MF_TRANSLUCENT;
+                mobjinfo[predefined_translucency[i].value()].flags &=
+                    ~MF_TRANSLUCENT;
             }
             else
 #endif
                 if (comp[comp_translucency])
-                mobjinfo[predefined_translucency[i]].flags &= ~MF_TRANSLUCENT;
+                mobjinfo[predefined_translucency[i].value()].flags &=
+                    ~MF_TRANSLUCENT;
             else
-                mobjinfo[predefined_translucency[i]].flags |= MF_TRANSLUCENT;
+                mobjinfo[predefined_translucency[i].value()].flags |=
+                    MF_TRANSLUCENT;
         }
     }
 }
 
-void deh_applyCompatibility(void)
+void deh_applyCompatibility()
 {
-    int comp_max = (compatibility_level == doom_12_compatibility ? 199 : 200);
+    int comp_max = (COMPATIBILITY_LEVEL == doom_12_compatibility ? 199 : 200);
 
     max_soul = (IsDehMaxSoul ? deh_max_soul : comp_max);
     mega_health = (IsDehMegaHealth ? deh_mega_health : comp_max);
@@ -1430,12 +1432,12 @@ void deh_applyCompatibility(void)
         maxhealthbonus = maxhealth * 2;
     }
 
-    if (!DEH_mobjinfo_bits[MT_SKULL])
+    if (!DEH_mobjinfo_bits[MT_SKULL.value()])
     {
-        if (compatibility_level == doom_12_compatibility)
-            mobjinfo[MT_SKULL].flags |= (MF_COUNTKILL);
+        if (COMPATIBILITY_LEVEL == doom_12_compatibility)
+            mobjinfo[MT_SKULL.value()].flags |= (MF_COUNTKILL);
         else
-            mobjinfo[MT_SKULL].flags &= ~(MF_COUNTKILL);
+            mobjinfo[MT_SKULL.value()].flags &= ~(MF_COUNTKILL);
     }
 
     deh_changeCompTranslucency();
@@ -1453,32 +1455,40 @@ void deh_applyCompatibility(void)
 
 void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
 {
-    static FILE *fileout;              // In case -dehout was used
-    DEHFILE infile, *filein = &infile; // killough 10/98
-    char inbuffer[DEH_BUFFERMAX];      // Place to put the primary infostring
-    const char *file_or_lump;
+    static FILE *fileout; // In case -dehout was used
+    DEHFILE infile{};     // killough 10/98
+    DEHFILE *filein = &infile;
+    char inbuffer[DEH_BUFFERMAX]; // Place to put the primary infostring
+    const char *file_or_lump = nullptr;
 
     // Open output file if we're writing output
     if (outfilename && *outfilename && !fileout)
     {
         static dboolean firstfile = true; // to allow append to output log
         if (!strcmp(outfilename, "-"))
-            fileout = stdout;
-        else if (!(fileout = fopen(outfilename, firstfile ? "wt" : "at")))
         {
-            lprintf(LO_WARN,
-                    "Could not open -dehout file %s\n... using stdout.\n",
-                    outfilename);
             fileout = stdout;
+        }
+        else
+        {
+            fileout = fopen(outfilename, firstfile ? "wte" : "ate");
+            if (fileout == nullptr)
+            {
+                lprintf(LO_WARN,
+                        "Could not open -dehout file %s\n... using stdout.\n",
+                        outfilename);
+                fileout = stdout;
+            }
         }
         firstfile = false;
     }
 
     // killough 10/98: allow DEH files to come from wad lumps
 
-    if (filename)
+    if (filename != nullptr)
     {
-        if (!(infile.f = fopen(filename, "rt")))
+        infile.f = fopen(filename, "rte");
+        if (infile.f == nullptr)
         {
             lprintf(LO_WARN, "-deh file %s not found\n", filename);
             return; // should be checked up front anyway
@@ -1500,8 +1510,6 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
         filename = lumpinfo[lumpnum].wadfile->name;
         file_or_lump = "lump from";
     }
-    infile.lump = nullptr;
-    file_or_lump = "file";
 
     lprintf(LO_INFO, "Loading DEH %s %s\n", file_or_lump, filename);
     if (fileout)
@@ -1560,7 +1568,8 @@ void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum)
                 fprintf(fileout, "Branching to include file %s...\n", nextfile);
 
             // killough 10/98:
-            // Second argument must be nullptr to prevent closing fileout too soon
+            // Second argument must be nullptr to prevent closing fileout too
+            // soon
 
             ProcessDehFile(nextfile, nullptr, 0); // do the included file
 
@@ -1625,7 +1634,7 @@ static void deh_procBexCodePointers(DEHFILE *fpin, FILE *fpout, char *line)
 {
     char key[DEH_MAXKEYLEN];
     char inbuffer[DEH_BUFFERMAX];
-    int indexnum;
+    statenum_t indexnum;
     char mnemonic[DEH_MAXKEYLEN]; // to hold the codepointer mnemonic
     int i;                        // looper
     dboolean found; // know if we found this one during lookup or not
@@ -1677,11 +1686,11 @@ static void deh_procBexCodePointers(DEHFILE *fpin, FILE *fpout, char *line)
             if (!M_CaseInsensitiveCompare(key, lookup))
             { // Ty 06/01/98  - add  to
               // states[].action for new djgcc version
-                states[indexnum].action = deh_bexptrs[i].cptr; // assign
+                states[indexnum.value()].action = deh_bexptrs[i].cptr; // assign
                 if (fpout)
                     fprintf(fpout,
                             " - applied %s from codeptr[%d] to states[%d]\n",
-                            deh_bexptrs[i].lookup, i, indexnum);
+                            deh_bexptrs[i].lookup, i, indexnum.value());
                 found = TRUE;
             }
         } while (!found && deh_bexptrs[i].cptr != ACTION_NULL);
@@ -1689,7 +1698,7 @@ static void deh_procBexCodePointers(DEHFILE *fpin, FILE *fpout, char *line)
         if (!found)
             if (fpout)
                 fprintf(fpout, "Invalid frame pointer mnemonic '%s' at %d\n",
-                        mnemonic, indexnum);
+                        mnemonic, indexnum.value());
     }
     return;
 }
@@ -1769,12 +1778,12 @@ static uint_64_t getConvertedDEHBits(uint_64_t bits)
 //---------------------------------------------------------------------------
 // See usage below for an explanation of this function's existence - POPE
 //---------------------------------------------------------------------------
-static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint_64_t value)
+static void setMobjInfoValue(mobjtype_t mobjInfoIndex, int keyIndex, uint_64_t value)
 {
     mobjinfo_t *mi;
     if (mobjInfoIndex >= NUMMOBJTYPES || mobjInfoIndex < 0)
         return;
-    mi = &mobjinfo[mobjInfoIndex];
+    mi = &mobjinfo[mobjInfoIndex.value()];
     switch (keyIndex)
     {
     case 0:
@@ -2049,7 +2058,7 @@ static void deh_procFrame(DEHFILE *fpin, FILE *fpout, char *line)
     sscanf(inbuffer, "%s %i", key, &indexnum);
     if (fpout)
         fprintf(fpout, "Processing Frame at index %d: %s\n", indexnum, key);
-    if (indexnum < 0 || indexnum >= NUMSTATES)
+    if (indexnum < 0 || indexnum >= NUMSTATES.value())
         if (fpout)
             fprintf(fpout, "Bad frame number %d of %d\n", indexnum, NUMSTATES);
 
@@ -2147,11 +2156,11 @@ static void deh_procPointer(DEHFILE *fpin, FILE *fpout, char *line) // done
 
     if (fpout)
         fprintf(fpout, "Processing Pointer at index %d: %s\n", indexnum, key);
-    if (indexnum < 0 || indexnum >= NUMSTATES)
+    if (indexnum < 0 || indexnum >= NUMSTATES.value())
     {
         if (fpout)
             fprintf(fpout, "Bad pointer number %d of %d\n", indexnum,
-                    NUMSTATES);
+                    NUMSTATES.value());
         return;
     }
 
@@ -2170,11 +2179,11 @@ static void deh_procPointer(DEHFILE *fpin, FILE *fpout, char *line) // done
             continue;
         }
 
-        if (value >= NUMSTATES)
+        if (value >= NUMSTATES.value())
         {
             if (fpout)
                 fprintf(fpout, "Bad pointer number %ld of %d\n", (long)value,
-                        NUMSTATES);
+                        NUMSTATES.value());
             return;
         }
 
@@ -2229,9 +2238,9 @@ static void deh_procSounds(DEHFILE *fpin, FILE *fpout, char *line)
     sscanf(inbuffer, "%s %i", key, &indexnum);
     if (fpout)
         fprintf(fpout, "Processing Sounds at index %d: %s\n", indexnum, key);
-    if (indexnum < 0 || indexnum >= NUMSFX)
+    if (indexnum < 0 || indexnum >= NUMSFX.value())
         if (fpout)
-            fprintf(fpout, "Bad sound number %d of %d\n", indexnum, NUMSFX);
+            fprintf(fpout, "Bad sound number %d of %d\n", indexnum, NUMSFX.value());
 
     while (!dehfeof(fpin) && *inbuffer && (*inbuffer != ' '))
     {
@@ -2712,7 +2721,7 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
     int fromlen, tolen;     // as specified on the text block line
     int usedlen;            // shorter of fromlen and tolen if not matched
     dboolean found = FALSE; // to allow early exit once found
-    char *line2 = nullptr;     // duplicate line for rerouting
+    char *line2 = nullptr;  // duplicate line for rerouting
 
     // e6y
     // Correction for DEHs which swap the values of two strings. For example:
@@ -2721,7 +2730,7 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
     // It corrects buggy behaviour on "All Hell is Breaking Loose" TC
     // http://www.doomworld.com/idgames/index.php?id=6480
     static dboolean sprnames_state[NUMSPRITES + 1];
-    static dboolean S_sfx_state[NUMSFX];
+    static dboolean S_sfx_state[NUMSFX.value()];
     static dboolean S_music_state[NUMMUSIC];
 
     // Ty 04/11/98 - Included file may have NOTEXT skip flag set
@@ -2799,7 +2808,7 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
                         "Warning: Mismatched lengths from=%d, to=%d, used %d\n",
                         fromlen, tolen, usedlen);
         // Try sound effects entries - see sounds.c
-        for (i = 1; i < NUMSFX; i++)
+        for (i = 1; i < NUMSFX.value(); i++)
         {
             // skip empty dummy entries in S_sfx[]
             if (!S_sfx[i].name)
@@ -2869,7 +2878,7 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line)
 
         deh_procStringSub(nullptr, inbuffer, line2, fpout);
     }
-    free(line2); // may be nullptr, ignored by free()
+    Z_Free(line2); // may be nullptr, ignored by Z_Free()
     return;
 }
 
@@ -3418,7 +3427,7 @@ dboolean deh_GetData(char *s, char *k, uint_64_t *l, char **strval, FILE *fpout)
     strcpy(k, ptr_lstrip(buffer)); // could be a zero-length string
 
     if (strval != nullptr) // pass nullptr if you don't want this back
-        *strval = t;    // pointer, has to be somewhere in s,
+        *strval = t;       // pointer, has to be somewhere in s,
     // even if pointing at the zero byte.
 
     return (okrc);

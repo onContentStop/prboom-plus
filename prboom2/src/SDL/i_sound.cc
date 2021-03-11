@@ -108,7 +108,7 @@ typedef struct
 {
     // SFX id of the playing sound effect.
     // Used to catch duplicates (like chainsaw).
-    int id;
+    sfxenum_t id;
     // The channel step amount...
     unsigned int step;
     // ... and a 0.16 bit remainder of last step.
@@ -167,7 +167,7 @@ static void stopchan(int i)
 //  (eight, usually) of internal channels.
 // Returns a handle.
 //
-static int addsfx(int sfxid, int channel, const unsigned char *data, size_t len)
+static int addsfx(sfxenum_t sfxid, int channel, const unsigned char *data, size_t len)
 {
     channel_info_t *const ci = &channelinfo[channel];
 
@@ -359,7 +359,7 @@ int I_GetSfxLumpNum(sfxinfo_t *sfx)
 // Pitching (that is, increased speed of playback)
 //  is set, but currently not used by mixing.
 //
-int I_StartSound(int id, int channel, int vol, int sep, int pitch, int priority)
+int I_StartSound(sfxenum_t id, int channel, int vol, int sep, int pitch, int priority)
 {
     const unsigned char *data;
     int lump;
@@ -375,7 +375,7 @@ int I_StartSound(int id, int channel, int vol, int sep, int pitch, int priority)
     if (snd_pcspeaker)
         return I_PCS_StartSound(id, channel, vol, sep, pitch, priority);
 
-    lump = S_sfx[id].lumpnum;
+    lump = S_sfx[id.value()].lumpnum;
 
     // We will handle the new SFX.
     // Set pointer to raw data.
@@ -475,8 +475,8 @@ static void I_UpdateSound(void *unused, Uint8 *stream, int len)
     // Mix current sound data.
     // Data, from raw sound, for right and left.
     // register unsigned char sample;
-    register int dl;
-    register int dr;
+    int dl;
+    int dr;
 
     // Pointers in audio stream, left, right, end.
     signed short *leftout;

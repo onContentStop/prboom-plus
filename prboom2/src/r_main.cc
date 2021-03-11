@@ -144,10 +144,12 @@ angle_t *xtoviewangle; // killough 2/8/98
 // killough 4/4/98: support dynamic number of them as well
 
 int numcolormaps;
-const lighttable_t ****c_scalelight;
-const lighttable_t ****c_zlight;
-const lighttable_t ***scalelight;
-const lighttable_t ***zlight;
+std::array<std::array<const lighttable_t *, LIGHTLEVELS_MAX>,
+                 MAXLIGHTSCALE> *c_scalelight;
+std::array<std::array<const lighttable_t *, LIGHTLEVELS_MAX>, MAXLIGHTZ>
+    *c_zlight;
+std::array<const lighttable_t *, MAXLIGHTSCALE> *scalelight;
+std::array<const lighttable_t *, MAXLIGHTZ> *zlight;
 const lighttable_t *fullcolormap;
 const lighttable_t **colormaps;
 /* cph - allow crappy fake contrast to be disabled */
@@ -403,9 +405,11 @@ static void R_InitLightTables(void)
     int i;
 
     // killough 4/4/98: dynamic colormaps
-    c_zlight = static_cast<const lighttable_t ****>(
+    c_zlight = static_cast<std::array<
+        std::array<const lighttable_t *, LIGHTLEVELS_MAX>, MAXLIGHTZ> *>(
         malloc(sizeof(*c_zlight) * numcolormaps));
-    c_scalelight = static_cast<const lighttable_t ****>(
+    c_scalelight = static_cast<std::array<
+        std::array<const lighttable_t *, LIGHTLEVELS_MAX>, MAXLIGHTSCALE> *>(
         malloc(sizeof(*c_scalelight) * numcolormaps));
 
     LIGHTLEVELS = (render_doom_lightmaps ? 16 : 32);
@@ -494,14 +498,14 @@ static void GenLookup(short *lookup1, short *lookup2, int size, int max,
     }
 }
 
-static void InitStretchParam(stretch_param_t *offsets, int stretch,
+static void InitStretchParam(StretchParam *offsets, int stretch,
                              patch_translation_e flags)
 {
     memset(offsets, 0, sizeof(*offsets));
 
     switch (stretch)
     {
-    case patch_stretch_16x10:
+    case PATCH_STRETCH_16_X_10.value():
         if (flags == VPT_ALIGN_WIDE)
         {
             offsets->video = &video_stretch;
@@ -515,12 +519,12 @@ static void InitStretchParam(stretch_param_t *offsets, int stretch,
             offsets->deltax2 = wide_offsetx;
         }
         break;
-    case patch_stretch_4x3:
+    case PATCH_STRETCH_4_X_3.value():
         offsets->video = &video_stretch;
         offsets->deltax1 = (SCREENWIDTH - WIDE_SCREENWIDTH) / 2;
         offsets->deltax2 = (SCREENWIDTH - WIDE_SCREENWIDTH) / 2;
         break;
-    case patch_stretch_full:
+    case PATCH_STRETCH_FULL.value():
         offsets->video = &video_full;
         offsets->deltax1 = 0;
         offsets->deltax2 = 0;
@@ -567,12 +571,12 @@ void R_SetupViewScaling(void)
 
     for (i = 0; i < 3; i++)
     {
-        for (k = 0; k < VPT_ALIGN_MAX; k++)
+        for (k = 0; k < VPT_ALIGN_MAX.value(); k++)
         {
             InitStretchParam(&stretch_params_table[i][k], i, k);
         }
     }
-    stretch_params = stretch_params_table[render_stretch_hud].data();
+    stretch_params = stretch_params_table[render_stretch_hud.value()].data();
 
     // SoM: ANYRES
     // Moved stuff, reformatted a bit
@@ -1040,8 +1044,10 @@ static void R_SetupFrame(player_t *player)
     boom_cm = cm;
 
     fullcolormap = colormaps[cm];
-    zlight = c_zlight[cm];
-    scalelight = c_scalelight[cm];
+    zlight = reinterpret_cast<std::array<const lighttable_t *, 128> *>(
+        c_zlight[cm].data());
+    scalelight = reinterpret_cast<std::array<const lighttable_t *, 48> *>(
+        c_scalelight[cm].data());
 
     // e6y
     frame_fixedcolormap = player->fixedcolormap;

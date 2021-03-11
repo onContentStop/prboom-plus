@@ -40,6 +40,8 @@
 #define __D_STATE__
 
 // We need the playr data structure as well.
+#include <array>
+
 #include "d_player.hh"
 #include "umapinfo.hh"
 #include "b_bitops.hh"
@@ -69,13 +71,18 @@ extern const char *doomverstr;
 extern dboolean modifiedgame;
 
 // CPhipps - new compatibility handling
-extern complevel_t compatibility_level, default_compatibility_level;
+extern complevel_t DEFAULT_COMPATIBILITY_LEVEL;
+extern complevel_t COMPATIBILITY_LEVEL;
 
 // CPhipps - old compatibility testing flags aliased to new handling
-#define compatibility (compatibility_level <= boom_compatibility_compatibility)
-#define demo_compatibility                                                     \
-    (compatibility_level < boom_compatibility_compatibility)
-#define mbf_features (compatibility_level >= mbf_compatibility)
+constexpr bool demo_compatibility()
+{
+    return COMPATIBILITY_LEVEL < boom_compatibility_compatibility;
+}
+constexpr bool mbf_features()
+{
+    return COMPATIBILITY_LEVEL >= mbf_compatibility;
+}
 
 // v1.1-like pitched sounds
 extern int pitched_sounds; // killough
@@ -261,7 +268,7 @@ extern dboolean timingdemo;
 // Run tick clock at fastest speed possible while playing demo.  killough
 extern dboolean fastdemo;
 
-extern gamestate_t gamestate;
+extern GameState gamestate;
 
 //-----------------------------
 // Internal parameters, fixed.
@@ -275,7 +282,7 @@ extern int gametic;
 extern dboolean realframe;
 
 // Bookkeeping on players - state.
-extern player_t players[MAXPLAYERS];
+extern std::array<player_t, MAXPLAYERS> players;
 extern int upmove;
 
 // Alive? Disconnected?
@@ -306,7 +313,7 @@ extern dboolean precache;
 
 // wipegamestate can be set to -1
 //  to force a wipe on the next draw
-extern gamestate_t wipegamestate;
+extern GameState wipegamestate;
 
 extern int mouseSensitivity_horiz; // killough
 extern int mouseSensitivity_vert;

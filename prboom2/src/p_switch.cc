@@ -169,7 +169,8 @@ void P_ChangeSwitchTexture(line_t *line, int useAgain)
 {
     /* Rearranged a bit to avoid too much code duplication */
     mobj_t *soundorg;
-    int i, sound;
+    int i;
+    sfxenum_t sound;
     short *texture, *ttop, *tmid, *tbot;
     bwhere_e position;
 
@@ -181,7 +182,7 @@ void P_ChangeSwitchTexture(line_t *line, int useAgain)
     /* use the sound origin of the linedef (its midpoint)
      * unless in a compatibility mode */
     soundorg = (mobj_t *)&line->soundorg;
-    if (comp[comp_sound] || compatibility_level < prboom_6_compatibility)
+    if (comp[comp_sound] || COMPATIBILITY_LEVEL < prboom_6_compatibility)
     {
         /* usually nullptr, unless there is another button already pressed in,
          * in which case it's the sound origin of that button press... */
@@ -292,7 +293,7 @@ dboolean P_UseSpecialLine(mobj_t *thing, line_t *line, int side,
     // e6y
     // b.m. side test was broken in boom201
     if ((demoplayback ? (demover != 201)
-                      : (compatibility_level != boom_201_compatibility)))
+                      : (COMPATIBILITY_LEVEL != boom_201_compatibility)))
         if (side) // jff 6/1/98 fix inadvertent deletion of side test
             return false;
 

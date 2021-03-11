@@ -45,7 +45,7 @@ typedef struct overrun_param_s
     int emulate;
     int footer;
     int footer_emulate;
-    int promted;
+    int prompted;
     int shit_happens;
 } overrun_param_t;
 
@@ -61,14 +61,15 @@ constexpr overrun_list_t OVERFLOW_MAX{6};
 
 extern int overflows_enabled;
 extern overrun_param_t overflows[];
-extern const char *overflow_cfgname[OVERFLOW_MAX];
+extern const char *overflow_cfgname[OVERFLOW_MAX.value()];
 
 #define EMULATE(overflow)                                                      \
-    (overflows_enabled &&                                                      \
-     (overflows[overflow].footer ? overflows[overflow].footer_emulate          \
-                                 : overflows[overflow].emulate))
+    (overflows_enabled && (overflows[overflow.value()].footer                  \
+                               ? overflows[overflow.value()].footer_emulate    \
+                               : overflows[overflow.value()].emulate))
 #define PROCESS(overflow)                                                      \
-    (overflows_enabled && (overflows[overflow].warn || EMULATE(overflow)))
+    (overflows_enabled &&                                                      \
+     (overflows[overflow.value()].warn || EMULATE(overflow)))
 
 // e6y
 //
@@ -96,7 +97,7 @@ void InterceptsOverrun(int num_intercepts, intercept_t *intercept);
 // playeringame overrun emulation
 //
 
-int PlayeringameOverrun(const mapthing_t *mthing);
+bool PlayeringameOverrun(const mapthing_t *mthing);
 
 //
 // spechit overrun emulation

@@ -64,20 +64,20 @@ float gl_ratio;
 int psprite_offset; // Needed for "tallscreen" modes
 
 const char *render_aspects_list[5] = {"auto", "16:9", "16:10", "4:3", "5:4"};
-const char *render_stretch_list[patch_stretch_max] = {
+const char *render_stretch_list[PATCH_STRETCH_MAX.value()] = {
     "not adjusted", "Doom format", "fit to width"};
 
-std::array<std::array<stretch_param_t, 3>, VPT_ALIGN_MAX.value()>
+std::array<std::array<StretchParam, 3>, VPT_ALIGN_MAX.value()>
     stretch_params_table;
-stretch_param_t *stretch_params;
+StretchParam *stretch_params;
 
-cb_video_t video;
-cb_video_t video_stretch;
-cb_video_t video_full;
+CbVideo video;
+CbVideo video_stretch;
+CbVideo video_full;
 int patches_scalex;
 int patches_scaley;
 
-int render_stretch_hud;
+patch_stretch_t render_stretch_hud;
 int render_stretch_hud_default;
 int render_patches_scalex;
 int render_patches_scaley;
@@ -220,7 +220,7 @@ static void FUNC_V_CopyRect(int srcscrn, int destscrn, int x, int y, int width,
 
     if (flags & VPT_STRETCH_MASK)
     {
-        stretch_param_t *params;
+        StretchParam *params;
         int sx = x;
         int sy = y;
 
@@ -409,7 +409,7 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t *patch,
 {
     const byte *trans;
 
-    stretch_param_t *params;
+    StretchParam *params;
 
     if (cm < CR_LIMIT)
         trans = colrngs[cm];
@@ -1680,7 +1680,7 @@ void V_FillBorder(int lump, byte color)
 {
     int bordtop, bordbottom, bordleft, bordright;
 
-    if (render_stretch_hud == patch_stretch_full)
+    if (render_stretch_hud == PATCH_STRETCH_FULL)
         return;
 
     bordleft = wide_offsetx;
@@ -1894,18 +1894,18 @@ void SetRatio(int width, int height)
     if (SCREENWIDTH < 320 || WIDE_SCREENWIDTH < 320 || SCREENHEIGHT < 200 ||
         WIDE_SCREENHEIGHT < 200)
     {
-        render_stretch_hud = patch_stretch_full;
+        render_stretch_hud = PATCH_STRETCH_FULL;
     }
 
-    switch (render_stretch_hud)
+    switch (render_stretch_hud.value())
     {
-    case patch_stretch_16x10:
+    case PATCH_STRETCH_16_X_10.value():
         ST_SCALED_Y = (200 * patches_scaley - ST_SCALED_HEIGHT);
 
         wide_offset2x = (SCREENWIDTH - patches_scalex * 320);
         wide_offset2y = (SCREENHEIGHT - patches_scaley * 200);
         break;
-    case patch_stretch_4x3:
+    case PATCH_STRETCH_4_X_3.value():
         ST_SCALED_HEIGHT = ST_HEIGHT * WIDE_SCREENHEIGHT / 200;
         ST_SCALED_WIDTH = WIDE_SCREENWIDTH;
 
@@ -1914,7 +1914,7 @@ void SetRatio(int width, int height)
         wide_offset2x = (SCREENWIDTH - WIDE_SCREENWIDTH);
         wide_offset2y = (SCREENHEIGHT - WIDE_SCREENHEIGHT);
         break;
-    case patch_stretch_full:
+    case PATCH_STRETCH_FULL.value():
         ST_SCALED_HEIGHT = ST_HEIGHT * SCREENHEIGHT / 200;
         ST_SCALED_WIDTH = SCREENWIDTH;
 
@@ -1933,7 +1933,7 @@ void SetRatio(int width, int height)
 
 void V_GetWideRect(int *x, int *y, int *w, int *h, patch_translation_e flags)
 {
-    stretch_param_t *params = &stretch_params[(flags & VPT_ALIGN_MASK).value()];
+    StretchParam *params = &stretch_params[(flags & VPT_ALIGN_MASK).value()];
     int sx = *x;
     int sy = *y;
 

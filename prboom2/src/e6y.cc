@@ -380,7 +380,7 @@ int G_ReloadLevel(void)
     int result = false;
 
     if ((gamestate == GS_LEVEL) && !deathmatch && !netgame && !democontinue &&
-        !demoplayback && !menuactive)
+        !demoplayback && menuactive == mnact_inactive)
     {
         // restart demos from the map they were started
         if (demorecording)
@@ -445,7 +445,7 @@ int G_GotoNextLevel(int *e, int *m)
         doom_next[2][7] = ((gamemode == registered) ||
                                    // the fourth episode for pre-ultimate
                                    // complevels is not allowed.
-                                   (compatibility_level < ultdoom_compatibility)
+                                   (COMPATIBILITY_LEVEL < ultdoom_compatibility)
                                ? 11
                                : 41);
 
@@ -475,7 +475,7 @@ int G_GotoNextLevel(int *e, int *m)
             *m = map;
     }
     else if ((gamestate == GS_LEVEL) && !deathmatch && !netgame &&
-             !demorecording && !demoplayback && !menuactive)
+             !demorecording && !demoplayback && menuactive == mnact_inactive)
     {
         G_DeferedInitNew(gameskill, epsd, map);
         changed = true;
@@ -1131,12 +1131,12 @@ void e6y_G_Compatibility(void)
         if (demo_compatibility)
             P_CrossSubsector = P_CrossSubsector_Doom;
 
-        switch (compatibility_level)
+        switch (COMPATIBILITY_LEVEL.value())
         {
-        case boom_compatibility_compatibility:
-        case boom_201_compatibility:
-        case boom_202_compatibility:
-        case mbf_compatibility:
+        case boom_compatibility_compatibility.value():
+        case boom_201_compatibility.value():
+        case boom_202_compatibility.value():
+        case mbf_compatibility.value():
             P_CrossSubsector = P_CrossSubsector_Boom;
             break;
         }

@@ -358,7 +358,7 @@ menuitem_t MainMenu[] = {{1, "M_NGAME", M_NewGame, 'n'},
 
 menu_t MainDef = {
     main_end,       // number of menu items
-    nullptr,           // previous menu screen
+    nullptr,        // previous menu screen
     MainMenu,       // table that defines menu items
     M_DrawMainMenu, // drawing routine
     97,
@@ -664,7 +664,7 @@ void M_NewGame(int choice)
 {
     if (netgame && !demoplayback)
     {
-        if (compatibility_level < lxdoom_1_compatibility)
+        if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility)
             M_StartMessage(s_NEWGAME, nullptr,
                            false); // Ty 03/27/98 - externalized
         else                       // CPhipps - query restarting the level
@@ -767,7 +767,7 @@ static void M_DeleteGame(int i)
     name = static_cast<char *>(malloc(len + 1));
     G_SaveGameName(name, len + 1, i, false);
     remove(name);
-    free(name);
+    std::free(name);
 
     M_ReadSaveStrings();
 }
@@ -837,13 +837,13 @@ static void M_VerifyForcedLoadGame(int ch)
 {
     if (ch == 'y')
         G_ForcedLoadGame();
-    free(forced_loadgame_message); // free the message strdup()'ed below
+    std::free(forced_loadgame_message); // free the message strdup()'ed below
     M_ClearMenus();
 }
 
 void M_ForcedLoadGame(const char *msg)
 {
-    forced_loadgame_message = strdup(msg); // free()'d above
+    forced_loadgame_message = strdup(msg); // Z_Free()'d above
     M_StartMessage(forced_loadgame_message, M_VerifyForcedLoadGame, true);
 }
 
@@ -857,8 +857,7 @@ void M_LoadGame(int choice)
 
     /* killough 5/26/98: exclude during demo recordings
      * cph - unless a new demo */
-    if (demorecording &&
-        (compatibility_level < prboom_2_compatibility))
+    if (demorecording && (COMPATIBILITY_LEVEL < prboom_2_compatibility))
     {
         M_StartMessage("you can't load a game\n"
                        "while recording an old demo!\n\n" PRESSKEY,
@@ -910,7 +909,7 @@ void M_ReadSaveStrings(void)
         name = static_cast<char *>(malloc(len + 1));
         G_SaveGameName(name, len + 1, i, false);
         fp = fopen(name, "rb");
-        free(name);
+        std::free(name);
         if (!fp)
         { // Ty 03/27/98 - externalized:
             strcpy(&savegamestrings[i][0], s_EMPTYSTRING);
@@ -990,7 +989,8 @@ void M_SaveGame(int choice)
     // killough 10/6/98: allow savegames during single-player demo playback
     if (!usergame && (!demoplayback || netgame))
     {
-        M_StartMessage(s_SAVEDEAD, nullptr, false); // Ty 03/27/98 - externalized
+        M_StartMessage(s_SAVEDEAD, nullptr,
+                       false); // Ty 03/27/98 - externalized
         return;
     }
 
@@ -1082,11 +1082,11 @@ void M_Options(int choice)
 //
 // M_QuitDOOM
 //
-int quitsounds[8] = {sfx_pldeth, sfx_dmpain, sfx_popain, sfx_slop,
-                     sfx_telept, sfx_posit1, sfx_posit3, sfx_sgtatk};
+sfxenum_t quitsounds[8] = {sfx_pldeth, sfx_dmpain, sfx_popain, sfx_slop,
+                           sfx_telept, sfx_posit1, sfx_posit3, sfx_sgtatk};
 
-int quitsounds2[8] = {sfx_vilact, sfx_getpow, sfx_boscub, sfx_slop,
-                      sfx_skeswg, sfx_kntdth, sfx_bspact, sfx_sgtatk};
+sfxenum_t quitsounds2[8] = {sfx_vilact, sfx_getpow, sfx_boscub, sfx_slop,
+                            sfx_skeswg, sfx_kntdth, sfx_bspact, sfx_sgtatk};
 
 static void M_QuitResponse(int ch)
 {
@@ -1403,7 +1403,8 @@ void M_QuickLoad(void)
 
     if (quickSaveSlot < 0)
     {
-        M_StartMessage(s_QSAVESPOT, nullptr, false); // Ty 03/27/98 - externalized
+        M_StartMessage(s_QSAVESPOT, nullptr,
+                       false); // Ty 03/27/98 - externalized
         return;
     }
     sprintf(tempstring, s_QLPROMPT,
@@ -1861,7 +1862,8 @@ static void M_DrawItem(const setup_menu_t *s)
          * This supports multiline items on horizontally-crowded menus.
          */
 
-        for (p = t = strdup(s->m_text); (p = strtok(p, "\n")); y += 8, p = nullptr)
+        for (p = t = strdup(s->m_text); (p = strtok(p, "\n"));
+             y += 8, p = nullptr)
         { /* killough 10/98: support left-justification: */
             strcpy(menu_buffer, p);
             if (!(flags & S_LEFTJUST))
@@ -1872,7 +1874,7 @@ static void M_DrawItem(const setup_menu_t *s)
             if (s == current_setup_menu + set_menu_itemon && whichSkull)
                 M_DrawString(x - w - 8, y, color, ">");
         }
-        free(t);
+        std::free(t);
     }
 }
 
@@ -2325,9 +2327,9 @@ extern setup_menu_t keys_settings7[];
 
 // The table which gets you from one screen table to the next.
 
-setup_menu_t *keys_settings[] = {
-    keys_settings1, keys_settings2, keys_settings3, keys_settings4,
-    keys_settings5, keys_settings6, keys_settings7, nullptr};
+setup_menu_t *keys_settings[] = {keys_settings1, keys_settings2, keys_settings3,
+                                 keys_settings4, keys_settings5, keys_settings6,
+                                 keys_settings7, nullptr};
 
 int mult_screens_index; // the index of the current screen in a set
 
@@ -3683,7 +3685,8 @@ static const char *videomodes[] = {"8bit",   "15bit", "16bit", "32bit",
 #endif
                                    nullptr};
 
-static const char *gltexformats[] = {"GL_RGBA", "GL_RGB5_A1", "GL_RGBA4", nullptr};
+static const char *gltexformats[] = {"GL_RGBA", "GL_RGB5_A1", "GL_RGBA4",
+                                     nullptr};
 
 setup_menu_t gen_settings1[] = { // General Settings screen1
 
@@ -4442,8 +4445,8 @@ setup_menu_t gen_settings7[] = {{"COMPATIBILITY WITH COMMON MAPPING ERRORS",
                                 {0, S_SKIP | S_END, m_null}};
 
 static const char *gltexfilters[] = {
-    "None",      "Linear", "Nearest Mipmap", "Linear Mipmap", "Bilinear",
-    "Trilinear", nullptr};
+    "None",     "Linear",    "Nearest Mipmap", "Linear Mipmap",
+    "Bilinear", "Trilinear", nullptr};
 
 static const char *gltexfilters_anisotropics[] = {"Off", "2x",  "4x",
                                                   "8x",  "16x", nullptr};
@@ -5308,7 +5311,7 @@ static void M_ResetDefaults(void)
                             } u; // type punning via unions
 
                             u.c = dp->location.ppsz;
-                            free(*(u.s));
+                            std::free(*(u.s));
                             *(u.c) = strdup(dp->defaultvalue.psz);
                         }
                         else
@@ -6452,7 +6455,7 @@ dboolean M_Responder(event_t *ev)
             if ((automapmode & am_active) || chat_on) // allow
                 return false;                         // key_hud==key_zoomin
             M_SizeDisplay(1);                         //  ^
-            S_StartSound(nullptr, sfx_stnmov);           //  |
+            S_StartSound(nullptr, sfx_stnmov);        //  |
             return true;                              // phares
         }
 
@@ -7256,7 +7259,7 @@ dboolean M_Responder(event_t *ev)
                     } u; // type punning via unions
 
                     u.c = ptr1->var.def()->location.ppsz;
-                    free(*(u.s));
+                    std::free(*(u.s));
                     *(u.c) = chat_string_buffer;
                 }
                 chat_index = 0; // current cursor position in chat_string_buffer
@@ -7542,7 +7545,7 @@ void M_StartControlPanel(void)
     {
         EpiDef.numitems = ep_end;
         if (gamemode != commercial &&
-            (compatibility_level < ultdoom_compatibility ||
+            (COMPATIBILITY_LEVEL < ultdoom_compatibility ||
              W_SafeGetNumForName(EpiDef.menuitems[ep4].name) == -1))
         {
             EpiDef.numitems--;
@@ -7588,7 +7591,7 @@ void M_Drawer(void)
             if ((*p = c))
                 p++;
         }
-        free(ms);
+        std::free(ms);
     }
     else if (menuactive != mnact_inactive)
     {
@@ -7596,7 +7599,7 @@ void M_Drawer(void)
         int lumps_missing = 0;
 
         menuactive = mnact_float; // Boom-style menu drawers will
-                                                // set mnact_full
+                                  // set mnact_full
 
         if (currentMenu->routine)
             currentMenu->routine(); // call Draw routine

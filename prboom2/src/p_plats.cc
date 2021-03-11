@@ -90,7 +90,7 @@ void T_PlatRaise(plat_t *plat)
                         "T_PlatRaise: raise-and-change type has reversed "
                         "direction in compatibility mode - may lead to desync\n"
                         " gametic: %d sector: %d complevel: %d\n",
-                        gametic, plat->sector->iSectorID, compatibility_level);
+                        gametic, plat->sector->iSectorID, COMPATIBILITY_LEVEL);
             }
         }
         else // else handle reaching end of up stroke

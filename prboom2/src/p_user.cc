@@ -158,8 +158,8 @@ void P_CalcHeight(player_t *player)
 
     // e6y
     if (!prboom_comp[PC_PRBOOM_FRICTION].state &&
-        compatibility_level >= boom_202_compatibility &&
-        compatibility_level <= lxdoom_1_compatibility &&
+        COMPATIBILITY_LEVEL >= boom_202_compatibility &&
+        COMPATIBILITY_LEVEL <= lxdoom_1_compatibility &&
         player->mo->friction > ORIG_FRICTION) // ice?
     {
         if (player->bob > (MAXBOB >> 2))
@@ -353,7 +353,7 @@ void P_MovePlayer(player_t *player)
                 }
             }
         }
-        if (mo->state == states + S_PLAY)
+        if (mo->state == states + S_PLAY.value())
             P_SetMobjState(mo, S_PLAY_RUN1);
     }
 }

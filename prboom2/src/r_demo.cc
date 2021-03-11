@@ -658,10 +658,10 @@ static void R_DemoEx_GetParams(const byte *pwad_p, waddata_t *waddata)
                 int value;
                 char *pstr, *mask;
 
-                mask = (char *)malloc(strlen(overflow_cfgname[overflow]) + 16);
+                mask = (char *)malloc(strlen(overflow_cfgname[overflow.value()]) + 16);
                 if (mask)
                 {
-                    sprintf(mask, "-set %s", overflow_cfgname[overflow]);
+                    sprintf(mask, "-set %s", overflow_cfgname[overflow.value()]);
                     pstr = strstr(str, mask);
 
                     if (pstr)
@@ -669,8 +669,8 @@ static void R_DemoEx_GetParams(const byte *pwad_p, waddata_t *waddata)
                         strcat(mask, " = %d");
                         if (sscanf(pstr, mask, &value) == 1)
                         {
-                            overflows[overflow].footer = true;
-                            overflows[overflow].footer_emulate = value;
+                            overflows[overflow.value()].footer = true;
+                            overflows[overflow.value()].footer_emulate = value;
                         }
                     }
                     free(mask);
@@ -767,7 +767,7 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
     // add complevel for formats which do not have it in header
     if (demo_compatibility)
     {
-        sprintf(buf, "-complevel %d ", compatibility_level);
+        sprintf(buf, "-complevel %d ", COMPATIBILITY_LEVEL);
         AddString(&files, buf);
     }
 
@@ -785,7 +785,7 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
     }
 
     // doom 1.2 does not store these params in header
-    if (compatibility_level == doom_12_compatibility)
+    if (COMPATIBILITY_LEVEL == doom_12_compatibility)
     {
         if (M_CheckParm("-respawn"))
         {
@@ -815,10 +815,10 @@ static void R_DemoEx_AddParams(wadtbl_t *wadtbl)
         overrun_list_t overflow;
         for (overflow = 0; overflow < OVERFLOW_MAX; overflow++)
         {
-            if (overflows[overflow].shit_happens)
+            if (overflows[overflow.value()].shit_happens)
             {
-                sprintf(buf, "-set %s=%d ", overflow_cfgname[overflow],
-                        overflows[overflow].emulate);
+                sprintf(buf, "-set %s=%d ", overflow_cfgname[overflow.value()],
+                        overflows[overflow.value()].emulate);
                 AddString(&files, buf);
             }
         }

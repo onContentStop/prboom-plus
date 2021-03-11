@@ -31,6 +31,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include <iostream>
+
 #include "p_tick.hh"
 #include "doomstat.hh"
 #include "e6y.hh"
@@ -55,7 +57,7 @@ static dboolean newthinkerpresent;
 
 // killough 8/29/98: we maintain several separate threads, each containing
 // a special class of thinkers, to allow more efficient searches.
-thinker_t thinkerclasscap[th_all + 1];
+std::array<thinker_t, TH_ALL.value() + 1> THINKER_CLASS_CAP;
 
 //
 // P_InitThinkers
@@ -65,12 +67,14 @@ void P_InitThinkers(void)
 {
     int i;
 
-    for (i = 0; i < NUMTHCLASS;
+    for (i = 0; i < NUMTHCLASS.value();
          i++) // killough 8/29/98: initialize threaded lists
-        thinkerclasscap[i].cprev = thinkerclasscap[i].cnext =
-            &thinkerclasscap[i];
+        THINKER_CLASS_CAP[i].cprev = THINKER_CLASS_CAP[i].cnext =
+            &THINKER_CLASS_CAP[i];
 
-    thinkercap.prev = thinkercap.next = &thinkercap;
+    THINKER_CLASS_CAP[TH_ALL.value()].prev =
+        THINKER_CLASS_CAP[TH_ALL.value()].next =
+            &THINKER_CLASS_CAP[TH_ALL.value()];
 }
 
 //
@@ -82,17 +86,66 @@ void P_InitThinkers(void)
 
 void P_UpdateThinker(thinker_t *thinker)
 {
-    register thinker_t *th;
+    thinker_t *th;
     // find the class the thinker belongs to
 
-    int cls =
-        thinker->function == P_RemoveThinkerDelayed ? th_delete
-        : thinker->function == P_MobjThinker &&
-                ((mobj_t *)thinker)->health > 0 &&
-                (((mobj_t *)thinker)->flags & MF_COUNTKILL ||
-                 ((mobj_t *)thinker)->type == MT_SKULL)
-            ? ((mobj_t *)thinker)->flags & MF_FRIEND ? th_friends : th_enemies
-            : th_misc;
+    th_class cls;
+    if (((mobj_t *)thinker)->flags & MF_FRIEND)
+    {
+        if (thinker->function == P_MobjThinker &&
+            ((mobj_t *)thinker)->health > 0 &&
+            (((mobj_t *)thinker)->flags & MF_COUNTKILL ||
+             ((mobj_t *)thinker)->type == MT_SKULL))
+        {
+            if (thinker->function == P_RemoveThinkerDelayed)
+            {
+                cls = TH_DELETE;
+            }
+            else
+            {
+                cls = TH_FRIENDS;
+            }
+        }
+        else
+        {
+            if (thinker->function == P_RemoveThinkerDelayed)
+            {
+                cls = TH_DELETE;
+            }
+            else
+            {
+                cls = TH_MISC;
+            }
+        }
+    }
+    else
+    {
+        if (thinker->function == P_MobjThinker &&
+            ((mobj_t *)thinker)->health > 0 &&
+            (((mobj_t *)thinker)->flags & MF_COUNTKILL ||
+             ((mobj_t *)thinker)->type == MT_SKULL))
+        {
+            if (thinker->function == P_RemoveThinkerDelayed)
+            {
+                cls = TH_DELETE;
+            }
+            else
+            {
+                cls = TH_ENEMIES;
+            }
+        }
+        else
+        {
+            if (thinker->function == P_RemoveThinkerDelayed)
+            {
+                cls = TH_DELETE;
+            }
+            else
+            {
+                cls = TH_MISC;
+            }
+        }
+    }
 
     {
         /* Remove from current thread, if in one */
@@ -101,7 +154,7 @@ void P_UpdateThinker(thinker_t *thinker)
     }
 
     // Add to appropriate thread
-    th = &thinkerclasscap[cls];
+    th = &THINKER_CLASS_CAP[cls.value()];
     th->cprev->cnext = thinker;
     thinker->cnext = th;
     thinker->cprev = th->cprev;
@@ -115,10 +168,10 @@ void P_UpdateThinker(thinker_t *thinker)
 
 void P_AddThinker(thinker_t *thinker)
 {
-    thinkercap.prev->next = thinker;
-    thinker->next = &thinkercap;
-    thinker->prev = thinkercap.prev;
-    thinkercap.prev = thinker;
+    THINKER_CLASS_CAP[TH_ALL.value()].prev->next = thinker;
+    thinker->next = &THINKER_CLASS_CAP[TH_ALL.value()];
+    thinker->prev = THINKER_CLASS_CAP[TH_ALL.value()].prev;
+    THINKER_CLASS_CAP[TH_ALL.value()].prev = thinker;
 
     thinker->references = 0; // killough 11/98: init reference counter to 0
 
@@ -194,10 +247,10 @@ void P_RemoveThinker(thinker_t *thinker)
  */
 thinker_t *P_NextThinker(thinker_t *th, th_class cl)
 {
-    thinker_t *top = &thinkerclasscap[cl];
+    thinker_t *top = &THINKER_CLASS_CAP[cl.value()];
     if (!th)
         th = top;
-    th = cl == th_all ? th->next : th->cnext;
+    th = cl == TH_ALL ? th->next : th->cnext;
     return th == top ? nullptr : th;
 }
 
@@ -217,7 +270,8 @@ void P_SetTarget(mobj_t **mop, mobj_t *targ)
 {
     if (*mop) // If there was a target already, decrease its refcount
         (*mop)->thinker.references--;
-    if ((*mop = targ)) // Set new target and if non-nullptr, increase its counter
+    if ((*mop =
+             targ)) // Set new target and if non-nullptr, increase its counter
         targ->thinker.references++;
 }
 
@@ -244,15 +298,46 @@ void P_SetTarget(mobj_t **mop, mobj_t *targ)
 // external and using P_RemoveThinkerDelayed() implicitly.
 //
 
-static void P_RunThinkers(void)
+static void P_RunThinkers()
 {
-    for (currentthinker = thinkercap.next; currentthinker != &thinkercap;
+    for (currentthinker = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         currentthinker != &THINKER_CLASS_CAP[TH_ALL.value()];
          currentthinker = currentthinker->next)
     {
         if (newthinkerpresent)
             R_ActivateThinkerInterpolations(currentthinker);
         if (currentthinker->function != ACTION_NULL)
-            currentthinker->function.thinker()(currentthinker);
+        {
+            if (currentthinker->function.thinker())
+                currentthinker->function.thinker()(currentthinker);
+            else if (currentthinker->function.mobj())
+                currentthinker->function.mobj()(
+                    reinterpret_cast<mobj_t *>(currentthinker));
+            else if (currentthinker->function.strobe())
+            {
+                currentthinker->function.strobe()(
+                    reinterpret_cast<strobe_t *>(currentthinker));
+            }
+            else if (currentthinker->function.glow())
+            {
+                currentthinker->function.glow()(
+                    reinterpret_cast<glow_t *>(currentthinker));
+            }
+            else if (currentthinker->function.fireflicker())
+            {
+                currentthinker->function.fireflicker()(
+                    reinterpret_cast<fireflicker_t *>(currentthinker));
+            }
+            else if (currentthinker->function.scroll())
+            {
+                currentthinker->function.scroll()(
+                    reinterpret_cast<scroll_t *>(currentthinker));
+            }
+            else
+            {
+                std::cout << currentthinker->function << std::endl;
+            }
+        }
     }
     newthinkerpresent = false;
 
@@ -277,9 +362,8 @@ void P_Ticker(void)
      * All of this complicated mess is used to preserve demo sync.
      */
 
-    if (paused ||
-        (menuactive != mnact_inactive && !demoplayback &&
-         !netgame && players[consoleplayer].viewz != 1))
+    if (paused || (menuactive != mnact_inactive && !demoplayback && !netgame &&
+                   players[consoleplayer].viewz != 1))
     {
         P_ResetWalkcam();
         return;

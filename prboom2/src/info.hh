@@ -1316,7 +1316,7 @@ constexpr statenum_t S_DOGS_RAISE6 = 998;
 // fixes bug #1576151 (part 2)
 // killough 7/11/98: the old BFG's 43 firing frames
 constexpr statenum_t S_OLDBFG1 = 999;
-constexpr statenum_t S_OLDBFG42 = S_OLDBFG1 + 41;
+constexpr statenum_t S_OLDBFG42 = S_OLDBFG1.value() + 41;
 constexpr statenum_t S_OLDBFG43 = 1041;
 
 constexpr statenum_t S_PLS1BALL =
@@ -1391,7 +1391,7 @@ struct state_t
 };
 
 /* these are in info.c */
-extern state_t states[NUMSTATES];
+extern state_t states[NUMSTATES.value()];
 extern const char *sprnames[]; /* 1/17/98 killough - CPhipps - const */
 
 /********************************************************************
@@ -1735,6 +1735,6 @@ struct mobjinfo_t
 };
 
 /* See p_mobj_h for addition more technical info */
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
+extern mobjinfo_t mobjinfo[NUMMOBJTYPES.value()];
 
 #endif

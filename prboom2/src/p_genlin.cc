@@ -816,7 +816,7 @@ int EV_DoGenStairs(line_t *line)
                     continue;
 
                 /* jff 6/19/98 prevent double stepsize */
-                if (compatibility_level < boom_202_compatibility)
+                if (COMPATIBILITY_LEVEL < boom_202_compatibility)
                     height += floor->direction * stairsize;
 
                 // jff 2/26/98 special lockout condition for retriggering
@@ -824,7 +824,7 @@ int EV_DoGenStairs(line_t *line)
                     continue;
 
                 /* jff 6/19/98 increase height AFTER continue */
-                if (compatibility_level >= boom_202_compatibility)
+                if (COMPATIBILITY_LEVEL >= boom_202_compatibility)
                     height += floor->direction * stairsize;
 
                 // jff 2/26/98

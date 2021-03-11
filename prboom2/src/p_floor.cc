@@ -165,7 +165,7 @@ result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest,
                             lprintf(LO_WARN,
                                     " gametic: %d, sector: %d, complevel: %d\n",
                                     gametic, sector->iSectorID,
-                                    compatibility_level);
+                                    COMPATIBILITY_LEVEL);
                         }
 
                         if (crush == true)
@@ -358,7 +358,7 @@ void T_MoveFloor(floormove_t *floor)
 
         // Moving floors (but not plats) in versions <= v1.2 did not
         // make floor stop sound
-        if (compatibility_level > doom_12_compatibility)
+        if (COMPATIBILITY_LEVEL > doom_12_compatibility)
         {
             S_StartSound(reinterpret_cast<mobj_t *>(&floor->sector->soundorg),
                          sfx_pstop);
@@ -531,7 +531,7 @@ int EV_DoFloor(line_t *line, floor_e floortype)
             floor->sector = sec;
             floor->speed = FLOORSPEED * 4;
             floor->floordestheight = P_FindHighestFloorSurrounding(sec);
-            if (compatibility_level == doom_12_compatibility ||
+            if (COMPATIBILITY_LEVEL == doom_12_compatibility ||
                 floor->floordestheight != sec->floorheight)
             {
                 floor->floordestheight += 8 * FRACUNIT;
@@ -903,7 +903,7 @@ int EV_BuildStairs(line_t *line, stair_e type)
                      * perversly reverted the fix
                      */
                     if (comp[comp_stairs] ||
-                        (compatibility_level == mbf_compatibility))
+                        (COMPATIBILITY_LEVEL == mbf_compatibility))
                         height +=
                             stairsize; // jff 6/28/98 change demo compatibility
 
@@ -914,7 +914,7 @@ int EV_BuildStairs(line_t *line, stair_e type)
                     /* cph - see comment above - do this iff we didn't do so
                      * above */
                     if (!comp[comp_stairs] &&
-                        (compatibility_level != mbf_compatibility))
+                        (COMPATIBILITY_LEVEL != mbf_compatibility))
                         height += stairsize;
 
                     sec = tsec;
@@ -961,8 +961,8 @@ int EV_BuildStairs(line_t *line, stair_e type)
              * logic reversed since we now have a separate outer loop index.
              * DEMOSYNC - what about boom_compatibility_compatibility?
              */
-            if ((compatibility_level >= mbf_compatibility) &&
-                (compatibility_level < prboom_3_compatibility))
+            if ((COMPATIBILITY_LEVEL >= mbf_compatibility) &&
+                (COMPATIBILITY_LEVEL < prboom_3_compatibility))
                 ssec = secnum; /* Trash outer loop index */
             else
             {

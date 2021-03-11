@@ -88,7 +88,7 @@ void Scanner::SetString(char **ptr, const char *start, unsigned int length)
     if (length == -1)
         length = strlen(start);
     if (*ptr != nullptr)
-        free(*ptr);
+        std::free(*ptr);
     *ptr = (char *)malloc(length + 1);
     memcpy(*ptr, start, length);
     (*ptr)[length] = 0;
@@ -204,9 +204,9 @@ void Scanner::SaveState(Scanner &savedstate)
 {
     // This saves the entire parser state except for the data pointer.
     if (savedstate.string != nullptr)
-        free(savedstate.string);
+        std::free(savedstate.string);
     if (savedstate.nextState.string != nullptr)
-        free(savedstate.nextState.string);
+        std::free(savedstate.nextState.string);
     memcpy(&savedstate, this, sizeof(*this));
     savedstate.string = strdup(string);
     savedstate.nextState.string = strdup(nextState.string);

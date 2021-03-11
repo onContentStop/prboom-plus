@@ -354,14 +354,14 @@ static void L_CommandOnChange(void)
 
         if (launcher.files)
         {
-            free(launcher.files);
+            Z_Free(launcher.files);
             launcher.files = nullptr;
         }
         launcher.filescount = 0;
 
         if (launcher.cache)
         {
-            free(launcher.cache);
+            Z_Free(launcher.cache);
             launcher.cache = nullptr;
         }
         launcher.cachesize = 0;
@@ -423,7 +423,7 @@ static void L_CommandOnChange(void)
                 result = L_Associate("PrBoomPlusLmpFiles", ".lmp", cmdline);
             }
 
-            free(cmdline);
+            Z_Free(cmdline);
 
             if (FormatMessage(
                     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -674,7 +674,7 @@ static dboolean L_PrepareToLaunch(void)
     new_wadfiles = malloc(sizeof(*wadfiles) * numwadfiles);
     memcpy(new_wadfiles, wadfiles, sizeof(*wadfiles) * numwadfiles);
     numwadfiles = 0;
-    free(wadfiles);
+    Z_Free(wadfiles);
     wadfiles = nullptr;
 
     listPWADCount = (int)SendMessage(launcher.listPWAD, LB_GETCOUNT, 0, 0);
@@ -729,7 +729,7 @@ static dboolean L_PrepareToLaunch(void)
         strcat(history, item->name);
     }
 
-    free(selection);
+    Z_Free(selection);
     L_SelClearAndFree();
 
     for (i = 0; (size_t)i < new_numwadfiles; i++)
@@ -738,9 +738,9 @@ static dboolean L_PrepareToLaunch(void)
             new_wadfiles[i].src == source_net)
             D_AddFile(new_wadfiles[i].name, new_wadfiles[i].src);
         if (new_wadfiles[i].name)
-            free((char *)new_wadfiles[i].name);
+            Z_Free((char *)new_wadfiles[i].name);
     }
-    free(new_wadfiles);
+    Z_Free(new_wadfiles);
 
     if (history)
     {
@@ -771,7 +771,7 @@ static dboolean L_PrepareToLaunch(void)
             history2 = M_LookupDefault(str);
 
             if (i == shiftfrom)
-                free((char *)history1->location.ppsz[0]);
+                Z_Free((char *)history1->location.ppsz[0]);
             history1->location.ppsz[0] = history2->location.ppsz[0];
         }
         if (shiftfrom > 0)
@@ -841,7 +841,7 @@ static void L_SelAdd(int index)
 
 static void L_SelClearAndFree(void)
 {
-    free(launcher.selection);
+    Z_Free(launcher.selection);
     launcher.selection = nullptr;
     launcher.selectioncount = 0;
 }
@@ -1059,7 +1059,7 @@ char *e6y_I_FindFile(const char *ext)
             }
         }
 
-        free(p);
+        Z_Free(p);
     }
     return nullptr;
 }
@@ -1119,18 +1119,18 @@ static char *L_HistoryGetStr(waddata_t *data)
         strcat(result, M_Strlwr(pwad));
         if (deh)
             strcat(result, " + ");
-        free(pwad);
+        Z_Free(pwad);
     }
     if (deh)
     {
         strcat(result, M_Strlwr(deh));
-        free(deh);
+        Z_Free(deh);
     }
     if (iwad)
     {
         strcat(result, " @ ");
         strcat(result, M_Strupr(iwad));
-        free(iwad);
+        Z_Free(iwad);
     }
 
     return result;
@@ -1183,11 +1183,11 @@ static void L_FillHistoryList(void)
                     SendMessage(launcher.listHistory, CB_SETITEMDATA, index,
                                 (LPARAM)waddata);
 
-                free(p);
+                Z_Free(p);
                 p = nullptr;
             }
 
-            free(str);
+            Z_Free(str);
         }
     }
 }
@@ -1284,7 +1284,7 @@ BOOL CALLBACK LauncherClientCallback(HWND hDlg, UINT message, WPARAM wParam,
                         WadDataFree(&data);
                         break;
                     }
-                    free(patterndata.missed);
+                    Z_Free(patterndata.missed);
                 }
             }
 #endif
@@ -1529,7 +1529,7 @@ VOID OnWMNotify(LPARAM lParam)
                     strcpy(tooltip_str, line);
             }
 
-            free(selection);
+            Z_Free(selection);
 
             lpttt->lpszText = tooltip_str;
         }

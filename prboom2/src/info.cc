@@ -123,7 +123,7 @@ const char *sprnames[NUMSPRITES + 1] = {
 // parts where frame rewiring is done for more details and the
 // extended way a BEX file can handle this.
 
-state_t states[NUMSTATES] = {
+state_t states[NUMSTATES.value()] = {
     {SPR_TROO, 0, -1, ACTION_NULL, S_NULL, 0, 0},             // S_NULL
     {SPR_SHTG, 4, 0, A_Light0, S_NULL, 0, 0},                 // S_LIGHTDONE
     {SPR_PUNG, 0, 1, A_WeaponReady, S_PUNCH, 0, 0},           // S_PUNCH
@@ -1138,12 +1138,12 @@ state_t states[NUMSTATES] = {
 #define BFGDELAY 1
 #define OLDBFG_1FRAMES(x)                                                      \
     {SPR_BFGG, 1, BFGDELAY, A_FireOldBFG,                                      \
-     static_cast<statenum_t>(x + S_OLDBFG1 + 2)},
+     static_cast<statenum_t>((x) + S_OLDBFG1.value() + 2)},
 #define OLDBFG_2FRAMES(x) OLDBFG_1FRAMES(x) OLDBFG_1FRAMES(x + 1)
 #define OLDBFG_4FRAMES(x) OLDBFG_2FRAMES(x) OLDBFG_2FRAMES(x + 2)
 #define OLDBFG_8FRAMES(x) OLDBFG_4FRAMES(x) OLDBFG_4FRAMES(x + 4)
     {SPR_BFGG, 0, 10, A_BFGsound,
-     static_cast<statenum_t>(S_OLDBFG1 + 1)}, // S_OLDBFG1
+     static_cast<statenum_t>(S_OLDBFG1.value() + 1)}, // S_OLDBFG1
 
     OLDBFG_8FRAMES(0) OLDBFG_8FRAMES(8) OLDBFG_8FRAMES(16) OLDBFG_8FRAMES(24)
         OLDBFG_8FRAMES(32)
@@ -1245,7 +1245,7 @@ state_t states[NUMSTATES] = {
 //
 // This goes on for the next 3000+ lines...
 
-mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
+mobjinfo_t mobjinfo[NUMMOBJTYPES.value()] = {
     {
         // MT_PLAYER
         -1,            // doomednum

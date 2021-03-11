@@ -33,6 +33,8 @@
 #ifndef __P_TICK__
 #define __P_TICK__
 
+#include <array>
+
 #include "d_think.hh"
 #include "p_mobj.hh"
 
@@ -58,18 +60,16 @@ void P_SetTarget(mobj_t **mo, mobj_t *target); // killough 11/98
  * cph 2002/01/13: for consistency with the main thinker list, keep objects
  * pending deletion on a class list too
  */
-typedef enum
-{
-    th_delete,
-    th_misc,
-    th_friends,
-    th_enemies,
-    NUMTHCLASS,
-    th_all = NUMTHCLASS, /* For P_NextThinker, indicates "any class" */
-} th_class;
+using th_class = SequentialEnum<int>;
+constexpr th_class TH_DELETE = 0;
+constexpr th_class TH_MISC = 1;
+constexpr th_class TH_FRIENDS = 2;
+constexpr th_class TH_ENEMIES = 3;
+constexpr th_class NUMTHCLASS = 4;
+/* For P_NextThinker, indicates "any class" */
+constexpr th_class TH_ALL = NUMTHCLASS;
 
-extern thinker_t thinkerclasscap[];
-#define thinkercap thinkerclasscap[th_all]
+extern std::array<thinker_t, TH_ALL.value() + 1> THINKER_CLASS_CAP;
 
 /* cph 2002/01/13 - iterator for thinker lists */
 thinker_t *P_NextThinker(thinker_t *, th_class);

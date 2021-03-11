@@ -130,7 +130,7 @@ void T_VerticalDoor(vldoor_t *door)
         // Old code: if (door->lighttag && door->topheight -
         // door->sector->floorheight)
         if (door->lighttag && door->topheight - door->sector->floorheight &&
-            compatibility_level >= mbf_compatibility)
+            COMPATIBILITY_LEVEL >= mbf_compatibility)
             EV_LightTurnOnPartway(
                 door->line,
                 FixedDiv(door->sector->ceilingheight -
@@ -181,7 +181,7 @@ void T_VerticalDoor(vldoor_t *door)
             // e6y: "Tagged doors don't trigger special lighting" handled wrong
             // http://sourceforge.net/tracker/index.php?func=detail&aid=1411400&group_id=148658&atid=772943
             if (door->lighttag && door->topheight - door->sector->floorheight &&
-                compatibility_level < mbf_compatibility)
+                COMPATIBILITY_LEVEL < mbf_compatibility)
                 EV_LightTurnOnPartway(door->line, 0);
         }
         /* jff 1/31/98 turn lighting off in tagged sectors of manual doors
@@ -226,7 +226,7 @@ void T_VerticalDoor(vldoor_t *door)
         // Old code: if (door->lighttag && door->topheight -
         // door->sector->floorheight)
         if (door->lighttag && door->topheight - door->sector->floorheight &&
-            compatibility_level >= mbf_compatibility)
+            COMPATIBILITY_LEVEL >= mbf_compatibility)
             EV_LightTurnOnPartway(
                 door->line,
                 FixedDiv(door->sector->ceilingheight -
@@ -266,7 +266,7 @@ void T_VerticalDoor(vldoor_t *door)
             // e6y: "Tagged doors don't trigger special lighting" handled wrong
             // http://sourceforge.net/tracker/index.php?func=detail&aid=1411400&group_id=148658&atid=772943
             if (door->lighttag && door->topheight - door->sector->floorheight &&
-                compatibility_level < mbf_compatibility)
+                COMPATIBILITY_LEVEL < mbf_compatibility)
                 EV_LightTurnOnPartway(door->line, FRACUNIT);
         }
         break;
@@ -537,7 +537,7 @@ int EV_VerticalDoor(line_t *line, mobj_t *thing)
      * removed the if-this-is-repeatable check, hence the prboom_4_compatibility
      * clause below (foolishly assumed that already moving implies repeatable -
      * but it could be moving due to another switch, e.g. lv19-509) */
-    if (door && ((compatibility_level == prboom_4_compatibility) ||
+    if (door && ((COMPATIBILITY_LEVEL == prboom_4_compatibility) ||
                  (line->special == 1) || (line->special == 117) ||
                  (line->special == 26) || (line->special == 27) ||
                  (line->special == 28)))
@@ -545,7 +545,7 @@ int EV_VerticalDoor(line_t *line, mobj_t *thing)
         /* For old demos we have to emulate the old buggy behavior and
          * mess up non-T_VerticalDoor actions.
          */
-        if (compatibility_level < prboom_4_compatibility ||
+        if (COMPATIBILITY_LEVEL < prboom_4_compatibility ||
             door->thinker.function == T_VerticalDoor)
         {
             /* cph - we are writing outval to door->direction iff it is non-zero

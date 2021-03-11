@@ -34,6 +34,8 @@
 #ifndef __R_MAIN__
 #define __R_MAIN__
 
+#include <array>
+
 #include "d_player.hh"
 #include "r_data.hh"
 
@@ -83,7 +85,9 @@ extern fixed_t viewfocratio;
 // Rendering stats
 //
 
-extern int rendered_visplanes, rendered_segs, rendered_vissprites;
+extern int rendered_visplanes;
+extern int rendered_segs;
+extern int rendered_vissprites;
 extern dboolean rendering_stats;
 
 //
@@ -115,9 +119,10 @@ extern int render_doom_lightmaps;
 extern int fake_contrast;
 
 // killough 3/20/98: Allow colormaps to be dynamic (e.g. underwater)
-extern const lighttable_t ***scalelight;
-extern const lighttable_t ****c_zlight;
-extern const lighttable_t ***zlight;
+extern std::array<const lighttable_t *, MAXLIGHTSCALE> *scalelight;
+extern std::array<std::array<const lighttable_t *, LIGHTLEVELS_MAX>, MAXLIGHTZ>
+    *c_zlight;
+extern std::array<const lighttable_t *, MAXLIGHTZ> *zlight;
 extern const lighttable_t *fullcolormap;
 extern int numcolormaps; // killough 4/4/98: dynamic number of maps
 extern const lighttable_t **colormaps;

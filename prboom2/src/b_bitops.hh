@@ -17,11 +17,6 @@ class Bitset
     {
     }
 
-    constexpr operator Underlying() const
-    {
-        return m_value;
-    }
-
     constexpr Underlying value() const
     {
         return m_value;
@@ -94,11 +89,6 @@ class SequentialEnum
     {
     }
 
-    constexpr operator Underlying() const
-    {
-        return m_value;
-    }
-
     constexpr Underlying value() const
     {
         return m_value;
@@ -158,5 +148,35 @@ class SequentialEnum
     constexpr bool operator!=(const SequentialEnum<Underlying> &other) const
     {
         return m_value != other.m_value;
+    }
+
+    constexpr SequentialEnum<Underlying> operator~() const
+    {
+        return ~m_value;
+    }
+
+    constexpr SequentialEnum<Underlying> operator&(
+        const SequentialEnum<Underlying> &other) const
+    {
+        return m_value & other.m_value;
+    }
+
+    constexpr SequentialEnum<Underlying> operator|(
+        const SequentialEnum<Underlying> &other) const
+    {
+        return m_value | other.m_value;
+    }
+
+    constexpr SequentialEnum<Underlying> operator^(
+        const SequentialEnum<Underlying> &other) const
+    {
+        return m_value ^ other.m_value;
+    }
+
+    constexpr SequentialEnum<Underlying> &operator&=(
+        const SequentialEnum<Underlying> &other)
+    {
+        m_value &= other.m_value;
+        return *this;
     }
 };

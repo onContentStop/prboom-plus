@@ -65,7 +65,7 @@ fixed_t pspritexscale;
 fixed_t pspriteyscale;
 fixed_t pspriteiyscale;
 
-static const lighttable_t **spritelights; // killough 1/25/98 made static
+static const lighttable_t *const *spritelights; // killough 1/25/98 made static
 
 // e6y: added for GL
 float pspriteyscale_f;
@@ -515,7 +515,7 @@ void R_DrawMaskedColumn(const rpatch_t *patch, R_DrawColumn_f colfunc,
 static void R_SetSpritelights(int lightlevel)
 {
     int lightnum = (lightlevel >> LIGHTSEGSHIFT) + (extralight * LIGHTBRIGHT);
-    spritelights = scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)];
+    spritelights = scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)].data();
 }
 
 //
@@ -868,7 +868,7 @@ static void R_ProjectSprite(mobj_t *thing, int lightlevel)
             index = MAXLIGHTSCALE - 1;
         vis->colormap = spritelights[index];
     }
-    if ((thing->type == MT_BLOOD || thing->state - states == S_GIBS) &&
+    if ((thing->type == MT_BLOOD || thing->state - states == S_GIBS.value()) &&
         thing->target)
     {
         if (thing->target->type == MT_BRUISER ||
@@ -893,7 +893,7 @@ void R_AddSprites(subsector_t *subsec, int lightlevel)
     sector_t *sec = subsec->sector;
     mobj_t *thing;
 
-    if (compatibility_level <= boom_202_compatibility)
+    if (COMPATIBILITY_LEVEL <= boom_202_compatibility)
         lightlevel = sec->lightlevel;
 
         // Handle all things in sector.
@@ -1016,7 +1016,7 @@ static void R_DrawPSprite(pspdef_t *psp)
     if (weapon_attack_alignment && viewplayer->attackdown && !psp->state->misc1)
     {
         const weaponinfo_t *const winfo = &weaponinfo[viewplayer->readyweapon];
-        const int state = viewplayer->psprites[ps_weapon].state - states;
+        const statenum_t state = viewplayer->psprites[ps_weapon].state - states;
 
         R_ApplyWeaponBob(&psp_sx, weapon_attack_alignment == CENTERWEAPON_BOB,
                          nullptr, false);

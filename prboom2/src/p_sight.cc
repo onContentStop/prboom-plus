@@ -395,7 +395,7 @@ INLINE static int P_DivlineSide(fixed_t x, fixed_t y, const divline_t *node)
                        : x <= node->x ? node->dy > 0
                                       : node->dy < 0
            : !node->dy
-               ? (compatibility_level < prboom_4_compatibility
+               ? (COMPATIBILITY_LEVEL < prboom_4_compatibility
                       ? x
                       : y) == node->y
                      ? 2
@@ -570,8 +570,8 @@ dboolean P_CrossSubsector_PrBoom(int num)
             /* cph 2006/07/15 - oops, we missed this in 2.4.0 & .1;
              *  use P_InterceptVector2 for those compat levels only. */
             fixed_t frac =
-                (compatibility_level == prboom_5_compatibility ||
-                 compatibility_level == prboom_6_compatibility)
+                (COMPATIBILITY_LEVEL == prboom_5_compatibility ||
+                            COMPATIBILITY_LEVEL == prboom_6_compatibility)
                     ? P_InterceptVector2(&los.strace, &divl)
                     : P_InterceptVector(&los.strace, &divl);
 
@@ -848,7 +848,7 @@ static dboolean P_CrossBSPNode_PrBoom(int bspnum)
 static dboolean P_CrossBSPNode(int bspnum)
 {
     /* cph - LxDoom used some R_* funcs here */
-    if (compatibility_level == lxdoom_1_compatibility ||
+    if (COMPATIBILITY_LEVEL == lxdoom_1_compatibility ||
         prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
         return P_CrossBSPNode_LxDoom(bspnum);
     else
@@ -868,7 +868,7 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2)
     const sector_t *s1, *s2;
     int pnum;
 
-    if (compatibility_level == doom_12_compatibility)
+    if (COMPATIBILITY_LEVEL == doom_12_compatibility)
     {
         return P_CheckSight_12(t1, t2);
     }
@@ -904,7 +904,7 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2)
      * same subsector? obviously visible
      * cph - compatibility optioned for demo sync, cf HR06-UV.LMP */
     if ((t1->subsector == t2->subsector) &&
-        (compatibility_level >= mbf_compatibility))
+        (COMPATIBILITY_LEVEL >= mbf_compatibility))
         return true;
 
     // An unobstructed LOS is possible.
@@ -932,7 +932,7 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2)
     /* cph - calculate min and max z of the potential line of sight
      * For old demos, we disable this optimisation by setting them to
      * the extremes */
-    if (compatibility_level == lxdoom_1_compatibility ||
+    if (COMPATIBILITY_LEVEL == lxdoom_1_compatibility ||
         prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
     {
         if (los.sightzstart < t2->z)

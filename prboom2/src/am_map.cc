@@ -1789,7 +1789,7 @@ static void AM_ProcessNiceThing(mobj_t *mobj, angle_t angle, fixed_t x,
     if (mobj->player)
     {
         player_t *p = mobj->player;
-        int color = mapcolor_plyr[p - players];
+        int color = mapcolor_plyr[p - players.data()];
         const unsigned char *playpal = V_GetPlaypal();
 
         if ((deathmatch && !demoplayback) && p != plr)

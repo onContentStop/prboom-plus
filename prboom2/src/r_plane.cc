@@ -94,7 +94,7 @@ static int *spanstart = nullptr; // killough 2/8/98
 // texture mapping
 //
 
-static const lighttable_t **planezlight;
+static const lighttable_t *const *planezlight;
 static fixed_t planeheight;
 
 // killough 2/8/98: make variables static
@@ -544,7 +544,7 @@ static void R_DoDrawPlane(visplane_t *pl)
                 light = 0;
 
             stop = pl->maxx + 1;
-            planezlight = zlight[light];
+            planezlight = zlight[light].data();
             pl->top[pl->minx - 1] = pl->top[stop] =
                 SHRT_MAX; // dropoff overflow
 

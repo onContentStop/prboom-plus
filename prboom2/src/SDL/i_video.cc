@@ -89,7 +89,7 @@
 #include "../i_main.hh"
 
 // e6y: new mouse code
-static SDL_Cursor *cursors[2] = {nullptr, nullptr};
+static SDL_Cursor *CURSORS[2] = {nullptr, nullptr};
 
 dboolean window_focused;
 int mouse_currently_grabbed = true;
@@ -508,9 +508,9 @@ static void I_InitInputs(void)
     SDL_PumpEvents();
 
     // Save the default cursor so it can be recalled later
-    cursors[0] = SDL_GetCursor();
+    CURSORS[0] = SDL_GetCursor();
     // Create an empty cursor
-    cursors[1] =
+    CURSORS[1] =
         SDL_CreateCursor(&empty_cursor_data, &empty_cursor_data, 8, 1, 0, 0);
 
     if (mouse_enabled)
@@ -531,9 +531,9 @@ inline static dboolean I_SkipFrame(void)
     static int frameno;
 
     frameno++;
-    switch (gamestate)
+    switch (gamestate.value())
     {
-    case GS_LEVEL:
+    case GS_LEVEL.value():
         if (!paused)
             return false;
     default:
@@ -563,9 +563,8 @@ static void I_UploadNewPalette(int pal, int force)
         int pplump = W_GetNumForName("PLAYPAL");
         int gtlump = (W_CheckNumForName)("GAMMATBL", ns_prboom);
         const byte *palette = (const byte *)W_CacheLumpNum(pplump);
-        const byte *const gtable =
-            (const byte *)W_CacheLumpNum(gtlump) +
-            256 * (cachedgamma = usegamma);
+        const byte *const gtable = (const byte *)W_CacheLumpNum(gtlump) +
+                                   256 * (cachedgamma = usegamma);
         int i;
 
         num_pals = W_LumpLength(pplump) / (3 * 256);
@@ -605,7 +604,7 @@ static void I_UploadNewPalette(int pal, int force)
 
 void I_ShutdownGraphics(void)
 {
-    SDL_FreeCursor(cursors[1]);
+    SDL_FreeCursor(CURSORS[1]);
     DeactivateMouse();
 }
 
@@ -1633,10 +1632,11 @@ static dboolean MouseShouldBeGrabbed()
     // always grab the mouse in camera mode when playing levels
     // and menu is not active
     if (walkcamera.type)
-        return (demoplayback && gamestate == GS_LEVEL && !menuactive);
+        return (demoplayback && gamestate == GS_LEVEL &&
+                menuactive == mnact_inactive);
 
     // when menu is active or game is paused, release the mouse
-    if (menuactive || paused)
+    if (menuactive != mnact_inactive || paused)
         return false;
 
     // only grab mouse when playing levels (but not demos)

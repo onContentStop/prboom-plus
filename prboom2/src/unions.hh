@@ -1,4 +1,5 @@
 #pragma once
+#include <ostream>
 struct ceiling_t;
 struct elevator_t;
 struct fireflicker_t;
@@ -277,13 +278,14 @@ class Action
         case discriminant::p2:
             return m_p2 == other.m_p2;
         case discriminant::undefined:
-            return false;
+            return true;
         }
     }
     constexpr bool operator!=(const Action &other) const
     {
         return !(*this == other);
     }
+    friend std::ostream &operator<<(std::ostream &os, const Action &action);
 };
 constexpr Action ACTION_NULL;
 struct default_t;
@@ -369,13 +371,15 @@ class SetupMenuVar
         case discriminant::menu:
             return m_menu == other.m_menu;
         case discriminant::undefined:
-            return false;
+            return true;
         }
     }
     constexpr bool operator!=(const SetupMenuVar &other) const
     {
         return !(*this == other);
     }
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const SetupMenuVar &setupmenuvar);
 };
 constexpr SetupMenuVar SETUPMENUVAR_NULL;
 class CheatSequenceFunction
@@ -433,12 +437,14 @@ class CheatSequenceFunction
         case discriminant::buf:
             return m_buf == other.m_buf;
         case discriminant::undefined:
-            return false;
+            return true;
         }
     }
     constexpr bool operator!=(const CheatSequenceFunction &other) const
     {
         return !(*this == other);
     }
+    friend std::ostream &operator<<(
+        std::ostream &os, const CheatSequenceFunction &cheatsequencefunction);
 };
 constexpr CheatSequenceFunction CHEATSEQUENCEFUNCTION_NULL;

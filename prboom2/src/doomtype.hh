@@ -72,12 +72,10 @@ typedef unsigned char byte;
 typedef signed long long int_64_t;
 typedef unsigned long long uint_64_t;
 // define compiled-specific long-long contstant notation here
-#define LONGLONG(num) (uint_64_t) num##ll
 #else
 typedef __int64 int_64_t;
 typedef unsigned __int64 uint_64_t;
 // define compiled-specific long-long contstant notation here
-#define LONGLONG(num) (uint_64_t) num
 #undef PATH_MAX
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp

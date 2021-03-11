@@ -2002,7 +2002,7 @@ void SetCrosshairTarget(void)
         if (R_Project(x, y, z, &winx, &winy, &winz))
         {
             int top, bottom, h;
-            stretch_param_t *params =
+            StretchParam *params =
                 &stretch_params[(crosshair.flags & VPT_ALIGN_MASK).value()];
 
             if (V_GetMode() != VID_MODEGL)
@@ -2692,7 +2692,7 @@ void T_ShowMessage(message_thinker_t *message)
 }
 
 int SetCustomMessage(int plr, const char *msg, int delay, int ticks, int cm,
-                     int sfx)
+                     sfxenum_t sfx)
 {
     custom_message_t item;
 

@@ -49,16 +49,14 @@
 // VIDEO
 //
 
-typedef enum
-{
-    patch_stretch_16x10,
-    patch_stretch_4x3,
-    patch_stretch_full,
+using patch_stretch_t = SequentialEnum<int>;
+constexpr patch_stretch_t PATCH_STRETCH_16_X_10 = 0;
+constexpr patch_stretch_t PATCH_STRETCH_4_X_3 = 1;
+constexpr patch_stretch_t PATCH_STRETCH_FULL = 2;
 
-    patch_stretch_max
-} patch_stretch_t;
+constexpr patch_stretch_t PATCH_STRETCH_MAX = 3;
 
-typedef struct
+struct CbVideo
 {
     fixed_t xstep, ystep;
 
@@ -70,31 +68,31 @@ typedef struct
     short y1lookup[201];
     short x2lookup[321];
     short y2lookup[201];
-} cb_video_t;
+};
 
-typedef struct stretch_param_s
+struct StretchParam
 {
-    cb_video_t *video;
+    CbVideo *video;
     int deltax1;
     int deltay1;
     int deltax2;
     int deltay2;
-} stretch_param_t;
+};
 
-extern std::array<std::array<stretch_param_t, 3>, VPT_ALIGN_MAX.value()>
+extern std::array<std::array<StretchParam, 3>, VPT_ALIGN_MAX.value()>
     stretch_params_table;
-extern stretch_param_t *stretch_params;
+extern StretchParam *stretch_params;
 
-extern cb_video_t video;
-extern cb_video_t video_stretch;
-extern cb_video_t video_full;
+extern CbVideo video;
+extern CbVideo video_stretch;
+extern CbVideo video_full;
 extern int patches_scalex;
 extern int patches_scaley;
 
 extern const char *render_aspects_list[];
 extern const char *render_stretch_list[];
 
-extern int render_stretch_hud;
+extern patch_stretch_t render_stretch_hud;
 extern int render_stretch_hud_default;
 extern int render_patches_scalex;
 extern int render_patches_scaley;
@@ -139,15 +137,15 @@ typedef enum
 
 typedef struct
 {
-    byte *data; // pointer to the screen content
-    dboolean
-        not_on_heap; // if set, no malloc or free is preformed and
-                     // data never set to nullptr. Used i.e. with SDL doublebuffer.
-    int width;       // the width of the surface
-    int height;      // the height of the surface, used when mallocing
-    int byte_pitch;  // tha actual width of one line, used when mallocing
-    int short_pitch; // tha actual width of one line, used when mallocing
-    int int_pitch;   // tha actual width of one line, used when mallocing
+    byte *data;           // pointer to the screen content
+    dboolean not_on_heap; // if set, no malloc or free is preformed and
+                          // data never set to nullptr. Used i.e. with SDL
+                          // doublebuffer.
+    int width;            // the width of the surface
+    int height;           // the height of the surface, used when mallocing
+    int byte_pitch;       // tha actual width of one line, used when mallocing
+    int short_pitch;      // tha actual width of one line, used when mallocing
+    int int_pitch;        // tha actual width of one line, used when mallocing
 } screeninfo_t;
 
 #define NUM_SCREENS 6
@@ -226,8 +224,7 @@ typedef void (*V_DrawNumPatch_f)(int x, int y, int scrn, int lump, int cm,
 extern V_DrawNumPatch_f V_DrawNumPatch;
 
 using V_DrawNumPatchPrecise_f = void (*)(float x, float y, int scrn, int lump,
-                                         int cm,
-                                         patch_translation_e flags);
+                                         int cm, patch_translation_e flags);
 extern V_DrawNumPatchPrecise_f V_DrawNumPatchPrecise;
 
 // V_DrawNamePatch - Draws the patch from lump "name"
@@ -311,8 +308,7 @@ void V_FreePlaypal(void);
 // e6y: wide-res
 void V_FillBorder(int lump, byte color);
 
-void V_GetWideRect(int *x, int *y, int *w, int *h,
-                   patch_translation_e flags);
+void V_GetWideRect(int *x, int *y, int *w, int *h, patch_translation_e flags);
 
 int V_BestColor(const unsigned char *palette, int r, int g, int b);
 

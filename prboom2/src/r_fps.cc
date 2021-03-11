@@ -573,17 +573,17 @@ static void R_InterpolationGetData(thinker_t *th, interpolation_type_e *type1,
     }
     else if (th->function == T_Scroll)
     {
-        switch (((scroll_t *)th)->type)
+        switch (((scroll_t *)th)->type.value())
         {
-        case scroll_t::sc_side:
+        case scroll_t::sc_side.value():
             *type1 = INTERP_WallPanning;
             *posptr1 = sides + ((scroll_t *)th)->affectee;
             break;
-        case scroll_t::sc_floor:
+        case scroll_t::sc_floor.value():
             *type1 = INTERP_FloorPanning;
             *posptr1 = sectors + ((scroll_t *)th)->affectee;
             break;
-        case scroll_t::sc_ceiling:
+        case scroll_t::sc_ceiling.value():
             *type1 = INTERP_CeilingPanning;
             *posptr1 = sectors + ((scroll_t *)th)->affectee;
             break;

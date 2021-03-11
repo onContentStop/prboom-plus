@@ -31,6 +31,7 @@ set(COMMON_SRC
         d_net.hh
         d_player.hh
         d_think.hh
+        d_think.cc
         d_ticcmd.hh
         e6y.cc
         e6y.hh
@@ -162,6 +163,7 @@ set(COMMON_SRC
         umapinfo.cc
         umapinfo.hh
         unions.hh
+        unions.cc
         version.cc
         version.hh
         v_trans.cc

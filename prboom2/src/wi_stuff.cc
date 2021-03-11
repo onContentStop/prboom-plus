@@ -974,7 +974,7 @@ void WI_initShowNextLoc(void)
     // .text:0003119E                 mov     ds:acceleratestage, 0
     // .text:000311A8                 mov     ds:cnt, 3Ch
     // nowhere no hide
-    if (compatibility_level == tasdoom_compatibility)
+    if (COMPATIBILITY_LEVEL == tasdoom_compatibility)
         cnt = 60;
     else
         cnt = SHOWNEXTLOCDELAY * TICRATE;
@@ -1525,7 +1525,7 @@ void WI_updateNetgameStats(void)
 
             if (cnt_secret[i] >=
                 (wbs->maxsecret ? (plrs[i].ssecret * 100) / wbs->maxsecret
-                 : compatibility_level < lxdoom_1_compatibility
+                 : COMPATIBILITY_LEVEL < lxdoom_1_compatibility
                      ? 0
                      : 100))
                 cnt_secret[i] = wbs->maxsecret
@@ -1758,7 +1758,7 @@ void WI_updateStats(void)
             S_StartSound(0, sfx_pistol);
 
         // killough 2/22/98: Make secrets = 100% if maxsecret = 0:
-        if ((!wbs->maxsecret && compatibility_level < lxdoom_1_compatibility) ||
+        if ((!wbs->maxsecret && COMPATIBILITY_LEVEL < lxdoom_1_compatibility) ||
             cnt_secret[0] >= (wbs->maxsecret
                                   ? (plrs[me].ssecret * 100) / wbs->maxsecret
                                   : 100))
@@ -1795,11 +1795,11 @@ void WI_updateStats(void)
         if (modifiedgame && play_early_explosion)
         {
             if ((cnt_time >= plrs[me].stime / TICRATE) &&
-                (compatibility_level < lxdoom_1_compatibility ||
+                (COMPATIBILITY_LEVEL < lxdoom_1_compatibility ||
                  cnt_total_time >= wbs->totaltimes / TICRATE))
             {
                 // for ExM8 levels if the player won't have pressed <Use>
-                if (compatibility_level < lxdoom_1_compatibility)
+                if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility)
                     cnt_total_time = wbs->totaltimes / TICRATE;
 
                 S_StartSound(0, sfx_barexp);
@@ -1812,11 +1812,11 @@ void WI_updateStats(void)
             cnt_par = wbs->partime / TICRATE;
 
             if ((cnt_time >= plrs[me].stime / TICRATE) &&
-                (compatibility_level < lxdoom_1_compatibility ||
+                (COMPATIBILITY_LEVEL < lxdoom_1_compatibility ||
                  cnt_total_time >= wbs->totaltimes / TICRATE))
             {
                 // e6y: for ExM8 levels
-                if (compatibility_level < lxdoom_1_compatibility)
+                if (COMPATIBILITY_LEVEL < lxdoom_1_compatibility)
                     cnt_total_time = wbs->totaltimes / TICRATE;
 
                 if (!modifiedgame) // e6y: do not play explosion sound if it was
@@ -1902,7 +1902,7 @@ void WI_checkForAccelerate(void)
     player_t *player;
 
     // check for button presses to skip delays
-    for (i = 0, player = players; i < MAXPLAYERS; i++, player++)
+    for (i = 0, player = players.data(); i < MAXPLAYERS; i++, player++)
     {
         if (playeringame[i])
         {

@@ -285,7 +285,8 @@ void P_ThinkerToIndex(void)
     // the prev field as a placeholder, since it can be restored later.
 
     number_of_thinkers = 0;
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
         if (th->function == P_MobjThinker)
             th->prev = (thinker_t *)(intptr_t)++number_of_thinkers;
 }
@@ -297,9 +298,10 @@ void P_IndexToThinker(void)
 {
     // killough 2/14/98: restore prev pointers
     thinker_t *th;
-    thinker_t *prev = &thinkercap;
+    thinker_t *prev = &THINKER_CLASS_CAP[TH_ALL.value()];
 
-    for (th = thinkercap.next; th != &thinkercap; prev = th, th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; prev = th, th = th->next)
         th->prev = prev;
 }
 
@@ -329,7 +331,8 @@ void P_ArchiveThinkers(void)
                   1);
 
     // save off the current thinkers
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
         if (th->function == P_MobjThinker)
         {
             mobj_t *mobj;
@@ -350,30 +353,54 @@ void P_ArchiveThinkers(void)
             // the thinker pointed to by these fields is not a
             // mobj thinker.
 
-            if (mobj->target)
-                mobj->target = mobj->target->thinker.function == P_MobjThinker
-                                   ? (mobj_t *)mobj->target->thinker.prev
-                                   : nullptr;
+            if (mobj->target != nullptr)
+            {
+                if (mobj->target->thinker.function == P_MobjThinker)
+                {
+                    mobj->target =
+                        reinterpret_cast<mobj_t *>(mobj->target->thinker.prev);
+                }
+                else
+                {
+                    mobj->target = nullptr;
+                }
+            }
 
-            if (mobj->tracer)
-                mobj->tracer = mobj->tracer->thinker.function == P_MobjThinker
-                                   ? (mobj_t *)mobj->tracer->thinker.prev
-                                   : nullptr;
+            if (mobj->tracer != nullptr)
+            {
+                if (mobj->tracer->thinker.function == P_MobjThinker)
+                {
+                    mobj->tracer =
+                        reinterpret_cast<mobj_t *>(mobj->tracer->thinker.prev);
+                }
+                else
+                {
+                    mobj->tracer = nullptr;
+                }
+            }
 
             // killough 2/14/98: new field: save last known enemy. Prevents
             // monsters from going to sleep after killing monsters and not
             // seeing player anymore.
 
-            if (mobj->lastenemy)
-                mobj->lastenemy =
-                    mobj->lastenemy->thinker.function == P_MobjThinker
-                        ? (mobj_t *)mobj->lastenemy->thinker.prev
-                        : nullptr;
+            if (mobj->lastenemy != nullptr)
+            {
+                if (mobj->lastenemy->thinker.function == P_MobjThinker)
+                {
+                    mobj->lastenemy = reinterpret_cast<mobj_t *>(
+                        mobj->lastenemy->thinker.prev);
+                }
+                else
+                {
+                    mobj->lastenemy = nullptr;
+                }
+            }
 
             // killough 2/14/98: end changes
 
             if (mobj->player)
-                mobj->player = (player_t *)((mobj->player - players) + 1);
+                mobj->player = reinterpret_cast<player_t *>(
+                    (mobj->player - &players[0]) + 1);
         }
 
     // add a terminating marker
@@ -440,7 +467,8 @@ void P_UnArchiveThinkers(void)
     save_p += sizeof brain;
 
     // remove all the current thinkers
-    for (th = thinkercap.next; th != &thinkercap;)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()];)
     {
         thinker_t *next = th->next;
         if (th->function == P_MobjThinker)
@@ -493,7 +521,7 @@ void P_UnArchiveThinkers(void)
             (mobj->player = &players[(size_t)mobj->player - 1])->mo = mobj;
 
         P_SetThingPosition(mobj);
-        mobj->info = &mobjinfo[mobj->type];
+        mobj->info = &mobjinfo[mobj->type.value()];
 
         // killough 2/28/98:
         // Fix for falling down into a wall after savegame loaded:
@@ -514,7 +542,8 @@ void P_UnArchiveThinkers(void)
     //
     // killough 11/98: use P_SetNewTarget() to set fields
 
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
     {
         P_SetNewTarget(&((mobj_t *)th)->target,
                        mobj_p[P_GetMobj(((mobj_t *)th)->target, size)]);
@@ -601,7 +630,8 @@ void P_ArchiveSpecials(void)
 
     // save off the current thinkers (memory size calculation -- killough)
 
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
         if (th->function == ACTION_NULL)
         {
             platlist_t *pl;
@@ -639,7 +669,8 @@ void P_ArchiveSpecials(void)
     CheckSaveGame(size + 1); // killough; cph: +1 for the tc_endspecials
 
     // save off the current thinkers
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (th = THINKER_CLASS_CAP[TH_ALL.value()].next;
+         th != &THINKER_CLASS_CAP[TH_ALL.value()]; th = th->next)
     {
         if (th->function == ACTION_NULL)
         {
