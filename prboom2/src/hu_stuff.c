@@ -176,6 +176,8 @@ static hu_textline_t w_ammo_big;
 static hu_textline_t w_ammo_icon;
 static hu_textline_t w_keys_icon;
 
+static int oldFullKillcount = 0;
+
 static dboolean always_off = false;
 static char chat_dest[MAXPLAYERS];
 dboolean chat_on;
@@ -1577,6 +1579,13 @@ void HU_widget_build_monsec(void) {
         fullsecretcount += players[i].secretcount;
       }
     }
+    for (int i = oldFullKillcount + 1; i <= fullkillcount; i++) {
+      printf("[\x1b[31mKIL\x1b[0m] Kill confirmed. (%d/%d)\n", i, totalkills);
+      if (i == totalkills) {
+        printf("[\x1b[1;32m100\x1b[0m] Achieved 100%% kills!\n");
+      }
+    }
+    oldFullKillcount = fullkillcount;
     killcolor = (fullkillcount >= totalkills ? 0x37 : 0x35);
     secretcolor = (fullsecretcount >= totalsecret ? 0x37 : 0x35);
     itemcolor = (fullitemcount >= totalitems ? 0x37 : 0x35);

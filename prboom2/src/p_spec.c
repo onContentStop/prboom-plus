@@ -2161,6 +2161,11 @@ void P_PlayerInSpecialSector(player_t *player) {
                                                                 : sfx_secret);
           SetCustomMessage(player - players, STSTR_SECRETFOUND, 0, 2 * TICRATE,
                            CR_GOLD, sfx_id);
+          printf("[\x1b[1;32mSCT\x1b[0m] A secret is revealed! (%d/%d)\n",
+                 player->secretcount, totalsecret);
+          if (player->secretcount == totalsecret) {
+            printf("[\x1b[1;32m100\x1b[0m] Achieved 100%% secrets!\n");
+          }
         }
 
         break;

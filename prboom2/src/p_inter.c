@@ -819,7 +819,11 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source,
     }
 
     player->health -= damage;  // mirror mobj health here for Dave
-    if (player->health < 0) player->health = 0;
+    if (player->health < 0) {
+      // You died, womp womp.
+      printf("[\x1b[1;31mDTH\x1b[0m] You are dead. Not big surprise.\n");
+      player->health = 0;
+    }
 
     player->attacker = source;
     player->damagecount += damage;  // add damage after armor / invuln

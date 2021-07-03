@@ -1476,6 +1476,7 @@ int cpars[34] = {
 dboolean secretexit;
 
 void G_ExitLevel(void) {
+  printf("[\x1b[1;32mEXT\x1b[0m] You beat the level!\n");
   secretexit = false;
   gameaction = ga_completed;
 }
@@ -1484,6 +1485,8 @@ void G_ExitLevel(void) {
 // IF NO WOLF3D LEVELS, NO SECRET EXIT!
 
 void G_SecretExitLevel(void) {
+  printf(
+      "[\x1b[1;32mEXT\x1b[0m] You beat the level and found the secret exit!\n");
   if (gamemode != commercial || haswolflevels)
     secretexit = true;
   else
