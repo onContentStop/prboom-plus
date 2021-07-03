@@ -2,13 +2,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface WadViewController : NSObject
-{
-	// Wad options
-	NSMutableArray *wads;
+@interface WadViewController : NSObject {
+  // Wad options
+  NSMutableArray *wads;
 
-	IBOutlet id view;
-	IBOutlet id removeButton;
+  IBOutlet id view;
+  IBOutlet id removeButton;
 }
 
 - (id)init;
@@ -27,10 +26,10 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)notification;
 - (int)numberOfRowsInTableView:(NSTableView *)tableView;
 - (id)tableView:(NSTableView *)tableView
-                objectValueForTableColumn:(NSTableColumn *)column
-                row:(int)row;
+    objectValueForTableColumn:(NSTableColumn *)column
+                          row:(int)row;
 - (void)tableView:(NSTableView *)tableView
-                  setObjectValue:(id)object
-                  forTableColumn:(NSTableColumn *)column
-                  row:(int)row;
+    setObjectValue:(id)object
+    forTableColumn:(NSTableColumn *)column
+               row:(int)row;
 @end

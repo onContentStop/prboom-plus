@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // Copyright(C) 2007 Simon Howard
@@ -26,15 +26,10 @@
 #ifndef __I_PCSOUND_H__
 #define __I_PCSOUND_H__
 
-int I_PCS_StartSound(int id,
-                     int channel,
-                     int vol,
-                     int sep,
-                     int pitch,
+int I_PCS_StartSound(int id, int channel, int vol, int sep, int pitch,
                      int priority);
 void I_PCS_StopSound(int handle);
 int I_PCS_SoundIsPlaying(int handle);
 void I_PCS_InitSound(void);
 
 #endif /* #ifndef __I_PCSOUND_H__ */
-

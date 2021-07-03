@@ -44,25 +44,21 @@
 #define PL_SKYFLAT (0x80000000)
 
 /* Visplane related. */
-extern int *lastopening; // dropoff overflow
+extern int *lastopening;  // dropoff overflow
 
 // e6y: resolution limitation is removed
-extern int *floorclip, *ceilingclip; // dropoff overflow
+extern int *floorclip, *ceilingclip;  // dropoff overflow
 extern fixed_t *yslope, *distscale;
 
 void R_InitVisplanesRes(void);
 void R_InitPlanesRes(void);
 void R_InitPlanes(void);
 void R_ClearPlanes(void);
-void R_DrawPlanes (void);
+void R_DrawPlanes(void);
 
-visplane_t *R_FindPlane(
-                        fixed_t height,
-                        int picnum,
-                        int lightlevel,
-                        fixed_t xoffs,  /* killough 2/28/98: add x-y offsets */
-                        fixed_t yoffs
-                       );
+visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel,
+                        fixed_t xoffs, /* killough 2/28/98: add x-y offsets */
+                        fixed_t yoffs);
 
 visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
 visplane_t *R_DupPlane(const visplane_t *pl, int start, int stop);

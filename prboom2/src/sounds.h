@@ -44,9 +44,8 @@ struct sfxinfo_struct;
 typedef struct sfxinfo_struct sfxinfo_t;
 
 struct sfxinfo_struct {
-
   // up to 6-character name
-  const char *name; // CPhipps - const
+  const char *name;  // CPhipps - const
 
   // Sfx singularity (only one at a time)
   int singularity;
@@ -79,7 +78,7 @@ struct sfxinfo_struct {
 
 typedef struct {
   // up to 6-character name
-  const char *name; // CPhipps - const
+  const char *name;  // CPhipps - const
 
   // lump number of music
   int lumpnum;
@@ -92,10 +91,10 @@ typedef struct {
 } musicinfo_t;
 
 // the complete set of sound effects
-extern sfxinfo_t    S_sfx[];
+extern sfxinfo_t S_sfx[];
 
 // the complete set of music
-extern musicinfo_t  S_music[];
+extern musicinfo_t S_music[];
 
 //
 // Identifiers for all music in game.
@@ -295,12 +294,13 @@ typedef enum {
   sfx_dgdth,
   sfx_dgpain,
 
-  //e6y
+  // e6y
   sfx_secret,
   sfx_gibdth,
   // Everything from here to 500 is reserved
 
-  /* Free sound effect slots for DEHEXTRA. Offset agreed upon with Eternity devs. -SH */
+  /* Free sound effect slots for DEHEXTRA. Offset agreed upon with Eternity
+     devs. -SH */
   sfx_fre000 = 500,
   sfx_fre001,
   sfx_fre002,

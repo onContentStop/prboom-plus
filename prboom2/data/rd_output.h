@@ -1,6 +1,8 @@
 // Copyright (c) 1993-2011 PrBoom developers (see AUTHORS)
 // Licence: GPLv2 or later (see COPYING)
 
+#include <stddef.h>
+
 // Output wad construction - add lump data, build wad directory
 
 // append lump to output wad

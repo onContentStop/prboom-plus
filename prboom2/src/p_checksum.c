@@ -1,13 +1,14 @@
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h> /* exit(), atexit() */
-#include "i_system.h" /* I_AtExit() */
-
 #include "p_checksum.h"
-#include "md5.h"
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h> /* exit(), atexit() */
+#include <string.h>
+
 #include "doomstat.h" /* players{,ingame} */
+#include "i_system.h" /* I_AtExit() */
 #include "lprintf.h"
+#include "md5.h"
 
 #ifdef _WIN32
 #include "WIN/win_fopen.h"
@@ -18,7 +19,7 @@ static void p_checksum_cleanup(void);
 void checksum_gamestate(int tic);
 
 /* vars */
-static void p_checksum_nop(int tic){} /* do nothing */
+static void p_checksum_nop(int tic) {} /* do nothing */
 void (*P_Checksum)(int) = p_checksum_nop;
 
 /*
@@ -29,73 +30,70 @@ static FILE *outfile = NULL;
 static struct MD5Context md5global;
 
 void P_RecordChecksum(const char *file) {
-    size_t fnsize;
+  size_t fnsize;
 
-    fnsize = strlen(file);
+  fnsize = strlen(file);
 
-    /* special case: write to stdout */
-    if(0 == strncmp("-",file,MIN(1,fnsize)))
-        outfile = stdout;
-    else {
-        outfile = fopen(file,"wb");
-        if(NULL == outfile) {
-            I_Error("cannot open %s for writing checksum:\n%s\n",
-                    file, strerror(errno));
-        }
-        I_AtExit(p_checksum_cleanup, true);
+  /* special case: write to stdout */
+  if (0 == strncmp("-", file, MIN(1, fnsize)))
+    outfile = stdout;
+  else {
+    outfile = fopen(file, "wb");
+    if (NULL == outfile) {
+      I_Error("cannot open %s for writing checksum:\n%s\n", file,
+              strerror(errno));
     }
+    I_AtExit(p_checksum_cleanup, true);
+  }
 
-    MD5Init(&md5global);
+  MD5Init(&md5global);
 
-    P_Checksum = checksum_gamestate;
+  P_Checksum = checksum_gamestate;
 }
 
 void P_ChecksumFinal(void) {
-    int i;
-    unsigned char digest[16];
+  int i;
+  unsigned char digest[16];
 
-    if (!outfile)
-      return;
+  if (!outfile) return;
 
-    MD5Final(digest, &md5global);
-    fprintf(outfile, "final: ");
-    for (i=0; i<16; i++)
-        fprintf(outfile,"%x", digest[i]);
-    fprintf(outfile, "\n");
-    MD5Init(&md5global);
+  MD5Final(digest, &md5global);
+  fprintf(outfile, "final: ");
+  for (i = 0; i < 16; i++) fprintf(outfile, "%x", digest[i]);
+  fprintf(outfile, "\n");
+  MD5Init(&md5global);
 }
 
 static void p_checksum_cleanup(void) {
-    if (outfile && (outfile != stdout))
-        fclose(outfile);
+  if (outfile && (outfile != stdout)) fclose(outfile);
 }
 
 /*
  * runs on each tic when recording checksums
  */
 void checksum_gamestate(int tic) {
-    int i;
-    struct MD5Context md5ctx;
-    unsigned char digest[16];
-    char buffer[2048];
+  int i;
+  struct MD5Context md5ctx;
+  unsigned char digest[16];
+  char buffer[2048];
 
-    fprintf(outfile,"%6d, ", tic);
+  fprintf(outfile, "%6d, ", tic);
 
-    /* based on "ArchivePlayers" */
-    MD5Init(&md5ctx);
-    for (i=0 ; i<MAXPLAYERS ; i++) {
-        if (!playeringame[i]) continue;
+  /* based on "ArchivePlayers" */
+  MD5Init(&md5ctx);
+  for (i = 0; i < MAXPLAYERS; i++) {
+    if (!playeringame[i]) continue;
 
-        doom_snprintf (buffer, sizeof(buffer), "%d", players[i].health);
-        buffer[sizeof(buffer)-1] = 0;
+    doom_snprintf(buffer, sizeof(buffer), "%d", players[i].health);
+    buffer[sizeof(buffer) - 1] = 0;
 
-        MD5Update(&md5ctx, (md5byte const *)&buffer, strlen(buffer));
-    }
-    MD5Final(digest, &md5ctx);
-    for (i=0; i<16; i++) {
-        MD5Update(&md5global, (md5byte const *)&digest[i], sizeof(digest[i]));
-        fprintf(outfile,"%x", digest[i]);
-    }
+    MD5Update(&md5ctx, (md5byte const *)&buffer, strlen(buffer));
+  }
+  MD5Final(digest, &md5ctx);
+  for (i = 0; i < 16; i++) {
+    MD5Update(&md5global, (md5byte const *)&digest[i], sizeof(digest[i]));
+    fprintf(outfile, "%x", digest[i]);
+  }
 
-    fprintf(outfile,"\n");
+  fprintf(outfile, "\n");
 }

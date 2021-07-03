@@ -3,14 +3,14 @@
 
 // Chained hash lookup to convert rgb triples to palette indices
 
-#include "config.h"
+#include "rd_palette.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
 #include "rd_util.h"
-#include "rd_palette.h"
 
 static unsigned char *palette_data;
 
@@ -21,7 +21,7 @@ static struct {
   int first, next;
 } hash[PAL_SIZE];
 
-#define HASH(c) ((int)((c)[0])+(int)((c)[1])+(int)((c)[2]))
+#define HASH(c) ((int)((c)[0]) + (int)((c)[1]) + (int)((c)[2]))
 
 //
 // make_hash
@@ -29,19 +29,16 @@ static struct {
 // killough-style chained hash
 //
 
-static void make_hash(void)
-{
+static void make_hash(void) {
   int i;
   unsigned char *rgb;
 
-  for (i = PAL_SIZE, rgb = &palette_data[3*i]; rgb -= 3, --i >= 0; )
-  {
+  for (i = PAL_SIZE, rgb = &palette_data[3 * i]; rgb -= 3, --i >= 0;) {
     memmove(hash[i].rgb, rgb, 3);
     hash[i].next = hash[i].first = PAL_SIZE;
   }
 
-  for (i = PAL_SIZE, rgb = &palette_data[3*i]; rgb -= 3, --i >= 0; )
-  {
+  for (i = PAL_SIZE, rgb = &palette_data[3 * i]; rgb -= 3, --i >= 0;) {
     int h = HASH(rgb) % PAL_SIZE;
     hash[i].next = hash[h].first;
     hash[h].first = i;
@@ -52,13 +49,11 @@ static void make_hash(void)
 // loadpal
 //
 
-static void loadpal(const char *filename)
-{
+static void loadpal(const char *filename) {
   void *data = NULL;
   size_t size = read_or_die(&data, filename);
 
-  if (size != 3*PAL_SIZE)
-    die("Bad palette: %s\n", filename);
+  if (size != 3 * PAL_SIZE) die("Bad palette: %s\n", filename);
 
   palette_data = data;
 }
@@ -67,8 +62,7 @@ static void loadpal(const char *filename)
 // palette_init
 //
 
-void palette_init(const char *filename)
-{
+void palette_init(const char *filename) {
   loadpal(filename);
   make_hash();
 }
@@ -77,8 +71,7 @@ void palette_init(const char *filename)
 // palette_getindex
 //
 
-int palette_getindex(const unsigned char *rgb)
-{
+int palette_getindex(const unsigned char *rgb) {
   int i;
 
   if (!palette_data)
@@ -86,8 +79,7 @@ int palette_getindex(const unsigned char *rgb)
 
   i = hash[HASH(rgb) % PAL_SIZE].first;
 
-  while (i < PAL_SIZE && memcmp(hash[i].rgb, rgb, 3) != 0)
-    i = hash[i].next;
+  while (i < PAL_SIZE && memcmp(hash[i].rgb, rgb, 3) != 0) i = hash[i].next;
 
   return i < PAL_SIZE ? i : -1;
 }

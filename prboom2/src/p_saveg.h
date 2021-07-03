@@ -34,6 +34,10 @@
 #ifndef __P_SAVEG__
 #define __P_SAVEG__
 
+#include <stddef.h>
+
+#include "doomtype.h"
+
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -60,7 +64,7 @@ void P_ArchiveMap(void);
 void P_UnArchiveMap(void);
 
 extern byte *save_p;
-void CheckSaveGame(size_t,const char*, int);              /* killough */
+void CheckSaveGame(size_t, const char *, int); /* killough */
 #define CheckSaveGame(a) (CheckSaveGame)(a, __FILE__, __LINE__)
 
 #endif

@@ -34,10 +34,10 @@
 #include <string.h>
 // CPhipps - include the correct header
 #include "doomtype.h"
-#include "z_zone.h"
 #include "m_argv.h"
+#include "z_zone.h"
 
-int    myargc;
+int myargc;
 char **myargv;
 
 //
@@ -48,12 +48,10 @@ char **myargv;
 // or 0 if not present
 //
 
-int M_CheckParm(const char *check)
-{
+int M_CheckParm(const char *check) {
   signed int i = myargc;
-  while (--i>0)
-    if (!strcasecmp(check, myargv[i]))
-      return i;
+  while (--i > 0)
+    if (!strcasecmp(check, myargv[i])) return i;
   return 0;
 }
 
@@ -63,14 +61,10 @@ int M_CheckParm(const char *check)
 // Returns the argument number (0 to paramscount-1) or -1 if not present
 //
 
-int M_CheckParmEx(const char *check, char **params, int paramscount)
-{
-  if (paramscount > 0 && check && params && *params)
-  {
-    while (--paramscount >= 0)
-    {
-      if (!strcasecmp(check, params[paramscount]))
-      {
+int M_CheckParmEx(const char *check, char **params, int paramscount) {
+  if (paramscount > 0 && check && params && *params) {
+    while (--paramscount >= 0) {
+      if (!strcasecmp(check, params[paramscount])) {
         return paramscount;
       }
     }
@@ -83,8 +77,7 @@ int M_CheckParmEx(const char *check, char **params, int paramscount)
 // Add one parameter to myargv list
 //
 
-void M_AddParam(const char *param)
-{
+void M_AddParam(const char *param) {
   myargv = realloc(myargv, sizeof(myargv[0]) * (myargc + 1));
   myargv[myargc] = strdup(param);
   myargc++;
@@ -114,14 +107,14 @@ void M_AddParam(const char *param)
 //  int *numchars - number of characters used in args buffer
 //
 
-void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs, int *numchars)
-{
+void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
+                    int *numchars) {
 #define IsSpace(c) ((c) == 0x20 || ((c) >= 0x09 && (c) <= 0x0D))
 
   char *p;
-  int inquote;                    /* 1 = inside quotes */
-  int copychar;                   /* 1 = copy char to *args */
-  unsigned numslash;              /* num of backslashes seen */
+  int inquote;       /* 1 = inside quotes */
+  int copychar;      /* 1 = copy char to *args */
+  unsigned numslash; /* num of backslashes seen */
 
   *numchars = 0;
   *numargs = 0;
@@ -131,14 +124,13 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs, int *
   inquote = 0;
 
   /* loop on each argument */
-  for(;;) {
-
+  for (;;) {
     while (IsSpace((int)*p)) ++p;
 
-    if (*p == '\0')break;   /* end of args */
+    if (*p == '\0') break; /* end of args */
 
     /* scan an argument */
-    if (argv) *argv++ = args;     /* store ptr to arg */
+    if (argv) *argv++ = args; /* store ptr to arg */
     ++*numargs;
 
     /* loop through scanning one argument */
@@ -153,18 +145,19 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs, int *
         ++numslash;
       }
       if (*p == '\"') {
-      /* if 2N backslashes before, start/end quote, otherwise
-        copy literally */
+        /* if 2N backslashes before, start/end quote, otherwise
+          copy literally */
         if ((numslash & 1) == 0) {
           if (inquote) {
             if (p[1] == '\"')
-              p++;    /* Double quote inside quoted string */
-            else        /* skip first quote char and copy second */
+              p++; /* Double quote inside quoted string */
+            else   /* skip first quote char and copy second */
               copychar = 0;
-          } else copychar = 0;       /* don't copy quote */
+          } else
+            copychar = 0; /* don't copy quote */
           inquote = !inquote;
         }
-        numslash >>= 1;             /* divide numslash by two */
+        numslash >>= 1; /* divide numslash by two */
       }
 
       /* copy slashes */
@@ -186,7 +179,7 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs, int *
 
     /* null-terminate the argument */
 
-    if (args) *args++ = '\0';          /* terminate string */
+    if (args) *args++ = '\0'; /* terminate string */
     ++*numchars;
   }
 }

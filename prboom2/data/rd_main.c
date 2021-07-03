@@ -3,21 +3,19 @@
 
 // Main program, parse command line arguments
 
-#include "config.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "rd_util.h"
-#include "rd_output.h"
-#include "rd_sound.h"
-#include "rd_palette.h"
+#include "config.h"
 #include "rd_graphic.h"
+#include "rd_output.h"
+#include "rd_palette.h"
+#include "rd_sound.h"
+#include "rd_util.h"
 
-enum argtype
-{
+enum argtype {
   ARG_NONE,
   ARG_OUTPUT,
   ARG_INCLUDE,
@@ -30,10 +28,10 @@ enum argtype
   ARG_SPRITE,
 };
 
-static void ATTR((noreturn)) usage(int exitcode)
-{
+static void ATTR((noreturn)) usage(int exitcode) {
   FILE *f = exitcode ? stderr : stdout;
-  fprintf(f, "Usage: rdatawad <options...>\n"
+  fprintf(f,
+          "Usage: rdatawad <options...>\n"
           "  -o <output filename>\n"
           "  -I <search directory>\n"
           "  -palette <rgbfile>\n"
@@ -46,21 +44,17 @@ static void ATTR((noreturn)) usage(int exitcode)
   exit(exitcode);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   enum argtype argtype = ARG_NONE;
   const char *output = NULL;
 
-  if (argc <= 1)
-    usage(0);
+  if (argc <= 1) usage(0);
 
-  while (*(++argv))
-  {
+  while (*(++argv)) {
     char *arg = *argv;
 
-    if (*arg == '-')
-    {
-      if (*(arg+1) == '-') // allow both -switch and --switch
+    if (*arg == '-') {
+      if (*(arg + 1) == '-')  // allow both -switch and --switch
         arg++;
 
       if (!strcmp(arg, "-o"))
@@ -85,83 +79,75 @@ int main(int argc, char **argv)
         usage(0);
       else
         usage(1);
-    }
-    else
-      switch (argtype)
-      {
-      case ARG_NONE:
-        usage(1);
-        break;
+    } else
+      switch (argtype) {
+        case ARG_NONE:
+          usage(1);
+          break;
 
-      case ARG_OUTPUT:
-        output = arg;
-        argtype = ARG_NONE;
-        break;
+        case ARG_OUTPUT:
+          output = arg;
+          argtype = ARG_NONE;
+          break;
 
-      case ARG_INCLUDE:
-        search_path(arg);
-        break;
+        case ARG_INCLUDE:
+          search_path(arg);
+          break;
 
-      case ARG_PALETTE:
-        palette_init(arg);
-        argtype = ARG_NONE;
-        break;
+        case ARG_PALETTE:
+          palette_init(arg);
+          argtype = ARG_NONE;
+          break;
 
-      case ARG_MARKER:
-        output_add(arg, NULL, 0);
-        break;
+        case ARG_MARKER:
+          output_add(arg, NULL, 0);
+          break;
 
-      case ARG_LUMP:
-        {
+        case ARG_LUMP: {
           void *data = NULL;
           size_t size = read_or_die(&data, arg);
           output_add(arg, data, size);
-        }
-        break;
+        } break;
 
-      case ARG_GRAPHIC:
-        {
+        case ARG_GRAPHIC: {
           void *data = NULL;
           size_t size = ppm_to_patch(&data, arg, 0, 0);
           output_add(arg, data, size);
-        }
-        break;
+        } break;
 
-      case ARG_SOUND:
-        {
+        case ARG_SOUND: {
           void *data = NULL;
           size_t size = wav_to_doom(&data, arg);
           output_add(arg, data, size);
-        }
-        break;
+        } break;
 
-      case ARG_FLAT:
-        {
+        case ARG_FLAT: {
           void *data = NULL;
           size_t size = ppm_to_bitmap(&data, arg);
           output_add(arg, data, size);
-        }
-        break;
+        } break;
 
-      case ARG_SPRITE:
-        {
+        case ARG_SPRITE: {
           void *data = NULL;
           char *pos = arg;
           size_t size;
           int x, y;
 
           x = strtol(pos, &pos, 0);
-          if (*pos == ',') pos++;
-          else if (!isspace(*pos) && !isdigit(*pos)) usage(1);
+          if (*pos == ',')
+            pos++;
+          else if (!isspace(*pos) && !isdigit(*pos))
+            usage(1);
 
           y = strtol(pos, &pos, 0);
-          if (*pos == ',') pos++;
-          else if (!isspace(*pos) && !isdigit(*pos)) usage(1);
+          if (*pos == ',')
+            pos++;
+          else if (!isspace(*pos) && !isdigit(*pos))
+            usage(1);
 
           size = ppm_to_patch(&data, pos, x, y);
           output_add(pos, data, size);
-        }
-        break;
+        } break;
       }
   }
 

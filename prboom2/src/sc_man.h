@@ -1,6 +1,8 @@
 #ifndef __SC_MAN__
 #define __SC_MAN__
 
+#include "doomtype.h"
+
 void SC_OpenLump(const char *name);
 void SC_OpenLumpByNum(int lump);
 void SC_Close(void);
@@ -23,4 +25,4 @@ extern dboolean sc_End;
 extern dboolean sc_Crossed;
 extern dboolean sc_FileScripts;
 
-#endif // __SC_MAN__
+#endif  // __SC_MAN__

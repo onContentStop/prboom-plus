@@ -35,17 +35,17 @@
 #ifndef __R_DEMO__
 #define __R_DEMO__
 
+#include "d_player.h"
 #include "doomdef.h"
 #include "doomtype.h"
 #include "tables.h"
-#include "d_player.h"
 #include "w_wad.h"
 
 //
 // Smooth playing stuff
 //
 
-#define SMOOTH_PLAYING_MAXFACTOR 16 
+#define SMOOTH_PLAYING_MAXFACTOR 16
 
 extern int demo_smoothturns;
 extern int demo_smoothturnsfactor;
@@ -59,22 +59,19 @@ void R_ResetAfterTeleport(player_t *player);
 // DemoEx stuff
 //
 
-typedef struct
-{
+typedef struct {
   wadinfo_t header;
   filelump_t *lumps;
-  char* data;
+  char *data;
   int datasize;
 } wadtbl_t;
 
-typedef struct
-{
+typedef struct {
   wadfile_info_t *wadfiles;
   size_t numwadfiles;
 } waddata_t;
 
-typedef struct
-{
+typedef struct {
   int pattern_num;
   char pattern_name[80];
   char *missed;
@@ -92,37 +89,41 @@ extern const char *demo_patterns_list_def[];
 extern const char *getwad_cmdline;
 
 int WadDataInit(waddata_t *waddata);
-int WadDataAddItem(waddata_t *waddata, const char *filename, wad_source_t source, int handle);
+int WadDataAddItem(waddata_t *waddata, const char *filename,
+                   wad_source_t source, int handle);
 void WadDataFree(waddata_t *wadfiles);
 
 int CheckDemoExDemo(void);
 int CheckAutoDemo(void);
-int ParseDemoPattern(const char *str, waddata_t* waddata, char **missed, dboolean trytodownload);
-int DemoNameToWadData(const char * demoname, waddata_t *waddata, patterndata_t *patterndata);
+int ParseDemoPattern(const char *str, waddata_t *waddata, char **missed,
+                     dboolean trytodownload);
+int DemoNameToWadData(const char *demoname, waddata_t *waddata,
+                      patterndata_t *patterndata);
 void WadDataToWadFiles(waddata_t *waddata);
 void WadFilesToWadData(waddata_t *waddata);
 
 void M_ChangeDemoExtendedFormat(void);
 
-byte* G_GetDemoFooter(const char *filename, const byte **footer, size_t *size);
+byte *G_GetDemoFooter(const char *filename, const byte **footer, size_t *size);
 void G_SetDemoFooter(const char *filename, wadtbl_t *wadtbl);
 void G_WriteDemoFooter(FILE *file);
 void I_DemoExShutdown(void);
 
 void W_InitPWADTable(wadtbl_t *wadtbl);
 void W_FreePWADTable(wadtbl_t *wadtbl);
-void W_AddLump(wadtbl_t *wadtbl, const char *name, const byte* data, size_t size);
+void W_AddLump(wadtbl_t *wadtbl, const char *name, const byte *data,
+               size_t size);
 
 extern dboolean use_demoex_info;
 void R_DemoEx_WriteMLook(angle_t pitch);
 angle_t R_DemoEx_ReadMLook(void);
 void R_DemoEx_ResetMLook(void);
 
-dboolean D_TryGetWad(const char* name);
+dboolean D_TryGetWad(const char *name);
 
 int IsDemoPlayback(void);
 int IsDemoContinue(void);
 
 int LoadDemo(const char *name, const byte **buffer, int *length, int *lump);
 
-#endif // __R_DEMO__
+#endif  // __R_DEMO__

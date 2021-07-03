@@ -40,9 +40,9 @@ extern const music_player_t alsa_player;
 
 // available outputs
 typedef struct {
-    int client;
-    int port;
-    char name[120]; // 120 + two 32-bit (4-byte) ints = 128, nice alignment
+  int client;
+  int port;
+  char name[120];  // 120 + two 32-bit (4-byte) ints = 128, nice alignment
 } alsaplay_output_t;
 
 extern alsaplay_output_t alsaplayer_outputs[64];
@@ -53,8 +53,8 @@ void alsaplay_clear_outputs(void);
 void alsaplay_refresh_outputs(void);
 const char *alsaplay_get_output_name(int which);
 int alsaplay_connect_output(int which);
-int alsa_midi_set_dest (int client, int port);
+int alsa_midi_set_dest(int client, int port);
 
-#endif // HAVE_ALSA
+#endif  // HAVE_ALSA
 
-#endif // ALSAPLAYER_H
+#endif  // ALSAPLAYER_H

@@ -59,7 +59,7 @@ void S_Start(void);
 // Start sound for thing at <origin>
 //  using <sound_id> from sounds.h
 //
-void S_StartSound(void *origin, int sound_id);
+void S_StartSound(void* origin, int sound_id);
 
 // killough 4/25/98: mask used to indicate sound origin is player item pickup
 #define PICKUP_SOUND (0x8000)
@@ -68,7 +68,7 @@ void S_StartSound(void *origin, int sound_id);
 void S_StopSound(void* origin);
 
 extern int full_sounds;
-void S_UnlinkSound(void *origin);
+void S_UnlinkSound(void* origin);
 
 // Start music using <music_id> from sounds.h
 void S_StartMusic(int music_id);
@@ -96,7 +96,7 @@ void S_SetSfxVolume(int volume);
 extern int default_numChannels;
 extern int numChannels;
 
-//jff 3/17/98 holds last IDMUS number, or -1
+// jff 3/17/98 holds last IDMUS number, or -1
 extern int idmusnum;
 
 #endif

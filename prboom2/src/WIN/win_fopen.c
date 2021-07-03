@@ -10,7 +10,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 
+//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //  02111-1307, USA.
 //
 // DESCRIPTION:
@@ -20,25 +20,23 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <stdlib.h>
+#include <windows.h>
 
-static wchar_t* ConvertToUtf8(const char *str)
-{
+static wchar_t *ConvertToUtf8(const char *str) {
   wchar_t *wstr = NULL;
   int wlen = 0;
 
   wlen = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
 
-  wstr = (wchar_t *) malloc(sizeof(wchar_t) * wlen);
+  wstr = (wchar_t *)malloc(sizeof(wchar_t) * wlen);
 
   MultiByteToWideChar(CP_UTF8, 0, str, -1, wstr, wlen);
 
   return wstr;
 }
 
-FILE* D_fopen(const char *filename, const char *mode)
-{
+FILE *D_fopen(const char *filename, const char *mode) {
   FILE *f;
   wchar_t *wname = NULL;
   wchar_t *wmode = NULL;
@@ -53,8 +51,7 @@ FILE* D_fopen(const char *filename, const char *mode)
   return f;
 }
 
-int D_remove(const char *path)
-{
+int D_remove(const char *path) {
   wchar_t *wpath = NULL;
   int ret;
 
@@ -66,8 +63,7 @@ int D_remove(const char *path)
   return ret;
 }
 
-int D_stat(const char *path, struct stat *buf)
-{
+int D_stat(const char *path, struct stat *buf) {
   wchar_t *wpath = NULL;
   struct _stat wbuf;
   int ret;
@@ -84,8 +80,7 @@ int D_stat(const char *path, struct stat *buf)
   return ret;
 }
 
-int D_open(const char *filename, int oflag)
-{
+int D_open(const char *filename, int oflag) {
   wchar_t *wname;
   int ret;
 
@@ -97,8 +92,7 @@ int D_open(const char *filename, int oflag)
   return ret;
 }
 
-int D_access(const char *path, int mode)
-{
+int D_access(const char *path, int mode) {
   wchar_t *wpath;
   int ret;
 
@@ -110,8 +104,7 @@ int D_access(const char *path, int mode)
   return ret;
 }
 
-int D_mkdir(const char *dirname)
-{
+int D_mkdir(const char *dirname) {
   wchar_t *wdir;
   int ret;
 

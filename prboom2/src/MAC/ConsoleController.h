@@ -2,12 +2,11 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface ConsoleController : NSWindowController
-{
-	IBOutlet NSTextView *textView;
+@interface ConsoleController : NSWindowController {
+  IBOutlet NSTextView *textView;
 
-	NSMutableString *log;
-	id launchDelegate;
+  NSMutableString *log;
+  id launchDelegate;
 }
 
 - (id)initWithWindow:(id)window;

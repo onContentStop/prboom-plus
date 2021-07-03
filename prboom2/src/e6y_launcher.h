@@ -36,8 +36,7 @@
 
 #ifdef _WIN32
 
-typedef enum
-{
+typedef enum {
   launcher_enable_never,
   launcher_enable_smart,
   launcher_enable_always,

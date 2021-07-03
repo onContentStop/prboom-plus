@@ -34,13 +34,15 @@
 #ifndef __R_BSP__
 #define __R_BSP__
 
+#include "r_defs.h"
+
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-extern seg_t    *curline;
-extern side_t   *sidedef;
-extern line_t   *linedef;
+extern seg_t *curline;
+extern side_t *sidedef;
+extern line_t *linedef;
 extern sector_t *frontsector;
 extern sector_t *backsector;
 
