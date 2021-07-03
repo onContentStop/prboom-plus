@@ -729,37 +729,39 @@ dboolean AM_Responder(event_t* ev) {
       automapmode ^=
           am_follow;  // CPhipps - put all automap mode stuff into one enum
       // Ty 03/27/98 - externalized
-      plr->message =
-          (automapmode & am_follow) ? s_AMSTR_FOLLOWON : s_AMSTR_FOLLOWOFF;
+      doom_printf("%s", (automapmode & am_follow) ? s_AMSTR_FOLLOWON
+                                                  : s_AMSTR_FOLLOWOFF);
     } else if (ch == key_map_grid) {
       automapmode ^= am_grid;  // CPhipps
       // Ty 03/27/98 - *not* externalized
-      plr->message = (automapmode & am_grid) ? s_AMSTR_GRIDON : s_AMSTR_GRIDOFF;
+      doom_printf("%s",
+                  (automapmode & am_grid) ? s_AMSTR_GRIDON : s_AMSTR_GRIDOFF);
     } else if (ch == key_map_mark) {
       /* Ty 03/27/98 - *not* externalized
        * cph 2001/11/20 - use doom_printf so we don't have our own buffer */
       doom_printf("%s %d", s_AMSTR_MARKEDSPOT, markpointnum);
       AM_addMark();
     } else if (ch == key_map_clear) {
-      AM_clearMarks();                      // Ty 03/27/98 - *not* externalized
-      plr->message = s_AMSTR_MARKSCLEARED;  //    ^
-    }                                       //    |
+      AM_clearMarks();  // Ty 03/27/98 - *not* externalized
+      doom_printf("%s", s_AMSTR_MARKSCLEARED);  //    ^
+    }                                           //    |
     else if (ch == key_map_rotate) {
       automapmode ^= am_rotate;
-      plr->message =
-          (automapmode & am_rotate) ? s_AMSTR_ROTATEON : s_AMSTR_ROTATEOFF;
+      doom_printf("%s", (automapmode & am_rotate) ? s_AMSTR_ROTATEON
+                                                  : s_AMSTR_ROTATEOFF);
     } else if (ch == key_map_overlay) {
       automapmode ^= am_overlay;
       AM_SetPosition();
       AM_activateNewScale();
-      plr->message =
-          (automapmode & am_overlay) ? s_AMSTR_OVERLAYON : s_AMSTR_OVERLAYOFF;
+      doom_printf("%s", (automapmode & am_overlay) ? s_AMSTR_OVERLAYON
+                                                   : s_AMSTR_OVERLAYOFF);
     }
 #ifdef GL_DOOM
     else if (ch == key_map_textured) {
       map_textured = !map_textured;
       M_ChangeMapTextured();
-      plr->message = (map_textured ? s_AMSTR_TEXTUREDON : s_AMSTR_TEXTUREDOFF);
+      doom_printf("%s",
+                  (map_textured ? s_AMSTR_TEXTUREDON : s_AMSTR_TEXTUREDOFF));
     }
 #endif
     else  // phares
@@ -1329,8 +1331,8 @@ static void AM_drawWalls(void) {
                        (P_WasSecret(lines[i].backsector) &&
                         !P_IsSecret(
                             lines[i].backsector)))) ||  // jff 3/9/98 add logic
-                                                        // to not show secret til
-                                                        // after entered
+                                                        // to not show secret
+                                                        // til after entered
                      (  // if map_secret_after is true
                          !map_secret_after &&
                          (P_WasSecret(lines[i].frontsector) ||

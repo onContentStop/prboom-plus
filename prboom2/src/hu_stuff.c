@@ -2213,7 +2213,7 @@ static int tail = 0;
 //
 static void HU_queueChatChar(char c) {
   if (((head + 1) & (QUEUESIZE - 1)) == tail) {
-    plr->message = HUSTR_MSGU;
+    doom_printf("%s", HUSTR_MSGU);
   } else {
     chatchars[head] = c;
     head = (head + 1) & (QUEUESIZE - 1);
@@ -2309,15 +2309,15 @@ dboolean HU_Responder(event_t *ev) {
             } else if (i == consoleplayer) {
               num_nobrainers++;
               if (num_nobrainers < 3)
-                plr->message = HUSTR_TALKTOSELF1;
+                doom_printf("%s", HUSTR_TALKTOSELF1);
               else if (num_nobrainers < 6)
-                plr->message = HUSTR_TALKTOSELF2;
+                doom_printf("%s", HUSTR_TALKTOSELF2);
               else if (num_nobrainers < 9)
-                plr->message = HUSTR_TALKTOSELF3;
+                doom_printf("%s", HUSTR_TALKTOSELF3);
               else if (num_nobrainers < 32)
-                plr->message = HUSTR_TALKTOSELF4;
+                doom_printf("%s", HUSTR_TALKTOSELF4);
               else
-                plr->message = HUSTR_TALKTOSELF5;
+                doom_printf("%s", HUSTR_TALKTOSELF5);
             }
           }
         }
@@ -2342,7 +2342,7 @@ dboolean HU_Responder(event_t *ev) {
       // leave chat mode and notify that it was sent
       chat_on = false;
       strncpy(lastmessage, chat_macros[c], HU_MAXLINELENGTH);
-      plr->message = lastmessage;
+      doom_printf("%s", lastmessage);
       eatkey = true;
     } else {
       if (shiftdown || (c >= 'a' && c <= 'z')) c = shiftxform[c];
@@ -2354,7 +2354,7 @@ dboolean HU_Responder(event_t *ev) {
         chat_on = false;
         if (w_chat.l.len) {
           strcpy(lastmessage, w_chat.l.l);
-          plr->message = lastmessage;
+          doom_printf("%s", lastmessage);
         }
       } else if (c == key_escape)  // phares
         chat_on = false;

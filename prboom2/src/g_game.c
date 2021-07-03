@@ -3996,6 +3996,7 @@ void doom_printf(const char *s, ...) {
   va_start(v, s);
   doom_vsnprintf(msg, sizeof(msg), s, v); /* print message in buffer */
   va_end(v);
+  printf("[\x1b[1;33mMSG\x1b[0m] %s\n", msg);
   players[consoleplayer].message = msg;  // set new message
 }
 

@@ -71,6 +71,14 @@
 #include "e6y_launcher.h"
 #endif
 
+#ifndef PACKAGE_NAME
+#define PACKAGE_NAME "prboom-plus"
+#endif
+
+#ifndef PACKAGE_VERSION
+#define PACKAGE_VERSION "v2.6um"
+#endif
+
 extern patchnum_t hu_font[HU_FONTSIZE];
 extern dboolean message_dontfuckwithme;
 
@@ -1335,9 +1343,9 @@ void M_ChangeMessages(int choice) {
   showMessages = 1 - showMessages;
 
   if (!showMessages)
-    players[consoleplayer].message = s_MSGOFF;  // Ty 03/27/98 - externalized
+    doom_printf("%s", s_MSGOFF);  // Ty 03/27/98 - externalized
   else
-    players[consoleplayer].message = s_MSGON;  // Ty 03/27/98 - externalized
+    doom_printf("%s", s_MSGON);  // Ty 03/27/98 - externalized
 
   message_dontfuckwithme = true;
 }
@@ -3604,7 +3612,7 @@ setup_menu_t gen_settings1[] = {  // General Settings screen1
      G_Y + 18 * 8,
      {"full_sounds"}},
     //{"Low-pass filter",                S_YESNO,            m_null, G_X,
-    //G_Y+19*8, {"lowpass_filter"}},
+    // G_Y+19*8, {"lowpass_filter"}},
 
     // Button for resetting to defaults
     {0, S_RESET, m_null, X_BUTTON, Y_BUTTON},
@@ -6112,7 +6120,7 @@ dboolean M_Responder(event_t *ev) {
         useglgamma++;
         if (useglgamma > MAX_GLGAMMA) useglgamma = 0;
         sprintf(str, "Gamma correction level %d", useglgamma);
-        players[consoleplayer].message = str;
+        doom_printf("%s", str);
 
         gld_SetGammaRamp(useglgamma);
       } else
@@ -6120,11 +6128,11 @@ dboolean M_Responder(event_t *ev) {
       {
         usegamma++;
         if (usegamma > 4) usegamma = 0;
-        players[consoleplayer].message = usegamma == 0   ? s_GAMMALVL0
-                                         : usegamma == 1 ? s_GAMMALVL1
-                                         : usegamma == 2 ? s_GAMMALVL2
-                                         : usegamma == 3 ? s_GAMMALVL3
-                                                         : s_GAMMALVL4;
+        doom_printf("%s", usegamma == 0   ? s_GAMMALVL0
+                          : usegamma == 1 ? s_GAMMALVL1
+                          : usegamma == 2 ? s_GAMMALVL2
+                          : usegamma == 3 ? s_GAMMALVL3
+                                          : s_GAMMALVL4);
         V_SetPalette(0);
         return true;
       }
