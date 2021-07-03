@@ -34,6 +34,8 @@
 #ifndef _GL_INTERN_H
 #define _GL_INTERN_H
 
+#include <GL/gl.h>
+
 #include "v_video.h"
 #include "xs_Float.h"
 

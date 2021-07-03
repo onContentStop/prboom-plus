@@ -49,7 +49,7 @@
 #include <unistd.h>
 #endif
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 // e6y
 #ifdef _WIN32
 #include <SDL_syswm.h>

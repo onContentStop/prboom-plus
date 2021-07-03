@@ -31,7 +31,7 @@
 
 #include <windows.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "pcsound.h"
 
 static SDL_Thread *sound_thread_handle;

@@ -26,7 +26,7 @@
 #include "i_pcsound.h"
 
 #include "PCSOUND/pcsound.h"
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "doomdef.h"
 #include "doomtype.h"
 #include "i_sound.h"

@@ -49,7 +49,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #ifdef _WIN32
 #include <SDL_syswm.h>
 #endif

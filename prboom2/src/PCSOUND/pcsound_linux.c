@@ -36,8 +36,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include "SDL.h"
-#include "SDL_thread.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_thread.h"
 #include "pcsound.h"
 
 // e6y

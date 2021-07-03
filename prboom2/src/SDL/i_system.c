@@ -56,7 +56,7 @@
 #endif
 #include <sys/stat.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -361,11 +361,11 @@ const char* I_GetTempDir(void) { return "PROGDIR:"; }
 static const char prboom_dir[] = {
     "/.prboom-plus"};  // Mead rem extra slash 8/21/03
 
-const char *I_DoomExeDir(void) {
-  static char *base;
+const char* I_DoomExeDir(void) {
+  static char* base;
   if (!base)  // cache multiple requests
   {
-    char *home = getenv("HOME");
+    char* home = getenv("HOME");
     size_t len = strlen(home);
 
     base = malloc(len + strlen(prboom_dir) + 1);
@@ -378,7 +378,7 @@ const char *I_DoomExeDir(void) {
   return base;
 }
 
-const char *I_GetTempDir(void) { return "/tmp"; }
+const char* I_GetTempDir(void) { return "/tmp"; }
 
 #endif
 

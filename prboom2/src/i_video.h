@@ -42,7 +42,7 @@
 #include <SDL_opengl.h>
 #endif
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "doomtype.h"
 #include "v_video.h"
 

@@ -39,7 +39,7 @@
 #include "config.h"
 #endif
 
-#include "SDL_timer.h"
+#include "SDL2/SDL_timer.h"
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -99,6 +99,10 @@
 
 #ifdef _WIN32
 #include "WIN/win_fopen.h"
+#endif
+
+#ifndef PACKAGE_NAME
+#define PACKAGE_NAME "prboom-plus"
 #endif
 
 void GetFirstMap(int *ep,
@@ -940,7 +944,7 @@ static void IdentifyVersion(void) {
       free(basesavegame);
       basesavegame = strdup(myargv[i + 1]);  // jff 3/24/98 use that for
                                              // savegame
-      NormalizeSlashes(basesavegame);  // jff 9/22/98 fix c:\ not working
+      NormalizeSlashes(basesavegame);        // jff 9/22/98 fix c:\ not working
     }
     // jff 9/3/98 use logical output routine
     else

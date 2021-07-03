@@ -33,14 +33,15 @@
 
 #include <math.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #ifdef HAVE_LIBSDL2_IMAGE
-#include "SDL_image.h"
+#include "SDL2/SDL_image.h"
 #endif
 
 #include "am_map.h"
 #include "gl_intern.h"
 #include "gl_opengl.h"
+#include "gl_struct.h"
 #include "lprintf.h"
 #include "m_misc.h"
 #include "w_wad.h"

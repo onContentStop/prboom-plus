@@ -38,7 +38,7 @@
 #endif
 #include <math.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "d_net.h"
 #include "doomstat.h"
 #include "e6y.h"  //e6y
