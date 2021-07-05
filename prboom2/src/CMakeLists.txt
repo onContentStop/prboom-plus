@@ -147,6 +147,8 @@ set(COMMON_SRC
     scanner.h
     sc_man.c
     sc_man.h
+    sndinfo.cpp
+    sndinfo.h
     sounds.c
     sounds.h
     statdump.c
@@ -376,6 +378,7 @@ addgameexecutable(prboom-plus "${PRBOOM_PLUS_SOURCES}")
 target_link_libraries(prboom-plus PRIVATE magic_enum::magic_enum)
 target_link_libraries(prboom-plus PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(prboom-plus PRIVATE vec)
+target_link_libraries(prboom-plus PRIVATE taocpp::pegtl)
 
 # PrBoom-Plus server executable
 

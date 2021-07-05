@@ -7,3 +7,6 @@
 [submodule "prboom2/deps/magic_enum"]
 	path = prboom2/deps/magic_enum
 	url = https://github.com/Neargye/magic_enum
+[submodule "prboom2/deps/PEGTL"]
+	path = prboom2/deps/PEGTL
+	url = https://github.com/taocpp/PEGTL.git

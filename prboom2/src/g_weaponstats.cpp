@@ -155,7 +155,7 @@ static nlohmann::json serialize(const weaponstats_t &stats) {
     j["distances"].push_back(stats.distances.data[i]);
   }
   j["mobjkills"] = nlohmann::json{};
-  for (mobjtype_t mt = MT_NULL; mt < NUMMOBJTYPES;
+  for (mobjtype_t mt = MT_PLAYER; mt < NUMMOBJTYPES;
        mt = static_cast<mobjtype_t>(static_cast<int>(mt) + 1)) {
     if (stats.monsters[mt] > 0) {
       j["mobjkills"].emplace(INFO_mobjtype_name(mt), stats.monsters[mt]);

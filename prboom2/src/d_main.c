@@ -2071,6 +2071,8 @@ static void D_DoomMainSetup(void) {
     weaponstats_init(&weaponstats[i]);
   }
   I_AtExit(weaponstats_cleanup, true);
+  weaponstats_load();
+  I_AtExit(weaponstats_save, true);
 }
 
 //
