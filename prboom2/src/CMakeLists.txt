@@ -53,8 +53,6 @@ set(COMMON_SRC
     info.h
     info_helpers.cpp
     info_helpers.h
-    intarray.c
-    intarray.h
     i_capture.c
     i_capture.h
     i_glob.c
@@ -377,6 +375,7 @@ addgameexecutable(prboom-plus "${PRBOOM_PLUS_SOURCES}")
 
 target_link_libraries(prboom-plus PRIVATE magic_enum::magic_enum)
 target_link_libraries(prboom-plus PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(prboom-plus PRIVATE vec)
 
 # PrBoom-Plus server executable
 

@@ -628,7 +628,8 @@ static void P_KillMobj(mobj_t *source, mobj_t *target) {
 
       if (target->flags & MF_RESSURECTED) source->player->resurectedkillcount++;
     }
-    if (target->flags & MF_COUNTKILL || target->type == MT_SKULL) {
+    if ((target->flags & MF_COUNTKILL || target->type == MT_SKULL) &&
+        target->type != MT_NULL) {
       weaponstats_register_kill(&weaponstats[source->player->readyweapon],
                                 target->type,
                                 P_ComputeDistance(source, target));

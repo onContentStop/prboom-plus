@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer
+# -fsanitize=address")
+
+# set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}
+# -fno-omit-frame-pointer -fsanitize=address")
+
+# set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer
+# -fsanitize=address")
+
 project(
   "PrBoom-Plus"
   VERSION 2.6
@@ -256,6 +265,9 @@ set(WAD_DATA_PATH "${PRBOOM_OUTPUT_PATH}/${WAD_DATA}")
 
 add_subdirectory("deps/json")
 add_subdirectory("deps/magic_enum")
+project(vec LANGUAGES C)
+add_library(vec "deps/vec/src/vec.c")
+target_include_directories(vec PUBLIC "deps/vec/src")
 add_subdirectory(data)
 add_subdirectory(doc)
 add_subdirectory(src)

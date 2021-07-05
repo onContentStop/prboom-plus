@@ -170,6 +170,8 @@ dboolean coop_spawns;
 // but without having to be recording every time.
 int shorttics;
 
+dboolean infammo = false;
+
 // automatic pistol start when advancing from one level to the next
 int pistolstart;
 
@@ -2532,6 +2534,8 @@ void G_ReloadDefaults(void) {
   // killough 3/1/98: Initialize options based on config file
   // (allows functions above to load different values for demos
   // and savegames without messing up defaults).
+
+  infammo = false;
 
   weapon_recoil = default_weapon_recoil;  // weapon recoil
 

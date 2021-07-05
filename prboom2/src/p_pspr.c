@@ -596,7 +596,9 @@ void A_FireMissile(player_t *player, pspdef_t *psp) {
 
   weaponstats_register_shot(&weaponstats[wp_missile]);
 
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
   P_SpawnPlayerMissile(player->mo, MT_ROCKET);
 }
 
@@ -609,7 +611,9 @@ void A_FireBFG(player_t *player, pspdef_t *psp) {
 
   weaponstats_register_shot(&weaponstats[wp_bfg]);
 
-  player->ammo[weaponinfo[player->readyweapon].ammo] -= BFGCELLS;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo] -= BFGCELLS;
+  }
   P_SpawnPlayerMissile(player->mo, MT_BFG);
 }
 
@@ -636,7 +640,9 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp) {
     P_Thrust(player, ANG180 + player->mo->angle,
              512 * recoil_values[wp_plasma]);
 
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
 
   player->extralight = 2;
 
@@ -685,7 +691,9 @@ void A_FirePlasma(player_t *player, pspdef_t *psp) {
 
   weaponstats_register_shot(&weaponstats[wp_plasma]);
 
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
 
   A_FireSomething(player, P_Random(pr_plasma) & 1);  // phares
   P_SpawnPlayerMissile(player->mo, MT_PLASMA);
@@ -750,7 +758,9 @@ void A_FirePistol(player_t *player, pspdef_t *psp) {
   S_StartSound(player->mo, sfx_pistol);
 
   P_SetMobjState(player->mo, S_PLAY_ATK2);
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
 
   A_FireSomething(player, 0);  // phares
   P_BulletSlope(player->mo);
@@ -771,7 +781,9 @@ void A_FireShotgun(player_t *player, pspdef_t *psp) {
   S_StartSound(player->mo, sfx_shotgn);
   P_SetMobjState(player->mo, S_PLAY_ATK2);
 
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
 
   A_FireSomething(player, 0);  // phares
 
@@ -793,7 +805,9 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp) {
 
   S_StartSound(player->mo, sfx_dshtgn);
   P_SetMobjState(player->mo, S_PLAY_ATK2);
-  player->ammo[weaponinfo[player->readyweapon].ammo] -= 2;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo] -= 2;
+  }
 
   A_FireSomething(player, 0);  // phares
 
@@ -827,7 +841,9 @@ void A_FireCGun(player_t *player, pspdef_t *psp) {
   if (!player->ammo[weaponinfo[player->readyweapon].ammo]) return;
 
   P_SetMobjState(player->mo, S_PLAY_ATK2);
-  player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  if (!infammo) {
+    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+  }
 
   A_FireSomething(player, psp->state - &states[S_CHAIN1]);  // phares
 

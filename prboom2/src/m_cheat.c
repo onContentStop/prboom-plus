@@ -97,6 +97,7 @@ static void cheat_notarget();
 static void cheat_fly();
 static void cheat_comp_ext();
 static void cheat_shorttics();
+static void cheat_infammo();
 
 //-----------------------------------------------------------------------------
 //
@@ -199,6 +200,9 @@ cheatseq_t cheat[] = {
 
     // Enable/disable shorttics in-game
     CHEAT("tntshort", NULL, cht_never, cheat_shorttics, 0),
+
+    // Enable/disable infinite ammo
+    CHEAT("tntinf", NULL, cht_never, cheat_infammo, 0),
 
     // end-of-list marker
     {NULL}};
@@ -838,5 +842,14 @@ static void cheat_shorttics() {
     doom_printf("Shorttics enabled");
   } else {
     doom_printf("Shorttics disabled");
+  }
+}
+
+static void cheat_infammo() {
+  infammo = !infammo;
+  if (infammo) {
+    doom_printf("Infinite ammo enabled");
+  } else {
+    doom_printf("Infinite ammo disabled");
   }
 }

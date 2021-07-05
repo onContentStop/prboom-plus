@@ -236,6 +236,8 @@ extern const char *comp_lev_str[];
 // but without having to be recording every time.
 extern int shorttics;
 
+extern dboolean infammo;
+
 // automatic pistol start when advancing from one level to the next
 extern int pistolstart;
 

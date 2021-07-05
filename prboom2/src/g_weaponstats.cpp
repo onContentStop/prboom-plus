@@ -14,6 +14,10 @@ extern "C" {
 #include "lprintf.h"
 }
 
+#undef malloc
+#undef free
+#undef realloc
+
 static void parse(weaponstats_t *stats, const nlohmann::json &j);
 static nlohmann::json serialize(const weaponstats_t &stats);
 
@@ -28,12 +32,10 @@ void weaponstats_init(weaponstats_t *stats) {
        mt = static_cast<mobjtype_t>(static_cast<int>(mt) + 1)) {
     stats->monsters[mt] = 0;
   }
-  intarray_init(&stats->distances);
+  vec_init(&stats->distances);
 }
 
-void weaponstats_free(weaponstats_t *stats) {
-  intarray_free(&stats->distances);
-}
+void weaponstats_free(weaponstats_t *stats) { vec_deinit(&stats->distances); }
 
 void weaponstats_cleanup(void) {
   for (int i = 0; i < NUMWEAPONS; i++) {
@@ -45,7 +47,7 @@ void weaponstats_register_kill(weaponstats_t *stats, mobjtype_t type,
                                int distance) {
   ++stats->kills;
   ++stats->monsters[type];
-  intarray_push_back(&stats->distances, distance);
+  vec_push(&stats->distances, distance);
 }
 
 void weaponstats_register_shot(weaponstats_t *stats) { ++stats->shots; }
@@ -121,7 +123,7 @@ static void parse(weaponstats_t *stats, const nlohmann::json &j) {
   }
   if (j.find("distances") != j.end() && j["distances"].is_array()) {
     for (int i = 0; i < j["distances"].size(); ++i) {
-      intarray_push_back(&stats->distances, j["distances"][i]);
+      vec_push(&stats->distances, j["distances"][i]);
     }
   }
   if (j.find("monsters") != j.end() && j["monsters"].is_object()) {
@@ -149,7 +151,7 @@ static nlohmann::json serialize(const weaponstats_t &stats) {
   j["kills"] = stats.kills;
   j["shots"] = stats.shots;
   j["distances"] = std::vector<int>{};
-  for (int i = 0; i < stats.distances.count; ++i) {
+  for (int i = 0; i < stats.distances.length; ++i) {
     j["distances"].push_back(stats.distances.data[i]);
   }
   j["mobjkills"] = nlohmann::json{};

@@ -2,19 +2,20 @@
 #define PRBOOM_PLUS_G_WEAPONSTATS_H
 
 #include "info.h"
-#include "intarray.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <vec.h>
 
 #include "doomdef.h"
 
 typedef struct {
   int kills;
   int shots;
-  intarray_t distances;
   int monsters[NUMMOBJTYPES];
+  vec_int_t distances;
 } weaponstats_t;
 
 extern weaponstats_t weaponstats[NUMWEAPONS];
