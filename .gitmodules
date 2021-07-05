@@ -1,0 +1,3 @@
+[submodule "prboom2/deps/vec"]
+	path = prboom2/deps/vec
+	url = https://github.com/rxi/vec.git
