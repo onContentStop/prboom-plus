@@ -16,3 +16,4 @@ cmake_install.cmake
 /prboom2/prboom-plus.wad
 /prboom2/build*
 .vscode/
+.cache/
