@@ -439,6 +439,8 @@ char* I_FindFileInternal(const char* wfname, const char* ext,
           {"/usr/share/games/doom"},
           {"/usr/local/share/doom"},
           {"/usr/share/doom"},
+          {"/public/doom/iwad"},
+          {"/public/doom/pwad"},
       },
     *search;
 
