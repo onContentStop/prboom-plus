@@ -84,6 +84,8 @@ extern dboolean message_dontfuckwithme;
 
 extern dboolean chat_on;  // in heads-up code
 
+int quick_skip_prompt;
+
 //
 // defaulted values
 //
@@ -1270,9 +1272,13 @@ void M_QuickSave(void) {
     quickSaveSlot = -2;  // means to pick a slot now
     return;
   }
-  sprintf(tempstring, s_QSPROMPT,
-          savegamestrings[quickSaveSlot]);  // Ty 03/27/98 - externalized
-  M_StartMessage(tempstring, M_QuickSaveResponse, true);
+  if (quick_skip_prompt) {
+    M_QuickSaveResponse('y');
+  } else {
+    sprintf(tempstring, s_QSPROMPT,
+            savegamestrings[quickSaveSlot]);  // Ty 03/27/98 - externalized
+    M_StartMessage(tempstring, M_QuickSaveResponse, true);
+  }
 }
 
 /////////////////////////////
@@ -1302,9 +1308,13 @@ void M_QuickLoad(void) {
     M_StartMessage(s_QSAVESPOT, NULL, false);  // Ty 03/27/98 - externalized
     return;
   }
-  sprintf(tempstring, s_QLPROMPT,
-          savegamestrings[quickSaveSlot]);  // Ty 03/27/98 - externalized
-  M_StartMessage(tempstring, M_QuickLoadResponse, true);
+  if (quick_skip_prompt) {
+    M_QuickLoadResponse('y');
+  } else {
+    sprintf(tempstring, s_QLPROMPT,
+            savegamestrings[quickSaveSlot]);  // Ty 03/27/98 - externalized
+    M_StartMessage(tempstring, M_QuickLoadResponse, true);
+  }
 }
 
 /////////////////////////////
@@ -2835,6 +2845,13 @@ setup_menu_t stat_settings2[] = {
      ADVHUD_X,
      SB_Y + 8 * 8,
      {"hudadd_timests"}},
+
+    {"SKIP QUICK SAVE/LOAD PROMPT",
+     S_YESNO,
+     m_null,
+     ADVHUD_X,
+     SB_Y + 9 * 8,
+     {"quick_skip_prompt"}},
 
     {"CROSSHAIR SETTINGS", S_SKIP | S_TITLE, m_null, ADVHUD_X, SB_Y + 10 * 8},
     {"ENABLE CROSSHAIR",

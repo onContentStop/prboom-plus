@@ -2544,6 +2544,7 @@ default_t defaults[] = {
      1,
      def_bool,
      ss_stat},
+    {"quick_skip_prompt", {&quick_skip_prompt}, {0}, 0, 1, def_bool, ss_stat},
 
     // e6y
     {"Prboom-plus mouse settings", {NULL}, {0}, UL, UL, def_none, ss_none},

@@ -2675,6 +2675,14 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
   // e6y
   P_SyncWalkcam(true, true);
   R_SmoothPlaying_Reset(NULL);
+
+  printf("[\x1b[1;32mENT\x1b[0m] Enter ");
+  if (gamemode == commercial) {
+    printf("MAP%02d", map);
+  } else {
+    printf("E%dM%d", episode, map);
+  }
+  printf("\n");
 }
 
 //

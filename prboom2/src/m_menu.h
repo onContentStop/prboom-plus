@@ -188,4 +188,6 @@ typedef struct setup_menu_s {
   const char **selectstrings; /* list of strings for choice value */
 } setup_menu_t;
 
+extern int quick_skip_prompt;
+
 #endif
