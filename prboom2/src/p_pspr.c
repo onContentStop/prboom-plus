@@ -38,6 +38,7 @@
 #include "doomstat.h"
 #include "e6y.h"  //e6y
 #include "g_game.h"
+#include "g_weaponstats.h"
 #include "lprintf.h"
 #include "m_random.h"
 #include "p_enemy.h"
@@ -500,6 +501,8 @@ void A_Punch(player_t *player, pspdef_t *psp) {
 
   CHECK_WEAPON_CODEPOINTER("A_Punch", player);
 
+  weaponstats_register_shot(&weaponstats[wp_fist]);
+
   damage = (P_Random(pr_punch) % 10 + 1) << 1;
 
   if (player->powers[pw_strength]) damage *= 10;
@@ -539,6 +542,8 @@ void A_Saw(player_t *player, pspdef_t *psp) {
   int t;
 
   CHECK_WEAPON_CODEPOINTER("A_Saw", player);
+
+  weaponstats_register_shot(&weaponstats[wp_chainsaw]);
 
   damage = 2 * (P_Random(pr_saw) % 10 + 1);
   angle = player->mo->angle;
@@ -589,6 +594,8 @@ void A_Saw(player_t *player, pspdef_t *psp) {
 void A_FireMissile(player_t *player, pspdef_t *psp) {
   CHECK_WEAPON_CODEPOINTER("A_FireMissile", player);
 
+  weaponstats_register_shot(&weaponstats[wp_missile]);
+
   player->ammo[weaponinfo[player->readyweapon].ammo]--;
   P_SpawnPlayerMissile(player->mo, MT_ROCKET);
 }
@@ -599,6 +606,8 @@ void A_FireMissile(player_t *player, pspdef_t *psp) {
 
 void A_FireBFG(player_t *player, pspdef_t *psp) {
   CHECK_WEAPON_CODEPOINTER("A_FireBFG", player);
+
+  weaponstats_register_shot(&weaponstats[wp_bfg]);
 
   player->ammo[weaponinfo[player->readyweapon].ammo] -= BFGCELLS;
   P_SpawnPlayerMissile(player->mo, MT_BFG);
@@ -620,6 +629,8 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp) {
   if (compatibility_level < mbf_compatibility) return;
 
   CHECK_WEAPON_CODEPOINTER("A_FireOldBFG", player);
+
+  weaponstats_register_shot(&weaponstats[wp_bfg]);
 
   if (weapon_recoil && !(player->mo->flags & MF_NOCLIP))
     P_Thrust(player, ANG180 + player->mo->angle,
@@ -671,6 +682,8 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp) {
 
 void A_FirePlasma(player_t *player, pspdef_t *psp) {
   CHECK_WEAPON_CODEPOINTER("A_FirePlasma", player);
+
+  weaponstats_register_shot(&weaponstats[wp_plasma]);
 
   player->ammo[weaponinfo[player->readyweapon].ammo]--;
 
@@ -732,6 +745,8 @@ static void P_GunShot(mobj_t *mo, dboolean accurate) {
 void A_FirePistol(player_t *player, pspdef_t *psp) {
   CHECK_WEAPON_CODEPOINTER("A_FirePistol", player);
 
+  weaponstats_register_shot(&weaponstats[wp_pistol]);
+
   S_StartSound(player->mo, sfx_pistol);
 
   P_SetMobjState(player->mo, S_PLAY_ATK2);
@@ -750,6 +765,8 @@ void A_FireShotgun(player_t *player, pspdef_t *psp) {
   int i;
 
   CHECK_WEAPON_CODEPOINTER("A_FireShotgun", player);
+
+  weaponstats_register_shot(&weaponstats[wp_shotgun]);
 
   S_StartSound(player->mo, sfx_shotgn);
   P_SetMobjState(player->mo, S_PLAY_ATK2);
@@ -771,6 +788,8 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp) {
   int i;
 
   CHECK_WEAPON_CODEPOINTER("A_FireShotgun2", player);
+
+  weaponstats_register_shot(&weaponstats[wp_supershotgun]);
 
   S_StartSound(player->mo, sfx_dshtgn);
   P_SetMobjState(player->mo, S_PLAY_ATK2);
@@ -798,6 +817,8 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp) {
 
 void A_FireCGun(player_t *player, pspdef_t *psp) {
   CHECK_WEAPON_CODEPOINTER("A_FireCGun", player);
+
+  weaponstats_register_shot(&weaponstats[wp_chaingun]);
 
   if (player->ammo[weaponinfo[player->readyweapon].ammo] ||
       default_comp[comp_sound])

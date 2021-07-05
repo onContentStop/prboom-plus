@@ -35,6 +35,7 @@
  *-----------------------------------------------------------------------------
  */
 
+#include "g_weaponstats.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -2065,6 +2066,11 @@ static void D_DoomMainSetup(void) {
 
   // do not try to interpolate during timedemo
   M_ChangeUncappedFrameRate();
+
+  for (int i = 0; i < NUMWEAPONS; ++i) {
+    weaponstats_init(&weaponstats[i]);
+  }
+  I_AtExit(weaponstats_cleanup, true);
 }
 
 //

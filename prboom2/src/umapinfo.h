@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
+
 struct BossAction {
   int type;
   int special;

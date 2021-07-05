@@ -36,8 +36,14 @@
 #ifndef __INFO__
 #define __INFO__
 
+#ifdef __cplusplus
+#include <magic_enum.hpp>
+extern "C" {
+#endif
+
 /* Needed for action function pointer handling. */
 #include "d_think.h"
+#include "doomtype.h"
 
 /********************************************************************
  * Sprite name enumeration - must match info.c                      *
@@ -1714,5 +1720,17 @@ typedef struct {
 
 /* See p_mobj_h for addition more technical info */
 extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
+
+#ifdef __cplusplus
+}
+
+namespace magic_enum::customize {
+template <>
+struct enum_range<mobjtype_t> {
+  static constexpr int min = -1;
+  static constexpr int max = 1000;
+};
+}  // namespace magic_enum::customize
+#endif
 
 #endif

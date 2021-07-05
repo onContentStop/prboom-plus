@@ -33,11 +33,14 @@
 
 #include "p_inter.h"
 
+#include <math.h>
+
 #include "am_map.h"
 #include "d_deh.h"  // Ty 03/22/98 - externalized strings
 #include "doomstat.h"
 #include "dstrings.h"
 #include "g_game.h"
+#include "g_weaponstats.h"
 #include "hu_tracers.h"
 #include "lprintf.h"
 #include "m_random.h"
@@ -577,6 +580,13 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher) {
     S_StartSound(player->mo, sound | PICKUP_SOUND);  // killough 4/25/98
 }
 
+static int P_ComputeDistance(mobj_t *m1, mobj_t *m2) {
+  double dx = m1->x - m2->x;
+  double dy = m1->y - m2->y;
+  double dz = m1->z - m2->z;
+  return sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 //
 // KillMobj
 //
@@ -617,6 +627,11 @@ static void P_KillMobj(mobj_t *source, mobj_t *target) {
       source->player->killcount++;
 
       if (target->flags & MF_RESSURECTED) source->player->resurectedkillcount++;
+    }
+    if (target->flags & MF_COUNTKILL || target->type == MT_SKULL) {
+      weaponstats_register_kill(&weaponstats[source->player->readyweapon],
+                                target->type,
+                                P_ComputeDistance(source, target));
     }
     if (target->player) source->player->frags[target->player - players]++;
   } else if (target->flags & MF_COUNTKILL) { /* Add to kills tally */
