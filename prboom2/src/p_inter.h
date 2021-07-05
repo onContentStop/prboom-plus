@@ -73,5 +73,6 @@ extern int mega_health;
 extern int bfgcells;
 extern int monsters_infight;  // e6y: Dehacked support - monsters infight
 extern int maxammo[], clipammo[];
+extern dboolean buddha;
 
 #endif

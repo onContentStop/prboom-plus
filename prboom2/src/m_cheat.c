@@ -98,6 +98,7 @@ static void cheat_fly();
 static void cheat_comp_ext();
 static void cheat_shorttics();
 static void cheat_infammo();
+static void cheat_buddha();
 
 //-----------------------------------------------------------------------------
 //
@@ -203,6 +204,9 @@ cheatseq_t cheat[] = {
 
     // Enable/disable infinite ammo
     CHEAT("tntinf", NULL, cht_never, cheat_infammo, 0),
+
+    // Enable/disable buddha mode (damage scales with health)
+    CHEAT("buddha", NULL, cht_never, cheat_buddha, 0),
 
     // end-of-list marker
     {NULL}};
@@ -851,5 +855,14 @@ static void cheat_infammo() {
     doom_printf("Infinite ammo enabled");
   } else {
     doom_printf("Infinite ammo disabled");
+  }
+}
+
+static void cheat_buddha() {
+  buddha = !buddha;
+  if (buddha) {
+    doom_printf("Buddha mode enabled");
+  } else {
+    doom_printf("Buddha mode disabled");
   }
 }

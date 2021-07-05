@@ -89,6 +89,8 @@ int monsters_infight = 0;  // e6y: Dehacked support - monsters infight
 int maxammo[NUMAMMO] = {200, 50, 300, 50};
 int clipammo[NUMAMMO] = {10, 4, 20, 1};
 
+dboolean buddha = false;
+
 //
 // GET STUFF
 //
@@ -750,6 +752,15 @@ static void P_KillMobj(mobj_t *source, mobj_t *target) {
 #endif
 }
 
+static int P_ComputeBuddhaDamage(int damage, mobj_t *player) {
+  if (player->health >= maxhealth) {
+    return damage;
+  }
+
+  double scalar = (double)player->health / (double)maxhealth;
+  return scalar * damage;
+}
+
 //
 // P_DamageMobj
 // Damages both enemies and players
@@ -766,6 +777,10 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source,
                   int damage) {
   player_t *player;
   dboolean justhit = false; /* killough 11/98 */
+
+  if (buddha && target->player) {
+    damage = P_ComputeBuddhaDamage(damage, target);
+  }
 
   /* killough 8/31/98: allow bouncers to take damage */
   if (!(target->flags & (MF_SHOOTABLE | MF_BOUNCES)))
