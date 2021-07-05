@@ -1,3 +1,9 @@
 [submodule "prboom2/deps/vec"]
 	path = prboom2/deps/vec
 	url = https://github.com/rxi/vec.git
+[submodule "prboom2/deps/json"]
+	path = prboom2/deps/json
+	url = https://github.com/nlohmann/json
+[submodule "prboom2/deps/magic_enum"]
+	path = prboom2/deps/magic_enum
+	url = https://github.com/Neargye/magic_enum
