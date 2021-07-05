@@ -1338,7 +1338,7 @@ static char *GetAutoloadDir(const char *base, const char *iwadname,
 }
 
 static const char *BaseName(const char *filename) {
-  char *basename;
+  const char *basename;
 
   basename = filename + strlen(filename) - 1;
 
