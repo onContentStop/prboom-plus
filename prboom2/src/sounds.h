@@ -35,6 +35,14 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
+#include "strings.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <vec.h>
+
 //
 // SoundFX struct.
 //
@@ -45,7 +53,7 @@ typedef struct sfxinfo_struct sfxinfo_t;
 
 struct sfxinfo_struct {
   // up to 6-character name
-  const char *name;  // CPhipps - const
+  vec_str_t names;
 
   // Sfx singularity (only one at a time)
   int singularity;
@@ -502,7 +510,31 @@ typedef enum {
   sfx_fre198,
   sfx_fre199,
 
+  sfx_tracex,
+  sfx_cgact,
+  sfx_spact,
+  sfx_plsxpl,
+  sfx_vilres,
+  sfx_vilstp,
+  sfx_skepn,
+  sfx_manact,
+  sfx_mnsxpl,
+  sfx_cgsit1,
+  sfx_cgsit2,
+  sfx_cgsit3,
+  sfx_cgpain,
+  sfx_cgdth1,
+  sfx_cgdth2,
+  sfx_cgdth3,
+
   NUMSFX
 } sfxenum_t;
+
+extern void init_sfx(void);
+extern int SFX_GetIndex(string_t *name);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

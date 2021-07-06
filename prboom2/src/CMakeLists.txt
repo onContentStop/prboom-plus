@@ -203,6 +203,7 @@ set(SDLDOOM_SOURCES
     SDL/i_joy.c
     SDL/i_main.c
     SDL/i_network.c
+    SDL/i_randomsound.cpp
     SDL/i_sound.c
     SDL/i_sshot.c
     SDL/i_system.c

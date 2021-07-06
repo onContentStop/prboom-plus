@@ -1044,6 +1044,12 @@ void A_Look(mobj_t *actor) {
         sound = sfx_posit1 + P_Random(pr_see) % 3;
         break;
 
+      case sfx_cgsit1:
+      case sfx_cgsit2:
+      case sfx_cgsit3:
+        sound = sfx_cgsit1 + P_Random(pr_see) % 3;
+        break;
+
       case sfx_bgsit1:
       case sfx_bgsit2:
         sound = sfx_bgsit1 + P_Random(pr_see) % 2;
@@ -1580,7 +1586,7 @@ void A_VileChase(mobj_t *actor) {
           actor->target = temp;
 
           P_SetMobjState(actor, S_VILE_HEAL1);
-          S_StartSound(corpsehit, sfx_slop);
+          S_StartSound(corpsehit, sfx_vilres);
           info = corpsehit->info;
 
           P_SetMobjState(corpsehit, info->raisestate);
@@ -1704,7 +1710,7 @@ void A_VileAttack(mobj_t *actor) {
 
   if (!P_CheckSight(actor, actor->target)) return;
 
-  S_StartSound(actor, sfx_barexp);
+  S_StartSound(actor, sfx_vilstp);
   P_DamageMobj(actor->target, actor, actor, 20);
   actor->target->momz = 1000 * FRACUNIT / actor->target->info->mass;
 
@@ -1959,6 +1965,12 @@ void A_Scream(mobj_t *actor) {
     case sfx_podth2:
     case sfx_podth3:
       sound = sfx_podth1 + P_Random(pr_scream) % 3;
+      break;
+
+    case sfx_cgdth1:
+    case sfx_cgdth2:
+    case sfx_cgdth3:
+      sound = sfx_cgdth1 + P_Random(pr_scream) % 3;
       break;
 
     case sfx_bgdth1:

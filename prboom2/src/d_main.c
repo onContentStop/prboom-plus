@@ -1482,7 +1482,8 @@ static void D_AutoloadDehPWadDir() {
 const char *doomverstr = NULL;
 
 static void D_DoomMainSetup(void) {
-  int p, slot;
+  int p;
+  int slot;
 
   L_SetupConsoleMasks();
 
@@ -1511,6 +1512,7 @@ static void D_DoomMainSetup(void) {
   // figgi 09/18/00-- added switch to force classic bsp nodes
   if (M_CheckParm("-forceoldbsp")) forceOldBsp = true;
 
+  init_sfx();
   D_BuildBEXTables();  // haleyjd
 
   DoLooseFiles();  // Ty 08/29/98 - handle "loose" files on command line
@@ -1861,6 +1863,17 @@ static void D_DoomMainSetup(void) {
     }
   }
 
+  for (int i = 0; i < NUMWEAPONS; ++i) {
+    weaponstats_init(&weaponstats[i]);
+  }
+  I_AtExit(weaponstats_cleanup, true);
+  weaponstats_load();
+  I_AtExit(weaponstats_save, true);
+
+  if (!parse_sndinfo()) {
+    printf("[\x1b[1;32mSND\x1b[0m] Applied SNDINFO patch\n");
+  }
+
   // Automatic pistol start when advancing from one level to the next. At the
   // beginning of each level, the player's health is reset to 100, their
   // armor to 0 and their inventory is reduced to the following: pistol,
@@ -2067,17 +2080,6 @@ static void D_DoomMainSetup(void) {
 
   // do not try to interpolate during timedemo
   M_ChangeUncappedFrameRate();
-
-  for (int i = 0; i < NUMWEAPONS; ++i) {
-    weaponstats_init(&weaponstats[i]);
-  }
-  I_AtExit(weaponstats_cleanup, true);
-  weaponstats_load();
-  I_AtExit(weaponstats_save, true);
-
-  if (!parse_sndinfo()) {
-    printf("[\x1b[1;32mSND\x1b[0m] Applied SNDINFO patch\n");
-  }
 }
 
 //

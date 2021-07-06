@@ -152,7 +152,11 @@ void S_Init(int sfxVolume, int musicVolume) {
     // Note that sounds have not been cached (yet).
     for (i = 1; i < NUMSFX; i++) {
       sfxinfo_t *sfx = &S_sfx[i];
-      sfx->lumpnum = I_GetSfxLumpNum(sfx);
+      if (sfx->names.length == 1) {
+        sfx->lumpnum = I_GetSfxLumpNum(sfx);
+      } else {
+        sfx->lumpnum = -1;
+      }
 
       if (sfx->lumpnum >= 0) W_LockLumpNum(sfx->lumpnum);
     }
@@ -315,6 +319,10 @@ static void S_StartSoundAtVolume(degenmobj_t *origin, int sfx_id, int volume) {
   // get lumpnum if necessary
   // killough 2/28/98: make missing sounds non-fatal
   if (sfx->lumpnum < 0 && (sfx->lumpnum = I_GetSfxLumpNum(sfx)) < 0) return;
+  if (sfx->names.length > 1) {
+    // reroll every time
+    sfx->lumpnum = I_GetSfxLumpNum(sfx);
+  }
 
   // Assigns the handle to one of the channels in the mix/output buffer.
   {  // e6y: [Fix] Crash with zero-length sounds.

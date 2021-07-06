@@ -1179,8 +1179,8 @@ static const char *deh_misc[] =  // CPhipps - static const*
         "IDKFA Armor Class",  // idkfa_armor_class
         "BFG Cells/Shot",     // BFGCELLS
         "Monsters Infight"    // Unknown--not a specific number it seems, but
-        // the logic has to be here somewhere or
-        // it'd happen always
+                              // the logic has to be here somewhere or
+                              // it'd happen always
 };
 
 // TEXT - Dehacked block name = "Text"
@@ -1329,8 +1329,8 @@ void D_BuildBEXTables(void) {
   deh_musicnames[0] = deh_musicnames[NUMMUSIC] = NULL;
 
   for (i = 1; i < NUMSFX; i++) {
-    if (S_sfx[i].name != NULL) {
-      deh_soundnames[i] = strdup(S_sfx[i].name);
+    if (S_sfx[i].names.data != NULL && S_sfx[i].names.data[0] != NULL) {
+      deh_soundnames[i] = strdup(S_sfx[i].names.data[0]);
     } else {  // This is possible due to how DEHEXTRA has turned S_sfx into a
               // sparse array
       deh_soundnames[i] = NULL;
@@ -2619,15 +2619,17 @@ static void deh_procText(DEHFILE *fpin, FILE *fpout, char *line) {
     // Try sound effects entries - see sounds.c
     for (i = 1; i < NUMSFX; i++) {
       // skip empty dummy entries in S_sfx[]
-      if (!S_sfx[i].name) continue;
+      if (!S_sfx[i].names.data[0]) continue;
       // avoid short prefix erroneous match
-      if (strlen(S_sfx[i].name) != (size_t)fromlen) continue;
-      if (!strnicmp(S_sfx[i].name, inbuffer, fromlen) && !S_sfx_state[i]) {
+      if (strlen(S_sfx[i].names.data[0]) != (size_t)fromlen) continue;
+      if (!strnicmp(S_sfx[i].names.data[0], inbuffer, fromlen) &&
+          !S_sfx_state[i]) {
         if (fpout)
-          fprintf(fpout, "Changing name of sfx from %s to %*s\n", S_sfx[i].name,
-                  usedlen, &inbuffer[fromlen]);
+          fprintf(fpout, "Changing name of sfx from %s to %*s\n",
+                  S_sfx[i].names.data[0], usedlen, &inbuffer[fromlen]);
 
-        S_sfx[i].name = strdup(&inbuffer[fromlen]);
+        free(S_sfx[i].names.data[0]);
+        S_sfx[i].names.data[0] = strdup(&inbuffer[fromlen]);
 
         // e6y: flag the SFX as changed
         S_sfx_state[i] = true;
@@ -2958,7 +2960,8 @@ static void deh_procBexSounds(DEHFILE *fpin, FILE *fpout, char *line) {
           fprintf(fpout, "Substituting '%s' for sound '%s'\n", candidate,
                   deh_soundnames[rover]);
 
-        S_sfx[rover].name = strdup(candidate);
+        free(S_sfx[rover].names.data[0]);
+        S_sfx[rover].names.data[0] = strdup(candidate);
         break;
       }
       rover++;

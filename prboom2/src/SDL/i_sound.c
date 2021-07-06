@@ -58,6 +58,7 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "doomtype.h"
+#include "i_randomsound.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "lprintf.h"
@@ -323,7 +324,11 @@ int I_GetSfxLumpNum(sfxinfo_t *sfx) {
   // Different prefix for PC speaker sound effects.
   prefix = (snd_pcspeaker ? "dp" : "ds");
 
-  sprintf(namebuf, "%s%s", prefix, sfx->name);
+  if (sfx->names.data == NULL) {
+    return -1;
+  }
+  char *name = I_GetRandomSoundName(sfx->names);
+  sprintf(namebuf, "%s%s", prefix, name);
   return W_CheckNumForName(namebuf);  // e6y: make missing sounds non-fatal
 }
 

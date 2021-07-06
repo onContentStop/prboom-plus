@@ -13,4 +13,5 @@
 "{"                     { return LB; }
 "}"                     { return RB; }
 [ \t\r\n\f]+            ;
+"//"[^\n]*              ;
 .                       { return BAD; }
