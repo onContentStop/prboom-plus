@@ -53,7 +53,7 @@ void weaponstats_register_kill(weaponstats_t *stats, mobjtype_t type,
 void weaponstats_register_shot(weaponstats_t *stats) { ++stats->shots; }
 
 void weaponstats_load() {
-  std::cout << "weaponstats_load: Load weapon stats.\n";
+  std::cout << "[\x1b[1mSTS\x1b[0m] weaponstats_load: Load weapon stats.\n";
   weaponstatsfilename << I_DoomExeDir() << "/weaponstats.json";
   std::ifstream weaponstatsfile{weaponstatsfilename.str()};
   if (!weaponstatsfile) {
@@ -141,6 +141,7 @@ static void parse(weaponstats_t *stats, const nlohmann::json &j) {
                   << m.value() << "\n";
         continue;
       }
+      std::cout << m.value() << "\n";
       stats->monsters[mt] = m.value();
     }
   }

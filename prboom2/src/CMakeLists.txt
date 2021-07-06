@@ -5,9 +5,20 @@ function(ApplySDL2NetOptions TARGET)
   endif()
 endfunction()
 
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
+bison_target(SndinfoParser sndinfo.y ${CMAKE_CURRENT_BINARY_DIR}/sndinfo.parse.c
+             DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sndinfo.parse.h)
+flex_target(SndinfoLexer sndinfo.l ${CMAKE_CURRENT_BINARY_DIR}/sndinfo.lex.c
+            DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/sndinfo.lex.h)
+add_flex_bison_dependency(SndinfoLexer SndinfoParser)
+
 # PrBoom main executable
 
 set(COMMON_SRC
+    ${BISON_SndinfoParser_OUTPUTS}
+    ${FLEX_SndinfoLexer_OUTPUTS}
     am_map.c
     am_map.h
     doomdata.h
@@ -375,10 +386,12 @@ endfunction()
 
 addgameexecutable(prboom-plus "${PRBOOM_PLUS_SOURCES}")
 
+target_include_directories(prboom-plus PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+
 target_link_libraries(prboom-plus PRIVATE magic_enum::magic_enum)
 target_link_libraries(prboom-plus PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(prboom-plus PRIVATE vec)
-target_link_libraries(prboom-plus PRIVATE taocpp::pegtl)
+target_link_libraries(prboom-plus PRIVATE ${FLEX_LIBRARIES})
 
 # PrBoom-Plus server executable
 

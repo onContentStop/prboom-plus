@@ -36,6 +36,7 @@
  */
 
 #include "g_weaponstats.h"
+#include "sndinfo.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -2073,6 +2074,10 @@ static void D_DoomMainSetup(void) {
   I_AtExit(weaponstats_cleanup, true);
   weaponstats_load();
   I_AtExit(weaponstats_save, true);
+
+  if (!parse_sndinfo()) {
+    printf("[\x1b[1;32mSND\x1b[0m] Applied SNDINFO patch\n");
+  }
 }
 
 //
