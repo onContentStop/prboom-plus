@@ -526,12 +526,34 @@ typedef enum {
   sfx_cgdth1,
   sfx_cgdth2,
   sfx_cgdth3,
+  sfx_posatk,
+  sfx_sgsit1,
+  sfx_sgsit2,
+  sfx_sgsit3,
+  sfx_sgatk,
+  sfx_sgpain,
+  sfx_sgdth1,
+  sfx_sgdth2,
+  sfx_sgdth3,
+  sfx_sgact,
+  sfx_cgatk,
+  sfx_sspain,
+  sfx_ssact,
+  sfx_ssatk,
+  sfx_spsit,
+  sfx_spatk,
+  sfx_sppain,
+  sfx_spdth,
+  sfx_bgpain,
+  sfx_sklpn,
+  sfx_sklact,
+  sfx_peact,
 
   NUMSFX
 } sfxenum_t;
 
 extern void init_sfx(void);
-extern int SFX_GetIndex(string_t *name);
+extern int SFX_GetIndex(string_t name);
 
 #ifdef __cplusplus
 }

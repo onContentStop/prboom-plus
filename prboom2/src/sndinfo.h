@@ -10,6 +10,7 @@ extern "C" {
 extern int parse_sndinfo(void);
 extern void random_decl(string_t name, string_elem_t *sounds);
 extern void sound_decl(string_t name, string_t value);
+extern void alias_decl(string_t name, string_t value);
 
 #ifdef __cplusplus
 }

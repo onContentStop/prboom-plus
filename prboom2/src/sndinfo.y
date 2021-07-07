@@ -40,7 +40,10 @@ sounds : IDENT sounds { $$ = malloc(sizeof(string_elem_t));
                         $$->next = NULL;
                         $$->value = $1; }
        ;
-alias_decl : ALIAS IDENT IDENT;
+alias_decl : ALIAS IDENT IDENT {
+    alias_decl($2, $3);
+}
+           ;
 sound_decl : IDENT IDENT {
     sound_decl($1, $2);
 }

@@ -1278,7 +1278,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_POSS_RUN1,                             // seestate
         sfx_posit1,                              // seesound
         8,                                       // reactiontime
-        sfx_pistol,                              // attacksound
+        sfx_posatk,                              // attacksound
         S_POSS_PAIN,                             // painstate
         200,                                     // painchance
         sfx_popain,                              // painsound
@@ -1303,23 +1303,23 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_SPOS_STND,                             // spawnstate
         30,                                      // spawnhealth
         S_SPOS_RUN1,                             // seestate
-        sfx_posit2,                              // seesound
+        sfx_sgsit1,                              // seesound
         8,                                       // reactiontime
         0,                                       // attacksound
         S_SPOS_PAIN,                             // painstate
         170,                                     // painchance
-        sfx_popain,                              // painsound
+        sfx_sgpain,                              // painsound
         0,                                       // meleestate
         S_SPOS_ATK1,                             // missilestate
         S_SPOS_DIE1,                             // deathstate
         S_SPOS_XDIE1,                            // xdeathstate
-        sfx_podth2,                              // deathsound
+        sfx_sgdth1,                              // deathsound
         8,                                       // speed
         20 * FRACUNIT,                           // radius
         56 * FRACUNIT,                           // height
         100,                                     // mass
         0,                                       // damage
-        sfx_posact,                              // activesound
+        sfx_sgact,                               // activesound
         MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,  // flags
         S_SPOS_RAISE1                            // raisestate
     },
@@ -1524,7 +1524,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_CPOS_RUN1,                             // seestate
         sfx_cgsit1,                              // seesound
         8,                                       // reactiontime
-        0,                                       // attacksound
+        sfx_None,                                // attacksound
         S_CPOS_PAIN,                             // painstate
         170,                                     // painchance
         sfx_cgpain,                              // painsound
@@ -1554,7 +1554,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,              // attacksound
         S_TROO_PAIN,    // painstate
         200,            // painchance
-        sfx_popain,     // painsound
+        sfx_bgpain,     // painsound
         S_TROO_ATK1,    // meleestate
         S_TROO_ATK1,    // missilestate
         S_TROO_DIE1,    // deathstate
@@ -1604,17 +1604,17 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_SARG_STND,                                         // spawnstate
         150,                                                 // spawnhealth
         S_SARG_RUN1,                                         // seestate
-        sfx_sgtsit,                                          // seesound
+        sfx_spsit,                                           // seesound
         8,                                                   // reactiontime
-        sfx_sgtatk,                                          // attacksound
+        sfx_spatk,                                           // attacksound
         S_SARG_PAIN,                                         // painstate
         180,                                                 // painchance
-        sfx_dmpain,                                          // painsound
+        sfx_sppain,                                          // painsound
         S_SARG_ATK1,                                         // meleestate
         0,                                                   // missilestate
         S_SARG_DIE1,                                         // deathstate
         S_NULL,                                              // xdeathstate
-        sfx_sgtdth,                                          // deathsound
+        sfx_spdth,                                           // deathsound
         10,                                                  // speed
         30 * FRACUNIT,                                       // radius
         56 * FRACUNIT,                                       // height
@@ -1746,18 +1746,18 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         sfx_sklatk,                                         // attacksound
         S_SKULL_PAIN,                                       // painstate
         256,                                                // painchance
-        sfx_dmpain,                                         // painsound
+        sfx_sklpn,                                          // painsound
         0,                                                  // meleestate
         S_SKULL_ATK1,                                       // missilestate
         S_SKULL_DIE1,                                       // deathstate
         S_NULL,                                             // xdeathstate
-        sfx_firxpl,                                         // deathsound
+        sfx_skldth,                                         // deathsound
         8,                                                  // speed
         16 * FRACUNIT,                                      // radius
         56 * FRACUNIT,                                      // height
         50,                                                 // mass
         3,                                                  // damage
-        sfx_dmact,                                          // activesound
+        sfx_sklact,                                         // activesound
         MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY,  // flags
         S_NULL                                              // raisestate
     },
@@ -1865,7 +1865,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         56 * FRACUNIT,  // height
         400,            // mass
         0,              // damage
-        sfx_dmact,      // activesound
+        sfx_peact,      // activesound
         MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY |
             MF_COUNTKILL,  // flags
         S_PAIN_RAISE1      // raisestate
@@ -1882,7 +1882,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                                       // attacksound
         S_SSWV_PAIN,                             // painstate
         170,                                     // painchance
-        sfx_popain,                              // painsound
+        sfx_sspain,                              // painsound
         0,                                       // meleestate
         S_SSWV_ATK1,                             // missilestate
         S_SSWV_DIE1,                             // deathstate
@@ -1893,7 +1893,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         56 * FRACUNIT,                           // height
         100,                                     // mass
         0,                                       // damage
-        sfx_posact,                              // activesound
+        sfx_ssact,                               // activesound
         MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,  // flags
         S_SSWV_RAISE1                            // raisestate
     },

@@ -34,6 +34,7 @@
 
 // killough 5/3/98: reformatted
 
+#include "p_saveg.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -459,6 +460,28 @@ static const char *sfx_names[] = {
     [713] = "podth1",
     [714] = "podth2",
     [715] = "podth3",
+    [716] = "pistol",
+    [717] = "posit1",
+    [718] = "posit2",
+    [719] = "posit3",
+    [720] = "shotgn",
+    [721] = "popain",
+    [722] = "podth1",
+    [723] = "podth2",
+    [724] = "podth3",
+    [725] = "posact",
+    [726] = "shotgn",
+    [727] = "popain",
+    [728] = "posact",
+    [729] = "shotgn",
+    [730] = "sgtsit",
+    [731] = "sgtatk",
+    [732] = "dmpain",
+    [733] = "sgtdth",
+    [734] = "popain",
+    [735] = "popain",
+    [736] = "dmact",
+    [737] = "dmact",
 };
 
 //
@@ -811,9 +834,31 @@ sfxinfo_t S_sfx[] = {
     [713] = {{}, false, 70, 0, -1, -1, 0},
     [714] = {{}, false, 70, 0, -1, -1, 0},
     [715] = {{}, false, 70, 0, -1, -1, 0},
+    [716] = {{}, false, 64, 0, -1, -1, 0},
+    [717] = {{}, true, 98, 0, -1, -1, 0},
+    [718] = {{}, true, 98, 0, -1, -1, 0},
+    [719] = {{}, true, 98, 0, -1, -1, 0},
+    [720] = {{}, false, 64, 0, -1, -1, 0},
+    [721] = {{}, false, 96, 0, -1, -1, 0},
+    [722] = {{}, false, 70, 0, -1, -1, 0},
+    [723] = {{}, false, 70, 0, -1, -1, 0},
+    [724] = {{}, false, 70, 0, -1, -1, 0},
+    [725] = {{}, true, 120, 0, -1, -1, 0},
+    [726] = {{}, false, 64, 0, -1, -1, 0},
+    [727] = {{}, false, 96, 0, -1, -1, 0},
+    [728] = {{}, true, 120, 0, -1, -1, 0},
+    [729] = {{}, false, 64, 0, -1, -1, 0},
+    [730] = {{}, true, 98, 0, -1, -1, 0},
+    [731] = {{}, false, 70, 0, -1, -1, 0},
+    [732] = {{}, false, 96, 0, -1, -1, 0},
+    [733] = {{}, false, 70, 0, -1, -1, 0},
+    [734] = {{}, false, 96, 0, -1, -1, 0},
+    [735] = {{}, false, 96, 0, -1, -1, 0},
+    [736] = {{}, true, 120, 0, -1, -1, 0},
+    [737] = {{}, true, 120, 0, -1, -1, 0},
 };
 
-extern void init_sfx(void) {
+void init_sfx(void) {
   char *name = NULL;
   for (int i = 0; i < sizeof(sfx_names) / sizeof(const char *); ++i) {
     if (!sfx_names[i]) {
@@ -826,34 +871,167 @@ extern void init_sfx(void) {
   }
 }
 
-#define CHECK_SFX_NAME(expected, if_match)         \
-  if (!strncmp(name->text, expected, name->len)) { \
-    return if_match;                               \
+#define CHECK_SFX_NAME(expected, if_match)       \
+  if (!strncmp(name.text, expected, name.len)) { \
+    return if_match;                             \
   }
 
-int SFX_GetIndex(string_t *name) {
-  CHECK_SFX_NAME("weapons/sshotl", sfx_dbload);
-  CHECK_SFX_NAME("weapons/chngun", sfx_chgun);
-  CHECK_SFX_NAME("skeleton/melee", sfx_punch);
-  CHECK_SFX_NAME("skeleton/tracex", sfx_tracex);
-  CHECK_SFX_NAME("chainguy/active", sfx_cgact);
-  CHECK_SFX_NAME("imp/shotx", sfx_firxpl);
-  CHECK_SFX_NAME("demon/active", sfx_dmact);
-  CHECK_SFX_NAME("spectre/active", sfx_spact);
-  CHECK_SFX_NAME("weapons/plasmax", sfx_plsxpl);
-  CHECK_SFX_NAME("vile/raise", sfx_vilres);
-  CHECK_SFX_NAME("vile/stop", sfx_vilstp);
-  CHECK_SFX_NAME("skeleton/pain", sfx_skepn);
-  CHECK_SFX_NAME("fatso/active", sfx_manact);
-  CHECK_SFX_NAME("fatso/attack", sfx_manatk);
-  CHECK_SFX_NAME("fatso/shotx", sfx_mnsxpl);
+int SFX_GetIndex(string_t name) {
+  CHECK_SFX_NAME("grunt/sight1", sfx_posit1);
+  CHECK_SFX_NAME("grunt/sight2", sfx_posit2);
+  CHECK_SFX_NAME("grunt/sight3", sfx_posit3);
+  CHECK_SFX_NAME("grunt/attack", sfx_posatk);
+  CHECK_SFX_NAME("grunt/pain", sfx_popain);
+  CHECK_SFX_NAME("grunt/death1", sfx_podth1);
+  CHECK_SFX_NAME("grunt/death2", sfx_podth2);
+  CHECK_SFX_NAME("grunt/death3", sfx_podth3);
+  CHECK_SFX_NAME("grunt/active", sfx_posact);
+
+  CHECK_SFX_NAME("shotguy/sight1", sfx_sgsit1);
+  CHECK_SFX_NAME("shotguy/sight2", sfx_sgsit2);
+  CHECK_SFX_NAME("shotguy/sight3", sfx_sgsit3);
+  CHECK_SFX_NAME("shotguy/attack", sfx_sgatk);
+  CHECK_SFX_NAME("shotguy/pain", sfx_sgpain);
+  CHECK_SFX_NAME("shotguy/death1", sfx_sgdth1);
+  CHECK_SFX_NAME("shotguy/death2", sfx_sgdth2);
+  CHECK_SFX_NAME("shotguy/death3", sfx_sgdth3);
+  CHECK_SFX_NAME("shotguy/active", sfx_sgact);
+
   CHECK_SFX_NAME("chainguy/sight1", sfx_cgsit1);
   CHECK_SFX_NAME("chainguy/sight2", sfx_cgsit2);
   CHECK_SFX_NAME("chainguy/sight3", sfx_cgsit3);
+  CHECK_SFX_NAME("chainguy/attack", sfx_cgatk);
   CHECK_SFX_NAME("chainguy/pain", sfx_cgpain);
   CHECK_SFX_NAME("chainguy/death1", sfx_cgdth1);
   CHECK_SFX_NAME("chainguy/death2", sfx_cgdth2);
   CHECK_SFX_NAME("chainguy/death3", sfx_cgdth3);
-  sfx_popain;
+  CHECK_SFX_NAME("chainguy/active", sfx_cgact);
+
+  CHECK_SFX_NAME("wolfss/sight", sfx_sssit);
+  CHECK_SFX_NAME("wolfss/pain", sfx_sspain);
+  CHECK_SFX_NAME("wolfss/death", sfx_ssdth);
+  CHECK_SFX_NAME("wolfss/active", sfx_ssact);
+  CHECK_SFX_NAME("wolfss/attack", sfx_ssatk);
+
+  CHECK_SFX_NAME("demon/sight", sfx_sgtsit);
+  CHECK_SFX_NAME("demon/melee", sfx_sgtatk);
+  CHECK_SFX_NAME("demon/pain", sfx_dmpain);
+  CHECK_SFX_NAME("demon/death", sfx_sgtdth);
+  CHECK_SFX_NAME("demon/active", sfx_dmact);
+
+  CHECK_SFX_NAME("spectre/sight", sfx_spsit);
+  CHECK_SFX_NAME("spectre/melee", sfx_spatk);
+  CHECK_SFX_NAME("spectre/pain", sfx_sppain);
+  CHECK_SFX_NAME("spectre/death", sfx_spdth);
+  CHECK_SFX_NAME("spectre/active", sfx_spact);
+
+  CHECK_SFX_NAME("imp/sight1", sfx_bgsit1);
+  CHECK_SFX_NAME("imp/sight2", sfx_bgsit2);
+  CHECK_SFX_NAME("imp/pain", sfx_bgpain);
+  CHECK_SFX_NAME("imp/death1", sfx_bgdth1);
+  CHECK_SFX_NAME("imp/death2", sfx_bgdth2);
+  CHECK_SFX_NAME("imp/active", sfx_bgact);
+  CHECK_SFX_NAME("imp/attack", sfx_claw);
+  CHECK_SFX_NAME("imp/shotx", sfx_firxpl);
+
+  CHECK_SFX_NAME("skull/melee", sfx_sklatk);
+  CHECK_SFX_NAME("skull/pain", sfx_sklpn);
+  CHECK_SFX_NAME("skull/death", sfx_skldth);
+  CHECK_SFX_NAME("skull/active", sfx_sklact);
+
+  CHECK_SFX_NAME("fatso/active", sfx_manact);
+  CHECK_SFX_NAME("fatso/attack", sfx_manatk);
+  CHECK_SFX_NAME("fatso/sight", sfx_mansit);
+  CHECK_SFX_NAME("fatso/pain", sfx_mnpain);
+  CHECK_SFX_NAME("fatso/death", sfx_mandth);
+  CHECK_SFX_NAME("fatso/shotx", sfx_mnsxpl);
+
+  CHECK_SFX_NAME("pain/sight", sfx_pesit);
+  CHECK_SFX_NAME("pain/pain", sfx_pepain);
+  CHECK_SFX_NAME("pain/death", sfx_pedth);
+  CHECK_SFX_NAME("pain/active", sfx_peact);
+
+  CHECK_SFX_NAME("skeleton/melee", sfx_punch);
+  CHECK_SFX_NAME("skeleton/sight", sfx_skesit);
+  CHECK_SFX_NAME("skeleton/pain", sfx_skepn);
+  CHECK_SFX_NAME("skeleton/death", sfx_skedth);
+  CHECK_SFX_NAME("skeleton/active", sfx_skeact);
+  CHECK_SFX_NAME("skeleton/attack", sfx_skeatk);
+  CHECK_SFX_NAME("skeleton/tracex", sfx_tracex);
+
+  CHECK_SFX_NAME("baron/sight", sfx_brssit);
+  CHECK_SFX_NAME("baron/pain", sfx_brspn);
+  CHECK_SFX_NAME("baron/death", sfx_brsdth);
+  CHECK_SFX_NAME("baron/active", sfx_brsact);
+  CHECK_SFX_NAME("baron/attack", sfx_brsatk);
+  CHECK_SFX_NAME("baron/shotx", sfx_brsxpl);
+
+  CHECK_SFX_NAME("knight/sight", sfx_kntsit);
+  CHECK_SFX_NAME("knight/active", sfx_kntact);
+  CHECK_SFX_NAME("knight/pain", sfx_kntpn);
+  CHECK_SFX_NAME("knight/death", sfx_kntdth);
+  CHECK_SFX_NAME("knight/attack", sfx_kntatk);
+  CHECK_SFX_NAME("knight/shotx", sfx_kntxpl);
+
+  CHECK_SFX_NAME("caco/sight", sfx_cacsit);
+  CHECK_SFX_NAME("caco/pain", sfx_cacpn);
+  CHECK_SFX_NAME("caco/death", sfx_cacdth);
+  CHECK_SFX_NAME("caco/active", sfx_cacact);
+  CHECK_SFX_NAME("caco/attack", sfx_cacatk);
+  CHECK_SFX_NAME("caco/shotx", sfx_cacxpl);
+
+  CHECK_SFX_NAME("vile/sight", sfx_vilsit);
+  CHECK_SFX_NAME("vile/pain", sfx_vipain);
+  CHECK_SFX_NAME("vile/death", sfx_vildth);
+  CHECK_SFX_NAME("vile/active", sfx_vilact);
+  CHECK_SFX_NAME("vile/raise", sfx_vilres);
+  CHECK_SFX_NAME("vile/start", sfx_vilatk);
+  CHECK_SFX_NAME("vile/stop", sfx_vilstp);
+  CHECK_SFX_NAME("vile/firestrt", sfx_flamst);
+  CHECK_SFX_NAME("vile/firecrkl", sfx_flame);
+
+  CHECK_SFX_NAME("baby/sight", sfx_bspsit);
+  CHECK_SFX_NAME("baby/pain", sfx_bsppn);
+  CHECK_SFX_NAME("baby/death", sfx_bspdth);
+  CHECK_SFX_NAME("baby/active", sfx_bspact);
+  CHECK_SFX_NAME("baby/attack", sfx_bspatk);
+  CHECK_SFX_NAME("baby/shotx", sfx_bspxpl);
+  CHECK_SFX_NAME("baby/walk", sfx_bspwlk);
+
+  CHECK_SFX_NAME("dog/active", sfx_dgact);
+  CHECK_SFX_NAME("dog/attack", sfx_dgatk);
+  CHECK_SFX_NAME("dog/death", sfx_dgdth);
+  CHECK_SFX_NAME("dog/pain", sfx_dgpain);
+  CHECK_SFX_NAME("dog/sight", sfx_dgsit);
+
+  CHECK_SFX_NAME("brain/pain", sfx_bospn);
+  CHECK_SFX_NAME("brain/death", sfx_bosdth);
+  CHECK_SFX_NAME("brain/spit", sfx_bospit);
+  CHECK_SFX_NAME("brain/cubeboom", sfx_bosxpl);
+  CHECK_SFX_NAME("brain/sight", sfx_bossit);
+  CHECK_SFX_NAME("brain/spawn", sfx_bosspw);
+  CHECK_SFX_NAME("brain/cube", sfx_boscub);
+
+  CHECK_SFX_NAME("cyber/sight", sfx_cybsit);
+  CHECK_SFX_NAME("cyber/pain", sfx_cybpn);
+  CHECK_SFX_NAME("cyber/death", sfx_cybdth);
+  CHECK_SFX_NAME("cyber/active", sfx_cybact);
+  CHECK_SFX_NAME("cyber/attack", sfx_cybatk);
+  CHECK_SFX_NAME("cyber/hoof", sfx_hoof);
+
+  CHECK_SFX_NAME("spider/sight", sfx_spisit);
+  CHECK_SFX_NAME("spider/attack", sfx_spiatk);
+  CHECK_SFX_NAME("spider/pain", sfx_spipn);
+  CHECK_SFX_NAME("spider/active", sfx_spiact);
+  CHECK_SFX_NAME("spider/death", sfx_spidth);
+  CHECK_SFX_NAME("spider/walk", sfx_metal);
+
+  CHECK_SFX_NAME("weapons/sshotl", sfx_dbload);
+  CHECK_SFX_NAME("weapons/chngun", sfx_chgun);
+  CHECK_SFX_NAME("weapons/plasmax", sfx_plsxpl);
+
+  CHECK_SFX_NAME("world/barrelx", sfx_barexp);
+
+  CHECK_SFX_NAME("misc/p_pkup", sfx_getpow);
   return -1;
 }

@@ -1044,6 +1044,12 @@ void A_Look(mobj_t *actor) {
         sound = sfx_posit1 + P_Random(pr_see) % 3;
         break;
 
+      case sfx_sgsit1:
+      case sfx_sgsit2:
+      case sfx_sgsit3:
+        sound = sfx_sgsit1 + P_Random(pr_see) % 3;
+        break;
+
       case sfx_cgsit1:
       case sfx_cgsit2:
       case sfx_cgsit3:
@@ -1232,7 +1238,7 @@ void A_PosAttack(mobj_t *actor) {
   A_FaceTarget(actor);
   angle = actor->angle;
   slope = P_AimLineAttack(actor, angle, MISSILERANGE, 0); /* killough 8/2/98 */
-  S_StartSound(actor, sfx_pistol);
+  S_StartSound(actor, sfx_posatk);
 
   // killough 5/5/98: remove dependence on order of evaluation:
   t = P_Random(pr_posattack);
@@ -1245,7 +1251,7 @@ void A_SPosAttack(mobj_t *actor) {
   int i, bangle, slope;
 
   if (!actor->target) return;
-  S_StartSound(actor, sfx_shotgn);
+  S_StartSound(actor, sfx_sgatk);
   A_FaceTarget(actor);
   bangle = actor->angle;
   slope = P_AimLineAttack(actor, bangle, MISSILERANGE, 0); /* killough 8/2/98 */
@@ -1259,10 +1265,14 @@ void A_SPosAttack(mobj_t *actor) {
 }
 
 void A_CPosAttack(mobj_t *actor) {
-  int angle, bangle, damage, slope, t;
+  int angle;
+  int bangle;
+  int damage;
+  int slope;
+  int t;
 
   if (!actor->target) return;
-  S_StartSound(actor, sfx_shotgn);
+  S_StartSound(actor, actor->info->attacksound);
   A_FaceTarget(actor);
   bangle = actor->angle;
   slope = P_AimLineAttack(actor, bangle, MISSILERANGE, 0); /* killough 8/2/98 */
@@ -1965,6 +1975,12 @@ void A_Scream(mobj_t *actor) {
     case sfx_podth2:
     case sfx_podth3:
       sound = sfx_podth1 + P_Random(pr_scream) % 3;
+      break;
+
+    case sfx_sgdth1:
+    case sfx_sgdth2:
+    case sfx_sgdth3:
+      sound = sfx_sgdth1 + P_Random(pr_scream) % 3;
       break;
 
     case sfx_cgdth1:

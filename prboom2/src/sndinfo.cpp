@@ -36,14 +36,19 @@ int parse_sndinfo() {
     return 1;
   }
   const char* lump = static_cast<const char*>(W_CacheLumpNum(lumpnum));
+  int lumplen = W_LumpLength(lumpnum);
 
   yyscan_t scanner;
   yylex_init(&scanner);
-  auto* buffer = yy_scan_string(lump, scanner);
+  auto* buffer = yy_scan_bytes(lump, lumplen, scanner);
   yy_switch_to_buffer(buffer, scanner);
   int ret = yyparse(scanner);
   yy_delete_buffer(buffer, scanner);
   yylex_destroy(scanner);
+  if (ret != 0) {
+    std::cout << "[\x1b[1;33mWRN\x1b[0m] SNDINFO lump was found, but parsing "
+                 "failed. Here be dragons.\n";
+  }
   return ret;
 }
 
@@ -103,6 +108,20 @@ void sound_decl(string_t name, string_t value) {
       return;
     }
     replace_sound(&S_sfx[index].names.data[0], value);
+    vec_push(&changes, &S_sfx[index]);
+  }
+}
+
+extern void alias_decl(string_t name, string_t value) {
+  symbols.emplace(std::string{name.text, name.text + name.len},
+                  std::string{value.text, value.text + value.len});
+
+  for (int i = 0; i < changes.length; ++i) {
+    for (int j = 0; j < changes.data[i]->names.length; ++j) {
+      if (!strncmp(changes.data[i]->names.data[j], name.text, name.len)) {
+        replace_sound(&changes.data[i]->names.data[j], value);
+      }
+    }
   }
 }
 
@@ -114,4 +133,5 @@ static void replace_sound(char** location, string_t value) {
   }
   *location = static_cast<char*>(malloc(value.len - offset + 1));
   strncpy(*location, value.text + offset, value.len - offset);
+  (*location)[value.len - offset] = '\0';
 }
