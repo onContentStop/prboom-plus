@@ -38,8 +38,8 @@ void weaponstats_init(weaponstats_t *stats) {
 void weaponstats_free(weaponstats_t *stats) { vec_deinit(&stats->distances); }
 
 void weaponstats_cleanup(void) {
-  for (int i = 0; i < NUMWEAPONS; i++) {
-    weaponstats_free(&weaponstats[i]);
+  for (auto &weaponstat : weaponstats) {
+    weaponstats_free(&weaponstat);
   }
 }
 
@@ -122,8 +122,8 @@ static void parse(weaponstats_t *stats, const nlohmann::json &j) {
     stats->shots = j["shots"];
   }
   if (j.find("distances") != j.end() && j["distances"].is_array()) {
-    for (int i = 0; i < j["distances"].size(); ++i) {
-      vec_push(&stats->distances, j["distances"][i]);
+    for (const auto &d : j["distances"]) {
+      vec_push(&stats->distances, d);
     }
   }
   if (j.find("monsters") != j.end() && j["monsters"].is_object()) {
@@ -155,11 +155,11 @@ static nlohmann::json serialize(const weaponstats_t &stats) {
   for (int i = 0; i < stats.distances.length; ++i) {
     j["distances"].push_back(stats.distances.data[i]);
   }
-  j["mobjkills"] = nlohmann::json{};
+  j["monsters"] = nlohmann::json{};
   for (mobjtype_t mt = MT_PLAYER; mt < NUMMOBJTYPES;
        mt = static_cast<mobjtype_t>(static_cast<int>(mt) + 1)) {
     if (stats.monsters[mt] > 0) {
-      j["mobjkills"].emplace(INFO_mobjtype_name(mt), stats.monsters[mt]);
+      j["monsters"].emplace(INFO_mobjtype_name(mt), stats.monsters[mt]);
     }
   }
   return j;
