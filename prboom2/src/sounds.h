@@ -35,7 +35,7 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
-#include "strings.h"
+#include "d_strings.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -548,6 +548,31 @@ typedef enum {
   sfx_sklpn,
   sfx_sklact,
   sfx_peact,
+  sfx_brspn,
+  sfx_brsact,
+  sfx_brsatk,
+  sfx_brssht,
+  sfx_brsxpl,
+  sfx_kntact,
+  sfx_kntpn,
+  sfx_kntatk,
+  sfx_kntsht,
+  sfx_kntxpl,
+  sfx_cacpn,
+  sfx_cacact,
+  sfx_cacatk,
+  sfx_cacxpl,
+  sfx_bsppn,
+  sfx_bspatk,
+  sfx_bspxpl,
+  sfx_bosxpl,
+  sfx_bosspw,
+  sfx_cybpn,
+  sfx_cybact,
+  sfx_cybatk,
+  sfx_spiatk,
+  sfx_spipn,
+  sfx_spiact,
 
   NUMSFX
 } sfxenum_t;

@@ -1,7 +1,7 @@
 #ifndef PRBOOM_PLUS_SNDINFO_H
 #define PRBOOM_PLUS_SNDINFO_H
 
-#include "strings.h"
+#include "d_strings.h"
 
 #ifdef __cplusplus
 extern "C" {

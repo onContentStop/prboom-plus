@@ -482,8 +482,34 @@ static const char *sfx_names[] = {
     [735] = "popain",
     [736] = "dmact",
     [737] = "dmact",
+    [sfx_brspn] = "dmpain",
+    [sfx_brsact] = "dmact",
+    [sfx_brsatk] = "claw",
+    [sfx_brssht] = "firsht",
+    [sfx_brsxpl] = "firxpl",
+    [sfx_kntact] = "dmact",
+    [sfx_kntpn] = "dmpain",
+    [sfx_kntatk] = "claw",
+    [sfx_kntsht] = "firsht",
+    [sfx_kntxpl] = "firxpl",
+    [sfx_cacpn] = "dmpain",
+    [sfx_cacact] = "dmact",
+    [sfx_cacatk] = "firsht",
+    [sfx_cacxpl] = "firxpl",
+    [sfx_bsppn] = "dmpain",
+    [sfx_bspatk] = "plasma",
+    [sfx_bspxpl] = "firxpl",
+    [sfx_bosxpl] = "firxpl",
+    [sfx_bosspw] = "telept",
+    [sfx_cybpn] = "dmpain",
+    [sfx_cybact] = "dmact",
+    [sfx_cybatk] = "rlaunc",
+    [sfx_spiatk] = "shotgn",
+    [sfx_spipn] = "dmpain",
+    [sfx_spiact] = "dmact",
 };
 
+int x = sfx_claw;
 //
 // Information about all the sfx
 //
@@ -856,6 +882,31 @@ sfxinfo_t S_sfx[] = {
     [735] = {{}, false, 96, 0, -1, -1, 0},
     [736] = {{}, true, 120, 0, -1, -1, 0},
     [737] = {{}, true, 120, 0, -1, -1, 0},
+    [sfx_brspn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_brsact] = {{}, true, 120, 0, -1, -1, 0},
+    [sfx_brsatk] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_brssht] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_brsxpl] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_kntact] = {{}, true, 120, 0, -1, -1, 0},
+    [sfx_kntpn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_kntatk] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_kntsht] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_kntxpl] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_cacpn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_cacact] = {{}, true, 120, 0, -1, -1, 0},
+    [sfx_cacatk] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_cacxpl] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_bsppn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_bspatk] = {{}, false, 64, 0, -1, -1, 0},
+    [sfx_bspxpl] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_bosxpl] = {{}, false, 70, 0, -1, -1, 0},
+    [sfx_bosspw] = {{}, false, 32, 0, -1, -1, 0},
+    [sfx_cybpn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_cybact] = {{}, true, 120, 0, -1, -1, 0},
+    [sfx_cybatk] = {{}, false, 64, 0, -1, -1, 0},
+    [sfx_spiatk] = {{}, false, 64, 0, -1, -1, 0},
+    [sfx_spipn] = {{}, false, 96, 0, -1, -1, 0},
+    [sfx_spiact] = {{}, true, 120, 0, -1, -1, 0},
 };
 
 void init_sfx(void) {
@@ -963,14 +1014,16 @@ int SFX_GetIndex(string_t name) {
   CHECK_SFX_NAME("baron/pain", sfx_brspn);
   CHECK_SFX_NAME("baron/death", sfx_brsdth);
   CHECK_SFX_NAME("baron/active", sfx_brsact);
-  CHECK_SFX_NAME("baron/attack", sfx_brsatk);
+  CHECK_SFX_NAME("baron/melee", sfx_brsatk);
+  CHECK_SFX_NAME("baron/attack", sfx_brssht);
   CHECK_SFX_NAME("baron/shotx", sfx_brsxpl);
 
   CHECK_SFX_NAME("knight/sight", sfx_kntsit);
   CHECK_SFX_NAME("knight/active", sfx_kntact);
   CHECK_SFX_NAME("knight/pain", sfx_kntpn);
   CHECK_SFX_NAME("knight/death", sfx_kntdth);
-  CHECK_SFX_NAME("knight/attack", sfx_kntatk);
+  CHECK_SFX_NAME("knight/melee", sfx_kntatk);
+  CHECK_SFX_NAME("knight/attack", sfx_kntsht);
   CHECK_SFX_NAME("knight/shotx", sfx_kntxpl);
 
   CHECK_SFX_NAME("caco/sight", sfx_cacsit);

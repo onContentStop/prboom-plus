@@ -60,7 +60,7 @@ static void warn_unknown_sound(string_t name) {
 void random_decl(string_t name, string_elem_t* sounds) {
   std::cout << "[\x1b[1;34mPAR\x1b[0m] RANDOM DECL: "
             << std::string{name.text, name.text + name.len} << "\n";
-  int index = SFX_GetIndex(&name);
+  int index = SFX_GetIndex(name);
   if (index == -1) {
     warn_unknown_sound(name);
     return;
@@ -102,7 +102,7 @@ void sound_decl(string_t name, string_t value) {
   }
 
   if (!found) {
-    int index = SFX_GetIndex(&name);
+    int index = SFX_GetIndex(name);
     if (index == -1) {
       warn_unknown_sound(name);
       return;
