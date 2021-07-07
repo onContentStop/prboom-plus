@@ -141,7 +141,6 @@ static void parse(weaponstats_t *stats, const nlohmann::json &j) {
                   << m.value() << "\n";
         continue;
       }
-      std::cout << m.value() << "\n";
       stats->monsters[mt] = m.value();
     }
   }
