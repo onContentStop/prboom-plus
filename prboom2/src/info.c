@@ -49,9 +49,6 @@
 #endif
 #include "info.h"
 
-void A_BetaSkullAttack();  // killough 10/98: beta lost souls attacked different
-void A_Stop();
-
 // ********************************************************************
 // Sprite names
 // ********************************************************************
@@ -1135,10 +1132,10 @@ state_t states[NUMSTATES] = {
 
 #define BFGDELAY 1
 #define OLDBFG_1FRAMES(x) \
-  {SPR_BFGG, 1, BFGDELAY, A_FireOldBFG, x + S_OLDBFG1 + 2},
-#define OLDBFG_2FRAMES(x) OLDBFG_1FRAMES(x) OLDBFG_1FRAMES(x + 1)
-#define OLDBFG_4FRAMES(x) OLDBFG_2FRAMES(x) OLDBFG_2FRAMES(x + 2)
-#define OLDBFG_8FRAMES(x) OLDBFG_4FRAMES(x) OLDBFG_4FRAMES(x + 4)
+  {SPR_BFGG, 1, BFGDELAY, A_FireOldBFG, (x) + S_OLDBFG1 + 2},
+#define OLDBFG_2FRAMES(x) OLDBFG_1FRAMES(x) OLDBFG_1FRAMES((x) + 1)
+#define OLDBFG_4FRAMES(x) OLDBFG_2FRAMES(x) OLDBFG_2FRAMES((x) + 2)
+#define OLDBFG_8FRAMES(x) OLDBFG_4FRAMES(x) OLDBFG_4FRAMES((x) + 4)
     {SPR_BFGG, 0, 10, A_BFGsound, S_OLDBFG1 + 1},  // S_OLDBFG1
 
     OLDBFG_8FRAMES(0) OLDBFG_8FRAMES(8) OLDBFG_8FRAMES(16) OLDBFG_8FRAMES(24)
