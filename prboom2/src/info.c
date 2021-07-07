@@ -1524,7 +1524,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_CPOS_RUN1,                             // seestate
         sfx_cgsit1,                              // seesound
         8,                                       // reactiontime
-        sfx_None,                                // attacksound
+        sfx_cgatk,                               // attacksound
         S_CPOS_PAIN,                             // painstate
         170,                                     // painchance
         sfx_cgpain,                              // painsound
@@ -1538,7 +1538,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         56 * FRACUNIT,                           // height
         100,                                     // mass
         0,                                       // damage
-        sfx_posact,                              // activesound
+        sfx_cgact,                               // activesound
         MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,  // flags
         S_CPOS_RAISE1                            // raisestate
     },
@@ -1773,7 +1773,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         sfx_spiatk,                              // attacksound
         S_SPID_PAIN,                             // painstate
         40,                                      // painchance
-        sfx_spipn,                              // painsound
+        sfx_spipn,                               // painsound
         0,                                       // meleestate
         S_SPID_ATK1,                             // missilestate
         S_SPID_DIE1,                             // deathstate
@@ -1784,7 +1784,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         100 * FRACUNIT,                          // height
         1000,                                    // mass
         0,                                       // damage
-        sfx_spiact,                               // activesound
+        sfx_spiact,                              // activesound
         MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,  // flags
         S_NULL                                   // raisestate
     },
