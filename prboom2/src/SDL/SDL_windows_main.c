@@ -12,7 +12,6 @@
 #include "SDL/SDL_windows.h"
 #include <shellapi.h> /* CommandLineToArgvW() */
 
-
 /* Include the SDL main definition header */
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_main.h"

@@ -34,6 +34,8 @@
 #ifndef _GL_INTERN_H
 #define _GL_INTERN_H
 
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_opengl_glext.h>
 #include <GL/gl.h>
 #include <SDL2/SDL_opengl_glext.h>
 
