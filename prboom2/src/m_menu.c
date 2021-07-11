@@ -130,10 +130,11 @@ static int allow_changes(void) {
 static void M_UpdateCurrent(default_t *def) {
   /* cph - requires rewrite of m_misc.c */
   if (def->current) {
-    if (allow_changes()) /* killough 8/15/98 */
+    if (allow_changes()) { /* killough 8/15/98 */
       *def->current = *def->location.pi;
-    else if (*def->current != *def->location.pi)
+    } else if (*def->current != *def->location.pi) {
       warn_about_changes(S_LEVWARN); /* killough 8/15/98 */
+    }
   }
 }
 
@@ -144,7 +145,9 @@ int warning_about_changes, print_warning_about_changes;
 dboolean menu_background = 1;  // do Boom fullscreen menus have backgrounds?
 
 static void M_DrawBackground(const char *flat, int scrn) {
-  if (menu_background) V_DrawBackground(flat, scrn);
+  if (menu_background) {
+    V_DrawBackground(flat, scrn);
+  }
 }
 
 // we are going to be entering a savegame string
@@ -445,8 +448,9 @@ void M_DrawReadThis1(void) {
     // e6y: wide-res
     V_FillBorder(-1, 0);
     V_DrawNamePatch(0, 0, 0, "HELP2", CR_DEFAULT, VPT_STRETCH);
-  } else
+  } else {
     M_DrawCredits();
+  }
 }
 
 //
@@ -456,9 +460,9 @@ void M_DrawReadThis1(void) {
 
 void M_DrawReadThis2(void) {
   inhelpscreens = true;
-  if (gamemode == shareware)
+  if (gamemode == shareware) {
     M_DrawCredits();
-  else {
+  } else {
     // e6y: wide-res
     V_FillBorder(-1, 0);
     V_DrawNamePatch(0, 0, 0, "CREDIT", CR_DEFAULT, VPT_STRETCH);
@@ -514,12 +518,16 @@ void M_AddEpisode(const char *map, const char *gfx, const char *txt,
     EpiCustom = true;
     NewDef.prevMenu = &EpiDef;
 
-    if (gamemode == commercial || gamemission == chex) EpiDef.numitems = 0;
+    if (gamemode == commercial || gamemission == chex) {
+      EpiDef.numitems = 0;
+    }
   }
 
   {
     int epi, mapnum;
-    if (EpiDef.numitems >= 8) return;
+    if (EpiDef.numitems >= 8) {
+      return;
+    }
     G_ValidateMapName(map, &epi, &mapnum);
     EpiMenuEpi[EpiDef.numitems] = epi;
     EpiMenuMap[EpiDef.numitems] = mapnum;
@@ -598,9 +606,13 @@ void M_DrawNewGame(void) {
 
 /* cph - make `New Game' restart the level in a netgame */
 static void M_RestartLevelResponse(int ch) {
-  if (ch != 'y') return;
+  if (ch != 'y') {
+    return;
+  }
 
-  if (demorecording) I_SafeExit(0);
+  if (demorecording) {
+    I_SafeExit(0);
+  }
 
   currentMenu->lastOn = itemOn;
   M_ClearMenus();
@@ -609,10 +621,11 @@ static void M_RestartLevelResponse(int ch) {
 
 void M_NewGame(int choice) {
   if (netgame && !demoplayback) {
-    if (compatibility_level < lxdoom_1_compatibility)
+    if (compatibility_level < lxdoom_1_compatibility) {
       M_StartMessage(s_NEWGAME, NULL, false);  // Ty 03/27/98 - externalized
-    else  // CPhipps - query restarting the level
+    } else {  // CPhipps - query restarting the level
       M_StartMessage(s_RESTARTLEVEL, M_RestartLevelResponse, true);
+    }
     return;
   }
 
@@ -626,9 +639,9 @@ void M_NewGame(int choice) {
 
   // Chex Quest disabled the episode select screen, as did Doom II.
   if (((gamemode == commercial || gamemission == chex) && !EpiCustom) ||
-      EpiDef.numitems == 1)
+      EpiDef.numitems == 1) {
     M_SetupNextMenu(&NewDef);
-  else {
+  } else {
     epiChoice = 0;
     M_SetupNextMenu(&EpiDef);
   }
@@ -636,7 +649,9 @@ void M_NewGame(int choice) {
 
 // CPhipps - static
 static void M_VerifyNightmare(int ch) {
-  if (ch != 'y') return;
+  if (ch != 'y') {
+    return;
+  }
 
   G_DeferedInitNew(nightmare, EpiMenuEpi[epiChoice], EpiMenuMap[epiChoice]);
   M_ClearMenus();
@@ -647,8 +662,9 @@ void M_ChooseSkill(int choice) {
     M_StartMessage(s_NIGHTMARE, M_VerifyNightmare, true);
     return;
   }
-  if (EpiMenuEpi[epiChoice] == -1 || EpiMenuMap[epiChoice] == -1)
+  if (EpiMenuEpi[epiChoice] == -1 || EpiMenuMap[epiChoice] == -1) {
     return;  // There is no map to start here.
+  }
 
   G_DeferedInitNew(choice, EpiMenuEpi[epiChoice], EpiMenuMap[epiChoice]);
   M_ClearMenus();
@@ -722,7 +738,9 @@ void M_DrawLoad(void) {
                 CR_DEFAULT);
   }
 
-  if (delete_verify) M_DrawDelVerify();
+  if (delete_verify) {
+    M_DrawDelVerify();
+  }
 }
 
 //
@@ -762,7 +780,9 @@ void M_LoadSelect(int choice) {
 static char *forced_loadgame_message;
 
 static void M_VerifyForcedLoadGame(int ch) {
-  if (ch == 'y') G_ForcedLoadGame();
+  if (ch == 'y') {
+    G_ForcedLoadGame();
+  }
   free(forced_loadgame_message);  // free the message strdup()'ed below
   M_ClearMenus();
 }
@@ -862,7 +882,9 @@ void M_DrawSave(void) {
                 CR_DEFAULT);
   }
 
-  if (delete_verify) M_DrawDelVerify();
+  if (delete_verify) {
+    M_DrawDelVerify();
+  }
 }
 
 //
@@ -873,7 +895,9 @@ static void M_DoSave(int slot) {
   M_ClearMenus();
 
   // PICK QUICKSAVE SLOT YET?
-  if (quickSaveSlot == -2) quickSaveSlot = slot;
+  if (quickSaveSlot == -2) {
+    quickSaveSlot = slot;
+  }
 }
 
 // [FG] generate a default save slot name if the user saves to an empty slot
@@ -887,11 +911,16 @@ static void SetDefaultSaveName(int slot) {
     char *ext = strrchr(wadname, '.');
     char *basename = wadname + strlen(wadname) - 1;
 
-    if (ext != NULL) *ext = '\0';
+    if (ext != NULL) {
+      *ext = '\0';
+    }
 
-    while (basename > wadname && *basename != '/' && *basename != '\\')
+    while (basename > wadname && *basename != '/' && *basename != '\\') {
       basename--;
-    if (*basename == '/' || *basename == '\\') basename++;
+    }
+    if (*basename == '/' || *basename == '\\') {
+      basename++;
+    }
 
     snprintf(savegamestrings[itemOn], SAVESTRINGSIZE, "%s (%s)",
              lumpinfo[maplumpnum].name, basename);
@@ -948,7 +977,9 @@ void M_SaveGame(int choice) {
     return;
   }
 
-  if (gamestate != GS_LEVEL) return;
+  if (gamestate != GS_LEVEL) {
+    return;
+  }
 
   M_SetupNextMenu(&SaveDef);
   M_ReadSaveStrings();
@@ -1033,7 +1064,9 @@ int quitsounds2[8] = {sfx_vilact, sfx_getpow, sfx_boscub, sfx_slop,
                       sfx_skeswg, sfx_kntdth, sfx_bspact, sfx_sgtatk};
 
 static void M_QuitResponse(int ch) {
-  if (ch != 'y') return;
+  if (ch != 'y') {
+    return;
+  }
 
   // e6y: Optional removal of a quit sound
   if ((!netgame && showendoom)    // killough 12/98
@@ -1041,16 +1074,19 @@ static void M_QuitResponse(int ch) {
   {
     int i;
 
-    if (gamemode == commercial)
+    if (gamemode == commercial) {
       S_StartSound(NULL, quitsounds2[(gametic >> 2) & 7]);
-    else
+    } else {
       S_StartSound(NULL, quitsounds[(gametic >> 2) & 7]);
+    }
 
     // wait till all sounds stopped or 3 seconds are over
     i = 30;
     while (i > 0) {
       I_uSleep(100000);  // CPhipps - don't thrash cpu in this loop
-      if (!I_AnySoundStillPlaying()) break;
+      if (!I_AnySoundStillPlaying()) {
+        break;
+      }
       i--;
     }
   }
@@ -1064,11 +1100,12 @@ void M_QuitDOOM(int choice) {
   // We pick index 0 which is language sensitive,
   // or one at random, between 1 and maximum number.
   // Ty 03/27/98 - externalized DOSY as a string s_DOSY that's in the sprintf
-  if (language != english)
+  if (language != english) {
     sprintf(endstring, "%s\n\n%s", s_DOSY, endmsg[0]);
-  else  // killough 1/18/98: fix endgame message calculation:
+  } else {  // killough 1/18/98: fix endgame message calculation:
     sprintf(endstring, "%s\n\n%s", endmsg[gametic % (NUM_QUITMESSAGES - 1) + 1],
             s_DOSY);
+  }
 
   M_StartMessage(endstring, M_QuitResponse, true);
 }
@@ -1112,10 +1149,14 @@ void M_Sound(int choice) { M_SetupNextMenu(&SoundDef); }
 void M_SfxVol(int choice) {
   switch (choice) {
     case 0:
-      if (snd_SfxVolume) snd_SfxVolume--;
+      if (snd_SfxVolume) {
+        snd_SfxVolume--;
+      }
       break;
     case 1:
-      if (snd_SfxVolume < 15) snd_SfxVolume++;
+      if (snd_SfxVolume < 15) {
+        snd_SfxVolume++;
+      }
       break;
   }
 
@@ -1125,10 +1166,14 @@ void M_SfxVol(int choice) {
 void M_MusicVol(int choice) {
   switch (choice) {
     case 0:
-      if (snd_MusicVolume) snd_MusicVolume--;
+      if (snd_MusicVolume) {
+        snd_MusicVolume--;
+      }
       break;
     case 1:
-      if (snd_MusicVolume < 15) snd_MusicVolume++;
+      if (snd_MusicVolume < 15) {
+        snd_MusicVolume++;
+      }
       break;
   }
 
@@ -1234,10 +1279,14 @@ void M_MouseVert(int choice) { M_Mouse(choice, &mouseSensitivity_vert); }
 void M_Mouse(int choice, int *sens) {
   switch (choice) {
     case 0:
-      if (*sens) --*sens;
+      if (*sens) {
+        --*sens;
+      }
       break;
     case 1:
-      if (*sens < 99) ++*sens; /*mead*/
+      if (*sens < 99) {
+        ++*sens; /*mead*/
+      }
       break;
   }
 }
@@ -1262,7 +1311,9 @@ void M_QuickSave(void) {
     return;
   }
 
-  if (gamestate != GS_LEVEL) return;
+  if (gamestate != GS_LEVEL) {
+    return;
+  }
 
   if (quickSaveSlot < 0) {
     M_StartControlPanel();
@@ -1322,10 +1373,14 @@ void M_QuickLoad(void) {
 //
 
 static void M_EndGameResponse(int ch) {
-  if (ch != 'y') return;
+  if (ch != 'y') {
+    return;
+  }
 
   // killough 5/26/98: make endgame quit if recording or playing back demo
-  if (demorecording || singledemo) G_CheckDemoStatus();
+  if (demorecording || singledemo) {
+    G_CheckDemoStatus();
+  }
 
   currentMenu->lastOn = itemOn;
   M_ClearMenus();
@@ -1351,10 +1406,11 @@ void M_ChangeMessages(int choice) {
   choice = 0;
   showMessages = 1 - showMessages;
 
-  if (!showMessages)
+  if (!showMessages) {
     doom_printf("%s", s_MSGOFF);  // Ty 03/27/98 - externalized
-  else
+  } else {
     doom_printf("%s", s_MSGON);  // Ty 03/27/98 - externalized
+  }
 
   message_dontfuckwithme = true;
 }
@@ -1381,8 +1437,9 @@ void M_SizeDisplay(int choice) {
       if (screenSize < 8) {
         screenblocks++;
         screenSize++;
-      } else
+      } else {
         hud_displayed = !hud_displayed;
+      }
       break;
   }
   R_SetViewSize(screenblocks /*, detailLevel obsolete -- killough */);
@@ -1450,7 +1507,9 @@ static int M_GetSetupMenuItemOn(void) {
   const setup_menu_t *menu = current_setup_menu;
 
   if (menu) {
-    while (!(menu->m_flags & S_END)) menu++;
+    while (!(menu->m_flags & S_END)) {
+      menu++;
+    }
 
     return menu->m_x;
   }
@@ -1462,7 +1521,9 @@ static void M_SetSetupMenuItemOn(const int x) {
   setup_menu_t *menu = current_setup_menu;
 
   if (menu) {
-    while (!(menu->m_flags & S_END)) menu++;
+    while (!(menu->m_flags & S_END)) {
+      menu++;
+    }
 
     menu->m_x = x;
   }
@@ -1713,8 +1774,7 @@ static void M_DrawItem(const setup_menu_t *s) {
   int x = s->m_x;
   int y = s->m_y;
   int flags = s->m_flags;
-  if (flags & S_RESET)
-
+  if (flags & S_RESET) {
     // This item is the reset button
     // Draw the 'off' version if this isn't the current menu item
     // Draw the blinking version in tune with the blinking skull otherwise
@@ -1727,7 +1787,7 @@ static void M_DrawItem(const setup_menu_t *s) {
         ResetButtonName[(flags & (S_HILITE | S_SELECT)) ? whichSkull : 0],
         CR_DEFAULT, VPT_STRETCH);
 
-  else {  // Draw the item string
+  } else {  // Draw the item string
     char *p, *t;
     int w = 0;
     int color = flags & S_DISABLE ? CR_DISABLE :  // e6y
@@ -1745,11 +1805,14 @@ static void M_DrawItem(const setup_menu_t *s) {
     for (p = t = strdup(s->m_text); (p = strtok(p, "\n"));
          y += 8, p = NULL) { /* killough 10/98: support left-justification: */
       strcpy(menu_buffer, p);
-      if (!(flags & S_LEFTJUST)) w = M_GetPixelWidth(menu_buffer) + 4;
+      if (!(flags & S_LEFTJUST)) {
+        w = M_GetPixelWidth(menu_buffer) + 4;
+      }
       M_DrawMenuString(x - w, y, color);
       // print a blinking "arrow" next to the currently highlighted menu item
-      if (s == current_setup_menu + set_menu_itemon && whichSkull)
+      if (s == current_setup_menu + set_menu_itemon && whichSkull) {
         M_DrawString(x - w - 8, y, color, ">");
+      }
     }
     free(t);
   }
@@ -1791,8 +1854,9 @@ static void M_DrawSetting(const setup_menu_t *s) {
   if (flags & S_YESNO) {
     strcpy(menu_buffer, *s->var.def->location.pi ? "YES" : "NO");
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       strcat(menu_buffer, " <");
+    }
     M_DrawMenuString(x, y, color);
     return;
   }
@@ -1804,11 +1868,13 @@ static void M_DrawSetting(const setup_menu_t *s) {
     if (flags & (S_HILITE | S_SELECT) && setup_gather) {
       gather_buffer[gather_count] = 0;
       strcpy(menu_buffer, gather_buffer);
-    } else
+    } else {
       sprintf(menu_buffer, "%d", *s->var.def->location.pi);
+    }
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       strcat(menu_buffer, " <");
+    }
     M_DrawMenuString(x, y, color);
     return;
   }
@@ -1823,14 +1889,17 @@ static void M_DrawSetting(const setup_menu_t *s) {
     if (key) {
       M_GetKeyString(*key, 0);  // string to display
 
-      if (s->m_mouse && *s->m_mouse != -1)
+      if (s->m_mouse && *s->m_mouse != -1) {
         sprintf(menu_buffer + strlen(menu_buffer), "/MB%d", *s->m_mouse + 1);
-      if (s->m_joy)
+      }
+      if (s->m_joy) {
         sprintf(menu_buffer + strlen(menu_buffer), "/JSB%d", *s->m_joy + 1);
+      }
 
       if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-          !setup_select)
+          !setup_select) {
         strcat(menu_buffer, " <");
+      }
       M_DrawMenuString(x, y, color);
     }
     return;
@@ -1849,8 +1918,9 @@ static void M_DrawSetting(const setup_menu_t *s) {
   {
     sprintf(menu_buffer, "%d", *s->var.def->location.pi);
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       M_DrawString(x + 8, y, color, " <");
+    }
     M_DrawMenuString(x, y, flags & S_CRITEM ? *s->var.def->location.pi : color);
     return;
   }
@@ -1873,11 +1943,13 @@ static void M_DrawSetting(const setup_menu_t *s) {
       V_FillRect(0, xx, yy, ww, hh, (byte)ch);
     }
 
-    if (!ch)  // don't show this item in automap mode
+    if (!ch) {  // don't show this item in automap mode
       V_DrawNamePatch(x + 1, y, 0, "M_PALNO", CR_DEFAULT, VPT_STRETCH);
+    }
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       M_DrawString(x + 8, y, color, " <");
+    }
     return;
   }
 
@@ -1909,7 +1981,9 @@ static void M_DrawSetting(const setup_menu_t *s) {
       while (M_GetPixelWidth(text) >= MAXCHATWIDTH) {
         int len = strlen(text);
         text[--len] = 0;
-        if (chat_index > len) chat_index--;
+        if (chat_index > len) {
+          chat_index--;
+        }
       }
 
       // Find the distance from the beginning of the string to
@@ -1919,8 +1993,10 @@ static void M_DrawSetting(const setup_menu_t *s) {
       *c = text[chat_index];  // hold temporarily
       c[1] = 0;
       char_width = M_GetPixelWidth(c);
-      if (char_width == 1) char_width = 7;  // default for end of line
-      text[chat_index] = 0;                 // NULL to get cursor position
+      if (char_width == 1) {
+        char_width = 7;  // default for end of line
+      }
+      text[chat_index] = 0;  // NULL to get cursor position
       cursor_start = M_GetPixelWidth(text);
       text[chat_index] = *c;  // replace stored char
 
@@ -1938,8 +2014,9 @@ static void M_DrawSetting(const setup_menu_t *s) {
 
     strcpy(menu_buffer, text);
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       strcat(menu_buffer, " <");
+    }
     M_DrawMenuString(x, y, color);
     return;
   }
@@ -1960,8 +2037,9 @@ static void M_DrawSetting(const setup_menu_t *s) {
     }
 
     if (s == current_setup_menu + set_menu_itemon && whichSkull &&
-        !setup_select)
+        !setup_select) {
       strcat(menu_buffer, " <");
+    }
     M_DrawMenuString(x, y, color);
     return;
   }
@@ -2002,11 +2080,15 @@ static void M_DrawScreenItems(const setup_menu_t *src) {
   while (!(src->m_flags & S_END)) {
     // See if we're to draw the item description (left-hand part)
 
-    if (src->m_flags & S_SHOWDESC) M_DrawItem(src);
+    if (src->m_flags & S_SHOWDESC) {
+      M_DrawItem(src);
+    }
 
     // See if we're to draw the setting (right-hand part)
 
-    if (src->m_flags & S_SHOWSET) M_DrawSetting(src);
+    if (src->m_flags & S_SHOWSET) {
+      M_DrawSetting(src);
+    }
     src++;
   }
 }
@@ -2068,11 +2150,12 @@ static void M_DrawInstructions(void) {
         // See if a joystick or mouse button setting is allowed for
         // this item.
         if (current_setup_menu[set_menu_itemon].m_mouse ||
-            current_setup_menu[set_menu_itemon].m_joy)
+            current_setup_menu[set_menu_itemon].m_joy) {
           M_DrawStringCentered(160, 20, CR_SELECT,
                                "Press key or button for this action");
-        else
+        } else {
           M_DrawStringCentered(160, 20, CR_SELECT, "Press key for this action");
+        }
         break;
 
       case S_YESNO:
@@ -2112,14 +2195,15 @@ static void M_DrawInstructions(void) {
 #endif
     }
   } else {
-    if (flags & S_RESET)
+    if (flags & S_RESET) {
       M_DrawStringCentered(160, 20, CR_HILITE,
                            "Press ENTER key to reset to defaults");
-    else if (flags & S_KEY)
+    } else if (flags & S_KEY) {
       M_DrawStringCentered(160, 20, CR_HILITE,
                            "Press Enter to Change, Del to Clear");
-    else
+    } else {
       M_DrawStringCentered(160, 20, CR_HILITE, "Press Enter to Change");
+    }
   }
 }
 
@@ -2540,8 +2624,9 @@ void M_KeyBindings(int choice) {
   mult_screens_index = 0;
   current_setup_menu = keys_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -2563,7 +2648,9 @@ void M_DrawKeybnd(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -2706,8 +2793,9 @@ void M_Weapons(int choice) {
   mult_screens_index = 0;
   current_setup_menu = weap_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -2727,7 +2815,9 @@ void M_DrawWeapons(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 #define PP_X 203
@@ -2947,8 +3037,9 @@ void M_StatusBar(int choice) {
   mult_screens_index = 0;
   current_setup_menu = stat_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -2968,7 +3059,9 @@ void M_DrawStatusHUD(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -3264,8 +3357,9 @@ void M_Automap(int choice) {
   mult_screens_index = 0;
   current_setup_menu = auto_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -3318,13 +3412,15 @@ void M_DrawAutoMap(void) {
 
   // If a color is being selected, need to show color paint chips
 
-  if (colorbox_active) M_DrawColPal();
+  if (colorbox_active) {
+    M_DrawColPal();
 
-  // If the Reset Button has been selected, an "Are you sure?" message
-  // is overlayed across everything else.
+    // If the Reset Button has been selected, an "Are you sure?" message
+    // is overlayed across everything else.
 
-  else if (default_verify)
+  } else if (default_verify) {
     M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -3471,8 +3567,9 @@ void M_Enemy(int choice) {
   mult_screens_index = 0;
   current_setup_menu = enem_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -3492,7 +3589,9 @@ void M_DrawEnemy(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -4470,7 +4569,9 @@ void M_Trans(void)  // To reset translucency after setting it in menu
       default_translucency;  // e6y: Fix for "translucency won't change until
                              // you restart the engine"
 
-  if (general_translucency) R_InitTranMap(0);
+  if (general_translucency) {
+    R_InitTranMap(0);
+  }
 }
 
 // To (un)set fullscreen video after menu changes
@@ -4507,8 +4608,9 @@ void M_General(int choice) {
   mult_screens_index = 0;
   current_setup_menu = gen_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -4528,7 +4630,9 @@ void M_DrawGeneral(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -4843,8 +4947,9 @@ void M_Compat(int choice) {
   mult_screens_index = 0;
   current_setup_menu = comp_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -4863,7 +4968,9 @@ void M_DrawCompat(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -4974,8 +5081,9 @@ void M_Messages(int choice) {
   mult_screens_index = 0;
   current_setup_menu = mess_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -4991,7 +5099,9 @@ void M_DrawMessages(void) {
   M_DrawTitle(103, 2, "M_MESS", CR_DEFAULT, "MESSAGES", CR_GOLD);
   M_DrawInstructions();
   M_DrawScreenItems(current_setup_menu);
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -5040,8 +5150,9 @@ void M_ChatStrings(int choice) {
   mult_screens_index = 0;
   current_setup_menu = chat_settings[0];
   set_menu_itemon = M_GetSetupMenuItemOn();
-  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
     ;
+  }
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
@@ -5077,7 +5188,9 @@ void M_DrawChatStrings(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 void M_DrawPlusPlus(void) {
@@ -5086,7 +5199,9 @@ void M_DrawPlusPlus(void) {
   M_DrawTitle(83, 2, "M_PLPL", CR_DEFAULT, "SETTINGS++", CR_GOLD);
   M_DrawInstructions();
   M_DrawScreenItems(current_setup_menu);
-  if (default_verify) M_DrawDefVerify();
+  if (default_verify) {
+    M_DrawDefVerify();
+  }
 }
 
 /////////////////////////////
@@ -5106,8 +5221,9 @@ static void M_SelectDone(setup_menu_t *ptr) {
   S_StartSound(NULL, sfx_itemup);
   setup_select = false;
   colorbox_active = false;
-  if (print_warning_about_changes)  // killough 8/15/98
+  if (print_warning_about_changes) {  // killough 8/15/98
     print_warning_about_changes--;
+  }
 }
 
 // phares 4/21/98:
@@ -5147,8 +5263,8 @@ static void M_ResetDefaults(void) {
 
     if (dp->setupscreen == setup_screen) {
       setup_menu_t **l, *p;
-      for (l = setup_screens[setup_screen - 1]; *l; l++)
-        for (p = *l; !(p->m_flags & S_END); p++)
+      for (l = setup_screens[setup_screen - 1]; *l; l++) {
+        for (p = *l; !(p->m_flags & S_END); p++) {
           if (p->m_flags & S_HASDEFPTR ? p->var.def == dp
                                        : p->var.m_key == dp->location.pi ||
                                              p->m_mouse == dp->location.pi ||
@@ -5162,8 +5278,9 @@ static void M_ResetDefaults(void) {
               u.c = dp->location.ppsz;
               free(*(u.s));
               *(u.c) = strdup(dp->defaultvalue.psz);
-            } else
+            } else {
               *dp->location.pi = dp->defaultvalue.i;
+            }
 
 #if 0
     if (p->m_flags & (S_LEVWARN | S_PRGWARN))
@@ -5175,15 +5292,21 @@ static void M_ResetDefaults(void) {
         else
           warn |= S_LEVWARN;
 #endif
-            if (p->action) p->action();
+            if (p->action) {
+              p->action();
+            }
 
             goto end;
           }
+        }
+      }
     end:;
     }
   }
 
-  if (warn) warn_about_changes(warn);
+  if (warn) {
+    warn_about_changes(warn);
+  }
 }
 
 //
@@ -5204,11 +5327,12 @@ static void M_InitDefaults(void) {
     for (p = setup_screens[i]; *p; p++) {
       for (t = *p; !(t->m_flags & S_END); t++) {
         if (t->m_flags & S_HASDEFPTR) {
-          if (!(dp = M_LookupDefault(t->var.name)))
+          if (!(dp = M_LookupDefault(t->var.name))) {
             I_Error("M_InitDefaults: Couldn't find config variable %s",
                     t->var.name);
-          else
+          } else {
             (t->var.def = dp)->setup_menu = t;
+          }
         }
       }
     }
@@ -5356,12 +5480,13 @@ int M_GetKeyString(int c, int offset) {
     // still mean their shifted versions. Could be changed later
     // if someone can come up with a better way to deal with them.
 
-    if (c == '=')  // probably means the '+' key?
+    if (c == '=') {  // probably means the '+' key?
       c = '+';
-    else if (c == ',')  // probably means the '<' key?
+    } else if (c == ',') {  // probably means the '<' key?
       c = '<';
-    else if (c == '.')  // probably means the '>' key?
+    } else if (c == '.') {  // probably means the '>' key?
       c = '>';
+    }
     menu_buffer[offset++] = c;  // Just insert the ascii key
     menu_buffer[offset] = 0;
 
@@ -5371,9 +5496,9 @@ int M_GetKeyString(int c, int offset) {
     // cph - Keypad keys, general code reorganisation to
     //  make this smaller and neater.
     if ((0x100 <= c) && (c < 0x200)) {
-      if (c == KEYD_KEYPADENTER)
+      if (c == KEYD_KEYPADENTER) {
         s = "PADE";
-      else {
+      } else {
         strcpy(&menu_buffer[offset], "PAD");
         offset += 4;
         menu_buffer[offset - 1] = c & 0xff;
@@ -5782,7 +5907,9 @@ static void M_DrawString(int cx, int cy, int color, const char *ch) {
       continue;
     }
     w = hu_font[c].width;
-    if (cx + w > 320) break;
+    if (cx + w > 320) {
+      break;
+    }
 
     // V_DrawpatchTranslated() will draw the string in the
     // desired color, colrngs[color]
@@ -5919,7 +6046,9 @@ static int M_IndexInChoices(const char *str, const char **choices) {
   int i = 0;
 
   while (*choices != NULL) {
-    if (!strcmp(str, *choices)) return i;
+    if (!strcmp(str, *choices)) {
+      return i;
+    }
     i++;
     choices++;
   }
@@ -6017,26 +6146,32 @@ dboolean M_Responder(event_t *ev) {
       // Handle mouse button 3, and allow it to pass down
       // to where key binding can eat it.
 
-      if (setup_active && set_keybnd_active)
+      if (setup_active && set_keybnd_active) {
         if (ev->data1 >> 2) {
           ch = 0;  // meaningless, just to get you past the check for -1
           mousewait = I_GetTime() + 15;
         }
+      }
     } else
 
         // Process keyboard input
 
         if (ev->type == ev_keydown) {
-      ch = ev->data1;                // phares 4/11/98:
-      if (ch == KEYD_RSHIFT)         // For chat string processing, need
-        shiftdown = true;            // to know when shift key is up or
-    }                                // down so you can get at the !,#,
-    else if (ev->type == ev_keyup)   // etc. keys. Keydowns are allowed
-      if (ev->data1 == KEYD_RSHIFT)  // past this point, but keyups aren't
-        shiftdown = false;           // so we need to note the difference
-  }                                  // here using the 'shiftdown' dboolean.
+      ch = ev->data1;           // phares 4/11/98:
+      if (ch == KEYD_RSHIFT) {  // For chat string processing, need
+        shiftdown = true;       // to know when shift key is up or
+      }
+    }                                  // down so you can get at the !,#,
+    else if (ev->type == ev_keyup) {   // etc. keys. Keydowns are allowed
+      if (ev->data1 == KEYD_RSHIFT) {  // past this point, but keyups aren't
+        shiftdown = false;             // so we need to note the difference
+      }
+    }
+  }  // here using the 'shiftdown' dboolean.
 
-  if (ch == -1) return false;  // we can't use the event here
+  if (ch == -1) {
+    return false;  // we can't use the event here
+  }
 
   // Save Game string input
 
@@ -6058,7 +6193,9 @@ dboolean M_Responder(event_t *ev) {
     else if (ch == key_menu_enter)  // phares 3/7/98
     {
       saveStringEnter = 0;
-      if (savegamestrings[saveSlot][0]) M_DoSave(saveSlot);
+      if (savegamestrings[saveSlot][0]) {
+        M_DoSave(saveSlot);
+      }
     }
 
     else {
@@ -6076,12 +6213,15 @@ dboolean M_Responder(event_t *ev) {
 
   if (messageToPrint) {
     if (messageNeedsInput == true &&
-        !(ch == ' ' || ch == 'n' || ch == 'y' || ch == key_escape))  // phares
+        !(ch == ' ' || ch == 'n' || ch == 'y' || ch == key_escape)) {  // phares
       return false;
+    }
 
     menuactive = messageLastMenuActive;
     messageToPrint = 0;
-    if (messageRoutine) messageRoutine(ch);
+    if (messageRoutine) {
+      messageRoutine(ch);
+    }
 
     menuactive = mnact_inactive;
     S_StartSound(NULL, sfx_swtchx);
@@ -6181,7 +6321,9 @@ dboolean M_Responder(event_t *ev) {
       if (V_GetMode() == VID_MODEGL && gl_hardware_gamma) {
         static char str[200];
         useglgamma++;
-        if (useglgamma > MAX_GLGAMMA) useglgamma = 0;
+        if (useglgamma > MAX_GLGAMMA) {
+          useglgamma = 0;
+        }
         sprintf(str, "Gamma correction level %d", useglgamma);
         doom_printf("%s", str);
 
@@ -6190,7 +6332,9 @@ dboolean M_Responder(event_t *ev) {
 #endif
       {
         usegamma++;
-        if (usegamma > 4) usegamma = 0;
+        if (usegamma > 4) {
+          usegamma = 0;
+        }
         doom_printf("%s", usegamma == 0   ? s_GAMMALVL0
                           : usegamma == 1 ? s_GAMMALVL1
                           : usegamma == 2 ? s_GAMMALVL2
@@ -6203,19 +6347,22 @@ dboolean M_Responder(event_t *ev) {
 
     if (ch == key_zoomout)  // zoom out
     {
-      if ((automapmode & am_active) || chat_on) return false;
+      if ((automapmode & am_active) || chat_on) {
+        return false;
+      }
       M_SizeDisplay(0);
       S_StartSound(NULL, sfx_stnmov);
       return true;
     }
 
-    if (ch == key_zoomin)                        // zoom in
-    {                                            // jff 2/23/98
-      if ((automapmode & am_active) || chat_on)  // allow
-        return false;                            // key_hud==key_zoomin
-      M_SizeDisplay(1);                          //  ^
-      S_StartSound(NULL, sfx_stnmov);            //  |
-      return true;                               // phares
+    if (ch == key_zoomin)                          // zoom in
+    {                                              // jff 2/23/98
+      if ((automapmode & am_active) || chat_on) {  // allow
+        return false;                              // key_hud==key_zoomin
+      }
+      M_SizeDisplay(1);                //  ^
+      S_StartSound(NULL, sfx_stnmov);  //  |
+      return true;                     // phares
     }
 
     // e6y
@@ -6246,12 +6393,16 @@ dboolean M_Responder(event_t *ev) {
         G_SkipDemoStart();
         return true;
       } else {
-        if (G_GotoNextLevel(NULL, NULL)) return true;
+        if (G_GotoNextLevel(NULL, NULL)) {
+          return true;
+        }
       }
     }
 
     if (ch == key_level_restart) {
-      if (G_ReloadLevel()) return true;
+      if (G_ReloadLevel()) {
+        return true;
+      }
     }
 
     if (ch == key_demo_endlevel) {
@@ -6278,7 +6429,9 @@ dboolean M_Responder(event_t *ev) {
         walkcamera.type = (walkcamera.type + 1) % 3;
         P_SyncWalkcam(true, (walkcamera.type != 2));
         R_ResetViewInterpolation();
-        if (walkcamera.type == 0) R_SmoothPlaying_Reset(NULL);
+        if (walkcamera.type == 0) {
+          R_SmoothPlaying_Reset(NULL);
+        }
         // Don't eat the keypress in this case.
         // return true;
       }
@@ -6315,12 +6468,14 @@ dboolean M_Responder(event_t *ev) {
 
     if (ch == key_hud)  // heads-up mode
     {
-      if ((automapmode & am_active) || chat_on)   // jff 2/22/98
-        return false;                             // HUD mode control
-      if (screenSize < 8)                         // function on default F5
-        while (screenSize < 8 || !hud_displayed)  // make hud visible
-          M_SizeDisplay(1);                       // when configuring it
-      else {
+      if ((automapmode & am_active) || chat_on) {  // jff 2/22/98
+        return false;                              // HUD mode control
+      }
+      if (screenSize < 8) {                         // function on default F5
+        while (screenSize < 8 || !hud_displayed) {  // make hud visible
+          M_SizeDisplay(1);                         // when configuring it
+        }
+      } else {
         hud_displayed = 1;  // jff 3/3/98 turn hud on
         HU_NextHud();
         HU_MoveHud(true);  // jff 3/9/98 move it now to avoid glitch
@@ -6410,22 +6565,25 @@ dboolean M_Responder(event_t *ev) {
 
           // killough 8/15/98: add warning messages
 
-          if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN))
+          if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN)) {
             warn_about_changes(ptr1->m_flags &  // killough 10/98
                                (S_LEVWARN | S_PRGWARN));
-          else
+          } else {
             M_UpdateCurrent(ptr1->var.def);
+          }
 
-          if (ptr1->action)  // killough 10/98
+          if (ptr1->action) {  // killough 10/98
             ptr1->action();
+          }
 
-            // e6y
+          // e6y
 #ifdef GL_DOOM
           {
             extern dboolean gl_arb_multitexture;
             if ((ptr1->m_flags & S_CANT_GL_ARB_MULTITEXTURE) &&
-                !gl_arb_multitexture)
+                !gl_arb_multitexture) {
               warn_about_changes(ptr1->m_flags & S_CANT_GL_ARB_MULTITEXTURE);
+            }
           }
 #endif
         }
@@ -6435,12 +6593,15 @@ dboolean M_Responder(event_t *ev) {
 
       if (ptr1->m_flags & S_CRITEM) {
         if (ch != key_menu_enter) {
-          ch -= 0x30;                         // out of ascii
-          if (ch < 0 || ch > 9) return true;  // ignore
+          ch -= 0x30;  // out of ascii
+          if (ch < 0 || ch > 9) {
+            return true;  // ignore
+          }
           *ptr1->var.def->location.pi = ch;
         }
-        if (ptr1->action)  // killough 10/98
+        if (ptr1->action) {  // killough 10/98
           ptr1->action();
+        }
         M_SelectDone(ptr1);  // phares 4/17/98
         return true;
       }
@@ -6462,29 +6623,31 @@ dboolean M_Responder(event_t *ev) {
 
               // e6y
               if ((ptr1->m_flags & S_CANT_GL_ARB_MULTISAMPLEFACTOR) &&
-                  value % 2 != 0)
+                  value % 2 != 0) {
                 warn_about_changes(ptr1->m_flags &
                                    S_CANT_GL_ARB_MULTISAMPLEFACTOR);
-              else
+              } else
 
                   if ((ptr1->var.def->minvalue != UL &&
                        value < ptr1->var.def->minvalue) ||
                       (ptr1->var.def->maxvalue != UL &&
-                       value > ptr1->var.def->maxvalue))
+                       value > ptr1->var.def->maxvalue)) {
                 warn_about_changes(S_BADVAL);
-              else {
+              } else {
                 *ptr1->var.def->location.pi = value;
 
                 /* killough 8/9/98: fix numeric vars
                  * killough 8/15/98: add warning message
                  */
-                if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN))
+                if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN)) {
                   warn_about_changes(ptr1->m_flags & (S_LEVWARN | S_PRGWARN));
-                else
+                } else {
                   M_UpdateCurrent(ptr1->var.def);
+                }
 
-                if (ptr1->action)  // killough 10/98
+                if (ptr1->action) {  // killough 10/98
                   ptr1->action();
+                }
               }
             }
             M_SelectDone(ptr1);    // phares 4/17/98
@@ -6497,9 +6660,13 @@ dboolean M_Responder(event_t *ev) {
             return true;
           }
 
-          if (gather_count >= MAXGATHER) return true;
+          if (gather_count >= MAXGATHER) {
+            return true;
+          }
 
-          if (!isdigit(ch) && ch != '-') return true;  // ignore
+          if (!isdigit(ch) && ch != '-') {
+            return true;  // ignore
+          }
 
           /* killough 10/98: character-based numerical input */
           gather_buffer[gather_count++] = ch;
@@ -6515,13 +6682,16 @@ dboolean M_Responder(event_t *ev) {
 
             value = value - 1;
             if ((ptr1->var.def->minvalue != UL &&
-                 value < ptr1->var.def->minvalue))
+                 value < ptr1->var.def->minvalue)) {
               value = ptr1->var.def->minvalue;
+            }
             if ((ptr1->var.def->maxvalue != UL &&
-                 value > ptr1->var.def->maxvalue))
+                 value > ptr1->var.def->maxvalue)) {
               value = ptr1->var.def->maxvalue;
-            if (*ptr1->var.def->location.pi != value)
+            }
+            if (*ptr1->var.def->location.pi != value) {
               S_StartSound(NULL, sfx_pstop);
+            }
             *ptr1->var.def->location.pi = value;
           }
           if (ptr1->var.def->type == def_str) {
@@ -6530,8 +6700,12 @@ dboolean M_Responder(event_t *ev) {
             old_value = M_IndexInChoices(*ptr1->var.def->location.ppsz,
                                          ptr1->selectstrings);
             value = old_value - 1;
-            if (value < 0) value = 0;
-            if (old_value != value) S_StartSound(NULL, sfx_pstop);
+            if (value < 0) {
+              value = 0;
+            }
+            if (old_value != value) {
+              S_StartSound(NULL, sfx_pstop);
+            }
             *ptr1->var.def->location.ppsz = ptr1->selectstrings[value];
           }
         }
@@ -6541,13 +6715,16 @@ dboolean M_Responder(event_t *ev) {
 
             value = value + 1;
             if ((ptr1->var.def->minvalue != UL &&
-                 value < ptr1->var.def->minvalue))
+                 value < ptr1->var.def->minvalue)) {
               value = ptr1->var.def->minvalue;
+            }
             if ((ptr1->var.def->maxvalue != UL &&
-                 value > ptr1->var.def->maxvalue))
+                 value > ptr1->var.def->maxvalue)) {
               value = ptr1->var.def->maxvalue;
-            if (*ptr1->var.def->location.pi != value)
+            }
+            if (*ptr1->var.def->location.pi != value) {
               S_StartSound(NULL, sfx_pstop);
+            }
             *ptr1->var.def->location.pi = value;
           }
           if (ptr1->var.def->type == def_str) {
@@ -6556,8 +6733,12 @@ dboolean M_Responder(event_t *ev) {
             old_value = M_IndexInChoices(*ptr1->var.def->location.ppsz,
                                          ptr1->selectstrings);
             value = old_value + 1;
-            if (ptr1->selectstrings[value] == NULL) value = old_value;
-            if (old_value != value) S_StartSound(NULL, sfx_pstop);
+            if (ptr1->selectstrings[value] == NULL) {
+              value = old_value;
+            }
+            if (old_value != value) {
+              S_StartSound(NULL, sfx_pstop);
+            }
             *ptr1->var.def->location.ppsz = ptr1->selectstrings[value];
           }
         }
@@ -6569,14 +6750,16 @@ dboolean M_Responder(event_t *ev) {
 
           // killough 8/15/98: add warning messages
 
-          if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN))
+          if (ptr1->m_flags & (S_LEVWARN | S_PRGWARN)) {
             warn_about_changes(ptr1->m_flags &  // killough 10/98
                                (S_LEVWARN | S_PRGWARN));
-          else
+          } else {
             M_UpdateCurrent(ptr1->var.def);
+          }
 
-          if (ptr1->action)  // killough 10/98
+          if (ptr1->action) {  // killough 10/98
             ptr1->action();
+          }
           M_SelectDone(ptr1);  // phares 4/17/98
         }
         return true;
@@ -6585,15 +6768,17 @@ dboolean M_Responder(event_t *ev) {
 
     // Key Bindings
 
-    if (set_keybnd_active)  // on a key binding setup screen
-      if (setup_select)     // incoming key or button gets bound
+    if (set_keybnd_active) {  // on a key binding setup screen
+      if (setup_select)       // incoming key or button gets bound
       {
         if (ev->type == ev_joystick) {
           int oldbutton;
           setup_group group;
           dboolean search = true;
 
-          if (!ptr1->m_joy) return true;  // not a legal action here (yet)
+          if (!ptr1->m_joy) {
+            return true;  // not a legal action here (yet)
+          }
 
           // see if the button is already bound elsewhere. if so, you
           // have to swap bindings so the action where it's currently
@@ -6604,32 +6789,39 @@ dboolean M_Responder(event_t *ev) {
 
           oldbutton = *ptr1->m_joy;
           group = ptr1->m_group;
-          if (ev->data1 & 1)
+          if (ev->data1 & 1) {
             ch = 0;
-          else if (ev->data1 & 2)
+          } else if (ev->data1 & 2) {
             ch = 1;
-          else if (ev->data1 & 4)
+          } else if (ev->data1 & 4) {
             ch = 2;
-          else if (ev->data1 & 8)
+          } else if (ev->data1 & 8) {
             ch = 3;
-          else
+          } else {
             return true;
-          for (i = 0; keys_settings[i] && search; i++)
-            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
-              if (ptr2->m_group == group && ptr1 != ptr2)
-                if (ptr2->m_flags & S_KEY && ptr2->m_joy)
+          }
+          for (i = 0; keys_settings[i] && search; i++) {
+            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++) {
+              if (ptr2->m_group == group && ptr1 != ptr2) {
+                if (ptr2->m_flags & S_KEY && ptr2->m_joy) {
                   if (*ptr2->m_joy == ch) {
                     *ptr2->m_joy = oldbutton;
                     search = false;
                     break;
                   }
+                }
+              }
+            }
+          }
           *ptr1->m_joy = ch;
         } else if (ev->type == ev_mouse) {
           int i, oldbutton;
           setup_group group;
           dboolean search = true;
 
-          if (!ptr1->m_mouse) return true;  // not a legal action here (yet)
+          if (!ptr1->m_mouse) {
+            return true;  // not a legal action here (yet)
+          }
 
           // see if the button is already bound elsewhere. if so, you
           // have to swap bindings so the action where it's currently
@@ -6640,16 +6832,22 @@ dboolean M_Responder(event_t *ev) {
 
           oldbutton = *ptr1->m_mouse;
           group = ptr1->m_group;
-          if ((ch = GetButtons(MAX_MOUSEB, ev->data1)) == -1) return true;
-          for (i = 0; keys_settings[i] && search; i++)
-            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
-              if (ptr2->m_group == group && ptr1 != ptr2)
-                if (ptr2->m_flags & S_KEY && ptr2->m_mouse)
+          if ((ch = GetButtons(MAX_MOUSEB, ev->data1)) == -1) {
+            return true;
+          }
+          for (i = 0; keys_settings[i] && search; i++) {
+            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++) {
+              if (ptr2->m_group == group && ptr1 != ptr2) {
+                if (ptr2->m_flags & S_KEY && ptr2->m_mouse) {
                   if (*ptr2->m_mouse == ch) {
                     *ptr2->m_mouse = oldbutton;
                     search = false;
                     break;
                   }
+                }
+              }
+            }
+          }
           *ptr1->m_mouse = ch;
         } else  // keyboard key
         {
@@ -6671,31 +6869,39 @@ dboolean M_Responder(event_t *ev) {
 
           oldkey = *ptr1->var.m_key;
           group = ptr1->m_group;
-          for (i = 0; keys_settings[i] && search; i++)
-            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
+          for (i = 0; keys_settings[i] && search; i++) {
+            for (ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++) {
               if (ptr2->m_flags & (S_KEY | S_KEEP) && ptr2->m_group == group &&
-                  ptr1 != ptr2)
+                  ptr1 != ptr2) {
                 if (*ptr2->var.m_key == ch) {
-                  if (ptr2->m_flags & S_KEEP) return true;  // can't have it!
+                  if (ptr2->m_flags & S_KEEP) {
+                    return true;  // can't have it!
+                  }
                   *ptr2->var.m_key = oldkey;
                   search = false;
                   break;
                 }
+              }
+            }
+          }
           *ptr1->var.m_key = ch;
         }
 
         M_SelectDone(ptr1);  // phares 4/17/98
         return true;
       }
+    }
 
     // Weapons
 
-    if (set_weapon_active)  // on the weapons setup screen
-      if (setup_select)     // changing an entry
+    if (set_weapon_active) {  // on the weapons setup screen
+      if (setup_select)       // changing an entry
       {
         if (ch != key_menu_enter) {
-          ch -= '0';                          // out of ascii
-          if (ch < 1 || ch > 9) return true;  // ignore
+          ch -= '0';  // out of ascii
+          if (ch < 1 || ch > 9) {
+            return true;  // ignore
+          }
 
           // Plasma and BFG don't exist in shareware
           // killough 10/98: allow it anyway, since this
@@ -6706,13 +6912,15 @@ dboolean M_Responder(event_t *ev) {
 
           // killough 11/98: simplified
 
-          for (i = 0; (ptr2 = weap_settings[i]); i++)
-            for (; !(ptr2->m_flags & S_END); ptr2++)
+          for (i = 0; (ptr2 = weap_settings[i]); i++) {
+            for (; !(ptr2->m_flags & S_END); ptr2++) {
               if (ptr2->m_flags & S_WEAP && *ptr2->var.def->location.pi == ch &&
                   ptr1 != ptr2) {
                 *ptr2->var.def->location.pi = *ptr1->var.def->location.pi;
                 goto end;
               }
+            }
+          }
         end:
           *ptr1->var.def->location.pi = ch;
         }
@@ -6720,32 +6928,41 @@ dboolean M_Responder(event_t *ev) {
         M_SelectDone(ptr1);  // phares 4/17/98
         return true;
       }
+    }
 
     // Automap
 
-    if (set_auto_active)  // on the automap setup screen
-      if (setup_select)   // incoming key
+    if (set_auto_active) {  // on the automap setup screen
+      if (setup_select)     // incoming key
       {
         if (ch == key_menu_down) {
-          if (++color_palette_y == 16) color_palette_y = 0;
+          if (++color_palette_y == 16) {
+            color_palette_y = 0;
+          }
           S_StartSound(NULL, sfx_itemup);
           return true;
         }
 
         if (ch == key_menu_up) {
-          if (--color_palette_y < 0) color_palette_y = 15;
+          if (--color_palette_y < 0) {
+            color_palette_y = 15;
+          }
           S_StartSound(NULL, sfx_itemup);
           return true;
         }
 
         if (ch == key_menu_left) {
-          if (--color_palette_x < 0) color_palette_x = 15;
+          if (--color_palette_x < 0) {
+            color_palette_x = 15;
+          }
           S_StartSound(NULL, sfx_itemup);
           return true;
         }
 
         if (ch == key_menu_right) {
-          if (++color_palette_x == 16) color_palette_x = 0;
+          if (++color_palette_x == 16) {
+            color_palette_x = 0;
+          }
           S_StartSound(NULL, sfx_itemup);
           return true;
         }
@@ -6757,6 +6974,7 @@ dboolean M_Responder(event_t *ev) {
           return true;
         }
       }
+    }
 
     // killough 10/98: consolidate handling into one place:
     if (setup_select && set_enemy_active | set_general_active |
@@ -6768,18 +6986,25 @@ dboolean M_Responder(event_t *ev) {
         if (ch == key_menu_backspace)  // backspace and DEL
         {
           if (chat_string_buffer[chat_index] == 0) {
-            if (chat_index > 0) chat_string_buffer[--chat_index] = 0;
+            if (chat_index > 0) {
+              chat_string_buffer[--chat_index] = 0;
+            }
           }
           // shift the remainder of the text one char left
-          else
+          else {
             strcpy(&chat_string_buffer[chat_index],
                    &chat_string_buffer[chat_index + 1]);
+          }
         } else if (ch == key_menu_left)  // move cursor left
         {
-          if (chat_index > 0) chat_index--;
+          if (chat_index > 0) {
+            chat_index--;
+          }
         } else if (ch == key_menu_right)  // move cursor right
         {
-          if (chat_string_buffer[chat_index] != 0) chat_index++;
+          if (chat_string_buffer[chat_index] != 0) {
+            chat_index++;
+          }
         } else if ((ch == key_menu_enter) || (ch == key_menu_escape)) {
           *ptr1->var.def->location.ppsz = chat_string_buffer;
           M_SelectDone(ptr1);  // phares 4/17/98
@@ -6790,15 +7015,19 @@ dboolean M_Responder(event_t *ev) {
         // chat string gets larger than what the screen can hold,
         // it is dealt with when the string is drawn (above).
 
-        else if ((ch >= 32) && (ch <= 126))
+        else if ((ch >= 32) && (ch <= 126)) {
           if ((chat_index + 1) < CHAT_STRING_BFR_SIZE) {
-            if (shiftdown) ch = shiftxform[ch];
+            if (shiftdown) {
+              ch = shiftxform[ch];
+            }
             if (chat_string_buffer[chat_index] == 0) {
               chat_string_buffer[chat_index++] = ch;
               chat_string_buffer[chat_index] = 0;
-            } else
+            } else {
               chat_string_buffer[chat_index++] = ch;
+            }
           }
+        }
         return true;
       }
 
@@ -6811,7 +7040,7 @@ dboolean M_Responder(event_t *ev) {
 
     if (ch == key_menu_down) {
       ptr1->m_flags &= ~S_HILITE;  // phares 4/17/98
-      do
+      do {
         if (ptr1->m_flags & S_END) {
           set_menu_itemon = 0;
           ptr1 = current_setup_menu;
@@ -6819,7 +7048,7 @@ dboolean M_Responder(event_t *ev) {
           set_menu_itemon++;
           ptr1++;
         }
-      while (ptr1->m_flags & S_SKIP);
+      } while (ptr1->m_flags & S_SKIP);
       M_SelectDone(ptr1);  // phares 4/17/98
       return true;
     }
@@ -6827,9 +7056,11 @@ dboolean M_Responder(event_t *ev) {
     if (ch == key_menu_up) {
       ptr1->m_flags &= ~S_HILITE;  // phares 4/17/98
       do {
-        if (set_menu_itemon == 0) do
+        if (set_menu_itemon == 0) {
+          do {
             set_menu_itemon++;
-          while (!((current_setup_menu + set_menu_itemon)->m_flags & S_END));
+          } while (!((current_setup_menu + set_menu_itemon)->m_flags & S_END));
+        }
         set_menu_itemon--;
       } while ((current_setup_menu + set_menu_itemon)->m_flags & S_SKIP);
       M_SelectDone(current_setup_menu + set_menu_itemon);  // phares 4/17/98
@@ -6838,9 +7069,13 @@ dboolean M_Responder(event_t *ev) {
 
     if (ch == key_menu_clear) {
       if (ptr1->m_flags & S_KEY) {
-        if (ptr1->m_joy) *ptr1->m_joy = -1;
+        if (ptr1->m_joy) {
+          *ptr1->m_joy = -1;
+        }
 
-        if (ptr1->m_mouse) *ptr1->m_mouse = -1;
+        if (ptr1->m_mouse) {
+          *ptr1->m_mouse = -1;
+        }
 
         *ptr1->var.m_key = 0;
       }
@@ -6864,8 +7099,9 @@ dboolean M_Responder(event_t *ev) {
       } else if (flags & S_COLOR) {
         int color = *ptr1->var.def->location.pi;
 
-        if (color < 0 || color > 255)  // range check the value
-          color = 0;                   // 'no show' if invalid
+        if (color < 0 || color > 255) {  // range check the value
+          color = 0;                     // 'no show' if invalid
+        }
 
         color_palette_x = *ptr1->var.def->location.pi & 15;
         color_palette_y = *ptr1->var.def->location.pi >> 4;
@@ -6897,8 +7133,9 @@ dboolean M_Responder(event_t *ev) {
           *(u.c) = chat_string_buffer;
         }
         chat_index = 0;  // current cursor position in chat_string_buffer
-      } else if (flags & S_RESET)
+      } else if (flags & S_RESET) {
         default_verify = true;
+      }
 
       ptr1->m_flags |= S_SELECT;
       setup_select = true;
@@ -6908,9 +7145,9 @@ dboolean M_Responder(event_t *ev) {
 
     if ((ch == key_menu_escape) || (ch == key_menu_backspace)) {
       M_SetSetupMenuItemOn(set_menu_itemon);
-      if (ch == key_menu_escape)  // Clear all menus
+      if (ch == key_menu_escape) {  // Clear all menus
         M_ClearMenus();
-      else  // key_menu_backspace = return to Setup Menu
+      } else  // key_menu_backspace = return to Setup Menu
           if (currentMenu->prevMenu) {
         currentMenu = currentMenu->prevMenu;
         itemOn = currentMenu->lastOn;
@@ -6953,8 +7190,9 @@ dboolean M_Responder(event_t *ev) {
           current_setup_menu = ptr2->var.menu;
           set_menu_itemon = M_GetSetupMenuItemOn();
           print_warning_about_changes = false;  // killough 10/98
-          while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+          while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
             ;
+          }
           current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
           S_StartSound(NULL, sfx_pstop);  // killough 10/98
           return true;
@@ -6973,8 +7211,9 @@ dboolean M_Responder(event_t *ev) {
           current_setup_menu = ptr2->var.menu;
           set_menu_itemon = M_GetSetupMenuItemOn();
           print_warning_about_changes = false;  // killough 10/98
-          while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP)
+          while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
             ;
+          }
           current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
           S_StartSound(NULL, sfx_pstop);  // killough 10/98
           return true;
@@ -6990,10 +7229,11 @@ dboolean M_Responder(event_t *ev) {
   if (ch == key_menu_down)  // phares 3/7/98
   {
     do {
-      if (itemOn + 1 > currentMenu->numitems - 1)
+      if (itemOn + 1 > currentMenu->numitems - 1) {
         itemOn = 0;
-      else
+      } else {
         itemOn++;
+      }
       S_StartSound(NULL, sfx_pstop);
     } while (currentMenu->menuitems[itemOn].status == -1);
     return true;
@@ -7002,10 +7242,11 @@ dboolean M_Responder(event_t *ev) {
   if (ch == key_menu_up)  // phares 3/7/98
   {
     do {
-      if (!itemOn)
+      if (!itemOn) {
         itemOn = currentMenu->numitems - 1;
-      else
+      } else {
         itemOn--;
+      }
       S_StartSound(NULL, sfx_pstop);
     } while (currentMenu->menuitems[itemOn].status == -1);
     return true;
@@ -7073,8 +7314,9 @@ dboolean M_Responder(event_t *ev) {
           currentMenu = currentMenu->prevMenu;
           extended_help_index = 1;  // reset
         }
-      } else
+      } else {
         currentMenu = currentMenu->prevMenu;
+      }
       itemOn = currentMenu->lastOn;
       S_StartSound(NULL, sfx_swtchn);
     }
@@ -7097,18 +7339,20 @@ dboolean M_Responder(event_t *ev) {
   }
 
   else {
-    for (i = itemOn + 1; i < currentMenu->numitems; i++)
+    for (i = itemOn + 1; i < currentMenu->numitems; i++) {
       if (currentMenu->menuitems[i].alphaKey == ch) {
         itemOn = i;
         S_StartSound(NULL, sfx_pstop);
         return true;
       }
-    for (i = 0; i <= itemOn; i++)
+    }
+    for (i = 0; i <= itemOn; i++) {
       if (currentMenu->menuitems[i].alphaKey == ch) {
         itemOn = i;
         S_StartSound(NULL, sfx_pstop);
         return true;
       }
+    }
   }
   return false;
 }
@@ -7129,7 +7373,9 @@ dboolean M_Responder(event_t *ev) {
 void M_StartControlPanel(void) {
   // intro might call this repeatedly
 
-  if (menuactive) return;
+  if (menuactive) {
+    return;
+  }
 
   // jff 3/24/98 make default skill menu choice follow -skill or defaultskill
   // from command line or config file
@@ -7180,11 +7426,15 @@ void M_Drawer(void) {
     int y = 100 - M_StringHeight(messageString) / 2;
     while (*p) {
       char *string = p, c;
-      while ((c = *p) && *p != '\n') p++;
+      while ((c = *p) && *p != '\n') {
+        p++;
+      }
       *p = 0;
       M_WriteText(160 - M_StringWidth(string) / 2, y, string, CR_DEFAULT);
       y += hu_font[0].height;
-      if ((*p = c)) p++;
+      if ((*p = c)) {
+        p++;
+      }
     }
     free(ms);
   } else if (menuactive) {
@@ -7193,7 +7443,9 @@ void M_Drawer(void) {
 
     menuactive = mnact_float;  // Boom-style menu drawers will set mnact_full
 
-    if (currentMenu->routine) currentMenu->routine();  // call Draw routine
+    if (currentMenu->routine) {
+      currentMenu->routine();  // call Draw routine
+    }
 
     // DRAW MENU
 
@@ -7201,26 +7453,32 @@ void M_Drawer(void) {
     y = currentMenu->y;
     max = currentMenu->numitems;
 
-    for (i = 0; i < max; i++)
-      if (currentMenu->menuitems[i].name[0])
-        if (W_CheckNumForName(currentMenu->menuitems[i].name) < 0)
+    for (i = 0; i < max; i++) {
+      if (currentMenu->menuitems[i].name[0]) {
+        if (W_CheckNumForName(currentMenu->menuitems[i].name) < 0) {
           lumps_missing++;
+        }
+      }
+    }
 
-    if (lumps_missing == 0)
+    if (lumps_missing == 0) {
       for (i = 0; i < max; i++) {
-        if (currentMenu->menuitems[i].name[0])
+        if (currentMenu->menuitems[i].name[0]) {
           V_DrawNamePatch(x, y, 0, currentMenu->menuitems[i].name, CR_DEFAULT,
                           VPT_STRETCH);
+        }
         y += LINEHEIGHT;
       }
-    else
+    } else {
       for (i = 0; i < max; i++) {
         const char *alttext = currentMenu->menuitems[i].alttext;
-        if (alttext)
+        if (alttext) {
           M_WriteText(x, y + 8 - (M_StringHeight(alttext) / 2), alttext,
                       CR_DEFAULT);
+        }
         y += LINEHEIGHT;
       }
+    }
 
     // DRAW SKULL
 
@@ -7359,10 +7617,11 @@ void M_DrawSelCell(menu_t *menu, int item) {
 
 int M_StringWidth(const char *string) {
   int i, c, w = 0;
-  for (i = 0; (size_t)i < strlen(string); i++)
+  for (i = 0; (size_t)i < strlen(string); i++) {
     w += (c = toupper(string[i]) - HU_FONTSTART) < 0 || c >= HU_FONTSIZE
              ? 4
              : hu_font[c].width;
+  }
   return w;
 }
 
@@ -7372,8 +7631,11 @@ int M_StringWidth(const char *string) {
 
 int M_StringHeight(const char *string) {
   int i, h, height = h = hu_font[0].height;
-  for (i = 0; string[i]; i++)  // killough 1/31/98
-    if (string[i] == '\n') h += height;
+  for (i = 0; string[i]; i++) {  // killough 1/31/98
+    if (string[i] == '\n') {
+      h += height;
+    }
+  }
   return h;
 }
 
@@ -7393,11 +7655,15 @@ void M_WriteText(int x, int y, const char *string, int cm) {
   cy = y;
 
   flags = VPT_STRETCH;
-  if (cm != CR_DEFAULT) flags |= VPT_TRANS;
+  if (cm != CR_DEFAULT) {
+    flags |= VPT_TRANS;
+  }
 
   while (1) {
     c = *ch++;
-    if (!c) break;
+    if (!c) {
+      break;
+    }
     if (c == '\n') {
       cx = x;
       cy += 12;
@@ -7411,7 +7677,9 @@ void M_WriteText(int x, int y, const char *string, int cm) {
     }
 
     w = hu_font[c].width;
-    if (cx + w > BASE_WIDTH) break;
+    if (cx + w > BASE_WIDTH) {
+      break;
+    }
     // proff/nicolas 09/20/98 -- changed for hi-res
     // CPhipps - patch drawing updated
     V_DrawNumPatch(cx, cy, 0, hu_font[c].lumpnum, cm, flags);
@@ -7425,7 +7693,9 @@ void M_DrawTitle(int x, int y, const char *patch, int cm, const char *alttext,
 
   if (lumpnum >= 0) {
     int flags = VPT_STRETCH;
-    if (cm != CR_DEFAULT) flags |= VPT_TRANS;
+    if (cm != CR_DEFAULT) {
+      flags |= VPT_TRANS;
+    }
     V_DrawNumPatch(x, y, 0, lumpnum, cm, flags);
   } else {
     // patch doesn't exist, draw some text in place of it
@@ -7450,12 +7720,15 @@ void M_InitHelpScreen(void) {
 
   src = helpstrings;
   while (!(src->m_flags & S_END)) {
-    if ((strncmp(src->m_text, "PLASMA", 6) == 0) && (gamemode == shareware))
+    if ((strncmp(src->m_text, "PLASMA", 6) == 0) && (gamemode == shareware)) {
       src->m_flags = S_SKIP;  // Don't show setting or item
-    if ((strncmp(src->m_text, "BFG", 3) == 0) && (gamemode == shareware))
+    }
+    if ((strncmp(src->m_text, "BFG", 3) == 0) && (gamemode == shareware)) {
       src->m_flags = S_SKIP;  // Don't show setting or item
-    if ((strncmp(src->m_text, "SSG", 3) == 0) && (gamemode != commercial))
+    }
+    if ((strncmp(src->m_text, "SSG", 3) == 0) && (gamemode != commercial)) {
       src->m_flags = S_SKIP;  // Don't show setting or item
+    }
     src++;
   }
 }
@@ -7487,7 +7760,9 @@ void M_Init(void) {
       MainMenu[readthis] = MainMenu[quitdoom];
       MainDef.numitems--;
       MainDef.y += 8;
-      if (!EpiCustom) NewDef.prevMenu = &MainDef;
+      if (!EpiCustom) {
+        NewDef.prevMenu = &MainDef;
+      }
       ReadDef1.routine = M_DrawReadThis1;
       ReadDef1.x = 330;
       ReadDef1.y = 165;

@@ -219,7 +219,9 @@ static dboolean CheckForIdentifier(int lumpnum, const byte *id, size_t length) {
   if (W_LumpLength(lumpnum) >= length) {
     const char *data = W_CacheLumpNum(lumpnum);
 
-    if (!memcmp(data, id, length)) result = true;
+    if (!memcmp(data, id, length)) {
+      result = true;
+    }
 
     W_UnlockLumpNum(lumpnum);
   }
@@ -237,8 +239,9 @@ static dboolean P_CheckForZDoomNodes(int lumpnum, int gl_lumpnum) {
     I_Error("P_CheckForZDoomNodes: compressed ZDoom nodes not supported yet");
 #endif
 
-  if (CheckForIdentifier(lumpnum + ML_SSECTORS, "ZGLN", 4))
+  if (CheckForIdentifier(lumpnum + ML_SSECTORS, "ZGLN", 4)) {
     I_Error("P_CheckForZDoomNodes: ZDoom GL nodes not supported yet");
+  }
 
   return false;
 }
@@ -251,10 +254,11 @@ static dboolean P_CheckForZDoomNodes(int lumpnum, int gl_lumpnum) {
 static dboolean P_CheckForDeePBSPv4Nodes(int lumpnum, int gl_lumpnum) {
   int result = CheckForIdentifier(lumpnum + ML_NODES, "xNd4\0\0\0\0", 8);
 
-  if (result)
+  if (result) {
     lprintf(
         LO_INFO,
         "P_CheckForDeePBSPv4Nodes: DeePBSP v4 Extended nodes are detected\n");
+  }
 
   return result;
 }
@@ -323,8 +327,9 @@ static void P_GetNodesVersion(int lumpnum, int gl_lumpnum) {
   } else {
     nodesVersion = 0;
     lprintf(LO_DEBUG, "P_GetNodesVersion: using normal BSP nodes\n");
-    if (P_CheckForZDoomNodes(lumpnum, gl_lumpnum))
+    if (P_CheckForZDoomNodes(lumpnum, gl_lumpnum)) {
       I_Error("P_GetNodesVersion: ZDoom nodes not supported yet");
+    }
   }
 }
 
@@ -429,7 +434,9 @@ static void P_LoadVertexes2(int lump, int gllump) {
  *******************************************/
 
 static int checkGLVertex(int num) {
-  if (num & 0x8000) num = (num & 0x7FFF) + firstglvertex;
+  if (num & 0x8000) {
+    num = (num & 0x7FFF) + firstglvertex;
+  }
   return num;
 }
 
@@ -467,7 +474,9 @@ static void P_LoadSegs(int lump) {
   data = (const mapseg_t *)W_CacheLumpNum(
       lump);  // cph - wad lump handling updated
 
-  if ((!data) || (!numsegs)) I_Error("P_LoadSegs: no segs in level");
+  if ((!data) || (!numsegs)) {
+    I_Error("P_LoadSegs: no segs in level");
+  }
 
   for (i = 0; i < numsegs; i++) {
     seg_t *li = segs + i;
@@ -528,9 +537,9 @@ static void P_LoadSegs(int lump) {
     /* cph 2006/09/30 - our frontsector can be the second side of the
      * linedef, so must check for NO_INDEX in case we are incorrectly
      * referencing the back of a 1S line */
-    if (ldef->sidenum[side] != NO_INDEX)
+    if (ldef->sidenum[side] != NO_INDEX) {
       li->frontsector = sides[ldef->sidenum[side]].sector;
-    else {
+    } else {
       li->frontsector = 0;
       lprintf(LO_WARN, "P_LoadSegs: front of seg %i has no sidedef\n", i);
     }
@@ -565,8 +574,12 @@ static void P_LoadSegs(int lump) {
             i, (v1 >= numvertexes ? v1 : v2));
       }
 
-      if (v1 >= numvertexes) lprintf(LO_WARN, str, i, v1);
-      if (v2 >= numvertexes) lprintf(LO_WARN, str, i, v2);
+      if (v1 >= numvertexes) {
+        lprintf(LO_WARN, str, i, v1);
+      }
+      if (v2 >= numvertexes) {
+        lprintf(LO_WARN, str, i, v2);
+      }
 
       if (li->sidedef == &sides[li->linedef->sidenum[0]]) {
         li->v1 = lines[ml->linedef].v1;
@@ -597,7 +610,9 @@ static void P_LoadSegs_V4(int lump) {
   segs = calloc_IfSameLevel(segs, numsegs, sizeof(seg_t));
   data = (const mapseg_v4_t *)W_CacheLumpNum(lump);
 
-  if ((!data) || (!numsegs)) I_Error("P_LoadSegs_V4: no segs in level");
+  if ((!data) || (!numsegs)) {
+    I_Error("P_LoadSegs_V4: no segs in level");
+  }
 
   for (i = 0; i < numsegs; i++) {
     seg_t *li = segs + i;
@@ -656,10 +671,11 @@ static void P_LoadSegs_V4(int lump) {
       lprintf(LO_WARN, "P_LoadSegs_V4: front of seg %i has no sidedef\n", i);
     }
 
-    if (ldef->flags & ML_TWOSIDED && ldef->sidenum[side ^ 1] != NO_INDEX)
+    if (ldef->flags & ML_TWOSIDED && ldef->sidenum[side ^ 1] != NO_INDEX) {
       li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
-    else
+    } else {
       li->backsector = 0;
+    }
 
     // e6y
     // check and fix wrong references to non-existent vertexes
@@ -678,8 +694,12 @@ static void P_LoadSegs_V4(int lump) {
             i, (v1 >= numvertexes ? v1 : v2));
       }
 
-      if (v1 >= numvertexes) lprintf(LO_WARN, str, i, v1);
-      if (v2 >= numvertexes) lprintf(LO_WARN, str, i, v2);
+      if (v1 >= numvertexes) {
+        lprintf(LO_WARN, str, i, v1);
+      }
+      if (v2 >= numvertexes) {
+        lprintf(LO_WARN, str, i, v2);
+      }
 
       if (li->sidedef == &sides[li->linedef->sidenum[0]]) {
         li->v1 = lines[ml->linedef].v1;
@@ -719,7 +739,9 @@ static void P_LoadGLSegs(int lump) {
   memset(segs, 0, numsegs * sizeof(seg_t));
   ml = (const glseg_t *)W_CacheLumpNum(lump);
 
-  if ((!ml) || (!numsegs)) I_Error("P_LoadGLSegs: no glsegs in level");
+  if ((!ml) || (!numsegs)) {
+    I_Error("P_LoadGLSegs: no glsegs in level");
+  }
 
   for (i = 0; i < numsegs; i++) {  // check for gl-vertices
     segs[i].v1 = &vertexes[checkGLVertex(LittleShort(ml->v1))];
@@ -735,15 +757,17 @@ static void P_LoadGLSegs(int lump) {
 
       segs[i].sidedef = &sides[ldef->sidenum[ml->side]];
       segs[i].frontsector = sides[ldef->sidenum[ml->side]].sector;
-      if (ldef->flags & ML_TWOSIDED)
+      if (ldef->flags & ML_TWOSIDED) {
         segs[i].backsector = sides[ldef->sidenum[ml->side ^ 1]].sector;
-      else
+      } else {
         segs[i].backsector = 0;
+      }
 
-      if (ml->side)
+      if (ml->side) {
         segs[i].offset = GetOffset(segs[i].v1, ldef->v2);
-      else
+      } else {
         segs[i].offset = GetOffset(segs[i].v1, ldef->v1);
+      }
     } else {
       segs[i].miniseg = true;
       segs[i].angle = 0;
@@ -774,8 +798,9 @@ static void P_LoadSubsectors(int lump) {
       calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
   data = (const mapsubsector_t *)W_CacheLumpNum(lump);
 
-  if ((!data) || (!numsubsectors))
+  if ((!data) || (!numsubsectors)) {
     I_Error("P_LoadSubsectors: no subsectors in level");
+  }
 
   for (i = 0; i < numsubsectors; i++) {
     // e6y: support for extended nodes
@@ -797,8 +822,9 @@ static void P_LoadSubsectors_V4(int lump) {
       calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
   data = (const mapsubsector_v4_t *)W_CacheLumpNum(lump);
 
-  if ((!data) || (!numsubsectors))
+  if ((!data) || (!numsubsectors)) {
     I_Error("P_LoadSubsectors_V4: no subsectors in level");
+  }
 
   for (i = 0; i < numsubsectors; i++) {
     // MB 2020-04-22: Fix endianess for DeePBSP V4 extended nodes
@@ -882,10 +908,11 @@ static void P_LoadNodes(int lump) {
 
   if ((!data) || (!numnodes)) {
     // allow trivial maps
-    if (numsubsectors == 1)
+    if (numsubsectors == 1) {
       lprintf(LO_INFO, "P_LoadNodes: trivial map (no nodes, one subsector)\n");
-    else
+    } else {
       I_Error("P_LoadNodes: no nodes in level");
+    }
   }
 
   for (i = 0; i < numnodes; i++) {
@@ -921,8 +948,9 @@ static void P_LoadNodes(int lump) {
         no->children[j] |= NF_SUBSECTOR;
       }
 
-      for (k = 0; k < 4; k++)
+      for (k = 0; k < 4; k++) {
         no->bbox[j][k] = LittleShort(mn->bbox[j][k]) << FRACBITS;
+      }
     }
   }
 
@@ -942,11 +970,12 @@ static void P_LoadNodes_V4(int lump) {
 
   if ((!data) || (!numnodes)) {
     // allow trivial maps
-    if (numsubsectors == 1)
+    if (numsubsectors == 1) {
       lprintf(LO_INFO,
               "P_LoadNodes_V4: trivial map (no nodes, one subsector)\n");
-    else
+    } else {
       I_Error("P_LoadNodes_V4: no nodes in level");
+    }
   }
 
   for (i = 0; i < numnodes; i++) {
@@ -964,8 +993,9 @@ static void P_LoadNodes_V4(int lump) {
       // MB 2020-04-22: Fix endianess for DeePBSP V4 extended nodes
       no->children[j] = LittleLong(mn->children[j]);
 
-      for (k = 0; k < 4; k++)
+      for (k = 0; k < 4; k++) {
         no->bbox[j][k] = LittleShort(mn->bbox[j][k]) << FRACBITS;
+      }
     }
   }
 
@@ -1038,10 +1068,11 @@ static void P_LoadZSegs(const byte *data) {
       lprintf(LO_WARN, "P_LoadZSegs: front of seg %i has no sidedef\n", i);
     }
 
-    if ((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX))
+    if ((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX)) {
       li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
-    else
+    } else {
       li->backsector = 0;
+    }
 
     li->v1 = &vertexes[v1];
     li->v2 = &vertexes[v2];
@@ -1091,10 +1122,11 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed) {
     zstream->next_out = output;
     zstream->avail_out = outlen;
 
-    if (inflateInit(zstream) != Z_OK)
+    if (inflateInit(zstream) != Z_OK) {
       I_Error(
           "P_LoadZNodes: Error during ZDoom nodes decompression "
           "initialization!");
+    }
 
     // resize if output buffer runs full
     while ((err = inflate(zstream, Z_SYNC_FLUSH)) == Z_OK) {
@@ -1105,8 +1137,9 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed) {
       zstream->avail_out = outlen - outlen_old;
     }
 
-    if (err != Z_STREAM_END)
+    if (err != Z_STREAM_END) {
       I_Error("P_LoadZNodes: Error during ZDoom nodes decompression!");
+    }
 
     lprintf(LO_INFO, "P_LoadZNodes: ZDoom nodes compression ratio %.3f\n",
             (float)zstream->total_out / zstream->total_in);
@@ -1114,9 +1147,10 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed) {
     data = output;
     len = zstream->total_out;
 
-    if (inflateEnd(zstream) != Z_OK)
+    if (inflateEnd(zstream) != Z_OK) {
       I_Error(
           "P_LoadZNodes: Error during ZDoom nodes decompression shut-down!");
+    }
 
     // release the original data lump
     W_UnlockLumpNum(lump);
@@ -1182,7 +1216,9 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed) {
   data += sizeof(numSubs);
 
   numsubsectors = numSubs;
-  if (numsubsectors <= 0) I_Error("P_LoadZNodes: no subsectors in level");
+  if (numsubsectors <= 0) {
+    I_Error("P_LoadZNodes: no subsectors in level");
+  }
   subsectors =
       calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t));
 
@@ -1245,17 +1281,21 @@ static void P_LoadZNodes(int lump, int glnodes, int compressed) {
     for (j = 0; j < 2; j++) {
       no->children[j] = LittleLong(mn->children[j]);
 
-      for (k = 0; k < 4; k++)
+      for (k = 0; k < 4; k++) {
         no->bbox[j][k] = LittleShort(mn->bbox[j][k]) << FRACBITS;
+      }
     }
   }
 
 #ifdef HAVE_LIBZ
-  if (compressed == ZDOOM_ZNOD_NODES)
+  if (compressed == ZDOOM_ZNOD_NODES) {
     Z_Free(output);
-  else
+  } else {
 #endif
     W_UnlockLumpNum(lump);  // cph - release the data
+#ifdef HAVE_LIBZ
+  }
+#endif
 }
 
 #ifdef GL_DOOM
@@ -1287,7 +1327,9 @@ static void P_LoadThings(int lump) {
   int mobjcount = 0;
   mobj_t **mobjlist = malloc(numthings * sizeof(mobjlist[0]));
 
-  if ((!data) || (!numthings)) I_Error("P_LoadThings: no things in level");
+  if ((!data) || (!numthings)) {
+    I_Error("P_LoadThings: no things in level");
+  }
 
   for (i = 0; i < numthings; i++) {
     mapthing_t mt = data[i];
@@ -1298,16 +1340,22 @@ static void P_LoadThings(int lump) {
     mt.type = LittleShort(mt.type);
     mt.options = LittleShort(mt.options);
 
-    if (!P_IsDoomnumAllowed(mt.type)) continue;
+    if (!P_IsDoomnumAllowed(mt.type)) {
+      continue;
+    }
 
     // Although all resources of the Wolf SS have been removed
     // off the BFG Edition, there is still one left in MAP33.
     // Replace with a Former Human instead.
-    if (bfgedition && singleplayer && mt.type == 84) mt.type = 3004;
+    if (bfgedition && singleplayer && mt.type == 84) {
+      mt.type = 3004;
+    }
 
     // Do spawn all other stuff.
     mobj = P_SpawnMapThing(&mt, i);
-    if (mobj && mobj->info->speed == 0) mobjlist[mobjcount++] = mobj;
+    if (mobj && mobj->info->speed == 0) {
+      mobjlist[mobjcount++] = mobj;
+    }
   }
 
   W_UnlockLumpNum(lump);  // cph - release the data
@@ -1460,8 +1508,9 @@ static void P_LoadLineDefs(int lump) {
     }
 
     // killough 4/4/98: support special sidedef interpretation below
-    if (ld->sidenum[0] != NO_INDEX && ld->special)
+    if (ld->sidenum[0] != NO_INDEX && ld->special) {
       sides[*ld->sidenum].special = ld->special;
+    }
   }
 
   W_UnlockLumpNum(lump);  // cph - release the lump
@@ -1484,12 +1533,15 @@ static void P_LoadLineDefs2(int lump) {
       case 260:                     // killough 4/11/98: translucent 2s textures
         transparentpresent = true;  // e6y
         lump = sides[*ld->sidenum].special;  // translucency from sidedef
-        if (!ld->tag)                        // if tag==0,
+        if (!ld->tag) {                      // if tag==0,
           ld->tranlump = lump;               // affect this linedef only
-        else
-          for (j = 0; j < numlines; j++)  // if tag!=0,
-            if (lines[j].tag == ld->tag)  // affect all matching linedefs
+        } else {
+          for (j = 0; j < numlines; j++) {  // if tag!=0,
+            if (lines[j].tag == ld->tag) {  // affect all matching linedefs
               lines[j].tranlump = lump;
+            }
+          }
+        }
         break;
     }
   }
@@ -1612,7 +1664,9 @@ static void AddBlockLine(linelist_t **lists, int *count, int *done, int blockno,
                          long lineno) {
   linelist_t *l;
 
-  if (done[blockno]) return;
+  if (done[blockno]) {
+    return;
+  }
 
   l = malloc(sizeof(linelist_t));
   l->num = lineno;
@@ -1649,14 +1703,16 @@ static void P_CreateBlockMap(void) {
   for (i = 0; i < numvertexes; i++) {
     fixed_t t;
 
-    if ((t = vertexes[i].x) < map_minx)
+    if ((t = vertexes[i].x) < map_minx) {
       map_minx = t;
-    else if (t > map_maxx)
+    } else if (t > map_maxx) {
       map_maxx = t;
-    if ((t = vertexes[i].y) < map_miny)
+    }
+    if ((t = vertexes[i].y) < map_miny) {
       map_miny = t;
-    else if (t > map_maxy)
+    } else if (t > map_maxy) {
       map_maxy = t;
+    }
   }
   map_minx >>= FRACBITS;  // work in map coords, not fixed_t
   map_maxx >>= FRACBITS;
@@ -1741,11 +1797,13 @@ static void P_CreateBlockMap(void) {
         int yb = (y - yorg) >> blkshift;  // block row number
         int yp = (y - yorg) & blkmask;    // y position within block
 
-        if (yb < 0 || yb > nrows - 1)  // outside blockmap, continue
+        if (yb < 0 || yb > nrows - 1) {  // outside blockmap, continue
           continue;
+        }
 
-        if (x < minx || x > maxx)  // line doesn't touch column
+        if (x < minx || x > maxx) {  // line doesn't touch column
           continue;
+        }
 
         // The cell that contains the intersection point is always added
 
@@ -1759,26 +1817,31 @@ static void P_CreateBlockMap(void) {
         {
           if (sneg)  //   \ - blocks x,y-, x-,y
           {
-            if (yb > 0 && miny < y)
+            if (yb > 0 && miny < y) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * (yb - 1) + j, i);
-            if (j > 0 && minx < x)
+            }
+            if (j > 0 && minx < x) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * yb + j - 1, i);
+            }
           } else if (spos)  //   / - block x-,y-
           {
-            if (yb > 0 && j > 0 && minx < x)
+            if (yb > 0 && j > 0 && minx < x) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * (yb - 1) + j - 1, i);
+            }
           } else if (horiz)  //   - - block x-,y
           {
-            if (j > 0 && minx < x)
+            if (j > 0 && minx < x) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * yb + j - 1, i);
+            }
           }
-        } else if (j > 0 && minx < x)  // else not at corner: x-,y
+        } else if (j > 0 && minx < x) {  // else not at corner: x-,y
           AddBlockLine(blocklists, blockcount, blockdone, ncols * yb + j - 1,
                        i);
+        }
       }
     }
 
@@ -1797,11 +1860,13 @@ static void P_CreateBlockMap(void) {
         int xb = (x - xorg) >> blkshift;  // block column number
         int xp = (x - xorg) & blkmask;    // x position within block
 
-        if (xb < 0 || xb > ncols - 1)  // outside blockmap, continue
+        if (xb < 0 || xb > ncols - 1) {  // outside blockmap, continue
           continue;
+        }
 
-        if (y < miny || y > maxy)  // line doesn't touch row
+        if (y < miny || y > maxy) {  // line doesn't touch row
           continue;
+        }
 
         // The cell that contains the intersection point is always added
 
@@ -1815,26 +1880,31 @@ static void P_CreateBlockMap(void) {
         {
           if (sneg)  //   \ - blocks x,y-, x-,y
           {
-            if (j > 0 && miny < y)
+            if (j > 0 && miny < y) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * (j - 1) + xb, i);
-            if (xb > 0 && minx < x)
+            }
+            if (xb > 0 && minx < x) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * j + xb - 1, i);
+            }
           } else if (vert)  //   | - block x,y-
           {
-            if (j > 0 && miny < y)
+            if (j > 0 && miny < y) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * (j - 1) + xb, i);
+            }
           } else if (spos)  //   / - block x-,y-
           {
-            if (xb > 0 && j > 0 && miny < y)
+            if (xb > 0 && j > 0 && miny < y) {
               AddBlockLine(blocklists, blockcount, blockdone,
                            ncols * (j - 1) + xb - 1, i);
+            }
           }
-        } else if (j > 0 && miny < y)  // else not on a corner: x,y-
+        } else if (j > 0 && miny < y) {  // else not on a corner: x,y-
           AddBlockLine(blocklists, blockcount, blockdone, ncols * (j - 1) + xb,
                        i);
+        }
       }
     }
   }
@@ -1929,8 +1999,9 @@ static dboolean P_VerifyBlockMap(int count) {
           lprintf(LO_ERROR, "P_VerifyBlockMap: open blocklist\n");
           return false;
         }
-        if (*tmplist == -1)  // found -1
+        if (*tmplist == -1) {  // found -1
           break;
+        }
       }
 
       // scan the list for out-of-range linedef indicies in list
@@ -1960,10 +2031,10 @@ static void P_LoadBlockMap(int lump) {
   long count;
 
   if (M_CheckParm("-blockmap") || W_LumpLength(lump) < 8 ||
-      (count = W_LumpLength(lump) / 2) >= 0x10000)  // e6y
+      (count = W_LumpLength(lump) / 2) >= 0x10000) {  // e6y
     // COMPAT: MBF uses a different algorithm in P_CreateBlockMap()
     P_CreateBlockMap();
-  else {
+  } else {
     long i;
     // cph - const*, wad lump handling updated
     const short *wadblockmaplump = W_CacheLumpNum(lump);
@@ -2030,7 +2101,9 @@ static void P_LoadBlockMap(int lump) {
 
 static void P_LoadReject(int lumpnum, int totallines) {
   // dump any old cached reject lump, then cache the new one
-  if (rejectlump != -1) W_UnlockLumpNum(rejectlump);
+  if (rejectlump != -1) {
+    W_UnlockLumpNum(rejectlump);
+  }
   rejectlump = lumpnum + ML_REJECT;
   rejectmatrix = W_CacheLumpNum(rejectlump);
 
@@ -2074,8 +2147,9 @@ static int P_GroupLines(void) {
       }
       seg++;
     }
-    if (subsectors[i].sector == NULL)
+    if (subsectors[i].sector == NULL) {
       I_Error("P_GroupLines: Subsector a part of no sector!\n");
+    }
   }
 
   // count number of lines in each sector
@@ -2103,8 +2177,9 @@ static int P_GroupLines(void) {
   // Enter those lines
   for (i = 0, li = lines; i < numlines; i++, li++) {
     P_AddLineToSector(li, li->frontsector);
-    if (li->backsector && li->backsector != li->frontsector)
+    if (li->backsector && li->backsector != li->frontsector) {
       P_AddLineToSector(li, li->backsector);
+    }
   }
 
   for (i = 0, sector = sectors; i < numsectors; i++, sector++) {
@@ -2215,14 +2290,15 @@ static void P_RemoveSlimeTrails(void)  // killough 10/98
   {
     const line_t *l;
 
-    if (segs[i].miniseg == true)  // figgi -- skip minisegs
-      break;                      // e6y: probably 'continue;'?
+    if (segs[i].miniseg == true) {  // figgi -- skip minisegs
+      break;                        // e6y: probably 'continue;'?
+    }
 
     l = segs[i].linedef;  // The parent linedef
     if (l->dx && l->dy)   // We can ignore orthogonal lines
     {
       vertex_t *v = segs[i].v1;
-      do
+      do {
         if (!hit[v - vertexes])  // If we haven't processed vertex
         {
           hit[v - vertexes] = 1;         // Mark this vertex as processed
@@ -2252,7 +2328,7 @@ static void P_RemoveSlimeTrails(void)  // killough 10/98
             }
           }
         }  // Obsfucated C contest entry:   :)
-      while ((v != segs[i].v2) && (v = segs[i].v2));
+      } while ((v != segs[i].v2) && (v = segs[i].v2));
     }
   }
   free(hit);
@@ -2284,22 +2360,31 @@ dboolean P_CheckLumpsForSameSource(int lump1, int lump2) {
   wadfile_info_t *wad1, *wad2;
 
   if (((unsigned)lump1 >= (unsigned)numlumps) ||
-      ((unsigned)lump2 >= (unsigned)numlumps))
+      ((unsigned)lump2 >= (unsigned)numlumps)) {
     return false;
+  }
 
   wad1 = lumpinfo[lump1].wadfile;
   wad2 = lumpinfo[lump2].wadfile;
 
-  if (!wad1 || !wad2) return false;
+  if (!wad1 || !wad2) {
+    return false;
+  }
 
   wad1_index = (int)(wad1 - wadfiles);
   wad2_index = (int)(wad2 - wadfiles);
 
-  if (wad1_index != wad2_index) return false;
+  if (wad1_index != wad2_index) {
+    return false;
+  }
 
-  if ((wad1_index < 0) || ((size_t)wad1_index >= numwadfiles)) return false;
+  if ((wad1_index < 0) || ((size_t)wad1_index >= numwadfiles)) {
+    return false;
+  }
 
-  if ((wad2_index < 0) || ((size_t)wad2_index >= numwadfiles)) return false;
+  if ((wad2_index < 0) || ((size_t)wad2_index >= numwadfiles)) {
+    return false;
+  }
 
   return true;
 }
@@ -2379,14 +2464,20 @@ void P_InitSubsectorsLines(void) {
     sslines_indexes[num] = count;
 
     for (seg = segs + subsectors[num].firstline; seg < seg_last; seg++) {
-      if (!seg->linedef) continue;
+      if (!seg->linedef) {
+        continue;
+      }
       seg->linedef->validcount = 0;
     }
 
     for (seg = segs + subsectors[num].firstline; seg < seg_last; seg++) {
-      if (!seg->linedef) continue;
+      if (!seg->linedef) {
+        continue;
+      }
 
-      if (seg->linedef->validcount == 1) continue;
+      if (seg->linedef->validcount == 1) {
+        continue;
+      }
 
       seg->linedef->validcount = 1;
       count++;
@@ -2404,15 +2495,21 @@ void P_InitSubsectorsLines(void) {
         segs + subsectors[num].firstline + subsectors[num].numlines;
 
     for (seg = segs + subsectors[num].firstline; seg < seg_last; seg++) {
-      if (!seg->linedef) continue;
+      if (!seg->linedef) {
+        continue;
+      }
       seg->linedef->validcount = 0;
     }
 
     for (seg = segs + subsectors[num].firstline; seg < seg_last; seg++) {
       ssline_t *ssline = &sslines[count];
-      if (!seg->linedef) continue;
+      if (!seg->linedef) {
+        continue;
+      }
 
-      if (seg->linedef->validcount == 1) continue;
+      if (seg->linedef->validcount == 1) {
+        continue;
+      }
 
       seg->linedef->validcount = 1;
 
@@ -2547,10 +2644,11 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
     free(vertexes);
   }
 
-  if (nodesVersion > 0)
+  if (nodesVersion > 0) {
     P_LoadVertexes2(lumpnum + ML_VERTEXES, gl_lumpnum + ML_GL_VERTS);
-  else
+  } else {
     P_LoadVertexes(lumpnum + ML_VERTEXES);
+  }
   P_LoadSectors(lumpnum + ML_SECTORS);
   P_LoadSideDefs(lumpnum + ML_SIDEDEFS);
   P_LoadLineDefs(lumpnum + ML_LINEDEFS);
@@ -2575,9 +2673,9 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
     P_LoadGLSegs(gl_lumpnum + ML_GL_SEGS);
   } else {
     int zdoom_nodes;
-    if ((zdoom_nodes = P_CheckForZDoomUncompressedNodes(lumpnum, gl_lumpnum)))
+    if ((zdoom_nodes = P_CheckForZDoomUncompressedNodes(lumpnum, gl_lumpnum))) {
       P_LoadZNodes(lumpnum + ML_NODES, 0, zdoom_nodes);
-    else if (P_CheckForDeePBSPv4Nodes(lumpnum, gl_lumpnum)) {
+    } else if (P_CheckForDeePBSPv4Nodes(lumpnum, gl_lumpnum)) {
       P_LoadSubsectors_V4(lumpnum + ML_SSECTORS);
       P_LoadNodes_V4(lumpnum + ML_NODES);
       P_LoadSegs_V4(lumpnum + ML_SEGS);
@@ -2614,7 +2712,9 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
   /* cph - reset all multiplayer starts */
   memset(playerstarts, 0, sizeof(playerstarts));
   deathmatch_p = deathmatchstarts;
-  for (i = 0; i < MAXPLAYERS; i++) players[i].mo = NULL;
+  for (i = 0; i < MAXPLAYERS; i++) {
+    players[i].mo = NULL;
+  }
   TracerClearStarts();
 
   P_MapStart();
@@ -2623,16 +2723,19 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
 
   // if deathmatch, randomly spawn the active players
   if (deathmatch) {
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (i = 0; i < MAXPLAYERS; i++) {
       if (playeringame[i]) {
         players[i].mo = NULL;  // not needed? - done before P_LoadThings
         G_DeathMatchSpawnPlayer(i);
       }
+    }
   } else  // if !deathmatch, check all necessary player starts actually exist
   {
-    for (i = 0; i < MAXPLAYERS; i++)
-      if (playeringame[i] && !players[i].mo)
+    for (i = 0; i < MAXPLAYERS; i++) {
+      if (playeringame[i] && !players[i].mo) {
         I_Error("P_SetupLevel: missing player %d start\n", i + 1);
+      }
+    }
   }
 
   if (players[consoleplayer].cheats & CF_FLY) {
@@ -2640,7 +2743,9 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
   }
 
   // killough 3/26/98: Spawn icon landings:
-  if (gamemode == commercial) P_SpawnBrainTargets();
+  if (gamemode == commercial) {
+    P_SpawnBrainTargets();
+  }
 
   if (gamemode != shareware) {
     S_ParseMusInfo(lumpname);
@@ -2655,7 +2760,9 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill) {
   P_MapEnd();
 
   // preload graphics
-  if (precache) R_PrecacheLevel();
+  if (precache) {
+    R_PrecacheLevel();
+  }
 
   // [FG] current map lump number
   maplumpnum = lumpnum;

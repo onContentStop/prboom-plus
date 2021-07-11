@@ -114,10 +114,11 @@ int monkeys, default_monkeys;
 char *MAPNAME(int e, int m) {
   static char name[9];
 
-  if (gamemode == commercial)
+  if (gamemode == commercial) {
     snprintf(name, sizeof(name), "MAP%02d", m);
-  else
+  } else {
     snprintf(name, sizeof(name), "E%dM%d", e, m);
+  }
 
   return name;
 }

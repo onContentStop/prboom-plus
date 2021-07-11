@@ -127,7 +127,9 @@ static dboolean gld_clipper_IsRangeVisible(angle_t startAngle,
   clipnode_t *ci;
   ci = cliphead;
 
-  if (endAngle == 0 && ci && ci->start == 0) return false;
+  if (endAngle == 0 && ci && ci->start == 0) {
+    return false;
+  }
 
   while (ci != NULL && ci->start < endAngle) {
     if (startAngle >= ci->start && endAngle <= ci->end) {
@@ -292,14 +294,18 @@ angle_t gld_FrustumAngle(void) {
   }
 
   // If the pitch is larger than this you can look all around at a FOV of 90
-  if (D_abs(viewpitch) > 46 * ANG1) return 0xffffffff;
+  if (D_abs(viewpitch) > 46 * ANG1) {
+    return 0xffffffff;
+  }
 
   // ok, this is a gross hack that barely works...
   // but at least it doesn't overestimate too much...
   floatangle = 2.0f + (45.0f + (tilt / 1.9f)) * (float)render_fov *
                           ratio_scale / render_multiplier / 90.0f;
   a1 = (angle_t)xs_CRoundToInt(ANG1 * floatangle);
-  if (a1 >= ANG180) return 0xffffffff;
+  if (a1 >= ANG180) {
+    return 0xffffffff;
+  }
   return a1;
 }
 

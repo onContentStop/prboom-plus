@@ -89,7 +89,9 @@ int EV_DoGenFloor(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_floor;
@@ -103,10 +105,11 @@ int EV_DoGenFloor(line_t* line) {
   manual_floor:
     // Do not start another function if floor already moving
     if (P_SectorActive(floor_special, sec)) {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new floor thinker
@@ -167,9 +170,12 @@ int EV_DoGenFloor(line_t* line) {
             (floor->sector->floorheight >> FRACBITS) +
             floor->direction *
                 (P_FindShortestTextureAround(secnum) >> FRACBITS);
-        if (floor->floordestheight > 32000)  // jff 3/13/98 prevent overflow
-          floor->floordestheight = 32000;    // wraparound in floor height
-        if (floor->floordestheight < -32000) floor->floordestheight = -32000;
+        if (floor->floordestheight > 32000) {  // jff 3/13/98 prevent overflow
+          floor->floordestheight = 32000;      // wraparound in floor height
+        }
+        if (floor->floordestheight < -32000) {
+          floor->floordestheight = -32000;
+        }
         floor->floordestheight <<= FRACBITS;
         break;
       case Fby24:
@@ -241,7 +247,9 @@ int EV_DoGenFloor(line_t* line) {
         }
       }
     }
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }
@@ -289,7 +297,9 @@ int EV_DoGenCeiling(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_ceiling;
@@ -304,10 +314,11 @@ int EV_DoGenCeiling(line_t* line) {
     // Do not start another function if ceiling already moving
     if (P_SectorActive(ceiling_special, sec))  // jff 2/22/98
     {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new ceiling thinker
@@ -368,9 +379,12 @@ int EV_DoGenCeiling(line_t* line) {
         targheight = (ceiling->sector->ceilingheight >> FRACBITS) +
                      ceiling->direction *
                          (P_FindShortestUpperAround(secnum) >> FRACBITS);
-        if (targheight > 32000)  // jff 3/13/98 prevent overflow
-          targheight = 32000;    // wraparound in ceiling height
-        if (targheight < -32000) targheight = -32000;
+        if (targheight > 32000) {  // jff 3/13/98 prevent overflow
+          targheight = 32000;      // wraparound in ceiling height
+        }
+        if (targheight < -32000) {
+          targheight = -32000;
+        }
         targheight <<= FRACBITS;
         break;
       case Cby24:
@@ -384,10 +398,11 @@ int EV_DoGenCeiling(line_t* line) {
       default:
         break;
     }
-    if (Dirn)
+    if (Dirn) {
       ceiling->topheight = targheight;
-    else
+    } else {
       ceiling->bottomheight = targheight;
+    }
 
     // set texture/type change properties
     if (ChgT)  // if a texture change is indicated
@@ -448,7 +463,9 @@ int EV_DoGenCeiling(line_t* line) {
       }
     }
     P_AddActiveCeiling(ceiling);  // add this ceiling to the active list
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }
@@ -481,7 +498,9 @@ int EV_DoGenLift(line_t* line) {
 
   // Activate all <type> plats that are in_stasis
 
-  if (Targ == LnF2HnF) P_ActivateInStasis(line->tag);
+  if (Targ == LnF2HnF) {
+    P_ActivateInStasis(line->tag);
+  }
 
   if (ProcessNoTagLines(line, &sec, &secnum)) {
     if (zerotag_manual) {
@@ -494,7 +513,9 @@ int EV_DoGenLift(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_lift;
@@ -507,10 +528,11 @@ int EV_DoGenLift(line_t* line) {
   manual_lift:
     // Do not start another function if floor already moving
     if (P_SectorActive(floor_special, sec)) {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // Setup the plat thinker
@@ -533,21 +555,29 @@ int EV_DoGenLift(line_t* line) {
     switch (Targ) {
       case F2LnF:
         plat->low = P_FindLowestFloorSurrounding(sec);
-        if (plat->low > sec->floorheight) plat->low = sec->floorheight;
+        if (plat->low > sec->floorheight) {
+          plat->low = sec->floorheight;
+        }
         break;
       case F2NnF:
         plat->low = P_FindNextLowestFloor(sec, sec->floorheight);
         break;
       case F2LnC:
         plat->low = P_FindLowestCeilingSurrounding(sec);
-        if (plat->low > sec->floorheight) plat->low = sec->floorheight;
+        if (plat->low > sec->floorheight) {
+          plat->low = sec->floorheight;
+        }
         break;
       case LnF2HnF:
         plat->type = genPerpetual;
         plat->low = P_FindLowestFloorSurrounding(sec);
-        if (plat->low > sec->floorheight) plat->low = sec->floorheight;
+        if (plat->low > sec->floorheight) {
+          plat->low = sec->floorheight;
+        }
         plat->high = P_FindHighestFloorSurrounding(sec);
-        if (plat->high < sec->floorheight) plat->high = sec->floorheight;
+        if (plat->high < sec->floorheight) {
+          plat->high = sec->floorheight;
+        }
         plat->status = P_Random(pr_genlift) & 1;
         break;
       default:
@@ -591,7 +621,9 @@ int EV_DoGenLift(line_t* line) {
     S_StartSound((mobj_t*)&sec->soundorg, sfx_pstart);
     P_AddActivePlat(plat);  // add this plat to the list of active plats
 
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }
@@ -646,7 +678,9 @@ int EV_DoGenStairs(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_stair;
@@ -662,10 +696,11 @@ int EV_DoGenStairs(line_t* line) {
     // jff 2/26/98 add special lockout condition to wait for entire
     // staircase to build before retriggering
     if (P_SectorActive(floor_special, sec) || sec->stairlock) {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new floor thinker
@@ -730,28 +765,38 @@ int EV_DoGenStairs(line_t* line) {
     do {
       ok = 0;
       for (i = 0; i < sec->linecount; i++) {
-        if (!((sec->lines[i])->backsector)) continue;
+        if (!((sec->lines[i])->backsector)) {
+          continue;
+        }
 
         tsec = (sec->lines[i])->frontsector;
         newsecnum = tsec->iSectorID;
 
-        if (secnum != newsecnum) continue;
+        if (secnum != newsecnum) {
+          continue;
+        }
 
         tsec = (sec->lines[i])->backsector;
         newsecnum = tsec->iSectorID;
 
-        if (!Igno && tsec->floorpic != texture) continue;
+        if (!Igno && tsec->floorpic != texture) {
+          continue;
+        }
 
         /* jff 6/19/98 prevent double stepsize */
-        if (compatibility_level < boom_202_compatibility)
+        if (compatibility_level < boom_202_compatibility) {
           height += floor->direction * stairsize;
+        }
 
         // jff 2/26/98 special lockout condition for retriggering
-        if (P_SectorActive(floor_special, tsec) || tsec->stairlock) continue;
+        if (P_SectorActive(floor_special, tsec) || tsec->stairlock) {
+          continue;
+        }
 
         /* jff 6/19/98 increase height AFTER continue */
-        if (compatibility_level >= boom_202_compatibility)
+        if (compatibility_level >= boom_202_compatibility) {
           height += floor->direction * stairsize;
+        }
 
         // jff 2/26/98
         // link the stair chain in both directions
@@ -781,12 +826,15 @@ int EV_DoGenStairs(line_t* line) {
         break;
       }
     } while (ok);
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
     secnum = osecnum;  // jff 3/4/98 restore old loop index
   }
   // retriggerable generalized stairs build up or down alternately
-  if (rtn)
+  if (rtn) {
     line->special ^= StairDirection;  // alternate dir on succ activations
+  }
   return rtn;
 }
 
@@ -827,7 +875,9 @@ int EV_DoGenCrusher(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_crusher;
@@ -842,10 +892,11 @@ int EV_DoGenCrusher(line_t* line) {
     // Do not start another function if ceiling already moving
     if (P_SectorActive(ceiling_special, sec))  // jff 2/22/98
     {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new ceiling thinker
@@ -885,7 +936,9 @@ int EV_DoGenCrusher(line_t* line) {
     ceiling->oldspeed = ceiling->speed;
 
     P_AddActiveCeiling(ceiling);  // add to list of active ceilings
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }
@@ -924,7 +977,9 @@ int EV_DoGenLockedDoor(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_locked;
@@ -940,10 +995,11 @@ int EV_DoGenLockedDoor(line_t* line) {
     // Do not start another function if ceiling already moving
     if (P_SectorActive(ceiling_special, sec))  // jff 2/22/98
     {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new door thinker
@@ -995,7 +1051,9 @@ int EV_DoGenLockedDoor(line_t* line) {
     S_StartSound((mobj_t*)&door->sector->soundorg,  // killough 4/15/98
                  door->speed >= VDOORSPEED * 4 ? sfx_bdopn : sfx_doropn);
 
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }
@@ -1035,7 +1093,9 @@ int EV_DoGenDoor(line_t* line) {
   // check if a manual trigger, if so do just the sector on the backside
   manual = false;
   if (Trig == PushOnce || Trig == PushMany) {
-    if (!(sec = line->backsector)) return rtn;
+    if (!(sec = line->backsector)) {
+      return rtn;
+    }
     secnum = sec->iSectorID;
     manual = true;
     goto manual_door;
@@ -1051,10 +1111,11 @@ int EV_DoGenDoor(line_t* line) {
     // Do not start another function if ceiling already moving
     if (P_SectorActive(ceiling_special, sec))  // jff 2/22/98
     {
-      if (!manual)
+      if (!manual) {
         continue;
-      else
+      } else {
         return rtn;
+      }
     }
 
     // new door thinker
@@ -1114,22 +1175,24 @@ int EV_DoGenDoor(line_t* line) {
         door->direction = 1;
         door->topheight = P_FindLowestCeilingSurrounding(sec);
         door->topheight -= 4 * FRACUNIT;
-        if (door->topheight != sec->ceilingheight)
+        if (door->topheight != sec->ceilingheight) {
           S_StartSound((mobj_t*)&door->sector->soundorg,
                        Sped >= SpeedFast || default_comp[comp_sound]
                            ? sfx_bdopn
                            : sfx_doropn);
+        }
         door->type = Sped >= SpeedFast ? genBlazeRaise : genRaise;
         break;
       case ODoor:
         door->direction = 1;
         door->topheight = P_FindLowestCeilingSurrounding(sec);
         door->topheight -= 4 * FRACUNIT;
-        if (door->topheight != sec->ceilingheight)
+        if (door->topheight != sec->ceilingheight) {
           S_StartSound((mobj_t*)&door->sector->soundorg,
                        Sped >= SpeedFast || default_comp[comp_sound]
                            ? sfx_bdopn
                            : sfx_doropn);
+        }
         door->type = Sped >= SpeedFast ? genBlazeOpen : genOpen;
         break;
       case CdODoor:
@@ -1154,7 +1217,9 @@ int EV_DoGenDoor(line_t* line) {
       default:
         break;
     }
-    if (manual) return rtn;
+    if (manual) {
+      return rtn;
+    }
   }
   return rtn;
 }

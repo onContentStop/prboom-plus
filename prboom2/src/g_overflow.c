@@ -353,9 +353,10 @@ void RejectOverrun(int rejectlump, const byte **rejectmatrix, int totallines) {
         // copy at most 16 bytes from rejectpad
         // emulating a 32-bit, little-endian architecture (can't memmove)
         for (i = 0; i < (unsigned int)(required - length) && i < 16;
-             i++) {      // 16 hard-coded
-          if (!(i & 3))  // get the next 4 bytes to copy when i=0,4,8,12
+             i++) {        // 16 hard-coded
+          if (!(i & 3)) {  // get the next 4 bytes to copy when i=0,4,8,12
             pad = *src++;
+          }
           *dest++ = pad & 0xff;  // store lowest-significant byte
           pad >>= 8;             // rotate the next byte down
         }
@@ -404,12 +405,14 @@ static int GetMemoryValue(unsigned int offset, void *value, int size) {
     i = 0;
 
     if ((p = M_CheckParm("-setmem")) && (p < myargc - 1)) {
-      if (!strcasecmp(myargv[p + 1], "dos622")) dos_mem_dump = mem_dump_dos622;
-      if (!strcasecmp(myargv[p + 1], "dos71"))
+      if (!strcasecmp(myargv[p + 1], "dos622")) {
+        dos_mem_dump = mem_dump_dos622;
+      }
+      if (!strcasecmp(myargv[p + 1], "dos71")) {
         dos_mem_dump = mem_dump_win98;
-      else if (!strcasecmp(myargv[p + 1], "dosbox"))
+      } else if (!strcasecmp(myargv[p + 1], "dosbox")) {
         dos_mem_dump = mem_dump_dosbox;
-      else {
+      } else {
         while (++p != myargc && *myargv[p] != '-' && i < DOS_MEM_DUMP_SIZE) {
           M_StrToInt(myargv[p], &val);
           dos_mem_dump[i++] = (unsigned char)val;

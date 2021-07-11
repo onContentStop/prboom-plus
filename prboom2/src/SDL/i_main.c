@@ -101,17 +101,20 @@ int (*I_GetTime)(void) = I_GetTime_Error;
 
 void I_Init(void) {
   /* killough 4/14/98: Adjustable speedup based on realtic_clock_rate */
-  if (fastdemo)
+  if (fastdemo) {
     I_GetTime = I_GetTime_FastDemo;
-  else if (realtic_clock_rate != 100) {
+  } else if (realtic_clock_rate != 100) {
     I_GetTime_Scale = ((int_64_t)realtic_clock_rate << 24) / 100;
     I_GetTime = I_GetTime_Scaled;
-  } else
+  } else {
     I_GetTime = I_GetTime_RealTime;
+  }
 
   {
     /* killough 2/21/98: avoid sound initialization if no sound & no music */
-    if (!(nomusicparm && nosfxparm)) I_InitSound();
+    if (!(nomusicparm && nosfxparm)) {
+      I_InitSound();
+    }
   }
 
   R_InitInterpolation();
@@ -119,14 +122,15 @@ void I_Init(void) {
 
 // e6y
 void I_Init2(void) {
-  if (fastdemo)
+  if (fastdemo) {
     I_GetTime = I_GetTime_FastDemo;
-  else {
+  } else {
     if (realtic_clock_rate != 100) {
       I_GetTime_Scale = ((int_64_t)realtic_clock_rate << 24) / 100;
       I_GetTime = I_GetTime_Scaled;
-    } else
+    } else {
       I_GetTime = I_GetTime_RealTime;
+    }
   }
   R_InitInterpolation();
   force_singletics_to = gametic + BACKUPTICS;
@@ -147,7 +151,9 @@ static void I_SignalHandler(int s) {
   /* If corrupted memory could cause crash, dump memory
    * allocation history, which points out probable causes
    */
-  if (s == SIGSEGV || s == SIGILL || s == SIGFPE) Z_DumpHistory(buf);
+  if (s == SIGSEGV || s == SIGILL || s == SIGFPE) {
+    Z_DumpHistory(buf);
+  }
 
   I_Error("I_SignalHandler: %s", buf);
 }
@@ -247,11 +253,11 @@ static void I_EndDoom(void) {
   lump_eb = W_CheckNumForName("ENDBOOM"); /* jff 4/1/98 sign our work    */
   lump_ed = W_CheckNumForName("ENDOOM");  /* CPhipps - also maybe ENDOOM */
 
-  if (lump_eb == -1)
+  if (lump_eb == -1) {
     lump = lump_ed;
-  else if (lump_ed == -1)
+  } else if (lump_ed == -1) {
     lump = lump_eb;
-  else { /* Both ENDOOM and ENDBOOM are present */
+  } else { /* Both ENDOOM and ENDBOOM are present */
 #define LUMP_IS_NEW(num)                      \
   (!((lumpinfo[num].source == source_iwad) || \
      (lumpinfo[num].source == source_auto_load)))
@@ -348,8 +354,12 @@ void I_SafeExit(int rc) {
 }
 
 static void I_Quit(void) {
-  if (!demorecording) I_EndDoom();
-  if (demorecording) G_CheckDemoStatus();
+  if (!demorecording) {
+    I_EndDoom();
+  }
+  if (demorecording) {
+    G_CheckDemoStatus();
+  }
   M_SaveDefaults();
   I_DemoExShutdown();
 }

@@ -119,7 +119,9 @@ static void P_SetPsprite(player_t *player, int position, statenum_t stnum) {
     // Modified handling.
     if (state->action) {
       state->action(player, psp);
-      if (!psp->state) break;
+      if (!psp->state) {
+        break;
+      }
     }
     stnum = psp->state->nextstate;
   } while (!psp->tics);  // an initial state of 0 could cycle through
@@ -135,13 +137,17 @@ static void P_SetPsprite(player_t *player, int position, statenum_t stnum) {
 static void P_BringUpWeapon(player_t *player) {
   statenum_t newstate;
 
-  if (player->pendingweapon == wp_nochange)
+  if (player->pendingweapon == wp_nochange) {
     player->pendingweapon = player->readyweapon;
+  }
 
-  if (player->pendingweapon == wp_chainsaw) S_StartSound(player->mo, sfx_sawup);
+  if (player->pendingweapon == wp_chainsaw) {
+    S_StartSound(player->mo, sfx_sawup);
+  }
 
-  if (player->pendingweapon >= NUMWEAPONS)
+  if (player->pendingweapon >= NUMWEAPONS) {
     lprintf(LO_WARN, "P_BringUpWeapon: weaponinfo overrun has occurred.\n");
+  }
 
   newstate = weaponinfo[player->pendingweapon].upstate;
 
@@ -181,49 +187,61 @@ int P_SwitchWeapon(player_t *player) {
 
   // killough 2/8/98: follow preferences and fix BFG/SSG bugs
 
-  do switch (*prefer++) {
+  do {
+    switch (*prefer++) {
       case 1:
-        if (!player->powers[pw_strength])  // allow chainsaw override
+        if (!player->powers[pw_strength]) {  // allow chainsaw override
           break;
+        }
         // fallthrough
       case 0:
         newweapon = wp_fist;
         break;
       case 2:
-        if (player->ammo[am_clip]) newweapon = wp_pistol;
+        if (player->ammo[am_clip]) {
+          newweapon = wp_pistol;
+        }
         break;
       case 3:
-        if (player->weaponowned[wp_shotgun] && player->ammo[am_shell])
+        if (player->weaponowned[wp_shotgun] && player->ammo[am_shell]) {
           newweapon = wp_shotgun;
+        }
         break;
       case 4:
-        if (player->weaponowned[wp_chaingun] && player->ammo[am_clip])
+        if (player->weaponowned[wp_chaingun] && player->ammo[am_clip]) {
           newweapon = wp_chaingun;
+        }
         break;
       case 5:
-        if (player->weaponowned[wp_missile] && player->ammo[am_misl])
+        if (player->weaponowned[wp_missile] && player->ammo[am_misl]) {
           newweapon = wp_missile;
+        }
         break;
       case 6:
         if (player->weaponowned[wp_plasma] && player->ammo[am_cell] &&
-            gamemode != shareware)
+            gamemode != shareware) {
           newweapon = wp_plasma;
+        }
         break;
       case 7:
         if (player->weaponowned[wp_bfg] && gamemode != shareware &&
-            player->ammo[am_cell] >= (demo_compatibility ? 41 : 40))
+            player->ammo[am_cell] >= (demo_compatibility ? 41 : 40)) {
           newweapon = wp_bfg;
+        }
         break;
       case 8:
-        if (player->weaponowned[wp_chainsaw]) newweapon = wp_chainsaw;
+        if (player->weaponowned[wp_chainsaw]) {
+          newweapon = wp_chainsaw;
+        }
         break;
       case 9:
         if (player->weaponowned[wp_supershotgun] && gamemode == commercial &&
-            player->ammo[am_shell] >= (demo_compatibility ? 3 : 2))
+            player->ammo[am_shell] >= (demo_compatibility ? 3 : 2)) {
           newweapon = wp_supershotgun;
+        }
         break;
     }
-  while (newweapon == currentweapon && --i);  // killough 5/2/98
+  } while (newweapon == currentweapon && --i);  // killough 5/2/98
   return newweapon;
 }
 
@@ -258,15 +276,18 @@ dboolean P_CheckAmmo(player_t *player) {
   ammotype_t ammo = weaponinfo[player->readyweapon].ammo;
   int count = 1;  // Regular
 
-  if (player->readyweapon == wp_bfg)  // Minimal amount for one shot varies.
+  if (player->readyweapon == wp_bfg) {  // Minimal amount for one shot varies.
     count = BFGCELLS;
-  else if (player->readyweapon == wp_supershotgun)  // Double barrel.
+  } else if (player->readyweapon == wp_supershotgun) {  // Double barrel.
     count = 2;
+  }
 
   // Some do not need ammunition anyway.
   // Return if current ammunition sufficient.
 
-  if (ammo == am_noammo || player->ammo[ammo] >= count) return true;
+  if (ammo == am_noammo || player->ammo[ammo] >= count) {
+    return true;
+  }
 
   // Out of ammo, pick a weapon to change to.
   //
@@ -291,7 +312,9 @@ dboolean P_CheckAmmo(player_t *player) {
 static void P_FireWeapon(player_t *player) {
   statenum_t newstate;
 
-  if (!P_CheckAmmo(player)) return;
+  if (!P_CheckAmmo(player)) {
+    return;
+  }
 
   P_SetMobjState(player->mo, S_PLAY_ATK1);
   newstate = weaponinfo[player->readyweapon].atkstate;
@@ -324,11 +347,13 @@ void A_WeaponReady(player_t *player, pspdef_t *psp) {
 
   // get out of attack state
   if (player->mo->state == &states[S_PLAY_ATK1] ||
-      player->mo->state == &states[S_PLAY_ATK2])
+      player->mo->state == &states[S_PLAY_ATK2]) {
     P_SetMobjState(player->mo, S_PLAY);
+  }
 
-  if (player->readyweapon == wp_chainsaw && psp->state == &states[S_SAW])
+  if (player->readyweapon == wp_chainsaw && psp->state == &states[S_SAW]) {
     S_StartSound(player->mo, sfx_sawidl);
+  }
 
   // check for change
   //  if player is dead, put the weapon away
@@ -350,8 +375,9 @@ void A_WeaponReady(player_t *player, pspdef_t *psp) {
       P_FireWeapon(player);
       return;
     }
-  } else
+  } else {
     player->attackdown = false;
+  }
 
   // bob the weapon based on movement speed
   {
@@ -409,7 +435,9 @@ void A_Lower(player_t *player, pspdef_t *psp) {
   psp->sy += LOWERSPEED;
 
   // Is already down.
-  if (psp->sy < WEAPONBOTTOM) return;
+  if (psp->sy < WEAPONBOTTOM) {
+    return;
+  }
 
   // Player is dead.
   if (player->playerstate == PST_DEAD) {
@@ -444,7 +472,9 @@ void A_Raise(player_t *player, pspdef_t *psp) {
 
   psp->sy -= RAISESPEED;
 
-  if (psp->sy > WEAPONTOP) return;
+  if (psp->sy > WEAPONTOP) {
+    return;
+  }
 
   psp->sy = WEAPONTOP;
 
@@ -468,11 +498,13 @@ static void A_FireSomething(player_t *player, int adder) {
                weaponinfo[player->readyweapon].flashstate + adder);
 
   // killough 3/27/98: prevent recoil in no-clipping mode
-  if (!(player->mo->flags & MF_NOCLIP))
-    if (!compatibility && weapon_recoil)
+  if (!(player->mo->flags & MF_NOCLIP)) {
+    if (!compatibility && weapon_recoil) {
       P_Thrust(player,
                ANG180 + player->mo->angle,                  //   ^
                2048 * recoil_values[player->readyweapon]);  //   |
+    }
+  }
 }  // phares
 
 //
@@ -505,7 +537,9 @@ void A_Punch(player_t *player, pspdef_t *psp) {
 
   damage = (P_Random(pr_punch) % 10 + 1) << 1;
 
-  if (player->powers[pw_strength]) damage *= 10;
+  if (player->powers[pw_strength]) {
+    damage *= 10;
+  }
 
   angle = player->mo->angle;
 
@@ -516,12 +550,15 @@ void A_Punch(player_t *player, pspdef_t *psp) {
   /* killough 8/2/98: make autoaiming prefer enemies */
   if (!mbf_features ||
       (slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MF_FRIEND),
-       !linetarget))
+       !linetarget)) {
     slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+  }
 
   P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 
-  if (!linetarget) return;
+  if (!linetarget) {
+    return;
+  }
 
   S_StartSound(player->mo, sfx_punch);
 
@@ -555,8 +592,9 @@ void A_Saw(player_t *player, pspdef_t *psp) {
    * killough 8/2/98: make autoaiming prefer enemies */
   if (!mbf_features ||
       (slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1, MF_FRIEND),
-       !linetarget))
+       !linetarget)) {
     slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1, 0);
+  }
 
   P_LineAttack(player->mo, angle, MELEERANGE + 1, slope, damage);
 
@@ -572,15 +610,17 @@ void A_Saw(player_t *player, pspdef_t *psp) {
                           linetarget->y);
 
   if (angle - player->mo->angle > ANG180) {
-    if (angle - player->mo->angle < -ANG90 / 20)
+    if (angle - player->mo->angle < -ANG90 / 20) {
       player->mo->angle = angle + ANG90 / 21;
-    else
+    } else {
       player->mo->angle -= ANG90 / 20;
+    }
   } else {
-    if (angle - player->mo->angle > ANG90 / 20)
+    if (angle - player->mo->angle > ANG90 / 20) {
       player->mo->angle = angle - ANG90 / 21;
-    else
+    } else {
       player->mo->angle += ANG90 / 20;
+    }
   }
 
   player->mo->flags |= MF_JUSTATTACKED;
@@ -630,15 +670,18 @@ int autoaim = 0;  // killough 7/19/98: autoaiming was not in original beta
 void A_FireOldBFG(player_t *player, pspdef_t *psp) {
   int type = MT_PLASMA1;
 
-  if (compatibility_level < mbf_compatibility) return;
+  if (compatibility_level < mbf_compatibility) {
+    return;
+  }
 
   CHECK_WEAPON_CODEPOINTER("A_FireOldBFG", player);
 
   weaponstats_register_shot(&weaponstats[wp_bfg]);
 
-  if (weapon_recoil && !(player->mo->flags & MF_NOCLIP))
+  if (weapon_recoil && !(player->mo->flags & MF_NOCLIP)) {
     P_Thrust(player, ANG180 + player->mo->angle,
              512 * recoil_values[wp_plasma]);
+  }
 
   if (!infammo) {
     player->ammo[weaponinfo[player->readyweapon].ammo]--;
@@ -659,11 +702,15 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp) {
       fixed_t slope;
       do {
         slope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT, mask);
-        if (!linetarget)
+        if (!linetarget) {
           slope = P_AimLineAttack(mo, an += 1 << 26, 16 * 64 * FRACUNIT, mask);
-        if (!linetarget)
+        }
+        if (!linetarget) {
           slope = P_AimLineAttack(mo, an -= 2 << 26, 16 * 64 * FRACUNIT, mask);
-        if (!linetarget) slope = 0, an = mo->angle;
+        }
+        if (!linetarget) {
+          slope = 0, an = mo->angle;
+        }
       } while (mask && (mask = 0, !linetarget));  // killough 8/2/98
       an1 += an - mo->angle;
       an2 += tantoangle[slope >> DBITS];
@@ -711,20 +758,22 @@ fixed_t bulletslope;
 static void P_BulletSlope(mobj_t *mo) {
   angle_t an = mo->angle;  // see which target is to be aimed at
 
-  if (comperr(comperr_freeaim))
+  if (comperr(comperr_freeaim)) {
     bulletslope = finetangent[(ANG90 - mo->pitch) >> ANGLETOFINESHIFT];
-  else {
+  } else {
     /* killough 8/2/98: make autoaiming prefer enemies */
     uint_64_t mask = mbf_features ? MF_FRIEND : 0;
 
     do {
       bulletslope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT, mask);
-      if (!linetarget)
+      if (!linetarget) {
         bulletslope =
             P_AimLineAttack(mo, an += 1 << 26, 16 * 64 * FRACUNIT, mask);
-      if (!linetarget)
+      }
+      if (!linetarget) {
         bulletslope =
             P_AimLineAttack(mo, an -= 2 << 26, 16 * 64 * FRACUNIT, mask);
+      }
     } while (mask && (mask = 0, !linetarget)); /* killough 8/2/98 */
   }
 }
@@ -789,7 +838,9 @@ void A_FireShotgun(player_t *player, pspdef_t *psp) {
 
   P_BulletSlope(player->mo);
 
-  for (i = 0; i < 7; i++) P_GunShot(player->mo, false);
+  for (i = 0; i < 7; i++) {
+    P_GunShot(player->mo, false);
+  }
 }
 
 //
@@ -835,10 +886,13 @@ void A_FireCGun(player_t *player, pspdef_t *psp) {
   weaponstats_register_shot(&weaponstats[wp_chaingun]);
 
   if (player->ammo[weaponinfo[player->readyweapon].ammo] ||
-      default_comp[comp_sound])
+      default_comp[comp_sound]) {
     S_StartSound(player->mo, sfx_chgun);
+  }
 
-  if (!player->ammo[weaponinfo[player->readyweapon].ammo]) return;
+  if (!player->ammo[weaponinfo[player->readyweapon].ammo]) {
+    return;
+  }
 
   P_SetMobjState(player->mo, S_PLAY_ATK2);
   if (!infammo) {
@@ -888,15 +942,20 @@ void A_BFGSpray(mobj_t *mo) {
     // killough 8/2/98: make autoaiming prefer enemies
     if (!mbf_features ||
         (P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, MF_FRIEND),
-         !linetarget))
+         !linetarget)) {
       P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, 0);
+    }
 
-    if (!linetarget) continue;
+    if (!linetarget) {
+      continue;
+    }
 
     P_SpawnMobj(linetarget->x, linetarget->y,
                 linetarget->z + (linetarget->height >> 2), MT_EXTRABFG);
 
-    for (damage = j = 0; j < 15; j++) damage += (P_Random(pr_bfg) & 7) + 1;
+    for (damage = j = 0; j < 15; j++) {
+      damage += (P_Random(pr_bfg) & 7) + 1;
+    }
 
     P_DamageMobj(linetarget, mo->target, mo->target, damage);
   }
@@ -921,7 +980,9 @@ void P_SetupPsprites(player_t *player) {
   int i;
 
   // remove all psprites
-  for (i = 0; i < NUMPSPRITES; i++) player->psprites[i].state = NULL;
+  for (i = 0; i < NUMPSPRITES; i++) {
+    player->psprites[i].state = NULL;
+  }
 
   // spawn the gun
   player->pendingweapon = player->readyweapon;
@@ -941,9 +1002,11 @@ void P_MovePsprites(player_t *player) {
   // drop tic count and possibly change state
   // a -1 tic count never changes
 
-  for (i = 0; i < NUMPSPRITES; i++, psp++)
-    if (psp->state && psp->tics != -1 && !--psp->tics)
+  for (i = 0; i < NUMPSPRITES; i++, psp++) {
+    if (psp->state && psp->tics != -1 && !--psp->tics) {
       P_SetPsprite(player, i, psp->state->nextstate);
+    }
+  }
 
   player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
   player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;

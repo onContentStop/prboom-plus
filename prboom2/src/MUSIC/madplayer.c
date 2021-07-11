@@ -103,10 +103,12 @@ static const void *mp_registersong(const void *data, unsigned len) {
 
   // if the stream begins with an ID3v2 magic, search hard and long for our
   // first valid header
-  if (memcmp(data, "ID3", 3) == 0) maxtry = 100;
-  // otherwise, search for not so long
-  else
+  if (memcmp(data, "ID3", 3) == 0) {
+    maxtry = 100;
+    // otherwise, search for not so long
+  } else {
     maxtry = 20;
+  }
 
   mad_stream_buffer(&Stream, (const unsigned char *)data, len);
 
@@ -162,8 +164,12 @@ static void mp_stop(void) { mp_playing = 0; }
 // convert from mad's internal fixed point representation
 static inline short mp_fixtoshort(mad_fixed_t f) {
   // clip
-  if (f < -MAD_F_ONE) f = -MAD_F_ONE;
-  if (f > MAD_F_ONE) f = MAD_F_ONE;
+  if (f < -MAD_F_ONE) {
+    f = -MAD_F_ONE;
+  }
+  if (f > MAD_F_ONE) {
+    f = MAD_F_ONE;
+  }
   // apply volume before conversion to 16bit
   f /= 15;
   f *= mp_volume;
@@ -187,8 +193,9 @@ static void mp_render_ex(void *dest, unsigned nsamp) {
     while (mp_leftoversamps > 0 && nsamp > 0) {
       short s = mp_fixtoshort(Synth.pcm.samples[0][mp_leftoversamppos]);
       *sout++ = s;
-      if (Synth.pcm.channels == 2)
+      if (Synth.pcm.channels == 2) {
         s = mp_fixtoshort(Synth.pcm.samples[1][mp_leftoversamppos]);
+      }
       // if mono, just duplicate the first channel again
       *sout++ = s;
 
@@ -196,7 +203,9 @@ static void mp_render_ex(void *dest, unsigned nsamp) {
       mp_leftoversamppos += 1;
       nsamp -= 1;
     }
-    if (nsamp == 0) return;  // done
+    if (nsamp == 0) {
+      return;  // done
+    }
 
     // decode next valid MP3 frame
     while (mad_frame_decode(&Frame, &Stream) != 0) {

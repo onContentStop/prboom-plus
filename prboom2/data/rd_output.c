@@ -33,20 +33,27 @@ static char *extract_lumpname(const char *filename) {
 
   // strip off directory prefix
   base = strrchr(filename, '/');
-  if (!base)
+  if (!base) {
     base = filename;
-  else
+  } else {
     base += 1;
+  }
 
-  if (!*base) die("Empty lumpname: %s\n", filename);
+  if (!*base) {
+    die("Empty lumpname: %s\n", filename);
+  }
 
   // copy the name
   lumpname = xstrdup(base);
 
   suffix = strrchr(lumpname, '.');
-  if (suffix) *suffix = '\0';
+  if (suffix) {
+    *suffix = '\0';
+  }
 
-  for (c = lumpname; *c; c++) *c = toupper(*c);
+  for (c = lumpname; *c; c++) {
+    *c = toupper(*c);
+  }
 
   return lumpname;
 }
@@ -108,7 +115,9 @@ void output_write(const char *filename) {
   }
 
   out = fopen(filename, "wb");
-  if (!out) die("Cannot open %s\n", filename);
+  if (!out) {
+    die("Cannot open %s\n", filename);
+  }
 
   // write wad header
   fwrite("PWAD", 4, 1, out);
@@ -116,8 +125,9 @@ void output_write(const char *filename) {
   write_u32(out, pos);
 
   // write lumps
-  for (i = numlumps, lump = dir; i; i--, lump++)
+  for (i = numlumps, lump = dir; i; i--, lump++) {
     fwrite(lump->data, lump->size, 1, out);
+  }
 
   // write wad directory
   for (i = numlumps, lump = dir; i; i--, lump++) {

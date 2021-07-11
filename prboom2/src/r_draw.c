@@ -180,9 +180,9 @@ static void (*R_FlushHTColumns)(void) = R_FlushHTError;
 static void (*R_FlushQuadColumn)(void) = R_QuadFlushError;
 
 static void R_FlushColumns(void) {
-  if (temp_x != 4 || commontop >= commonbot)
+  if (temp_x != 4 || commontop >= commonbot) {
     R_FlushWholeColumns();
-  else {
+  } else {
     R_FlushHTColumns();
     R_FlushQuadColumn();
   }
@@ -198,7 +198,9 @@ static void R_FlushColumns(void) {
 //
 void R_ResetColumnBuffer(void) {
   // haleyjd 10/06/05: this must not be done if temp_x == 0!
-  if (temp_x) R_FlushColumns();
+  if (temp_x) {
+    R_FlushColumns();
+  }
   temptype = COL_NONE;
   R_FlushWholeColumns = R_FlushWholeError;
   R_FlushHTColumns = R_FlushHTError;
@@ -803,9 +805,10 @@ R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type,
                                    enum draw_filter_type_e filter,
                                    enum draw_filter_type_e filterz) {
   R_DrawColumn_f result = drawcolumnfuncs[V_GetMode()][filterz][filter][type];
-  if (result == NULL)
+  if (result == NULL) {
     I_Error("R_GetDrawColumnFunc: undefined function (%d, %d, %d)", type,
             filter, filterz);
+  }
   return result;
 }
 
@@ -838,25 +841,30 @@ void R_InitTranslationTables(void) {
   // killough 5/2/98:
   // Remove dependency of colormaps aligned on 256-byte boundary
 
-  if (translationtables == NULL)  // CPhipps - allow multiple calls
+  if (translationtables == NULL) {  // CPhipps - allow multiple calls
     translationtables = Z_Malloc(256 * MAXTRANS, PU_STATIC, 0);
+  }
 
-  for (i = 0; i < MAXTRANS; i++) transtocolour[i] = 255;
+  for (i = 0; i < MAXTRANS; i++) {
+    transtocolour[i] = 255;
+  }
 
   for (i = 0; i < MAXPLAYERS; i++) {
     byte wantcolour = mapcolor_plyr[i];
     playernumtotrans[i] = 0;
-    if (wantcolour != 0x70)  // Not green, would like translation
-      for (j = 0; j < MAXTRANS; j++)
+    if (wantcolour != 0x70) {  // Not green, would like translation
+      for (j = 0; j < MAXTRANS; j++) {
         if (transtocolour[j] == 255) {
           transtocolour[j] = wantcolour;
           playernumtotrans[i] = j + 1;
           break;
         }
+      }
+    }
   }
 
   // translate just the 16 green colors
-  for (i = 0; i < 256; i++)
+  for (i = 0; i < 256; i++) {
     if (i >= 0x70 && i <= 0x7f) {
       // CPhipps - configurable player colours
       translationtables[i] = colormaps[0][((i & 0xf) << 9) + transtocolour[0]];
@@ -864,9 +872,11 @@ void R_InitTranslationTables(void) {
           colormaps[0][((i & 0xf) << 9) + transtocolour[1]];
       translationtables[i + 512] =
           colormaps[0][((i & 0xf) << 9) + transtocolour[2]];
-    } else  // Keep all other colors as is.
+    } else {  // Keep all other colors as is.
       translationtables[i] = translationtables[i + 256] =
           translationtables[i + 512] = i;
+    }
+  }
 }
 
 //
@@ -1113,8 +1123,9 @@ static R_DrawSpan_f drawspanfuncs[VID_MODEMAX][RDRAW_FILTER_MAXFILTERS]
 R_DrawSpan_f R_GetDrawSpanFunc(enum draw_filter_type_e filter,
                                enum draw_filter_type_e filterz) {
   R_DrawSpan_f result = drawspanfuncs[V_GetMode()][filterz][filter];
-  if (result == NULL)
+  if (result == NULL) {
     I_Error("R_GetDrawSpanFunc: undefined function (%d, %d)", filter, filterz);
+  }
   return result;
 }
 
@@ -1125,10 +1136,18 @@ void R_DrawSpan(draw_span_vars_t *dsvars) {
 void R_InitBuffersRes(void) {
   extern byte *solidcol;
 
-  if (solidcol) free(solidcol);
-  if (byte_tempbuf) free(byte_tempbuf);
-  if (short_tempbuf) free(short_tempbuf);
-  if (int_tempbuf) free(int_tempbuf);
+  if (solidcol) {
+    free(solidcol);
+  }
+  if (byte_tempbuf) {
+    free(byte_tempbuf);
+  }
+  if (short_tempbuf) {
+    free(short_tempbuf);
+  }
+  if (int_tempbuf) {
+    free(int_tempbuf);
+  }
 
   solidcol = calloc(1, SCREENWIDTH * sizeof(*solidcol));
   byte_tempbuf = calloc(1, (SCREENHEIGHT * 4) * sizeof(*byte_tempbuf));
@@ -1169,14 +1188,17 @@ void R_InitBuffer(int width, int height) {
   drawvars.int_pitch = screens[0].int_pitch;
 
   if (V_GetMode() == VID_MODE8) {
-    for (i = 0; i < FUZZTABLE; i++)
+    for (i = 0; i < FUZZTABLE; i++) {
       fuzzoffset[i] = fuzzoffset_org[i] * screens[0].byte_pitch;
+    }
   } else if ((V_GetMode() == VID_MODE15) || (V_GetMode() == VID_MODE16)) {
-    for (i = 0; i < FUZZTABLE; i++)
+    for (i = 0; i < FUZZTABLE; i++) {
       fuzzoffset[i] = fuzzoffset_org[i] * screens[0].short_pitch;
+    }
   } else if (V_GetMode() == VID_MODE32) {
-    for (i = 0; i < FUZZTABLE; i++)
+    for (i = 0; i < FUZZTABLE; i++) {
       fuzzoffset[i] = fuzzoffset_org[i] * screens[0].int_pitch;
+    }
   }
 }
 
@@ -1191,7 +1213,9 @@ void R_InitBuffer(int width, int height) {
 void R_FillBackScreen(void) {
   int automap = ((automapmode & am_active) && !(automapmode & am_overlay));
 
-  if (grnrock.lumpnum == 0) return;
+  if (grnrock.lumpnum == 0) {
+    return;
+  }
 
   // e6y: wide-res
   if (ratio_multiplier != ratio_scale || wide_offsety) {
@@ -1225,7 +1249,9 @@ void R_FillBackScreen(void) {
     }
   }
 
-  if (scaledviewwidth == SCREENWIDTH) return;
+  if (scaledviewwidth == SCREENWIDTH) {
+    return;
+  }
 
   V_FillFlat(grnrock.lumpnum, 1, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_NONE);
 
@@ -1267,10 +1293,11 @@ void R_FillBackScreen(void) {
 //
 
 void R_VideoErase(int x, int y, int count) {
-  if (V_GetMode() != VID_MODEGL)
+  if (V_GetMode() != VID_MODEGL) {
     memcpy(screens[0].data + y * screens[0].byte_pitch + x * V_GetPixelDepth(),
            screens[1].data + y * screens[1].byte_pitch + x * V_GetPixelDepth(),
            count * V_GetPixelDepth());  // LFB copy.
+  }
 }
 
 //
@@ -1300,14 +1327,17 @@ void R_DrawViewBorder(void) {
     }
   }
 
-  if (viewheight >= (SCREENHEIGHT - ST_SCALED_HEIGHT))
+  if (viewheight >= (SCREENHEIGHT - ST_SCALED_HEIGHT)) {
     return;  // if high-res, don't go any further!
+  }
 
   top = ((SCREENHEIGHT - ST_SCALED_HEIGHT) - viewheight) / 2;
   side = (SCREENWIDTH - scaledviewwidth) / 2;
 
   // copy top
-  for (i = 0; i < top; i++) R_VideoErase(0, i, SCREENWIDTH);
+  for (i = 0; i < top; i++) {
+    R_VideoErase(0, i, SCREENWIDTH);
+  }
 
   // copy sides
   for (i = top; i < (top + viewheight); i++) {
@@ -1316,6 +1346,7 @@ void R_DrawViewBorder(void) {
   }
 
   // copy bottom
-  for (i = top + viewheight; i < (SCREENHEIGHT - ST_SCALED_HEIGHT); i++)
+  for (i = top + viewheight; i < (SCREENHEIGHT - ST_SCALED_HEIGHT); i++) {
     R_VideoErase(0, i, SCREENWIDTH);
+  }
 }

@@ -88,10 +88,13 @@ int I_GetTime_RealTime(void) {
   if (!basetime) {
     basetime = thistimereply;
     thistimereply = 0;
-  } else
+  } else {
     thistimereply -= basetime;
+  }
 
-  if (thistimereply < lasttimereply) thistimereply = lasttimereply;
+  if (thistimereply < lasttimereply) {
+    thistimereply = lasttimereply;
+  }
 
   return (lasttimereply = thistimereply);
 }
@@ -123,10 +126,11 @@ const char* I_GetVersionString(char* buf, size_t sz) {
  */
 const char* I_SigString(char* buf, size_t sz, int signum) {
 #ifdef HAVE_STRSIGNAL
-  if (strsignal(signum) && strlen(strsignal(signum)) < sz)
+  if (strsignal(signum) && strlen(strsignal(signum)) < sz) {
     strcpy(buf, strsignal(signum));
-  else
+  } else {
 #endif
     sprintf(buf, "signal %d", signum);
+  }
   return buf;
 }

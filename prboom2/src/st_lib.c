@@ -100,14 +100,17 @@ static void STlib_drawNum(st_number_t* n, int cm, dboolean refresh) {
   // differences, and then went and constantly redrew all the numbers.
   // return without drawing if the number didn't change and the bar
   // isn't refreshing.
-  if (n->oldnum == num && !refresh) return;
+  if (n->oldnum == num && !refresh) {
+    return;
+  }
 
   // CPhipps - compact some code, use num instead of *n->num
   if ((neg = (n->oldnum = num) < 0)) {
-    if (numdigits == 2 && num < -9)
+    if (numdigits == 2 && num < -9) {
       num = -9;
-    else if (numdigits == 3 && num < -99)
+    } else if (numdigits == 3 && num < -99) {
       num = -99;
+    }
 
     num = -num;
   }
@@ -122,18 +125,21 @@ static void STlib_drawNum(st_number_t* n, int cm, dboolean refresh) {
   V_CopyRect(BG, FG, x, n->y, w * numdigits, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
 
   // if non-number, do not draw it
-  if (num == 1994) return;
+  if (num == 1994) {
+    return;
+  }
 
   x = n->x;
 
   // jff 2/16/98 add color translation to digit output
   // in the special case of 0, you draw 0
-  if (!num)
+  if (!num) {
     // CPhipps - patch drawing updated, reformatted
     V_DrawNumPatch(
         x - w, n->y, FG, n->p[0].lumpnum, cm,
         (((cm != CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) |
             VPT_ALIGN_BOTTOM);
+  }
 
   // draw the new number
   // jff 2/16/98 add color translation to digit output
@@ -151,11 +157,12 @@ static void STlib_drawNum(st_number_t* n, int cm, dboolean refresh) {
   // jff 2/16/98 add color translation to digit output
   // cph - patch drawing updated, load by name instead of acquiring pointer
   // earlier
-  if (neg)
+  if (neg) {
     V_DrawNamePatch(
         x - w, n->y, FG, "STTMINUS", cm,
         (((cm != CR_DEFAULT) && !sts_always_red) ? VPT_TRANS : VPT_NONE) |
             VPT_ALIGN_BOTTOM);
+  }
 }
 
 /*
@@ -170,7 +177,9 @@ static void STlib_drawNum(st_number_t* n, int cm, dboolean refresh) {
  * cphipps 10/99 - make that pointer const
  */
 void STlib_updateNum(st_number_t* n, int cm, dboolean refresh) {
-  if (*n->on) STlib_drawNum(n, cm, refresh);
+  if (*n->on) {
+    STlib_drawNum(n, cm, refresh);
+  }
 }
 
 //
@@ -263,9 +272,10 @@ void STlib_updateMultIcon(st_multicon_t* mi, dboolean refresh) {
 
       V_CopyRect(BG, FG, x, y, w, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
     }
-    if (*mi->inum != -1)  // killough 2/16/98: redraw only if != -1
+    if (*mi->inum != -1) {  // killough 2/16/98: redraw only if != -1
       V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT,
                      VPT_ALIGN_BOTTOM);
+    }
     mi->oldinum = *mi->inum;
   }
 }
@@ -319,10 +329,11 @@ void STlib_updateBinIcon(st_binicon_t* bi, dboolean refresh) {
     if (y - ST_Y < 0) I_Error("STlib_updateBinIcon: y - ST_Y < 0");
 #endif
 
-    if (*bi->val)
+    if (*bi->val) {
       V_DrawNumPatch(bi->x, bi->y, FG, bi->p->lumpnum, CR_DEFAULT, VPT_STRETCH);
-    else
+    } else {
       V_CopyRect(BG, FG, x, y, w, h, VPT_STRETCH);
+    }
 
     bi->oldval = *bi->val;
   }

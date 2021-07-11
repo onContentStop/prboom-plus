@@ -189,13 +189,27 @@ static const char *const ActorNames[] = {
 // -----------------------------------------------
 
 static void FreeMap(MapEntry *mape) {
-  if (mape->mapname) free(mape->mapname);
-  if (mape->levelname) free(mape->levelname);
-  if (mape->label) free(mape->label);
-  if (mape->intertext) free(mape->intertext);
-  if (mape->intertextsecret) free(mape->intertextsecret);
-  if (mape->properties) free(mape->properties);
-  if (mape->bossactions) free(mape->bossactions);
+  if (mape->mapname) {
+    free(mape->mapname);
+  }
+  if (mape->levelname) {
+    free(mape->levelname);
+  }
+  if (mape->label) {
+    free(mape->label);
+  }
+  if (mape->intertext) {
+    free(mape->intertext);
+  }
+  if (mape->intertextsecret) {
+    free(mape->intertextsecret);
+  }
+  if (mape->properties) {
+    free(mape->properties);
+  }
+  if (mape->bossactions) {
+    free(mape->bossactions);
+  }
   mape->propertycount = 0;
   mape->mapname = NULL;
   mape->properties = NULL;
@@ -213,7 +227,9 @@ void FreeMapList() {
 }
 
 void ReplaceString(char **pptr, const char *newstring) {
-  if (*pptr != NULL) free(*pptr);
+  if (*pptr != NULL) {
+    free(*pptr);
+  }
   *pptr = strdup(newstring);
 }
 
@@ -237,9 +253,9 @@ static char *ParseMultiString(Scanner &scanner, int error) {
 
   do {
     scanner.MustGetToken(TK_StringConst);
-    if (build == NULL)
+    if (build == NULL) {
       build = strdup(scanner.string);
-    else {
+    } else {
       size_t newlen = strlen(build) + strlen(scanner.string) +
                       2;  // strlen for both the existing text and the new line,
                           // plus room for one \n and one \0
@@ -295,9 +311,9 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     ReplaceString(&mape->levelname, scanner.string);
   } else if (!stricmp(pname, "label")) {
     if (scanner.CheckToken(TK_Identifier)) {
-      if (!stricmp(scanner.string, "clear"))
+      if (!stricmp(scanner.string, "clear")) {
         ReplaceString(&mape->label, "-");
-      else {
+      } else {
         scanner.ErrorF("Either 'clear' or string constant expected");
         return 0;
       }
@@ -327,22 +343,25 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     ParseLumpName(scanner, mape->endpic);
   } else if (!stricmp(pname, "endcast")) {
     scanner.MustGetToken(TK_BoolConst);
-    if (scanner.boolean)
+    if (scanner.boolean) {
       strcpy(mape->endpic, "$CAST");
-    else
+    } else {
       strcpy(mape->endpic, "-");
+    }
   } else if (!stricmp(pname, "endbunny")) {
     scanner.MustGetToken(TK_BoolConst);
-    if (scanner.boolean)
+    if (scanner.boolean) {
       strcpy(mape->endpic, "$BUNNY");
-    else
+    } else {
       strcpy(mape->endpic, "-");
+    }
   } else if (!stricmp(pname, "endgame")) {
     scanner.MustGetToken(TK_BoolConst);
-    if (scanner.boolean)
+    if (scanner.boolean) {
       strcpy(mape->endpic, "!");
-    else
+    } else {
       strcpy(mape->endpic, "-");
+    }
   } else if (!stricmp(pname, "exitpic")) {
     ParseLumpName(scanner, mape->exitpic);
   } else if (!stricmp(pname, "enterpic")) {
@@ -355,13 +374,21 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     mape->partime = TICRATE * scanner.number;
   } else if (!stricmp(pname, "intertext")) {
     char *lname = ParseMultiString(scanner, 1);
-    if (!lname) return 0;
-    if (mape->intertext != NULL) free(mape->intertext);
+    if (!lname) {
+      return 0;
+    }
+    if (mape->intertext != NULL) {
+      free(mape->intertext);
+    }
     mape->intertext = lname;
   } else if (!stricmp(pname, "intertextsecret")) {
     char *lname = ParseMultiString(scanner, 1);
-    if (!lname) return 0;
-    if (mape->intertextsecret != NULL) free(mape->intertextsecret);
+    if (!lname) {
+      return 0;
+    }
+    if (mape->intertextsecret != NULL) {
+      free(mape->intertextsecret);
+    }
     mape->intertextsecret = lname;
   } else if (!stricmp(pname, "interbackdrop")) {
     ParseLumpName(scanner, mape->interbackdrop);
@@ -369,9 +396,9 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     ParseLumpName(scanner, mape->intermusic);
   } else if (!stricmp(pname, "episode")) {
     if (scanner.CheckToken(TK_Identifier)) {
-      if (!stricmp(scanner.string, "clear"))
+      if (!stricmp(scanner.string, "clear")) {
         M_ClearEpisodes();
-      else {
+      } else {
         scanner.ErrorF("Either 'clear' or string constant expected");
         return 0;
       }
@@ -392,8 +419,12 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
 
       M_AddEpisode(mape->mapname, lumpname, alttext, key);
 
-      if (alttext) free(alttext);
-      if (key) free(key);
+      if (alttext) {
+        free(alttext);
+      }
+      if (key) {
+        free(key);
+      }
     }
   } else if (!stricmp(pname, "bossaction")) {
     scanner.MustGetToken(TK_Identifier);
@@ -401,13 +432,17 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     if (!stricmp(scanner.string, "clear")) {
       // mark level free of boss actions
       classnum = special = tag = -1;
-      if (mape->bossactions) free(mape->bossactions);
+      if (mape->bossactions) {
+        free(mape->bossactions);
+      }
       mape->bossactions = NULL;
       mape->numbossactions = -1;
     } else {
       int i;
       for (i = 0; ActorNames[i]; i++) {
-        if (!stricmp(scanner.string, ActorNames[i])) break;
+        if (!stricmp(scanner.string, ActorNames[i])) {
+          break;
+        }
       }
       if (ActorNames[i] == NULL) {
         scanner.ErrorF("Unknown thing type %s", scanner.string);
@@ -423,10 +458,11 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
       // allow no 0-tag specials here, unless a level exit.
       if (tag != 0 || special == 11 || special == 51 || special == 52 ||
           special == 124) {
-        if (mape->numbossactions == -1)
+        if (mape->numbossactions == -1) {
           mape->numbossactions = 1;
-        else
+        } else {
           mape->numbossactions++;
+        }
         mape->bossactions = (struct BossAction *)realloc(
             mape->bossactions,
             sizeof(struct BossAction) * mape->numbossactions);
@@ -437,7 +473,9 @@ static int ParseStandardProperty(Scanner &scanner, MapEntry *mape) {
     }
   } else {
     do {
-      if (!scanner.CheckFloat()) scanner.GetNextToken();
+      if (!scanner.CheckFloat()) {
+        scanner.GetNextToken();
+      }
       if (scanner.token > TK_BoolConst) {
         scanner.Error(TK_Identifier);
       }
@@ -497,26 +535,27 @@ int ParseUMapInfo(const unsigned char *buffer, size_t length,
     if (parsed.endpic[0] && (strcmp(parsed.endpic, "-") != 0)) {
       parsed.nextmap[0] = parsed.nextsecret[0] = 0;
     } else if (!parsed.nextmap[0] && !parsed.endpic[0]) {
-      if (!stricmp(parsed.mapname, "MAP30"))
+      if (!stricmp(parsed.mapname, "MAP30")) {
         strcpy(parsed.endpic, "$CAST");
-      else if (!stricmp(parsed.mapname, "E1M8"))
+      } else if (!stricmp(parsed.mapname, "E1M8")) {
         strcpy(parsed.endpic, gamemode == retail ? "CREDIT" : "HELP2");
-      else if (!stricmp(parsed.mapname, "E2M8"))
+      } else if (!stricmp(parsed.mapname, "E2M8")) {
         strcpy(parsed.endpic, "VICTORY");
-      else if (!stricmp(parsed.mapname, "E3M8"))
+      } else if (!stricmp(parsed.mapname, "E3M8")) {
         strcpy(parsed.endpic, "$BUNNY");
-      else if (!stricmp(parsed.mapname, "E4M8"))
+      } else if (!stricmp(parsed.mapname, "E4M8")) {
         strcpy(parsed.endpic, "ENDPIC");
-      else if (gamemission == chex && !stricmp(parsed.mapname, "E1M5"))
+      } else if (gamemission == chex && !stricmp(parsed.mapname, "E1M5")) {
         strcpy(parsed.endpic, "CREDIT");
-      else {
+      } else {
         int ep, map;
         G_ValidateMapName(parsed.mapname, &ep, &map);
         map++;
-        if (gamemode == commercial)
+        if (gamemode == commercial) {
           sprintf(parsed.nextmap, "MAP%02d", map);
-        else
+        } else {
           sprintf(parsed.nextmap, "E%dM%d", ep, map);
+        }
       }
     }
 

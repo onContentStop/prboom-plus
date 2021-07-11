@@ -73,10 +73,11 @@ extern int realtic_clock_rate;
 void D_Display(fixed_t frac);
 
 void M_ChangeUncappedFrameRate(void) {
-  if (capturing_video)
+  if (capturing_video) {
     movement_smooth = true;
-  else
+  } else {
     movement_smooth = (singletics ? false : movement_smooth_default);
+  }
 }
 
 void R_InitInterpolation(void) {
@@ -105,7 +106,9 @@ void R_InterpolateView(player_t *player, fixed_t frac) {
     oviewer = player->mo;
   }
 
-  if (NoInterpolate) frac = FRACUNIT;
+  if (NoInterpolate) {
+    frac = FRACUNIT;
+  }
   tic_vars.frac = frac;
 
   if (movement_smooth) {
@@ -291,15 +294,21 @@ static void R_DoAnInterpolation(int i, fixed_t smoothratio) {
 
 void R_UpdateInterpolations() {
   int i;
-  if (!movement_smooth) return;
-  for (i = numinterpolations - 1; i >= 0; --i) R_CopyInterpToOld(i);
+  if (!movement_smooth) {
+    return;
+  }
+  for (i = numinterpolations - 1; i >= 0; --i) {
+    R_CopyInterpToOld(i);
+  }
 }
 
 int interpolations_max = 0;
 
 static void R_SetInterpolation(interpolation_type_e type, void *posptr) {
   int *i;
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   if (numinterpolations >= interpolations_max) {
     int prevmax = interpolations_max;
@@ -355,7 +364,9 @@ static void R_StopInterpolation(interpolation_type_e type, void *posptr) {
   int *i, *j;
   void *posptr_last;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   i = NULL;
   switch (type) {
@@ -420,7 +431,9 @@ static void R_StopInterpolation(interpolation_type_e type, void *posptr) {
 void R_StopAllInterpolations(void) {
   int i;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   for (i = numinterpolations - 1; i >= 0; --i) {
     numinterpolations--;
@@ -446,7 +459,9 @@ void R_StopAllInterpolations(void) {
 void R_RestoreInterpolations(void) {
   int i;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   if (didInterp) {
     didInterp = false;
@@ -460,11 +475,17 @@ void R_ActivateSectorInterpolations() {
   int i;
   sector_t *sec;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   for (i = 0, sec = sectors; i < numsectors; i++, sec++) {
-    if (sec->floordata) R_SetInterpolation(INTERP_SectorFloor, sec);
-    if (sec->ceilingdata) R_SetInterpolation(INTERP_SectorCeiling, sec);
+    if (sec->floordata) {
+      R_SetInterpolation(INTERP_SectorFloor, sec);
+    }
+    if (sec->ceilingdata) {
+      R_SetInterpolation(INTERP_SectorCeiling, sec);
+    }
   }
 }
 
@@ -515,14 +536,18 @@ void R_ActivateThinkerInterpolations(thinker_t *th) {
   void *posptr2;
   interpolation_type_e type1, type2;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   R_InterpolationGetData(th, &type1, &type2, &posptr1, &posptr2);
 
   if (posptr1) {
     R_SetInterpolation(type1, posptr1);
 
-    if (posptr2) R_SetInterpolation(type2, posptr2);
+    if (posptr2) {
+      R_SetInterpolation(type2, posptr2);
+    }
   }
 }
 
@@ -531,12 +556,16 @@ void R_StopInterpolationIfNeeded(thinker_t *th) {
   void *posptr2;
   interpolation_type_e type1, type2;
 
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   R_InterpolationGetData(th, &type1, &type2, &posptr1, &posptr2);
 
   if (posptr1) {
     R_StopInterpolation(type1, posptr1);
-    if (posptr2) R_StopInterpolation(type2, posptr2);
+    if (posptr2) {
+      R_StopInterpolation(type2, posptr2);
+    }
   }
 }

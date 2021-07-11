@@ -88,7 +88,9 @@ static void W_ReportLocks(void) {
 void W_InitCache(void) {
   // set up caching
   cachelump = calloc(sizeof *cachelump, numlumps);
-  if (!cachelump) I_Error("W_Init: Couldn't allocate lumpcache");
+  if (!cachelump) {
+    I_Error("W_Init: Couldn't allocate lumpcache");
+  }
 
 #ifdef TIMEDIAG
   I_AtExit(W_ReportLocks, true);
@@ -110,9 +112,10 @@ const void *W_CacheLumpNum(int lump) {
     I_Error("W_CacheLumpNum: %i >= numlumps", lump);
 #endif
 
-  if (!cachelump[lump].cache)  // read the lump in
+  if (!cachelump[lump].cache) {  // read the lump in
     W_ReadLump(lump,
                Z_Malloc(W_LumpLength(lump), PU_CACHE, &cachelump[lump].cache));
+  }
 
   /* cph - if wasn't locked but now is, tell z_zone to hold it */
   if (!cachelump[lump].locks && locks) {
@@ -140,6 +143,7 @@ void W_UnlockLumpNum(int lump) {
   /* cph - Note: must only tell z_zone to make purgeable if currently locked,
    * else it might already have been purged
    */
-  if (unlocks && !cachelump[lump].locks)
+  if (unlocks && !cachelump[lump].locks) {
     Z_ChangeTag(cachelump[lump].cache, PU_CACHE);
+  }
 }

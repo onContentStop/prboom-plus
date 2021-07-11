@@ -57,14 +57,17 @@
 void T_FireFlicker(fireflicker_t* flick) {
   int amount;
 
-  if (--flick->count) return;
+  if (--flick->count) {
+    return;
+  }
 
   amount = (P_Random(pr_lights) & 3) * 16;
 
-  if (flick->sector->lightlevel - amount < flick->minlight)
+  if (flick->sector->lightlevel - amount < flick->minlight) {
     flick->sector->lightlevel = flick->minlight;
-  else
+  } else {
     flick->sector->lightlevel = flick->maxlight - amount;
+  }
 
   flick->count = 4;
 }
@@ -78,7 +81,9 @@ void T_FireFlicker(fireflicker_t* flick) {
 // Returns nothing
 //
 void T_LightFlash(lightflash_t* flash) {
-  if (--flash->count) return;
+  if (--flash->count) {
+    return;
+  }
 
   if (flash->sector->lightlevel == flash->maxlight) {
     flash->sector->lightlevel = flash->minlight;
@@ -98,7 +103,9 @@ void T_LightFlash(lightflash_t* flash) {
 // Returns nothing
 //
 void T_StrobeFlash(strobe_t* flash) {
-  if (--flash->count) return;
+  if (--flash->count) {
+    return;
+  }
 
   if (flash->sector->lightlevel == flash->minlight) {
     flash->sector->lightlevel = flash->maxlight;
@@ -230,15 +237,18 @@ void P_SpawnStrobeFlash(sector_t* sector, int fastOrSlow, int inSync) {
   flash->maxlight = sector->lightlevel;
   flash->minlight = P_FindMinSurroundingLight(sector, sector->lightlevel);
 
-  if (flash->minlight == flash->maxlight) flash->minlight = 0;
+  if (flash->minlight == flash->maxlight) {
+    flash->minlight = 0;
+  }
 
   // nothing special about it during gameplay
   sector->special &= ~31;  // jff 3/14/98 clear non-generalized sector type
 
-  if (!inSync)
+  if (!inSync) {
     flash->count = (P_Random(pr_lights) & 7) + 1;
-  else
+  } else {
     flash->count = 1;
+  }
 }
 
 //
@@ -291,8 +301,9 @@ int EV_StartLightStrobing(line_t* line) {
   while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0) {
     sec = &sectors[secnum];
     // if already doing a lighting function, don't start a second
-    if (P_SectorActive(lighting_special, sec))  // jff 2/22/98
+    if (P_SectorActive(lighting_special, sec)) {  // jff 2/22/98
       continue;
+    }
 
     P_SpawnStrobeFlash(sec, SLOWDARK, 0);
   }
@@ -319,10 +330,12 @@ int EV_TurnTagLightsOff(line_t* line) {
     sector_t *sector = sectors + j, *tsec;
     int i, min = sector->lightlevel;
     // find min neighbor light level
-    for (i = 0; i < sector->linecount; i++)
+    for (i = 0; i < sector->linecount; i++) {
       if ((tsec = getNextSector(sector->lines[i], sector)) &&
-          tsec->lightlevel < min)
+          tsec->lightlevel < min) {
         min = tsec->lightlevel;
+      }
+    }
     sector->lightlevel = min;
   }
   return 1;
@@ -351,17 +364,22 @@ int EV_LightTurnOn(line_t* line, int bright) {
 
     // bright = 0 means to search for highest light level surrounding sector
 
-    if (!bright)
-      for (j = 0; j < sector->linecount; j++)
+    if (!bright) {
+      for (j = 0; j < sector->linecount; j++) {
         if ((temp = getNextSector(sector->lines[j], sector)) &&
-            temp->lightlevel > tbright)
+            temp->lightlevel > tbright) {
           tbright = temp->lightlevel;
+        }
+      }
+    }
 
     sector->lightlevel = tbright;
 
     // jff 5/17/98 unless compatibility optioned
     // then maximum near ANY tagged sector
-    if (comp[comp_model]) bright = tbright;
+    if (comp[comp_model]) {
+      bright = tbright;
+    }
   }
   return 1;
 }
@@ -382,20 +400,28 @@ int EV_LightTurnOn(line_t* line, int bright) {
 int EV_LightTurnOnPartway(line_t* line, fixed_t level) {
   int i;
 
-  if (level < 0)  // clip at extremes
+  if (level < 0) {  // clip at extremes
     level = 0;
-  if (level > FRACUNIT) level = FRACUNIT;
+  }
+  if (level > FRACUNIT) {
+    level = FRACUNIT;
+  }
 
   // search all sectors for ones with same tag as activating line
   for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;) {
     sector_t *temp, *sector = sectors + i;
     int j, bright = 0, min = sector->lightlevel;
 
-    for (j = 0; j < sector->linecount; j++)
+    for (j = 0; j < sector->linecount; j++) {
       if ((temp = getNextSector(sector->lines[j], sector))) {
-        if (temp->lightlevel > bright) bright = temp->lightlevel;
-        if (temp->lightlevel < min) min = temp->lightlevel;
+        if (temp->lightlevel > bright) {
+          bright = temp->lightlevel;
+        }
+        if (temp->lightlevel < min) {
+          min = temp->lightlevel;
+        }
       }
+    }
 
     sector->lightlevel =  // Set level in-between extremes
         (level * bright + (FRACUNIT - level) * min) >> FRACBITS;

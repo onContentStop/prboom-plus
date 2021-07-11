@@ -246,17 +246,20 @@ void gld_DrawStripsSky(void) {
   GLTexture *gltexture = NULL;
 
   if (gl_drawskys == skytype_standard) {
-    if (comp[comp_skymap] && gl_shared_texture_palette)
+    if (comp[comp_skymap] && gl_shared_texture_palette) {
       glDisable(GL_SHARED_TEXTURE_PALETTE_EXT);
+    }
 
-    if (comp[comp_skymap] && (invul_method & INVUL_BW))
+    if (comp[comp_skymap] && (invul_method & INVUL_BW)) {
       glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    }
 
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
     glEnable(GL_TEXTURE_GEN_Q);
-    if (comp[comp_skymap] || !(invul_method & INVUL_BW))
+    if (comp[comp_skymap] || !(invul_method & INVUL_BW)) {
       glColor4fv(gl_whitecolor);
+    }
 
     SetTextureMode(TM_OPAQUE);
   }
@@ -319,11 +322,13 @@ void gld_DrawStripsSky(void) {
     glDisable(GL_TEXTURE_GEN_T);
     glDisable(GL_TEXTURE_GEN_S);
 
-    if (comp[comp_skymap] && (invul_method & INVUL_BW))
+    if (comp[comp_skymap] && (invul_method & INVUL_BW)) {
       glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_COMBINE);
+    }
 
-    if (comp[comp_skymap] && gl_shared_texture_palette)
+    if (comp[comp_skymap] && gl_shared_texture_palette) {
       glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
+    }
 
     SetFrameTextureMode();
   }
@@ -593,7 +598,9 @@ static void SkyVertex(vbo_vertex_t *vbo, int r, int c) {
   float timesRepeat;
 
   timesRepeat = (short)(4 * (256.0f / texw));
-  if (timesRepeat == 0.0f) timesRepeat = 1.0f;
+  if (timesRepeat == 0.0f) {
+    timesRepeat = 1.0f;
+  }
 
   if (!foglayer) {
     vbo->r = 255;
@@ -611,7 +618,9 @@ static void SkyVertex(vbo_vertex_t *vbo, int r, int c) {
       vbo->v = ((rows - r) / (float)rows) * 1.f * yMult + yAdd;
     }
 
-    if (SkyBox.wall.flag == GLDWF_SKYFLIP) vbo->u = -vbo->u;
+    if (SkyBox.wall.flag == GLDWF_SKYFLIP) {
+      vbo->u = -vbo->u;
+    }
   }
 
   if (r != 4) {
@@ -651,7 +660,9 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky,
   vbo->rows = row_count;
 
   texh = sky->wall.gltexture->buffer_height;
-  if (texh > 190 && gl_stretchsky) texh = 190;
+  if (texh > 190 && gl_stretchsky) {
+    texh = 190;
+  }
   texw = sky->wall.gltexture->buffer_width;
 
   vertex_p = &vbo->data[0];
@@ -669,10 +680,11 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky,
       SkyColor = &sky->CeilingSkyColor[vbo_idx];
     } else {
       SkyColor = &sky->FloorSkyColor[vbo_idx];
-      if (texh <= 180)
+      if (texh <= 180) {
         yMult = 1.0f;
-      else
+      } else {
         yAdd += 180.0f / texh;
+      }
     }
 
     delta = 0.0f;
@@ -715,12 +727,15 @@ static void RenderDome(SkyBoxParams_t *sky) {
   int vbosize;
   GLSkyVBO *vbo;
 
-  if (!sky || !sky->wall.gltexture) return;
+  if (!sky || !sky->wall.gltexture) {
+    return;
+  }
 
-  if (invul_method == INVUL_CM && frame_fixedcolormap == INVERSECOLORMAP)
+  if (invul_method == INVUL_CM && frame_fixedcolormap == INVERSECOLORMAP) {
     vbo = &sky_vbo[1];
-  else
+  } else {
     vbo = &sky_vbo[0];
+  }
 
 #if defined(USE_VERTEX_ARRAYS) || defined(USE_VBO)
   // be sure the second ARB is not enabled
@@ -788,7 +803,9 @@ static void RenderDome(SkyBoxParams_t *sky) {
     if (texh <= 180) {
       glScalef(1.0f, (float)texh / 230.0f, 1.0f);
     } else {
-      if (texh > 190) glScalef(1.0f, 230.0f / 240.0f, 1.0f);
+      if (texh > 190) {
+        glScalef(1.0f, 230.0f / 240.0f, 1.0f);
+      }
     }
   }
 
@@ -798,7 +815,9 @@ static void RenderDome(SkyBoxParams_t *sky) {
     for (i = 0; i < vbo->loopcount; i++) {
       GLSkyLoopDef *loop = &vbo->loops[i];
 
-      if (j == 0 ? loop->use_texture : !loop->use_texture) continue;
+      if (j == 0 ? loop->use_texture : !loop->use_texture) {
+        continue;
+      }
 
 #if defined(USE_VERTEX_ARRAYS) || defined(USE_VBO)
       glDrawArrays(loop->mode, loop->vertexindex, loop->vertexcount);
@@ -903,10 +922,11 @@ void R_SetBoxSkybox(int texture) {
 }
 
 box_skybox_t *R_GetBoxSkybox(int index) {
-  if (index >= 0 && index < BoxSkyboxCount)
+  if (index >= 0 && index < BoxSkyboxCount) {
     return &BoxSkybox[index];
-  else
+  } else {
     return NULL;
+  }
 }
 
 void gld_ParseSkybox(void) {
@@ -999,7 +1019,9 @@ int gld_DrawBoxSkyBox(void) {
   int faces;
   box_skybox_t *sb;
 
-  if (BoxSkyboxCount == 0) return false;
+  if (BoxSkyboxCount == 0) {
+    return false;
+  }
 
   if (SkyBox.side) {
     sb = R_GetBoxSkybox(SkyBox.side->skybox_index);

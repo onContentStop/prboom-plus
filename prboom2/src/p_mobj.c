@@ -72,9 +72,10 @@ dboolean P_SetMobjState(mobj_t* mobj, statenum_t state) {
   dboolean ret = true;                         // return value
   statenum_t* tempstate = NULL;                // for use with recursion
 
-  if (recursion++)  // if recursion detected,
+  if (recursion++) {  // if recursion detected,
     seenstate = tempstate =
         calloc(NUMSTATES, sizeof(statenum_t));  // allocate state table
+  }
 
   do {
     if (state == S_NULL) {
@@ -93,21 +94,28 @@ dboolean P_SetMobjState(mobj_t* mobj, statenum_t state) {
     // Modified handling.
     // Call action functions when the state is set
 
-    if (st->action) st->action(mobj);
+    if (st->action) {
+      st->action(mobj);
+    }
 
     seenstate[state] = 1 + st->nextstate;  // killough 4/9/98
 
     state = st->nextstate;
   } while (!mobj->tics && !seenstate[state]);  // killough 4/9/98
 
-  if (ret && !mobj->tics)  // killough 4/9/98: detect state cycles
+  if (ret && !mobj->tics) {  // killough 4/9/98: detect state cycles
     doom_printf("Warning: State Cycle Detected");
+  }
 
-  if (!--recursion)
-    for (; (state = seenstate[i]); i = state - 1)
+  if (!--recursion) {
+    for (; (state = seenstate[i]); i = state - 1) {
       seenstate[i] = 0;  // killough 4/9/98: erase memory of states
+    }
+  }
 
-  if (tempstate) free(tempstate);
+  if (tempstate) {
+    free(tempstate);
+  }
 
   return ret;
 }
@@ -123,11 +131,15 @@ void P_ExplodeMissile(mobj_t* mo) {
 
   mo->tics -= P_Random(pr_explode) & 3;
 
-  if (mo->tics < 1) mo->tics = 1;
+  if (mo->tics < 1) {
+    mo->tics = 1;
+  }
 
   mo->flags &= ~MF_MISSILE;
 
-  if (mo->info->deathsound) S_StartSound(mo, mo->info->deathsound);
+  if (mo->info->deathsound) {
+    S_StartSound(mo, mo->info->deathsound);
+  }
 }
 
 //
@@ -166,15 +178,17 @@ static void P_XYMovement(mobj_t* mo) {
 
   player = mo->player;
 
-  if (mo->momx > MAXMOVE)
+  if (mo->momx > MAXMOVE) {
     mo->momx = MAXMOVE;
-  else if (mo->momx < -MAXMOVE)
+  } else if (mo->momx < -MAXMOVE) {
     mo->momx = -MAXMOVE;
+  }
 
-  if (mo->momy > MAXMOVE)
+  if (mo->momy > MAXMOVE) {
     mo->momy = MAXMOVE;
-  else if (mo->momy < -MAXMOVE)
+  } else if (mo->momy < -MAXMOVE) {
     mo->momy = -MAXMOVE;
+  }
 
   xmove = mo->momx;
   ymove = mo->momy;
@@ -238,15 +252,16 @@ static void P_XYMovement(mobj_t* mo) {
             mo->momx = (mo->momx + x) / 2;
             mo->momy = (mo->momy + y) / 2;
           }
-        } else
+        } else {
           mo->momx = mo->momy = 0;
-      } else if (player)  // try to slide along it
+        }
+      } else if (player) {  // try to slide along it
         P_SlideMove(mo);
-      else if (mo->flags & MF_MISSILE) {
+      } else if (mo->flags & MF_MISSILE) {
         // explode a missile
 
         if (ceilingline && ceilingline->backsector &&
-            ceilingline->backsector->ceilingpic == skyflatnum)
+            ceilingline->backsector->ceilingpic == skyflatnum) {
           if (demo_compatibility ||  // killough
               mo->z > ceilingline->backsector->ceilingheight) {
             // Hack to prevent missiles exploding
@@ -256,9 +271,11 @@ static void P_XYMovement(mobj_t* mo) {
             P_RemoveMobj(mo);
             return;
           }
+        }
         P_ExplodeMissile(mo);
-      } else  // whatever else it is, it is now standing still in (x,y)
+      } else {  // whatever else it is, it is now standing still in (x,y)
         mo->momx = mo->momy = 0;
+      }
     }
   } while (xmove || ymove);
 
@@ -275,9 +292,13 @@ static void P_XYMovement(mobj_t* mo) {
 #endif
 
   /* no friction for missiles or skulls ever, no friction when airborne */
-  if (mo->flags & (MF_MISSILE | MF_SKULLFLY)) return;
+  if (mo->flags & (MF_MISSILE | MF_SKULLFLY)) {
+    return;
+  }
 
-  if (mo->z > mo->floorz && !(mo->flags & MF_FLY)) return;
+  if (mo->z > mo->floorz && !(mo->flags & MF_FLY)) {
+    return;
+  }
 
   /* killough 8/11/98: add bouncers
    * killough 9/15/98: add objects falling off ledges
@@ -287,8 +308,9 @@ static void P_XYMovement(mobj_t* mo) {
        mo->flags & MF_CORPSE || mo->intflags & MIF_FALLING) &&
       (mo->momx > FRACUNIT / 4 || mo->momx < -FRACUNIT / 4 ||
        mo->momy > FRACUNIT / 4 || mo->momy < -FRACUNIT / 4) &&
-      mo->floorz != mo->subsector->sector->floorheight)
+      mo->floorz != mo->subsector->sector->floorheight) {
     return;  // do not stop sliding if halfway off a step with some momentum
+  }
 
   // killough 11/98:
   // Stop voodoo dolls that have come to rest, despite any
@@ -306,15 +328,18 @@ static void P_XYMovement(mobj_t* mo) {
     // COMPAT: MBF compares (demo_version < 203) here, i.e. this should read
     //         (compatibility_level < lxdoom_1_compatibility)
     if (player && (unsigned)(player->mo->state - states - S_PLAY_RUN1) < 4 &&
-        (player->mo == mo || compatibility_level >= lxdoom_1_compatibility))
+        (player->mo == mo || compatibility_level >= lxdoom_1_compatibility)) {
       P_SetMobjState(player->mo, S_PLAY);
+    }
 
     mo->momx = mo->momy = 0;
 
     /* killough 10/98: kill any bobbing momentum too (except in voodoo dolls)
      * cph - DEMOSYNC - needs compatibility check?
      */
-    if (player && player->mo == mo) player->momx = player->momy = 0;
+    if (player && player->mo == mo) {
+      player->momx = player->momy = 0;
+    }
   } else {
     /* phares 3/17/98
      *
@@ -414,37 +439,46 @@ static void P_ZMovement(mobj_t* mo) {
                          : FixedMul(mo->momz, (fixed_t)(FRACUNIT * .45));
 
           /* Bring it to rest below a certain speed */
-          if (D_abs(mo->momz) <= mo->info->mass * (GRAVITY * 4 / 256))
+          if (D_abs(mo->momz) <= mo->info->mass * (GRAVITY * 4 / 256)) {
             mo->momz = 0;
+          }
         }
 
         /* killough 11/98: touchy objects explode on impact */
-        if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED && mo->health > 0)
+        if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED &&
+            mo->health > 0) {
           P_DamageMobj(mo, NULL, NULL, mo->health);
-        else if (mo->flags & MF_FLOAT && sentient(mo))
+        } else if (mo->flags & MF_FLOAT && sentient(mo)) {
           goto floater;
+        }
         return;
       }
     } else if (mo->z >= mo->ceilingz - mo->height) {
       /* bounce off ceilings */
       mo->z = mo->ceilingz - mo->height;
       if (mo->momz > 0) {
-        if (mo->subsector->sector->ceilingpic != skyflatnum)
+        if (mo->subsector->sector->ceilingpic != skyflatnum) {
           mo->momz = -mo->momz; /* always bounce off non-sky ceiling */
-        else if (mo->flags & MF_MISSILE)
+        } else if (mo->flags & MF_MISSILE) {
           P_RemoveMobj(mo); /* missiles don't bounce off skies */
-        else if (mo->flags & MF_NOGRAVITY)
+        } else if (mo->flags & MF_NOGRAVITY) {
           mo->momz = -mo->momz;  // bounce unless under gravity
+        }
 
-        if (mo->flags & MF_FLOAT && sentient(mo)) goto floater;
+        if (mo->flags & MF_FLOAT && sentient(mo)) {
+          goto floater;
+        }
 
         return;
       }
     } else {
-      if (!(mo->flags & MF_NOGRAVITY)) /* free-fall under gravity */
+      if (!(mo->flags & MF_NOGRAVITY)) { /* free-fall under gravity */
         mo->momz -= mo->info->mass * (GRAVITY / 256);
+      }
 
-      if (mo->flags & MF_FLOAT && sentient(mo)) goto floater;
+      if (mo->flags & MF_FLOAT && sentient(mo)) {
+        goto floater;
+      }
       return;
     }
 
@@ -454,13 +488,16 @@ static void P_ZMovement(mobj_t* mo) {
     if (mo->flags & MF_MISSILE) {
       if (ceilingline && ceilingline->backsector &&
           ceilingline->backsector->ceilingpic == skyflatnum &&
-          mo->z > ceilingline->backsector->ceilingheight)
+          mo->z > ceilingline->backsector->ceilingheight) {
         P_RemoveMobj(mo); /* don't explode on skies */
-      else
+      } else {
         P_ExplodeMissile(mo);
+      }
     }
 
-    if (mo->flags & MF_FLOAT && sentient(mo)) goto floater;
+    if (mo->flags & MF_FLOAT && sentient(mo)) {
+      goto floater;
+    }
     return;
   }
 
@@ -482,8 +519,7 @@ static void P_ZMovement(mobj_t* mo) {
   mo->z += mo->momz;
 
 floater:
-  if ((mo->flags & MF_FLOAT) && mo->target)
-
+  if ((mo->flags & MF_FLOAT) && mo->target) {
     // float down towards target if too close
 
     if (!((mo->flags ^ MF_FLOAT) & (MF_FLOAT | MF_SKULLFLY | MF_INFLOAT)) &&
@@ -491,9 +527,11 @@ floater:
     {
       fixed_t delta;
       if (P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y) <
-          D_abs(delta = mo->target->z + (mo->height >> 1) - mo->z) * 3)
+          D_abs(delta = mo->target->z + (mo->height >> 1) - mo->z) * 3) {
         mo->z += delta < 0 ? -FLOATSPEED : FLOATSPEED;
+      }
     }
+  }
 
   if (mo->player && (mo->flags & MF_FLY) && (mo->z > mo->floorz)) {
     mo->z += finesine[(FINEANGLES / 80 * gametic) & FINEMASK] / 8;
@@ -527,15 +565,18 @@ floater:
 
     if (mo->flags & MF_SKULLFLY &&
         (!comp[comp_soul] || (compatibility_level > doom2_19_compatibility &&
-                              compatibility_level < prboom_4_compatibility)))
+                              compatibility_level < prboom_4_compatibility))) {
       mo->momz = -mo->momz;  // the skull slammed into something
+    }
 
     if (mo->momz < 0) {
       /* killough 11/98: touchy objects explode on impact */
-      if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED && mo->health > 0)
+      if (mo->flags & MF_TOUCHY && mo->intflags & MIF_ARMED && mo->health > 0) {
         P_DamageMobj(mo, NULL, NULL, mo->health);
-      else {
-        if (mo->player) mo->player->jumpTics = 7;
+      } else {
+        if (mo->player) {
+          mo->player->jumpTics = 7;
+        }
         if (mo->player && /* killough 5/12/98: exclude voodoo dolls */
             // e6y
             // Restoring original visual behaviour for demo_compatibility.
@@ -556,8 +597,9 @@ floater:
           mo->player->deltaviewheight = mo->momz >> 3;
           // e6y: compatibility optioned
           if (default_comp[comp_sound] ||
-              (mo->health > 0)) /* cph - prevent "oof" when dead */
+              (mo->health > 0)) { /* cph - prevent "oof" when dead */
             S_StartSound(mo, sfx_oof);
+          }
         }
       }
       mo->momz = 0;
@@ -571,8 +613,9 @@ floater:
      * incorrectly reverse it, so we might still need this for demo sync
      */
     if (mo->flags & MF_SKULLFLY &&
-        compatibility_level <= doom2_19_compatibility)
+        compatibility_level <= doom2_19_compatibility) {
       mo->momz = -mo->momz;  // the skull slammed into something
+    }
 
     if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP)) {
       P_ExplodeMissile(mo);
@@ -582,12 +625,15 @@ floater:
       if (mo->type == MT_GIBDTH && !demorecording &&
           !demoplayback) {  // if (mo->flags & MF_LOGRAV)
     // alternate gravity (MF2_LOGRAV from Heretic)
-    if (mo->momz == 0)
+    if (mo->momz == 0) {
       mo->momz = -(GRAVITY >> 3) * 2;
-    else
+    } else {
       mo->momz -= GRAVITY >> 3;
+    }
   } else if (!(mo->flags & MF_NOGRAVITY)) {
-    if (!mo->momz) mo->momz = -GRAVITY;
+    if (!mo->momz) {
+      mo->momz = -GRAVITY;
+    }
     mo->momz -= GRAVITY;
   }
 
@@ -596,12 +642,15 @@ floater:
      * Lost souls were meant to bounce off of ceilings;
      *  new comp_soul compatibility option added
      */
-    if (!comp[comp_soul] && mo->flags & MF_SKULLFLY)
+    if (!comp[comp_soul] && mo->flags & MF_SKULLFLY) {
       mo->momz = -mo->momz;  // the skull slammed into something
+    }
 
     // hit the ceiling
 
-    if (mo->momz > 0) mo->momz = 0;
+    if (mo->momz > 0) {
+      mo->momz = 0;
+    }
 
     mo->z = mo->ceilingz - mo->height;
 
@@ -610,8 +659,9 @@ floater:
      *  lowering on us), so for old demos we must still do the buggy
      *  momentum reversal here
      */
-    if (comp[comp_soul] && mo->flags & MF_SKULLFLY)
+    if (comp[comp_soul] && mo->flags & MF_SKULLFLY) {
       mo->momz = -mo->momz;  // the skull slammed into something
+    }
 
     if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP)) {
       P_ExplodeMissile(mo);
@@ -653,7 +703,9 @@ static void P_NightmareRespawn(mobj_t* mobj) {
 
   // something is occupying its position?
 
-  if (!P_CheckPosition(mobj, x, y)) return;  // no respwan
+  if (!P_CheckPosition(mobj, x, y)) {
+    return;  // no respwan
+  }
 
   // spawn a teleport fog at old spot
   // because of removal of the body?
@@ -676,10 +728,11 @@ static void P_NightmareRespawn(mobj_t* mobj) {
   // spawn the new monster
 
   mthing = &mobj->spawnpoint;
-  if (mobj->info->flags & MF_SPAWNCEILING)
+  if (mobj->info->flags & MF_SPAWNCEILING) {
     z = ONCEILINGZ;
-  else
+  } else {
     z = ONFLOORZ;
+  }
 
   // inherit attributes from deceased one
 
@@ -688,7 +741,9 @@ static void P_NightmareRespawn(mobj_t* mobj) {
   mo->angle = ANG45 * (mthing->angle / 45);
   mo->index = mobj->index;
 
-  if (mthing->options & MTF_AMBUSH) mo->flags |= MF_AMBUSH;
+  if (mthing->options & MTF_AMBUSH) {
+    mo->flags |= MF_AMBUSH;
+  }
 
   /* killough 11/98: transfer friendliness from deceased */
   mo->flags = (mo->flags & ~MF_FRIEND) | (mobj->flags & MF_FRIEND);
@@ -724,14 +779,18 @@ void P_MobjThinker(mobj_t* mobj) {
   // momentum movement
   if (mobj->momx | mobj->momy || mobj->flags & MF_SKULLFLY) {
     P_XYMovement(mobj);
-    if (mobj->thinker.function != P_MobjThinker)  // cph - Must've been removed
-      return;                                     // killough - mobj was removed
+    if (mobj->thinker.function !=
+        P_MobjThinker) {  // cph - Must've been removed
+      return;             // killough - mobj was removed
+    }
   }
 
   if (mobj->z != mobj->floorz || mobj->momz) {
     P_ZMovement(mobj);
-    if (mobj->thinker.function != P_MobjThinker)  // cph - Must've been removed
-      return;                                     // killough - mobj was removed
+    if (mobj->thinker.function !=
+        P_MobjThinker) {  // cph - Must've been removed
+      return;             // killough - mobj was removed
+    }
   } else if (!(mobj->momx | mobj->momy) &&
              !sentient(mobj)) {   // non-sentient objects at rest
     mobj->intflags |= MIF_ARMED;  // arm a mine which has come to rest
@@ -741,10 +800,11 @@ void P_MobjThinker(mobj_t* mobj) {
 
     if (mobj->z > mobj->dropoffz &&       // Only objects contacting dropoff
         !(mobj->flags & MF_NOGRAVITY) &&  // Only objects which fall
-        !comp[comp_falloff])              // Not in old demos
+        !comp[comp_falloff]) {            // Not in old demos
       P_ApplyTorque(mobj);                // Apply torque
-    else
+    } else {
       mobj->intflags &= ~MIF_FALLING, mobj->gear = 0;  // Reset torque
+    }
   }
 
   // cycle through states,
@@ -755,23 +815,35 @@ void P_MobjThinker(mobj_t* mobj) {
 
     // you can cycle through multiple states in a tic
 
-    if (!mobj->tics)
-      if (!P_SetMobjState(mobj, mobj->state->nextstate))
+    if (!mobj->tics) {
+      if (!P_SetMobjState(mobj, mobj->state->nextstate)) {
         return;  // freed itself
+      }
+    }
   } else {
     // check for nightmare respawn
 
-    if (!(mobj->flags & MF_COUNTKILL)) return;
+    if (!(mobj->flags & MF_COUNTKILL)) {
+      return;
+    }
 
-    if (!respawnmonsters) return;
+    if (!respawnmonsters) {
+      return;
+    }
 
     mobj->movecount++;
 
-    if (mobj->movecount < 12 * 35) return;
+    if (mobj->movecount < 12 * 35) {
+      return;
+    }
 
-    if (leveltime & 31) return;
+    if (leveltime & 31) {
+      return;
+    }
 
-    if (P_Random(pr_respawn) > 4) return;
+    if (P_Random(pr_respawn) > 4) {
+      return;
+    }
 
     P_NightmareRespawn(mobj);
   }
@@ -817,14 +889,17 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type) {
   mobj->flags = info->flags;
 
   /* killough 8/23/98: no friends, bouncers, or touchy things in old demos */
-  if (!mbf_features)
+  if (!mbf_features) {
     mobj->flags &= ~(MF_BOUNCES | MF_FRIEND | MF_TOUCHY);
-  else if (type == MT_PLAYER)  // Except in old demos, players
-    mobj->flags |= MF_FRIEND;  // are always friends.
+  } else if (type == MT_PLAYER) {  // Except in old demos, players
+    mobj->flags |= MF_FRIEND;      // are always friends.
+  }
 
   mobj->health = info->spawnhealth;
 
-  if (gameskill != sk_nightmare) mobj->reactiontime = info->reactiontime;
+  if (gameskill != sk_nightmare) {
+    mobj->reactiontime = info->reactiontime;
+  }
 
   mobj->lastlook = P_Random(pr_lastlook) % MAXPLAYERS;
 
@@ -864,7 +939,9 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type) {
 
   mobj->target = mobj->tracer = mobj->lastenemy = NULL;
   P_AddThinker(&mobj->thinker);
-  if (!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL))) totallive++;
+  if (!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL))) {
+    totallive++;
+  }
   return mobj;
 }
 
@@ -886,7 +963,9 @@ void P_RemoveMobj(mobj_t* mobj) {
 
     // lose one off the end?
 
-    if (iquehead == iquetail) iquetail = (iquetail + 1) & (ITEMQUESIZE - 1);
+    if (iquehead == iquetail) {
+      iquetail = (iquetail + 1) & (ITEMQUESIZE - 1);
+    }
   }
 
   // unlink from sector and block lists
@@ -903,10 +982,11 @@ void P_RemoveMobj(mobj_t* mobj) {
   // stop any playing sound
 
   // [FG] removed map objects may finish their sounds
-  if (full_sounds)
+  if (full_sounds) {
     S_UnlinkSound(mobj);
-  else
+  } else {
     S_StopSound(mobj);
+  }
 
   // killough 11/98:
   //
@@ -943,18 +1023,22 @@ static PUREFUNC int P_FindDoomedNum(unsigned type) {
 
   if (!hash) {
     hash = Z_Malloc(sizeof *hash * NUMMOBJTYPES, PU_CACHE, (void**)&hash);
-    for (i = 0; i < NUMMOBJTYPES; i++) hash[i].first = NUMMOBJTYPES;
-    for (i = 0; i < NUMMOBJTYPES; i++)
+    for (i = 0; i < NUMMOBJTYPES; i++) {
+      hash[i].first = NUMMOBJTYPES;
+    }
+    for (i = 0; i < NUMMOBJTYPES; i++) {
       if (mobjinfo[i].doomednum != -1) {
         unsigned h = (unsigned)mobjinfo[i].doomednum % NUMMOBJTYPES;
         hash[i].next = hash[h].first;
         hash[h].first = i;
       }
+    }
   }
 
   i = hash[type % NUMMOBJTYPES].first;
-  while ((i < NUMMOBJTYPES) && ((unsigned)mobjinfo[i].doomednum != type))
+  while ((i < NUMMOBJTYPES) && ((unsigned)mobjinfo[i].doomednum != type)) {
     i = hash[i].next;
+  }
   return i;
 }
 
@@ -973,15 +1057,21 @@ void P_RespawnSpecials(void) {
 
   // only respawn items in deathmatch
 
-  if (deathmatch != 2) return;
+  if (deathmatch != 2) {
+    return;
+  }
 
   // nothing left to respawn?
 
-  if (iquehead == iquetail) return;
+  if (iquehead == iquetail) {
+    return;
+  }
 
   // wait at least 30 seconds
 
-  if (leveltime - itemrespawntime[iquetail] < 30 * 35) return;
+  if (leveltime - itemrespawntime[iquetail] < 30 * 35) {
+    return;
+  }
 
   mthing = &itemrespawnque[iquetail];
 
@@ -1001,10 +1091,11 @@ void P_RespawnSpecials(void) {
 
   // spawn it
 
-  if (mobjinfo[i].flags & MF_SPAWNCEILING)
+  if (mobjinfo[i].flags & MF_SPAWNCEILING) {
     z = ONCEILINGZ;
-  else
+  } else {
     z = ONFLOORZ;
+  }
 
   mo = P_SpawnMobj(x, y, z, i);
   mo->spawnpoint = *mthing;
@@ -1036,32 +1127,40 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing) {
   // playeringame overflow detection
   // it detects and emulates overflows on vex6d.wad\bug_wald(toke).lmp, etc.
   // http://www.doom2.net/doom2/research/runningbody.zip
-  if (PlayeringameOverrun(mthing)) return;
+  if (PlayeringameOverrun(mthing)) {
+    return;
+  }
 
   // not playing?
 
-  if (!playeringame[n]) return;
+  if (!playeringame[n]) {
+    return;
+  }
 
   p = &players[n];
 
-  if (p->playerstate == PST_REBORN) G_PlayerReborn(n);
+  if (p->playerstate == PST_REBORN) {
+    G_PlayerReborn(n);
+  }
 
   /* cph 2001/08/14 - use the options field of memorised player starts to
    * indicate whether the start really exists in the level.
    */
-  if (!mthing->options)
+  if (!mthing->options) {
     I_Error(
         "P_SpawnPlayer: attempt to spawn player at unavailable start point");
+  }
 
   x = mthing->x << FRACBITS;
   y = mthing->y << FRACBITS;
   z = ONFLOORZ;
   mobj = P_SpawnMobj(x, y, z, MT_PLAYER);
 
-  if (deathmatch)
+  if (deathmatch) {
     mobj->index = TracerGetDeathmatchStart(n);
-  else
+  } else {
     mobj->index = TracerGetPlayerStart(mthing->type - 1);
+  }
 
   // set color translations for player sprites
 
@@ -1090,8 +1189,11 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing) {
 
   // give all cards in death match mode
 
-  if (deathmatch)
-    for (i = 0; i < NUMCARDS; i++) p->cards[i] = true;
+  if (deathmatch) {
+    for (i = 0; i < NUMCARDS; i++) {
+      p->cards[i] = true;
+    }
+  }
 
   if (mthing->type - 1 == consoleplayer) {
     ST_Start();  // wake up the status bar
@@ -1108,7 +1210,8 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing) {
 
 dboolean P_IsDoomnumAllowed(int doomnum) {
   // Do not spawn cool, new monsters if !commercial
-  if (gamemode != commercial) switch (doomnum) {
+  if (gamemode != commercial) {
+    switch (doomnum) {
       case 64:  // Archvile
       case 65:  // Former Human Commando
       case 66:  // Revenant
@@ -1121,6 +1224,7 @@ dboolean P_IsDoomnumAllowed(int doomnum) {
       case 89:  // Boss Shooter
         return false;
     }
+  }
 
   return true;
 }
@@ -1164,10 +1268,11 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index) {
 
   if (demo_compatibility || (compatibility_level >= lxdoom_1_compatibility &&
                              options & MTF_RESERVED)) {
-    if (!demo_compatibility)  // cph - Add warning about bad thing flags
+    if (!demo_compatibility) {  // cph - Add warning about bad thing flags
       lprintf(LO_WARN,
               "P_SpawnMapThing: correcting bad flags (%u) (thing type %d)\n",
               options, thingtype);
+    }
     options &= MTF_EASY | MTF_NORMAL | MTF_HARD | MTF_AMBUSH | MTF_NOTSINGLE;
   }
 
@@ -1182,8 +1287,9 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index) {
 
       size_t offset = deathmatch_p - deathmatchstarts;
 
-      if (compatibility && deathmatch_p - deathmatchstarts >= 10)
+      if (compatibility && deathmatch_p - deathmatchstarts >= 10) {
         return NULL;  // e6y
+      }
       if (offset >= num_deathmatchstarts) {
         num_deathmatchstarts =
             num_deathmatchstarts ? num_deathmatchstarts * 2 : 16;
@@ -1238,30 +1344,38 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index) {
 
     TracerAddPlayerStart(thingtype - 1, index);
 
-    if (!deathmatch) P_SpawnPlayer(thingtype - 1, &playerstarts[thingtype - 1]);
+    if (!deathmatch) {
+      P_SpawnPlayer(thingtype - 1, &playerstarts[thingtype - 1]);
+    }
     return NULL;
   }
 
   // check for apropriate skill level
 
   /* jff "not single" thing flag */
-  if (!coop_spawns && !netgame && options & MTF_NOTSINGLE) return NULL;
+  if (!coop_spawns && !netgame && options & MTF_NOTSINGLE) {
+    return NULL;
+  }
 
   // jff 3/30/98 implement "not deathmatch" thing flag
 
-  if (netgame && deathmatch && options & MTF_NOTDM) return NULL;
+  if (netgame && deathmatch && options & MTF_NOTDM) {
+    return NULL;
+  }
 
   // jff 3/30/98 implement "not cooperative" thing flag
 
-  if ((coop_spawns || netgame) && !deathmatch && options & MTF_NOTCOOP)
+  if ((coop_spawns || netgame) && !deathmatch && options & MTF_NOTCOOP) {
     return NULL;
+  }
 
   // killough 11/98: simplify
   if (gameskill == sk_baby || gameskill == sk_easy ? !(options & MTF_EASY)
       : gameskill == sk_hard || gameskill == sk_nightmare
           ? !(options & MTF_HARD)
-          : !(options & MTF_NORMAL))
+          : !(options & MTF_NORMAL)) {
     return NULL;
+  }
 
   if (thingtype >= 14100 && thingtype <= 14164) {
     // Use the ambient number
@@ -1286,12 +1400,15 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index) {
 
   // don't spawn keycards and players in deathmatch
 
-  if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH) return NULL;
+  if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH) {
+    return NULL;
+  }
 
   // don't spawn any monsters if -nomonsters
 
-  if (nomonsters && (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL)))
+  if (nomonsters && (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL))) {
     return NULL;
+  }
 
   // spawn it
 spawnit:
@@ -1299,17 +1416,20 @@ spawnit:
   x = mthing->x << FRACBITS;
   y = mthing->y << FRACBITS;
 
-  if (mobjinfo[i].flags & MF_SPAWNCEILING)
+  if (mobjinfo[i].flags & MF_SPAWNCEILING) {
     z = ONCEILINGZ;
-  else
+  } else {
     z = ONFLOORZ;
+  }
 
   mobj = P_SpawnMobj(x, y, z, i);
   mobj->spawnpoint = *mthing;
   mobj->index = index;  // e6y
   mobj->iden_nums = iden_num;
 
-  if (mobj->tics > 0) mobj->tics = 1 + (P_Random(pr_spawnthing) % mobj->tics);
+  if (mobj->tics > 0) {
+    mobj->tics = 1 + (P_Random(pr_spawnthing) % mobj->tics);
+  }
 
   if (!(mobj->flags & MF_FRIEND) && options & MTF_FRIEND && mbf_features) {
     mobj->flags |= MF_FRIEND;         // killough 10/98:
@@ -1317,13 +1437,18 @@ spawnit:
   }
 
   /* killough 7/20/98: exclude friends */
-  if (!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+  if (!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL))) {
     totalkills++;
+  }
 
-  if (mobj->flags & MF_COUNTITEM) totalitems++;
+  if (mobj->flags & MF_COUNTITEM) {
+    totalitems++;
+  }
 
   mobj->angle = ANG45 * (mthing->angle / 45);
-  if (options & MTF_AMBUSH) mobj->flags |= MF_AMBUSH;
+  if (options & MTF_AMBUSH) {
+    mobj->flags |= MF_AMBUSH;
+  }
 
   // RjY
   // Print a warning when a solid hanging body is used in a sector where
@@ -1364,11 +1489,15 @@ void P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z) {
   th->momz = FRACUNIT;
   th->tics -= P_Random(pr_spawnpuff) & 3;
 
-  if (th->tics < 1) th->tics = 1;
+  if (th->tics < 1) {
+    th->tics = 1;
+  }
 
   // don't make punches spark on the wall
 
-  if (attackrange == MELEERANGE) P_SetMobjState(th, S_PUFF3);
+  if (attackrange == MELEERANGE) {
+    P_SetMobjState(th, S_PUFF3);
+  }
 }
 
 //
@@ -1388,12 +1517,15 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage,
     th->bloodcolor = V_BloodColor(bleeder->info->bloodcolor);
   }
 
-  if (th->tics < 1) th->tics = 1;
+  if (th->tics < 1) {
+    th->tics = 1;
+  }
 
-  if (damage <= 12 && damage >= 9)
+  if (damage <= 12 && damage >= 9) {
     P_SetMobjState(th, S_BLOOD2);
-  else if (damage < 9)
+  } else if (damage < 9) {
     P_SetMobjState(th, S_BLOOD3);
+  }
 }
 
 //
@@ -1404,7 +1536,9 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage,
 
 void P_CheckMissileSpawn(mobj_t* th) {
   th->tics -= P_Random(pr_missile) & 3;
-  if (th->tics < 1) th->tics = 1;
+  if (th->tics < 1) {
+    th->tics = 1;
+  }
 
   // move a little forward so an angle can
   // be computed if it immediately explodes
@@ -1414,11 +1548,15 @@ void P_CheckMissileSpawn(mobj_t* th) {
   th->z += (th->momz >> 1);
 
   // killough 8/12/98: for non-missile objects (e.g. grenades)
-  if (!(th->flags & MF_MISSILE) && mbf_features) return;
+  if (!(th->flags & MF_MISSILE) && mbf_features) {
+    return;
+  }
 
   // killough 3/15/98: no dropoff (really = don't care for missiles)
 
-  if (!P_TryMove(th, th->x, th->y, false)) P_ExplodeMissile(th);
+  if (!P_TryMove(th, th->x, th->y, false)) {
+    P_ExplodeMissile(th);
+  }
 }
 
 //
@@ -1432,7 +1570,9 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type) {
 
   th = P_SpawnMobj(source->x, source->y, source->z + 4 * 8 * FRACUNIT, type);
 
-  if (th->info->seesound) S_StartSound(th, th->info->seesound);
+  if (th->info->seesound) {
+    S_StartSound(th, th->info->seesound);
+  }
 
   P_SetTarget(&th->target, source);  // where it came from
   an = R_PointToAngle2(source->x, source->y, dest->x, dest->y);
@@ -1453,7 +1593,9 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type) {
   dist = P_AproxDistance(dest->x - source->x, dest->y - source->y);
   dist = dist / th->info->speed;
 
-  if (dist < 1) dist = 1;
+  if (dist < 1) {
+    dist = 1;
+  }
 
   th->momz = (dest->z - source->z) / dist;
   P_CheckMissileSpawn(th);
@@ -1475,21 +1617,25 @@ void P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type) {
   angle_t an = source->angle;
 
   // killough 7/19/98: autoaiming was not in original beta
-  if (comperr(comperr_freeaim))
+  if (comperr(comperr_freeaim)) {
     slope = finetangent[(ANG90 - source->pitch) >> ANGLETOFINESHIFT];
-  else {
+  } else {
     // killough 8/2/98: prefer autoaiming at enemies
     uint_64_t mask = mbf_features ? MF_FRIEND : 0;
 
     do {
       slope = P_AimLineAttack(source, an, 16 * 64 * FRACUNIT, mask);
-      if (!linetarget)
+      if (!linetarget) {
         slope =
             P_AimLineAttack(source, an += 1 << 26, 16 * 64 * FRACUNIT, mask);
-      if (!linetarget)
+      }
+      if (!linetarget) {
         slope =
             P_AimLineAttack(source, an -= 2 << 26, 16 * 64 * FRACUNIT, mask);
-      if (!linetarget) an = source->angle, slope = 0;
+      }
+      if (!linetarget) {
+        an = source->angle, slope = 0;
+      }
     } while (mask && (mask = 0, !linetarget));  // killough 8/2/98
   }
 
@@ -1499,7 +1645,9 @@ void P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type) {
 
   th = P_SpawnMobj(x, y, z, type);
 
-  if (th->info->seesound) S_StartSound(th, th->info->seesound);
+  if (th->info->seesound) {
+    S_StartSound(th, th->info->seesound);
+  }
 
   P_SetTarget(&th->target, source);
   th->angle = an;

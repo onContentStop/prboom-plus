@@ -76,20 +76,27 @@ dboolean PTR_SightTraverse(intercept_t *in) {
   //
   P_LineOpening(li);
 
-  if (openbottom >= opentop)  // quick test for totally closed doors
-    return false;             // stop
+  if (openbottom >= opentop) {  // quick test for totally closed doors
+    return false;               // stop
+  }
 
   if (li->frontsector->floorheight != li->backsector->floorheight) {
     slope = FixedDiv(openbottom - sightzstart, in->frac);
-    if (slope > bottomslope) bottomslope = slope;
+    if (slope > bottomslope) {
+      bottomslope = slope;
+    }
   }
 
   if (li->frontsector->ceilingheight != li->backsector->ceilingheight) {
     slope = FixedDiv(opentop - sightzstart, in->frac);
-    if (slope < topslope) topslope = slope;
+    if (slope < topslope) {
+      topslope = slope;
+    }
   }
 
-  if (topslope <= bottomslope) return false;  // stop
+  if (topslope <= bottomslope) {
+    return false;  // stop
+  }
 
   return true;  // keep going
 }
@@ -115,20 +122,27 @@ dboolean P_SightBlockLinesIterator(int x, int y) {
 
   for (list = blockmaplump + offset; *list != -1; list++) {
     ld = &lines[*list];
-    if (ld->validcount == validcount)
+    if (ld->validcount == validcount) {
       continue;  // line has already been checked
+    }
     ld->validcount = validcount;
 
     s1 = P_PointOnDivlineSide(ld->v1->x, ld->v1->y, &trace);
     s2 = P_PointOnDivlineSide(ld->v2->x, ld->v2->y, &trace);
-    if (s1 == s2) continue;  // line isn't crossed
+    if (s1 == s2) {
+      continue;  // line isn't crossed
+    }
     P_MakeDivline(ld, &dl);
     s1 = P_PointOnDivlineSide(trace.x, trace.y, &dl);
     s2 = P_PointOnDivlineSide(trace.x + trace.dx, trace.y + trace.dy, &dl);
-    if (s1 == s2) continue;  // line isn't crossed
+    if (s1 == s2) {
+      continue;  // line isn't crossed
+    }
 
     // try to early out the check
-    if (!ld->backsector) return false;  // stop checking
+    if (!ld->backsector) {
+      return false;  // stop checking
+    }
 
     check_intercept();  // killough
 
@@ -171,13 +185,16 @@ dboolean P_SightTraverseIntercepts(void) {
 
   while (count--) {
     dist = INT_MAX;
-    for (scan = intercepts; scan < intercept_p; scan++)
+    for (scan = intercepts; scan < intercept_p; scan++) {
       if (scan->frac < dist) {
         dist = scan->frac;
         in = scan;
       }
+    }
 
-    if (!PTR_SightTraverse(in)) return false;  // don't bother going farther
+    if (!PTR_SightTraverse(in)) {
+      return false;  // don't bother going farther
+    }
     in->frac = INT_MAX;
   }
 
@@ -205,10 +222,12 @@ dboolean P_SightPathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2) {
   validcount++;
   intercept_p = intercepts;
 
-  if (((x1 - bmaporgx) & (MAPBLOCKSIZE - 1)) == 0)
+  if (((x1 - bmaporgx) & (MAPBLOCKSIZE - 1)) == 0) {
     x1 += FRACUNIT;  // don't side exactly on a line
-  if (((y1 - bmaporgy) & (MAPBLOCKSIZE - 1)) == 0)
+  }
+  if (((y1 - bmaporgy) & (MAPBLOCKSIZE - 1)) == 0) {
     y1 += FRACUNIT;  // don't side exactly on a line
+  }
   trace.x = x1;
   trace.y = y1;
   trace.dx = x2 - x1;
@@ -227,8 +246,9 @@ dboolean P_SightPathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2) {
   // points should never be out of bounds, but check once instead of
   // each block
   if (xt1 < 0 || yt1 < 0 || xt1 >= bmapwidth || yt1 >= bmapheight || xt2 < 0 ||
-      yt2 < 0 || xt2 >= bmapwidth || yt2 >= bmapheight)
+      yt2 < 0 || xt2 >= bmapwidth || yt2 >= bmapheight) {
     return false;
+  }
 
   if (xt2 > xt1) {
     mapxstep = 1;
@@ -272,7 +292,9 @@ dboolean P_SightPathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2) {
       return false;  // early out
     }
 
-    if (mapx == xt2 && mapy == yt2) break;
+    if (mapx == xt2 && mapy == yt2) {
+      break;
+    }
 
     if ((yintercept >> FRACBITS) == mapy) {
       yintercept += ystep;
@@ -467,7 +489,9 @@ dboolean P_CrossSubsector_PrBoom(int num) {
     }
 
     // allready checked other side?
-    if (ssline->linedef->validcount == validcount) continue;
+    if (ssline->linedef->validcount == validcount) {
+      continue;
+    }
 
     ssline->linedef->validcount = validcount;
 
@@ -479,8 +503,9 @@ dboolean P_CrossSubsector_PrBoom(int num) {
 
       // no wall to block sight with?
       if (front->floorheight == back->floorheight &&
-          front->ceilingheight == back->ceilingheight)
+          front->ceilingheight == back->ceilingheight) {
         continue;
+      }
 
       // possible occluder
       // because of ceiling height differences
@@ -490,7 +515,9 @@ dboolean P_CrossSubsector_PrBoom(int num) {
       openbottom = MAX(front->floorheight, back->floorheight);
 
       // cph - reject if does not intrude in the z-space of the possible LOS
-      if ((opentop >= los.maxz) && (openbottom <= los.minz)) continue;
+      if ((opentop >= los.maxz) && (openbottom <= los.minz)) {
+        continue;
+      }
     }
 
     // cph - if bottom >= top or top < minz or bottom > maxz then it must be
@@ -498,8 +525,9 @@ dboolean P_CrossSubsector_PrBoom(int num) {
     if (!(ssline->linedef->flags & ML_TWOSIDED) || (openbottom >= opentop) ||
         (prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state
              ? (opentop <= los.minz) || (openbottom >= los.maxz)
-             : (opentop < los.minz) || (openbottom > los.maxz)))
+             : (opentop < los.minz) || (openbottom > los.maxz))) {
       return false;
+    }
 
     {  // crosses a two sided line
       /* cph 2006/07/15 - oops, we missed this in 2.4.0 & .1;
@@ -511,15 +539,21 @@ dboolean P_CrossSubsector_PrBoom(int num) {
 
       if (front->floorheight != back->floorheight) {
         fixed_t slope = FixedDiv(openbottom - los.sightzstart, frac);
-        if (slope > los.bottomslope) los.bottomslope = slope;
+        if (slope > los.bottomslope) {
+          los.bottomslope = slope;
+        }
       }
 
       if (front->ceilingheight != back->ceilingheight) {
         fixed_t slope = FixedDiv(opentop - los.sightzstart, frac);
-        if (slope < los.topslope) los.topslope = slope;
+        if (slope < los.topslope) {
+          los.topslope = slope;
+        }
       }
 
-      if (los.topslope <= los.bottomslope) return false;  // stop
+      if (los.topslope <= los.bottomslope) {
+        return false;  // stop
+      }
     }
   }
   // passed the subsector ok
@@ -558,12 +592,16 @@ dboolean P_CrossSubsector_Doom(int num) {
     }
 
     // allready checked other side?
-    if (ssline->linedef->validcount == validcount) continue;
+    if (ssline->linedef->validcount == validcount) {
+      continue;
+    }
 
     ssline->linedef->validcount = validcount;
 
     // stop because it is not two sided anyway
-    if (!(ssline->linedef->flags & ML_TWOSIDED)) return false;
+    if (!(ssline->linedef->flags & ML_TWOSIDED)) {
+      return false;
+    }
 
     // crosses a two sided line
     front = ssline->seg->frontsector;
@@ -576,8 +614,9 @@ dboolean P_CrossSubsector_Doom(int num) {
 
     // no wall to block sight with?
     if (front->floorheight == back->floorheight &&
-        front->ceilingheight == back->ceilingheight)
+        front->ceilingheight == back->ceilingheight) {
       continue;
+    }
 
     // possible occluder
     // because of ceiling height differences
@@ -587,21 +626,29 @@ dboolean P_CrossSubsector_Doom(int num) {
     openbottom = MAX(front->floorheight, back->floorheight);
 
     // quick test for totally closed doors
-    if (openbottom >= opentop) return false;  // stop
+    if (openbottom >= opentop) {
+      return false;  // stop
+    }
 
     frac = P_InterceptVector2(&los.strace, &divl);
 
     if (front->floorheight != back->floorheight) {
       fixed_t slope = FixedDiv(openbottom - los.sightzstart, frac);
-      if (slope > los.bottomslope) los.bottomslope = slope;
+      if (slope > los.bottomslope) {
+        los.bottomslope = slope;
+      }
     }
 
     if (front->ceilingheight != back->ceilingheight) {
       fixed_t slope = FixedDiv(opentop - los.sightzstart, frac);
-      if (slope < los.topslope) los.topslope = slope;
+      if (slope < los.topslope) {
+        los.topslope = slope;
+      }
     }
 
-    if (los.topslope <= los.bottomslope) return false;  // stop
+    if (los.topslope <= los.bottomslope) {
+      return false;  // stop
+    }
   }
   // passed the subsector ok
   return true;
@@ -649,12 +696,16 @@ dboolean P_CrossSubsector_Boom(int num) {
     }
 
     // allready checked other side?
-    if (ssline->linedef->validcount == validcount) continue;
+    if (ssline->linedef->validcount == validcount) {
+      continue;
+    }
 
     ssline->linedef->validcount = validcount;
 
     // stop because it is not two sided anyway
-    if (!(ssline->linedef->flags & ML_TWOSIDED)) return false;
+    if (!(ssline->linedef->flags & ML_TWOSIDED)) {
+      return false;
+    }
 
     // crosses a two sided line
     front = ssline->seg->frontsector;
@@ -662,8 +713,9 @@ dboolean P_CrossSubsector_Boom(int num) {
 
     // no wall to block sight with?
     if (front->floorheight == back->floorheight &&
-        front->ceilingheight == back->ceilingheight)
+        front->ceilingheight == back->ceilingheight) {
       continue;
+    }
 
     // possible occluder
     // because of ceiling height differences
@@ -673,21 +725,29 @@ dboolean P_CrossSubsector_Boom(int num) {
     openbottom = MAX(front->floorheight, back->floorheight);
 
     // quick test for totally closed doors
-    if (openbottom >= opentop) return false;  // stop
+    if (openbottom >= opentop) {
+      return false;  // stop
+    }
 
     frac = P_InterceptVector2(&los.strace, &divl);
 
     if (front->floorheight != back->floorheight) {
       fixed_t slope = FixedDiv(openbottom - los.sightzstart, frac);
-      if (slope > los.bottomslope) los.bottomslope = slope;
+      if (slope > los.bottomslope) {
+        los.bottomslope = slope;
+      }
     }
 
     if (front->ceilingheight != back->ceilingheight) {
       fixed_t slope = FixedDiv(opentop - los.sightzstart, frac);
-      if (slope < los.topslope) los.topslope = slope;
+      if (slope < los.topslope) {
+        los.topslope = slope;
+      }
     }
 
-    if (los.topslope <= los.bottomslope) return false;  // stop
+    if (los.topslope <= los.bottomslope) {
+      return false;  // stop
+    }
   }
   // passed the subsector ok
   return true;
@@ -709,13 +769,14 @@ static dboolean P_CrossBSPNode_LxDoom(int bspnum) {
     int side, side2;
     side = R_PointOnSide(los.strace.x, los.strace.y, bsp);
     side2 = R_PointOnSide(los.t2x, los.t2y, bsp);
-    if (side == side2)
+    if (side == side2) {
       bspnum = bsp->children[side];  // doesn't touch the other side
-    else                             // the partition plane is crossed here
-        if (!P_CrossBSPNode_LxDoom(bsp->children[side]))
+    } else                           // the partition plane is crossed here
+        if (!P_CrossBSPNode_LxDoom(bsp->children[side])) {
       return 0;  // cross the starting side
-    else
+    } else {
       bspnum = bsp->children[side ^ 1];  // cross the ending side
+    }
   }
   return P_CrossSubsector(bspnum == -1 ? 0 : bspnum & ~NF_SUBSECTOR);
 }
@@ -727,13 +788,14 @@ static dboolean P_CrossBSPNode_PrBoom(int bspnum) {
     side =
         P_DivlineSide(los.strace.x, los.strace.y, (const divline_t *)bsp) & 1;
     side2 = P_DivlineSide(los.t2x, los.t2y, (const divline_t *)bsp);
-    if (side == side2)
+    if (side == side2) {
       bspnum = bsp->children[side];  // doesn't touch the other side
-    else                             // the partition plane is crossed here
-        if (!P_CrossBSPNode_PrBoom(bsp->children[side]))
+    } else                           // the partition plane is crossed here
+        if (!P_CrossBSPNode_PrBoom(bsp->children[side])) {
       return 0;  // cross the starting side
-    else
+    } else {
       bspnum = bsp->children[side ^ 1];  // cross the ending side
+    }
   }
   return P_CrossSubsector(bspnum == -1 ? 0 : bspnum & ~NF_SUBSECTOR);
 }
@@ -744,10 +806,11 @@ static dboolean P_CrossBSPNode_PrBoom(int bspnum) {
 static dboolean P_CrossBSPNode(int bspnum) {
   /* cph - LxDoom used some R_* funcs here */
   if (compatibility_level == lxdoom_1_compatibility ||
-      prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
+      prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state) {
     return P_CrossBSPNode_LxDoom(bspnum);
-  else
+  } else {
     return P_CrossBSPNode_PrBoom(bspnum);
+  }
 }
 
 //
@@ -776,8 +839,9 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2) {
   // Check in REJECT table.
 
   if (rejectmatrix[pnum >> 3] &
-      (1 << (pnum & 7)))  // can't possibly be connected
+      (1 << (pnum & 7))) {  // can't possibly be connected
     return false;
+  }
 
   // killough 4/19/98: make fake floors and ceilings block monster view
 
@@ -790,15 +854,17 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2) {
        ((t2->z + t2->height <= sectors[s2->heightsec].floorheight &&
          t1->z >= sectors[s2->heightsec].floorheight) ||
         (t2->z >= sectors[s2->heightsec].ceilingheight &&
-         t1->z + t2->height <= sectors[s2->heightsec].ceilingheight))))
+         t1->z + t2->height <= sectors[s2->heightsec].ceilingheight)))) {
     return false;
+  }
 
   /* killough 11/98: shortcut for melee situations
    * same subsector? obviously visible
    * cph - compatibility optioned for demo sync, cf HR06-UV.LMP */
   if ((t1->subsector == t2->subsector) &&
-      (compatibility_level >= mbf_compatibility))
+      (compatibility_level >= mbf_compatibility)) {
     return true;
+  }
 
   // An unobstructed LOS is possible.
   // Now look from eyes of t1 to any part of t2.
@@ -812,15 +878,17 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2) {
   los.strace.dx = (los.t2x = t2->x) - (los.strace.x = t1->x);
   los.strace.dy = (los.t2y = t2->y) - (los.strace.y = t1->y);
 
-  if (t1->x > t2->x)
+  if (t1->x > t2->x) {
     los.bbox[BOXRIGHT] = t1->x, los.bbox[BOXLEFT] = t2->x;
-  else
+  } else {
     los.bbox[BOXRIGHT] = t2->x, los.bbox[BOXLEFT] = t1->x;
+  }
 
-  if (t1->y > t2->y)
+  if (t1->y > t2->y) {
     los.bbox[BOXTOP] = t1->y, los.bbox[BOXBOTTOM] = t2->y;
-  else
+  } else {
     los.bbox[BOXTOP] = t2->y, los.bbox[BOXBOTTOM] = t1->y;
+  }
 
   /* cph - calculate min and max z of the potential line of sight
    * For old demos, we disable this optimisation by setting them to

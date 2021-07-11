@@ -137,7 +137,9 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream) {
   memcpy(stream->buf + stream->position, ptr, bytes);
   stream->position += bytes;
 
-  if (stream->position > stream->buflen) stream->buflen = stream->position;
+  if (stream->position > stream->buflen) {
+    stream->buflen = stream->position;
+  }
 
   return nmemb;
 }

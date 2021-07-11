@@ -126,11 +126,12 @@ void T_VerticalDoor(vldoor_t* door) {
       // Old code: if (door->lighttag && door->topheight -
       // door->sector->floorheight)
       if (door->lighttag && door->topheight - door->sector->floorheight &&
-          compatibility_level >= mbf_compatibility)
+          compatibility_level >= mbf_compatibility) {
         EV_LightTurnOnPartway(
             door->line,
             FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
                      door->topheight - door->sector->floorheight));
+      }
 
       // handle door reaching bottom
       if (res == pastdest) {
@@ -143,8 +144,9 @@ void T_VerticalDoor(vldoor_t* door) {
             door->sector->ceilingdata = NULL;  // jff 2/22/98
             P_RemoveThinker(&door->thinker);   // unlink and free
             // killough 4/15/98: remove double-closing sound of blazing doors
-            if (comp[comp_blazing])
+            if (comp[comp_blazing]) {
               S_StartSound((mobj_t*)&door->sector->soundorg, sfx_bdcls);
+            }
             break;
 
           case normal:
@@ -173,8 +175,9 @@ void T_VerticalDoor(vldoor_t* door) {
         // e6y: "Tagged doors don't trigger special lighting" handled wrong
         // http://sourceforge.net/tracker/index.php?func=detail&aid=1411400&group_id=148658&atid=772943
         if (door->lighttag && door->topheight - door->sector->floorheight &&
-            compatibility_level < mbf_compatibility)
+            compatibility_level < mbf_compatibility) {
           EV_LightTurnOnPartway(door->line, 0);
+        }
       }
       /* jff 1/31/98 turn lighting off in tagged sectors of manual doors
        * killough 10/98: replaced with gradual lighting code
@@ -216,11 +219,12 @@ void T_VerticalDoor(vldoor_t* door) {
       // Old code: if (door->lighttag && door->topheight -
       // door->sector->floorheight)
       if (door->lighttag && door->topheight - door->sector->floorheight &&
-          compatibility_level >= mbf_compatibility)
+          compatibility_level >= mbf_compatibility) {
         EV_LightTurnOnPartway(
             door->line,
             FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
                      door->topheight - door->sector->floorheight));
+      }
 
       // handle door reaching the top
       if (res == pastdest) {
@@ -253,8 +257,9 @@ void T_VerticalDoor(vldoor_t* door) {
         // e6y: "Tagged doors don't trigger special lighting" handled wrong
         // http://sourceforge.net/tracker/index.php?func=detail&aid=1411400&group_id=148658&atid=772943
         if (door->lighttag && door->topheight - door->sector->floorheight &&
-            compatibility_level < mbf_compatibility)
+            compatibility_level < mbf_compatibility) {
           EV_LightTurnOnPartway(door->line, FRACUNIT);
+        }
       }
       break;
   }
@@ -280,7 +285,9 @@ int EV_DoLockedDoor(line_t* line, vldoor_e type, mobj_t* thing) {
 
   // only players can open locked doors
   p = thing->player;
-  if (!p) return 0;
+  if (!p) {
+    return 0;
+  }
 
   // check type of linedef, and if key is possessed to open it
   switch (line->special) {
@@ -333,9 +340,9 @@ int EV_DoDoor(line_t* line, vldoor_e type) {
   rtn = 0;
 
   if (ProcessNoTagLines(line, &sec, &secnum)) {
-    if (zerotag_manual)
+    if (zerotag_manual) {
       goto manual_door;
-    else {
+    } else {
       return rtn;
     }
   };  // e6y
@@ -345,9 +352,9 @@ int EV_DoDoor(line_t* line, vldoor_e type) {
   manual_door:  // e6y
     // if the ceiling already moving, don't start the door action
     if (P_SectorActive(ceiling_special, sec)) {  // jff 2/22/98
-      if (!zerotag_manual)
+      if (!zerotag_manual) {
         continue;
-      else {
+      } else {
         return rtn;
       }
     };  // e6y
@@ -396,8 +403,9 @@ int EV_DoDoor(line_t* line, vldoor_e type) {
         door->topheight = P_FindLowestCeilingSurrounding(sec);
         door->topheight -= 4 * FRACUNIT;
         door->speed = VDOORSPEED * 4;
-        if (door->topheight != sec->ceilingheight)
+        if (door->topheight != sec->ceilingheight) {
           S_StartSound((mobj_t*)&door->sector->soundorg, sfx_bdopn);
+        }
         break;
 
       case normal:
@@ -405,14 +413,17 @@ int EV_DoDoor(line_t* line, vldoor_e type) {
         door->direction = 1;
         door->topheight = P_FindLowestCeilingSurrounding(sec);
         door->topheight -= 4 * FRACUNIT;
-        if (door->topheight != sec->ceilingheight)
+        if (door->topheight != sec->ceilingheight) {
           S_StartSound((mobj_t*)&door->sector->soundorg, sfx_doropn);
+        }
         break;
 
       default:
         break;
     }
-    if (zerotag_manual) return rtn;  // e6y
+    if (zerotag_manual) {
+      return rtn;  // e6y
+    }
   }
   return rtn;
 }
@@ -438,7 +449,9 @@ int EV_VerticalDoor(line_t* line, mobj_t* thing) {
   switch (line->special) {
     case 26:  // Blue Lock
     case 32:
-      if (!player) return 0;
+      if (!player) {
+        return 0;
+      }
       if (!player->cards[it_bluecard] && !player->cards[it_blueskull]) {
         doom_printf("%s", s_PD_BLUEK);      // Ty 03/27/98 - externalized
         S_StartSound(player->mo, sfx_oof);  // killough 3/20/98
@@ -448,7 +461,9 @@ int EV_VerticalDoor(line_t* line, mobj_t* thing) {
 
     case 27:  // Yellow Lock
     case 34:
-      if (!player) return 0;
+      if (!player) {
+        return 0;
+      }
       if (!player->cards[it_yellowcard] && !player->cards[it_yellowskull]) {
         doom_printf("%s", s_PD_YELLOWK);    // Ty 03/27/98 - externalized
         S_StartSound(player->mo, sfx_oof);  // killough 3/20/98
@@ -458,7 +473,9 @@ int EV_VerticalDoor(line_t* line, mobj_t* thing) {
 
     case 28:  // Red Lock
     case 33:
-      if (!player) return 0;
+      if (!player) {
+        return 0;
+      }
       if (!player->cards[it_redcard] && !player->cards[it_redskull]) {
         doom_printf("%s", s_PD_REDK);       // Ty 03/27/98 - externalized
         S_StartSound(player->mo, sfx_oof);  // killough 3/20/98
@@ -490,8 +507,12 @@ int EV_VerticalDoor(line_t* line, mobj_t* thing) {
    */
   door = sec->ceilingdata;
   if (demo_compatibility) {
-    if (!door) door = sec->floordata;
-    if (!door) door = sec->lightingdata;
+    if (!door) {
+      door = sec->floordata;
+    }
+    if (!door) {
+      door = sec->lightingdata;
+    }
   }
   /* If this is a repeatable line, and the door is already moving, then we can
    * just reverse the current action. Note that in prboom 2.3.0 I erroneously

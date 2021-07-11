@@ -25,21 +25,28 @@ static unsigned char *parseppm(char *ppm, size_t size, const char *file,
   int maxcol, numpixels;
   char *pos = ppm;
 
-  if (size < 2 || !(*pos++ == 'P' && *pos++ == '6'))
+  if (size < 2 || !(*pos++ == 'P' && *pos++ == '6')) {
     die("Not a PPM: %s\n", file);
+  }
 
   // Ignore comments like "# Created by GIMP ..." in line 2
-  if (*pos++ == '\n' && *pos == '#')
-    while (*pos != '\n') pos++;
+  if (*pos++ == '\n' && *pos == '#') {
+    while (*pos != '\n') {
+      pos++;
+    }
+  }
 
   numpixels = *width = strtol(pos, &pos, 0);
   numpixels *= *height = strtol(pos, &pos, 0);
   maxcol = strtol(pos, &pos, 0);
 
-  if (maxcol != 255 || !isspace(*pos++)) die("Invalid PPM header: %s\n", file);
+  if (maxcol != 255 || !isspace(*pos++)) {
+    die("Invalid PPM header: %s\n", file);
+  }
 
-  if (!numpixels || numpixels > (size - (ppm - pos)) / 3)
+  if (!numpixels || numpixels > (size - (ppm - pos)) / 3) {
     die("Invalid PPM size: %s\n", file);
+  }
 
   return (unsigned char *)pos;
 }
@@ -81,19 +88,26 @@ static size_t createcolumn(unsigned char **column, int *colours, int height) {
 
     // count transparent pixels above post and opaque pixels in it
     transparent = opaque = 0;
-    for (; y < height && colours[y] == -1; y++) transparent++;
-    for (; y < height && colours[y] >= 0; y++) opaque++;
+    for (; y < height && colours[y] == -1; y++) {
+      transparent++;
+    }
+    for (; y < height && colours[y] >= 0; y++) {
+      opaque++;
+    }
 
     if (opaque > 0)  // this post has pixels
     {
-      while (size < length + opaque + 8) size *= 2, data = xrealloc(data, size);
+      while (size < length + opaque + 8) {
+        size *= 2, data = xrealloc(data, size);
+      }
 
       data[length++] = top + transparent;  // column offset
       data[length++] = opaque;             // length of column
       data[length++] = 0;                  // padding
 
-      for (i = 0; i < opaque; i++)
+      for (i = 0; i < opaque; i++) {
         data[length++] = colours[top + transparent + i];
+      }
 
       data[length++] = 0;  // more padding
     }
@@ -174,9 +188,11 @@ size_t ppm_to_bitmap(void **lumpdata, const char *filename) {
   pixels = parseppm(data, size, filename, &width, &height);
   bitmap = xmalloc(width * height);
 
-  for (j = 0; j < height; j++)
-    for (i = 0; i < width; i++)
+  for (j = 0; j < height; j++) {
+    for (i = 0; i < width; i++) {
       bitmap[width * j + i] = palette_getindex(&pixels[3 * (width * j + i)]);
+    }
+  }
 
   free(data);
 

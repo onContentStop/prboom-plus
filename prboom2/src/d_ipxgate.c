@@ -91,9 +91,13 @@ static byte ChecksumPacket(const packet_header_t* buffer, size_t len) {
   const byte* p = (void*)buffer;
   byte sum = 0;
 
-  if (len == 0) return 0;
+  if (len == 0) {
+    return 0;
+  }
 
-  while (p++, --len) sum += *p;
+  while (p++, --len) {
+    sum += *p;
+  }
 
   return sum;
 }
@@ -107,7 +111,9 @@ unsigned NetbufferChecksum(void* p, size_t l) {
   c = 0x1234567;
 
   l = l / 4;
-  for (int i = 0; i < l; i++) c += ((unsigned*)p)[i] * (i + 1);
+  for (int i = 0; i < l; i++) {
+    c += ((unsigned*)p)[i] * (i + 1);
+  }
 
   return c & NCMD_CHECKSUM;
 }
@@ -122,9 +128,15 @@ int ExpandTics(int low, int maketic) {
 
   delta = low - (maketic & 0xff);
 
-  if (delta >= -64 && delta <= 64) return (maketic & ~0xff) + low;
-  if (delta > 64) return (maketic & ~0xff) - 256 + low;
-  if (delta < -64) return (maketic & ~0xff) + 256 + low;
+  if (delta >= -64 && delta <= 64) {
+    return (maketic & ~0xff) + low;
+  }
+  if (delta > 64) {
+    return (maketic & ~0xff) - 256 + low;
+  }
+  if (delta < -64) {
+    return (maketic & ~0xff) + 256 + low;
+  }
   fprintf(stderr, "ExpandTics strange value %i at maketic %i\n", low, maketic);
   exit(-2);
 }
@@ -175,8 +187,9 @@ void ipx_receive(int s) {
         int tics;
         outbuf[0] = tics = buf.u.d.numtics;
         outbuf[1] = buf.u.d.player;
-        for (int i = 0; i < tics; i++)
+        for (int i = 0; i < tics; i++) {
           TicToRaw(outbuf + 2 + i * sizeof(ticcmd_t), &buf.u.d.cmds[i]);
+        }
         send_udp_packet(PKT_TICC, ExpandTics(buf.u.d.starttic, basetic), outbuf,
                         2 + tics * sizeof(ticcmd_t));
       }
@@ -232,7 +245,9 @@ void udp_receive(int s) {
         for (int t = 0; t < tics; t++) {
           int players = *pp++;
           for (int i = 0; i < players; i++) {
-            if (*pp++ == pkt.u.d.player) RawToTic(&pkt.u.d.cmds[t], pp);
+            if (*pp++ == pkt.u.d.player) {
+              RawToTic(&pkt.u.d.cmds[t], pp);
+            }
             pp += sizeof(ticcmd_t);
           }
         }
@@ -261,8 +276,12 @@ void loop(int ipxs, int udps) {
       exit(-2);
     }
     if (rc > 0) {
-      if (FD_ISSET(ipxs, &fds)) ipx_receive(ipxs);
-      if (FD_ISSET(udps, &fds)) udp_receive(udps);
+      if (FD_ISSET(ipxs, &fds)) {
+        ipx_receive(ipxs);
+      }
+      if (FD_ISSET(udps, &fds)) {
+        udp_receive(udps);
+      }
     }
   }
 }

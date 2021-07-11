@@ -53,7 +53,9 @@ static void loadpal(const char *filename) {
   void *data = NULL;
   size_t size = read_or_die(&data, filename);
 
-  if (size != 3 * PAL_SIZE) die("Bad palette: %s\n", filename);
+  if (size != 3 * PAL_SIZE) {
+    die("Bad palette: %s\n", filename);
+  }
 
   palette_data = data;
 }
@@ -74,12 +76,15 @@ void palette_init(const char *filename) {
 int palette_getindex(const unsigned char *rgb) {
   int i;
 
-  if (!palette_data)
+  if (!palette_data) {
     die("No palette loaded - please specify one with -palette\n");
+  }
 
   i = hash[HASH(rgb) % PAL_SIZE].first;
 
-  while (i < PAL_SIZE && memcmp(hash[i].rgb, rgb, 3) != 0) i = hash[i].next;
+  while (i < PAL_SIZE && memcmp(hash[i].rgb, rgb, 3) != 0) {
+    i = hash[i].next;
+  }
 
   return i < PAL_SIZE ? i : -1;
 }

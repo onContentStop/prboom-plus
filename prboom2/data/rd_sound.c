@@ -59,8 +59,9 @@ size_t wav_to_doom(void **lumpdata, const char *filename) {
   struct doom_sound_header *out;
 
   if (size < sizeof(*header) - 1 || memcmp(header->riff, "RIFF", 4) != 0 ||
-      memcmp(header->wave, "WAVE", 4) != 0)
+      memcmp(header->wave, "WAVE", 4) != 0) {
     die("Invalid WAV file: %s\n", filename);
+  }
 
   size = sizeof(*out) - 1 + LONG(header->datalen);
   out = xmalloc(size);

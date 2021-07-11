@@ -9,8 +9,9 @@
 
 /* Include this so we define UNICODE properly */
 //#include "../../core/windows/SDL_windows.h"
-#include "SDL/SDL_windows.h"
 #include <shellapi.h> /* CommandLineToArgvW() */
+
+#include "SDL/SDL_windows.h"
 
 /* Include the SDL main definition header */
 #include "SDL2/SDL.h"

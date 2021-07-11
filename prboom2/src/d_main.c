@@ -214,7 +214,9 @@ static void D_Wipe(void) {
   dboolean done;
   int wipestart = I_GetTime() - 1;
 
-  if (!render_wipescreen) return;  // e6y
+  if (!render_wipescreen) {
+    return;  // e6y
+  }
   do {
     int nowtime, tics;
     do {
@@ -250,8 +252,12 @@ void D_Display(fixed_t frac) {
   // e6y
   extern dboolean gamekeydown[];
   if (doSkip) {
-    if (HU_DrawDemoProgress(false)) I_FinishUpdate();
-    if (!gamekeydown[key_use]) return;
+    if (HU_DrawDemoProgress(false)) {
+      I_FinishUpdate();
+    }
+    if (!gamekeydown[key_use]) {
+      return;
+    }
 
 #ifdef GL_DOOM
     if (V_GetMode() == VID_MODEGL) {
@@ -260,12 +266,15 @@ void D_Display(fixed_t frac) {
 #endif
   }
 
-  if (!doSkip || !gamekeydown[key_use])
-
-    if (nodrawers)  // for comparative timing / profiling
+  if (!doSkip || !gamekeydown[key_use]) {
+    if (nodrawers) {  // for comparative timing / profiling
       return;
+    }
+  }
 
-  if (!I_StartDisplay()) return;
+  if (!I_StartDisplay()) {
+    return;
+  }
 
   if (setsizeneeded) {  // change the view size if needed
     R_ExecuteSetViewSize();
@@ -329,7 +338,9 @@ void D_Display(fixed_t frac) {
           (borderwillneedredraw) ||
           (((automapmode & am_active) && !(automapmode & am_overlay)));
     }
-    if (redrawborderstuff || (V_GetMode() == VID_MODEGL)) R_DrawViewBorder();
+    if (redrawborderstuff || (V_GetMode() == VID_MODEGL)) {
+      R_DrawViewBorder();
+    }
 
     // e6y
     // Boom colormaps should be applied for everything in R_RenderPlayerView
@@ -364,10 +375,14 @@ void D_Display(fixed_t frac) {
               (menuactive == mnact_full));
 
     BorderNeedRefresh = false;
-    if (V_GetMode() != VID_MODEGL) R_DrawViewBorder();
+    if (V_GetMode() != VID_MODEGL) {
+      R_DrawViewBorder();
+    }
     HU_Drawer();
 
-    if (V_GetMode() == VID_MODEGL) gld_ProcessExtraAlpha();
+    if (V_GetMode() == VID_MODEGL) {
+      gld_ProcessExtraAlpha();
+    }
   }
 
   isborderstate = isborder;
@@ -391,9 +406,9 @@ void D_Display(fixed_t frac) {
   HU_DrawDemoProgress(true);  // e6y
 
   // normal update
-  if (!wipe)
+  if (!wipe) {
     I_FinishUpdate();  // page flip or blit buffer
-  else {
+  } else {
     // wipe update
     wipe_EndScreen();
     D_Wipe();
@@ -425,31 +440,39 @@ static const char *auto_shot_fname;
 //
 
 static void D_DoomLoop(void) {
-  if (quickstart_window_ms > 0) I_uSleep(quickstart_window_ms * 1000);
+  if (quickstart_window_ms > 0) {
+    I_uSleep(quickstart_window_ms * 1000);
+  }
 
   for (;;) {
     WasRenderedInTryRunTics = false;
     // frame syncronous IO operations
     I_StartFrame();
 
-    if (ffmap == gamemap) ffmap = 0;
+    if (ffmap == gamemap) {
+      ffmap = 0;
+    }
 
     // process one or more tics
     if (singletics) {
       I_StartTic();
       G_BuildTiccmd(&netcmds[consoleplayer][maketic % BACKUPTICS]);
-      if (advancedemo) D_DoAdvanceDemo();
+      if (advancedemo) {
+        D_DoAdvanceDemo();
+      }
       M_Ticker();
       G_Ticker();
       P_Checksum(gametic);
       gametic++;
       maketic++;
-    } else
+    } else {
       TryRunTics();  // will run at least one tic
+    }
 
     // killough 3/16/98: change consoleplayer to displayplayer
-    if (players[displayplayer].mo)                // cph 2002/08/10
+    if (players[displayplayer].mo) {              // cph 2002/08/10
       S_UpdateSounds(players[displayplayer].mo);  // move positional sounds
+    }
 
     // Update display, next frame, with current state.
     if (!movement_smooth || !WasRenderedInTryRunTics ||
@@ -506,7 +529,9 @@ dboolean bfgedition = 0;
 // Handles timing for warped projection
 //
 void D_PageTicker(void) {
-  if (--pagetic < 0) D_AdvanceDemo();
+  if (--pagetic < 0) {
+    D_AdvanceDemo();
+  }
 }
 
 //
@@ -520,8 +545,9 @@ static void D_PageDrawer(void) {
     // e6y: wide-res
     V_FillBorder(-1, 0);
     V_DrawNamePatch(0, 0, 0, pagename, CR_DEFAULT, VPT_STRETCH);
-  } else
+  } else {
     M_DrawCredits();
+  }
 }
 
 //
@@ -535,10 +561,11 @@ void D_AdvanceDemo(void) { advancedemo = true; }
  */
 
 static void D_SetPageName(const char *name) {
-  if ((bfgedition) && name && !strncmp(name, "TITLEPIC", 8))
+  if ((bfgedition) && name && !strncmp(name, "TITLEPIC", 8)) {
     pagename = "DMENUPIC";
-  else
+  } else {
     pagename = name;
+  }
 }
 
 static void D_DrawTitle1(const char *name) {
@@ -639,12 +666,14 @@ void D_DoAdvanceDemo(void) {
 
   if (netgame && !demoplayback) {
     demosequence = 0;
-  } else if (!demostates[++demosequence][gamemode].func)
+  } else if (!demostates[++demosequence][gamemode].func) {
     demosequence = 0;
+  }
   // do not even attempt to play DEMO4 if it is not available
   if (demosequence == 6 && gamemode == commercial &&
-      W_CheckNumForName("demo4") < 0)
+      W_CheckNumForName("demo4") < 0) {
     demosequence = 0;
+  }
   demostates[demosequence][gamemode].func(
       demostates[demosequence][gamemode].name);
 }
@@ -680,15 +709,16 @@ void D_AddFile(const char *file, wad_source_t source) {
   // No Rest For The Living
   len = strlen(wadfiles[numwadfiles].name);
   if (len >= 9 &&
-      !strnicmp(wadfiles[numwadfiles].name + len - 9, "nerve.wad", 9))
+      !strnicmp(wadfiles[numwadfiles].name + len - 9, "nerve.wad", 9)) {
     gamemission = pack_nerve;
+  }
 
   numwadfiles++;
   // proff: automatically try to add the gwa files
   // proff - moved from w_wad.c
   gwa_filename =
       AddDefaultExtension(strcpy(malloc(strlen(file) + 5), file), ".wad");
-  if (strlen(gwa_filename) > 4)
+  if (strlen(gwa_filename) > 4) {
     if (!strcasecmp(gwa_filename + (strlen(gwa_filename) - 4), ".wad")) {
       char *ext;
       ext = &gwa_filename[strlen(gwa_filename) - 4];
@@ -701,6 +731,7 @@ void D_AddFile(const char *file, wad_source_t source) {
       wadfiles[numwadfiles].handle = 0;
       numwadfiles++;
     }
+  }
 }
 
 // killough 10/98: support -dehout filename
@@ -708,7 +739,9 @@ void D_AddFile(const char *file, wad_source_t source) {
 // e6y static
 const char *D_dehout(void) {
   int p = M_CheckParm("-dehout");
-  if (!p) p = M_CheckParm("-bexout");
+  if (!p) {
+    p = M_CheckParm("-bexout");
+  }
   return (p && ++p < myargc ? myargv[p] : NULL);
 }
 
@@ -754,46 +787,57 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec) {
         fileinfo = malloc(length * sizeof(filelump_t));
         if (fseek(fp, header.infotableofs, SEEK_SET) ||
             fread(fileinfo, sizeof(filelump_t), length, fp) != length ||
-            fclose(fp))
+            fclose(fp)) {
           I_Error("CheckIWAD: failed to read directory %s", iwadname);
+        }
 
         // scan directory for levelname lumps
         while (length--) {
           if (fileinfo[length].name[0] == 'E' &&
               fileinfo[length].name[2] == 'M' &&
               fileinfo[length].name[4] == 0) {
-            if (fileinfo[length].name[1] == '4')
+            if (fileinfo[length].name[1] == '4') {
               ++ud;
-            else if (fileinfo[length].name[1] == '3')
+            } else if (fileinfo[length].name[1] == '3') {
               ++rg;
-            else if (fileinfo[length].name[1] == '2')
+            } else if (fileinfo[length].name[1] == '2') {
               ++rg;
-            else if (fileinfo[length].name[1] == '1')
+            } else if (fileinfo[length].name[1] == '1') {
               ++sw;
+            }
           } else if (fileinfo[length].name[0] == 'M' &&
                      fileinfo[length].name[1] == 'A' &&
                      fileinfo[length].name[2] == 'P' &&
                      fileinfo[length].name[5] == 0) {
             ++cm;
-            if (fileinfo[length].name[3] == '3')
+            if (fileinfo[length].name[3] == '3') {
               if (fileinfo[length].name[4] == '1' ||
-                  fileinfo[length].name[4] == '2')
+                  fileinfo[length].name[4] == '2') {
                 ++sc;
+              }
+            }
           }
 
-          if (!strncmp(fileinfo[length].name, "DMENUPIC", 8)) bfgedition++;
-          if (!strncmp(fileinfo[length].name, "HACX", 4)) hx++;
+          if (!strncmp(fileinfo[length].name, "DMENUPIC", 8)) {
+            bfgedition++;
+          }
+          if (!strncmp(fileinfo[length].name, "HACX", 4)) {
+            hx++;
+          }
           if (!strncmp(fileinfo[length].name, "W94_1", 5) ||
-              !strncmp(fileinfo[length].name, "POSSH0M0", 8))
+              !strncmp(fileinfo[length].name, "POSSH0M0", 8)) {
             cq++;
+          }
         }
         free(fileinfo);
 
-        if (noiwad && !bfgedition && cq < 2)
+        if (noiwad && !bfgedition && cq < 2) {
           I_Error("CheckIWAD: IWAD tag %s not present", iwadname);
+        }
       }
-    } else  // error from open call
+    } else {  // error from open call
       I_Error("CheckIWAD: Can't open IWAD %s", iwadname);
+    }
 
     // Determine game mode from levels present
     // Must be a full set for whichever mode is present
@@ -804,14 +848,16 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec) {
     if (cm >= 30 || (cm >= 20 && hx)) {
       *gmode = commercial;
       *hassec = sc >= 2;
-    } else if (ud >= 9)
+    } else if (ud >= 9) {
       *gmode = retail;
-    else if (rg >= 18)
+    } else if (rg >= 18) {
       *gmode = registered;
-    else if (sw >= 9)
+    } else if (sw >= 9) {
       *gmode = shareware;
-  } else  // error from access call
+    }
+  } else {  // error from access call
     I_Error("CheckIWAD: IWAD %s not readable", iwadname);
+  }
 }
 
 //
@@ -820,7 +866,9 @@ void CheckIWAD(const char *iwadname, GameMode_t *gmode, dboolean *hassec) {
 void AddIWAD(const char *iwad) {
   size_t i;
 
-  if (!(iwad && *iwad)) return;
+  if (!(iwad && *iwad)) {
+    return;
+  }
 
   // jff 9/3/98 use logical output routine
   lprintf(LO_CONFIRM, "IWAD found: %s\n",
@@ -836,26 +884,30 @@ void AddIWAD(const char *iwad) {
     case registered:
     case shareware:
       gamemission = doom;
-      if (i >= 8 && !strnicmp(iwad + i - 8, "chex.wad", 8)) gamemission = chex;
+      if (i >= 8 && !strnicmp(iwad + i - 8, "chex.wad", 8)) {
+        gamemission = chex;
+      }
       break;
     case commercial:
       gamemission = doom2;
-      if (i >= 10 && !strnicmp(iwad + i - 10, "doom2f.wad", 10))
+      if (i >= 10 && !strnicmp(iwad + i - 10, "doom2f.wad", 10)) {
         language = french;
-      else if (i >= 7 && !strnicmp(iwad + i - 7, "tnt.wad", 7))
+      } else if (i >= 7 && !strnicmp(iwad + i - 7, "tnt.wad", 7)) {
         gamemission = pack_tnt;
-      else if (i >= 12 && !strnicmp(iwad + i - 12, "plutonia.wad", 12))
+      } else if (i >= 12 && !strnicmp(iwad + i - 12, "plutonia.wad", 12)) {
         gamemission = pack_plut;
-      else if (i >= 8 && !strnicmp(iwad + i - 8, "hacx.wad", 8))
+      } else if (i >= 8 && !strnicmp(iwad + i - 8, "hacx.wad", 8)) {
         gamemission = hacx;
+      }
       break;
     default:
       gamemission = none;
       break;
   }
-  if (gamemode == indetermined)
+  if (gamemode == indetermined) {
     // jff 9/3/98 use logical output routine
     lprintf(LO_WARN, "Unknown Game Version, may not work\n");
+  }
   D_AddFile(iwad, source_iwad);
 }
 
@@ -872,11 +924,17 @@ static void NormalizeSlashes(char *str) {
   // killough 1/18/98: Neater / \ handling.
   // Remove trailing / or \ to prevent // /\ \/ \\, and change \ to /
 
-  if (!str || !(l = strlen(str))) return;
-  if (str[--l] == '/' || str[l] == '\\')  // killough 1/18/98
+  if (!str || !(l = strlen(str))) {
+    return;
+  }
+  if (str[--l] == '/' || str[l] == '\\') {  // killough 1/18/98
     str[l] = 0;
-  while (l--)
-    if (str[l] == '\\') str[l] = '/';
+  }
+  while (l--) {
+    if (str[l] == '\\') {
+      str[l] = '/';
+    }
+  }
 }
 
 /*
@@ -894,8 +952,9 @@ static char *FindIWADFile(void) {
   if (i && (++i < myargc)) {
     iwad = I_FindFile(myargv[i], ".wad");
   } else {
-    for (i = 0; !iwad && i < nstandard_iwads; i++)
+    for (i = 0; !iwad && i < nstandard_iwads; i++) {
       iwad = I_FindFile(standard_iwads[i], ".wad");
+    }
   }
   return iwad;
 }
@@ -934,7 +993,9 @@ static void IdentifyVersion(void) {
     // CPhipps - use DOOMSAVEDIR if defined
     const char *p = getenv("DOOMSAVEDIR");
 
-    if (p == NULL) p = I_DoomExeDir();
+    if (p == NULL) {
+      p = I_DoomExeDir();
+    }
 
     free(basesavegame);
     basesavegame = strdup(p);
@@ -950,9 +1011,10 @@ static void IdentifyVersion(void) {
       NormalizeSlashes(basesavegame);        // jff 9/22/98 fix c:\ not working
     }
     // jff 9/3/98 use logical output routine
-    else
+    else {
       lprintf(LO_ERROR, "Error: -save path does not exist, using %s\n",
               basesavegame);
+    }
   }
 
   // locate the IWAD and determine game mode from it
@@ -974,8 +1036,9 @@ static void IdentifyVersion(void) {
   if (iwad && *iwad) {
     AddIWAD(iwad);
     free(iwad);
-  } else
+  } else {
     I_Error("IdentifyVersion: IWAD not found\n");
+  }
 }
 
 // killough 5/3/98: old code removed
@@ -986,7 +1049,7 @@ static void IdentifyVersion(void) {
 static void FindResponseFile(void) {
   int i;
 
-  for (i = 1; i < myargc; i++)
+  for (i = 1; i < myargc; i++) {
     if (myargv[i][0] == '@') {
       int size;
       int index;
@@ -1032,7 +1095,9 @@ static void FindResponseFile(void) {
         newargv = calloc(sizeof(newargv[0]), myargc);
         newargv[0] = myargv[0];
         for (k = 1, index = 1; k < myargc; k++) {
-          if (i != k) newargv[index++] = myargv[k];
+          if (i != k) {
+            newargv[index++] = myargv[k];
+          }
         }
         myargc = index;
         myargv = newargv;
@@ -1065,7 +1130,9 @@ static void FindResponseFile(void) {
 
             while (size > 0) {
               // Whitespace terminates the token unless quoted
-              if (!quoted && isspace(*infile)) break;
+              if (!quoted && isspace(*infile)) {
+                break;
+              }
               if (*infile == '\"') {
                 // Quotes are removed but remembered
                 infile++;
@@ -1076,7 +1143,9 @@ static void FindResponseFile(void) {
                 size--;
               }
             }
-            if (quoted) I_Error("Runaway quoted string in response file");
+            if (quoted) {
+              I_Error("Runaway quoted string in response file");
+            }
 
             // Terminate string, realloc and add to argv
             *p = 0;
@@ -1098,11 +1167,13 @@ static void FindResponseFile(void) {
       // DISPLAY ARGS
       // jff 9/3/98 use logical output routine
       lprintf(LO_CONFIRM, "%d command-line args:\n", myargc);
-      for (index = 1; index < myargc; index++)
+      for (index = 1; index < myargc; index++) {
         // jff 9/3/98 use logical output routine
         lprintf(LO_CONFIRM, "%s\n", myargv[index]);
+      }
       break;
     }
+  }
 }
 
 //
@@ -1171,12 +1242,16 @@ static void DoLooseFiles(void) {
   dehs = malloc(myargc * sizeof(*dehs));
   skip = malloc(myargc * sizeof(dboolean));
 
-  for (i = 0; i < myargc; i++) skip[i] = false;
+  for (i = 0; i < myargc; i++) {
+    skip[i] = false;
+  }
 
   for (i = 1; i < myargc; i++) {
     size_t arglen, extlen;
 
-    if (*myargv[i] == '-') break;  // quit at first switch
+    if (*myargv[i] == '-') {
+      break;  // quit at first switch
+    }
 
     // so now we must have a loose file.  Find out what kind and store it.
     arglen = strlen(myargv[i]);
@@ -1226,17 +1301,19 @@ static void DoLooseFiles(void) {
       // put our stuff into it
       if (*(params[k].count) > 0) {
         tmyargv[tmyargc++] = strdup(params[k].cmdparam);  // put the switch in
-        for (i = 0; i < *(params[k].count);)
+        for (i = 0; i < *(params[k].count);) {
           tmyargv[tmyargc++] =
               (*(params[k].list))[i++];  // allocated by strdup above
+        }
       }
       k++;
     }
 
     // then copy everything that's there now
     for (i = 1; i < myargc; i++) {
-      if (!skip[i])                      // skip any zapped entries
+      if (!skip[i]) {                    // skip any zapped entries
         tmyargv[tmyargc++] = myargv[i];  // pointers are still valid
+      }
     }
     // now make the global variables point to our array
     myargv = tmyargv;
@@ -1265,24 +1342,28 @@ static void L_SetupConsoleMasks(void) {
   // jff 9/3/98 get mask for console output filter
   if ((p = M_CheckParm("-cout"))) {
     lprintf(LO_DEBUG, "mask for stdout console output: ");
-    if (++p != myargc && *myargv[p] != '-')
-      for (i = 0, cons_output_mask = 0; (size_t)i < strlen(myargv[p]); i++)
+    if (++p != myargc && *myargv[p] != '-') {
+      for (i = 0, cons_output_mask = 0; (size_t)i < strlen(myargv[p]); i++) {
         if ((pos = strchr(cena, toupper(myargv[p][i])))) {
           cons_output_mask |= (1 << (pos - cena));
           lprintf(LO_DEBUG, "%c", toupper(myargv[p][i]));
         }
+      }
+    }
     lprintf(LO_DEBUG, "\n");
   }
 
   // jff 9/3/98 get mask for redirected console error filter
   if ((p = M_CheckParm("-cerr"))) {
     lprintf(LO_DEBUG, "mask for stderr console output: ");
-    if (++p != myargc && *myargv[p] != '-')
-      for (i = 0, cons_error_mask = 0; (size_t)i < strlen(myargv[p]); i++)
+    if (++p != myargc && *myargv[p] != '-') {
+      for (i = 0, cons_error_mask = 0; (size_t)i < strlen(myargv[p]); i++) {
         if ((pos = strchr(cena, toupper(myargv[p][i])))) {
           cons_error_mask |= (1 << (pos - cena));
           lprintf(LO_DEBUG, "%c", toupper(myargv[p][i]));
         }
+      }
+    }
     lprintf(LO_DEBUG, "\n");
   }
 }
@@ -1294,7 +1375,9 @@ static char *GetAutoloadBaseDir(unsigned int iter) {
   static char *autoload_path = NULL;
   int len;
 
-  if (M_CheckParm("-noload")) return NULL;
+  if (M_CheckParm("-noload")) {
+    return NULL;
+  }
 
   if (autoload_path == NULL) {
     const char *exedir = I_DoomExeDir();
@@ -1344,9 +1427,12 @@ static const char *BaseName(const char *filename) {
 
   basename = filename + strlen(filename) - 1;
 
-  while (basename > filename && *basename != '/' && *basename != '\\')
+  while (basename > filename && *basename != '/' && *basename != '\\') {
     basename--;
-  if (*basename == '/' || *basename == '\\') basename++;
+  }
+  if (*basename == '/' || *basename == '\\') {
+    basename++;
+  }
 
   return basename;
 }
@@ -1355,10 +1441,14 @@ const char *IWADBaseName(void) {
   int i;
 
   for (i = 0; i < numwadfiles; i++) {
-    if (wadfiles[i].src == source_iwad) break;
+    if (wadfiles[i].src == source_iwad) {
+      break;
+    }
   }
 
-  if (i == numwadfiles) I_Error("IWADBaseName: IWAD not found\n");
+  if (i == numwadfiles) {
+    I_Error("IWADBaseName: IWAD not found\n");
+  }
 
   return BaseName(wadfiles[i].name);
 }
@@ -1409,13 +1499,14 @@ static void D_AutoloadPWadDir() {
 
   for (iter = 0; (base = GetAutoloadBaseDir(iter)); iter++) {
     int i;
-    for (i = 0; i < numwadfiles; ++i)
+    for (i = 0; i < numwadfiles; ++i) {
       if (wadfiles[i].src == source_pwad) {
         char *autoload_dir;
         autoload_dir = GetAutoloadDir(base, BaseName(wadfiles[i].name), false);
         AutoLoadWADs(autoload_dir);
         free(autoload_dir);
       }
+    }
   }
 }
 
@@ -1465,13 +1556,14 @@ static void D_AutoloadDehPWadDir() {
 
   for (iter = 0; (base = GetAutoloadBaseDir(iter)); iter++) {
     int i;
-    for (i = 0; i < numwadfiles; ++i)
+    for (i = 0; i < numwadfiles; ++i) {
       if (wadfiles[i].src == source_pwad) {
         char *autoload_dir;
         autoload_dir = GetAutoloadDir(base, BaseName(wadfiles[i].name), false);
         AutoLoadPatches(autoload_dir);
         free(autoload_dir);
       }
+    }
   }
 }
 
@@ -1498,8 +1590,11 @@ static void D_DoomMainSetup(void) {
 
     do {
       rsp_found = false;
-      for (i = 0; i < myargc; i++)
-        if (myargv[i][0] == '@') rsp_found = true;
+      for (i = 0; i < myargc; i++) {
+        if (myargv[i][0] == '@') {
+          rsp_found = true;
+        }
+      }
       FindResponseFile();
     } while (rsp_found == true);
   }
@@ -1511,7 +1606,9 @@ static void D_DoomMainSetup(void) {
   */
 
   // figgi 09/18/00-- added switch to force classic bsp nodes
-  if (M_CheckParm("-forceoldbsp")) forceOldBsp = true;
+  if (M_CheckParm("-forceoldbsp")) {
+    forceOldBsp = true;
+  }
 
   init_sfx();
   D_BuildBEXTables();  // haleyjd
@@ -1531,10 +1628,11 @@ static void D_DoomMainSetup(void) {
 
   devparm = M_CheckParm("-devparm");
 
-  if (M_CheckParm("-altdeath"))
+  if (M_CheckParm("-altdeath")) {
     deathmatch = 2;
-  else if (M_CheckParm("-deathmatch"))
+  } else if (M_CheckParm("-deathmatch")) {
     deathmatch = 1;
+  }
 
   {
     switch (gamemode) {
@@ -1598,9 +1696,10 @@ static void D_DoomMainSetup(void) {
             version_date, doomverstr);
   }
 
-  if (devparm)
+  if (devparm) {
     // jff 9/3/98 use logical output routine
     lprintf(LO_CONFIRM, "%s", D_DEVSTR);
+  }
 
   // turbo option
   if ((p = M_CheckParm("-turbo"))) {
@@ -1608,9 +1707,15 @@ static void D_DoomMainSetup(void) {
     extern int forwardmove[2];
     extern int sidemove[2];
 
-    if (p < myargc - 1) scale = atoi(myargv[p + 1]);
-    if (scale < 10) scale = 10;
-    if (scale > 400) scale = 400;
+    if (p < myargc - 1) {
+      scale = atoi(myargv[p + 1]);
+    }
+    if (scale < 10) {
+      scale = 10;
+    }
+    if (scale > 400) {
+      scale = 400;
+    }
     // jff 9/3/98 use logical output routine
     lprintf(LO_CONFIRM, "turbo scale: %i%%\n", scale);
     forwardmove[0] = forwardmove[0] * scale / 100;
@@ -1646,10 +1751,11 @@ static void D_DoomMainSetup(void) {
             time > 1 ? "s" : "");
   }
 
-  if ((p = M_CheckParm("-avg")) && p < myargc - 1 && deathmatch)
+  if ((p = M_CheckParm("-avg")) && p < myargc - 1 && deathmatch) {
     // jff 9/3/98 use logical output routine
     lprintf(LO_CONFIRM,
             "Austin Virtual Gaming: Levels will end after 20 minutes\n");
+  }
 
   if ((p = M_CheckParm("-warp")) ||  // killough 5/2/98
       (p = M_CheckParm("-wart")))
@@ -1659,8 +1765,9 @@ static void D_DoomMainSetup(void) {
     startmap = 0;  // Ty 08/29/98 - allow "-warp x" to go to first map in wad(s)
     autostart = true;  // Ty 08/29/98 - move outside the decision tree
     if (gamemode == commercial) {
-      if (p < myargc - 1)
+      if (p < myargc - 1) {
         startmap = atoi(myargv[p + 1]);  // Ty 08/29/98 - add test if last parm
+      }
     } else  // 1/25/98 killough: fix -warp xxx from crashing Doom 1 / UD
     {
       if (p < myargc - 1) {
@@ -1730,18 +1837,22 @@ static void D_DoomMainSetup(void) {
     int i, imax = MAXLOADFILES;
 
     // make sure to always autoload prboom-plus.wad
-    if (M_CheckParm("-noload")) imax = 1;
+    if (M_CheckParm("-noload")) {
+      imax = 1;
+    }
 
     for (i = 0; i < imax; i++) {
       const char *fname = wad_files[i];
       char *fpath;
 
-      if (!(fname && *fname)) continue;
+      if (!(fname && *fname)) {
+        continue;
+      }
       // Filename is now stored as a zero terminated string
       fpath = I_FindFile(fname, ".wad");
-      if (!fpath)
+      if (!fpath) {
         lprintf(LO_WARN, "Failed to autoload %s\n", fname);
-      else {
+      } else {
         D_AddFile(fpath, source_auto_load);
         free(fpath);
       }
@@ -1777,9 +1888,9 @@ static void D_DoomMainSetup(void) {
   }
 
   if (!(p = M_CheckParm("-playdemo")) || p >= myargc - 1) { /* killough */
-    if ((p = M_CheckParm("-fastdemo")) && p < myargc - 1)   /* killough */
+    if ((p = M_CheckParm("-fastdemo")) && p < myargc - 1) { /* killough */
       fastdemo = true;  // run at fastest speed possible
-    else {
+    } else {
       if ((p = IsDemoContinue())) {
         democontinue = true;
         AddDefaultExtension(strcpy(democontinuename, myargv[p + 2]), ".lmp");
@@ -1808,7 +1919,9 @@ static void D_DoomMainSetup(void) {
   // e6y
   {
     int demo_footer = CheckDemoExDemo();
-    if (!demo_footer) demo_footer = CheckAutoDemo();
+    if (!demo_footer) {
+      demo_footer = CheckAutoDemo();
+    }
 #ifdef USE_WINDOWS_LAUNCHER
     LauncherShow(demo_footer);
 #endif
@@ -1836,13 +1949,15 @@ static void D_DoomMainSetup(void) {
   // option to disable automatic loading of dehacked-in-wad lump
   if (!M_CheckParm("-nodeh")) {
     // MBF-style DeHackEd in wad support: load all lumps, not just the last one
-    for (p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;)
+    for (p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;) {
       // Split loading DEHACKED lumps into IWAD/autoload and PWADs/others
       if (lumpinfo[p].source == source_iwad ||
           lumpinfo[p].source == source_pre ||
-          lumpinfo[p].source == source_auto_load)
+          lumpinfo[p].source == source_auto_load) {
         ProcessDehFile(NULL, D_dehout(),
                        p);  // cph - add dehacked-in-a-wad support
+      }
+    }
 
     if (bfgedition) {
       int lump = (W_CheckNumForName)("BFGBEX", ns_prboom);
@@ -1893,12 +2008,14 @@ static void D_DoomMainSetup(void) {
       const char *fname = deh_files[i];
       char *fpath;
 
-      if (!(fname && *fname)) continue;
+      if (!(fname && *fname)) {
+        continue;
+      }
       // Filename is now stored as a zero terminated string
       fpath = I_FindFile(fname, ".bex");
-      if (!fpath)
+      if (!fpath) {
         lprintf(LO_WARN, "Failed to autoload %s\n", fname);
-      else {
+      } else {
         ProcessDehFile(fpath, D_dehout(), 0);
         // this used to set modifiedgame here, but patches shouldn't
         free(fpath);
@@ -1911,12 +2028,15 @@ static void D_DoomMainSetup(void) {
 
   D_AutoloadDehDir();
 
-  if (!M_CheckParm("-nodeh"))
-    for (p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;)
+  if (!M_CheckParm("-nodeh")) {
+    for (p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;) {
       if (!(lumpinfo[p].source == source_iwad ||
             lumpinfo[p].source == source_pre ||
-            lumpinfo[p].source == source_auto_load))
+            lumpinfo[p].source == source_auto_load)) {
         ProcessDehFile(NULL, D_dehout(), p);
+      }
+    }
+  }
 
   // process .deh files from PWADs autoload directories
 
@@ -1970,11 +2090,21 @@ static void D_DoomMainSetup(void) {
   // Ty 04/08/98 - Add 5 lines of misc. data, only if nonblank
   // The expectation is that these will be set in a .bex file
   // jff 9/3/98 use logical output routine
-  if (*startup1) lprintf(LO_INFO, "%s", startup1);
-  if (*startup2) lprintf(LO_INFO, "%s", startup2);
-  if (*startup3) lprintf(LO_INFO, "%s", startup3);
-  if (*startup4) lprintf(LO_INFO, "%s", startup4);
-  if (*startup5) lprintf(LO_INFO, "%s", startup5);
+  if (*startup1) {
+    lprintf(LO_INFO, "%s", startup1);
+  }
+  if (*startup2) {
+    lprintf(LO_INFO, "%s", startup2);
+  }
+  if (*startup3) {
+    lprintf(LO_INFO, "%s", startup3);
+  }
+  if (*startup4) {
+    lprintf(LO_INFO, "%s", startup4);
+  }
+  if (*startup5) {
+    lprintf(LO_INFO, "%s", startup5);
+  }
   // End new startup strings
 
   // jff 9/3/98 use logical output routine
@@ -2006,7 +2136,9 @@ static void D_DoomMainSetup(void) {
   lprintf(LO_INFO, "HU_Init: Setting up heads up display.\n");
   HU_Init();
 
-  if (!(M_CheckParm("-nodraw") && M_CheckParm("-nosound"))) I_InitGraphics();
+  if (!(M_CheckParm("-nodraw") && M_CheckParm("-nosound"))) {
+    I_InitGraphics();
+  }
 
   // NSM
   if ((p = M_CheckParm("-viddump")) && (p < myargc - 1)) {
@@ -2018,9 +2150,11 @@ static void D_DoomMainSetup(void) {
   ST_Init();
 
   // CPhipps - auto screenshots
-  if ((p = M_CheckParm("-autoshot")) && (p < myargc - 2))
-    if ((auto_shot_count = auto_shot_time = atoi(myargv[p + 1])))
+  if ((p = M_CheckParm("-autoshot")) && (p < myargc - 2)) {
+    if ((auto_shot_count = auto_shot_time = atoi(myargv[p + 1]))) {
       auto_shot_fname = myargv[p + 2];
+    }
+  }
 
   if ((p = M_CheckParm("-statdump")) && (p < myargc - 1)) {
     I_AtExit(StatDump, true);
@@ -2032,9 +2166,9 @@ static void D_DoomMainSetup(void) {
   // killough 12/98:
   // Support -loadgame with -record and reimplement -recordfrom.
 
-  if ((slot = M_CheckParm("-recordfrom")) && (p = slot + 2) < myargc)
+  if ((slot = M_CheckParm("-recordfrom")) && (p = slot + 2) < myargc) {
     G_RecordDemo(myargv[p]);
-  else {
+  } else {
     slot = M_CheckParm("-loadgame");
     if ((p = M_CheckParm("-record")) && ++p < myargc) {
       autostart = true;
@@ -2077,9 +2211,12 @@ static void D_DoomMainSetup(void) {
         GetFirstMap(&startepisode, &startmap);
       }
       G_InitNew(startskill, startepisode, startmap);
-      if (demorecording) G_BeginRecording();
-    } else
+      if (demorecording) {
+        G_BeginRecording();
+      }
+    } else {
       D_StartTitle();  // start up intro loop
+    }
   }
 
   // do not try to interpolate during timedemo
@@ -2128,8 +2265,9 @@ void GetFirstMap(int *ep, int *map) {
             done = true;         // Ty 09/13/98
             newlevel = true;     // Ty 10/04/98
           } else {
-            if (!*name)  // found one, not pwad.  First default.
+            if (!*name) {  // found one, not pwad.  First default.
               strcpy(name, test);
+            }
           }
         }
       }
@@ -2151,8 +2289,9 @@ void GetFirstMap(int *ep, int *map) {
               done = true;         // Ty 09/13/98
               newlevel = true;     // Ty 10/04/98
             } else {
-              if (!*name)  // found one, not pwad.  First default.
+              if (!*name) {  // found one, not pwad.  First default.
                 strcpy(name, test);
+              }
             }
           }
         }

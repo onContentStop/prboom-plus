@@ -67,7 +67,9 @@ static int *y_lookup = NULL;
 
 // e6y: resolution limitation is removed
 void R_InitMeltRes(void) {
-  if (y_lookup) free(y_lookup);
+  if (y_lookup) {
+    free(y_lookup);
+  }
 
   y_lookup = calloc(1, SCREENWIDTH * sizeof(*y_lookup));
 }
@@ -77,10 +79,11 @@ static int wipe_initMelt(int ticks) {
 
   if (V_GetMode() != VID_MODEGL) {
     // copy start screen to main screen
-    for (i = 0; i < SCREENHEIGHT; i++)
+    for (i = 0; i < SCREENHEIGHT; i++) {
       memcpy(wipe_scr.data + i * wipe_scr.byte_pitch,
              wipe_scr_start.data + i * wipe_scr_start.byte_pitch,
              SCREENWIDTH * V_GetPixelDepth());
+    }
   }
 
   // setup initial column positions (y<0 => not ready to scroll yet)
@@ -88,10 +91,11 @@ static int wipe_initMelt(int ticks) {
   for (i = 1; i < SCREENWIDTH; i++) {
     int r = (M_Random() % 3) - 1;
     y_lookup[i] = y_lookup[i - 1] + r;
-    if (y_lookup[i] > 0)
+    if (y_lookup[i] > 0) {
       y_lookup[i] = 0;
-    else if (y_lookup[i] == -16)
+    } else if (y_lookup[i] == -16) {
       y_lookup[i] = -15;
+    }
   }
   return 0;
 }
@@ -118,14 +122,18 @@ static int wipe_doMelt(int ticks) {
          *  so it takes no longer in high res
          */
         dy = (y_lookup[i] < 16) ? y_lookup[i] + 1 : SCREENHEIGHT / 25;
-        if (y_lookup[i] + dy >= SCREENHEIGHT) dy = SCREENHEIGHT - y_lookup[i];
+        if (y_lookup[i] + dy >= SCREENHEIGHT) {
+          dy = SCREENHEIGHT - y_lookup[i];
+        }
 
         if (V_GetMode() != VID_MODEGL) {
           s = wipe_scr_end.data +
               (y_lookup[i] * wipe_scr_end.byte_pitch + (i * depth));
           d = wipe_scr.data + (y_lookup[i] * wipe_scr.byte_pitch + (i * depth));
           for (j = dy; j; j--) {
-            for (k = 0; k < depth; k++) d[k] = s[k];
+            for (k = 0; k < depth; k++) {
+              d[k] = s[k];
+            }
             d += wipe_scr.byte_pitch;
             s += wipe_scr_end.byte_pitch;
           }
@@ -135,7 +143,9 @@ static int wipe_doMelt(int ticks) {
           s = wipe_scr_start.data + (i * depth);
           d = wipe_scr.data + (y_lookup[i] * wipe_scr.byte_pitch + (i * depth));
           for (j = SCREENHEIGHT - y_lookup[i]; j; j--) {
-            for (k = 0; k < depth; k++) d[k] = s[k];
+            for (k = 0; k < depth; k++) {
+              d[k] = s[k];
+            }
             d += wipe_scr.byte_pitch;
             s += wipe_scr_end.byte_pitch;
           }
@@ -176,8 +186,10 @@ static int wipe_exitMelt(int ticks) {
 }
 
 int wipe_StartScreen(void) {
-  if (!render_wipescreen || wasWiped) return 0;  // e6y
-  wasWiped = true;                               // e6y
+  if (!render_wipescreen || wasWiped) {
+    return 0;  // e6y
+  }
+  wasWiped = true;  // e6y
 
 #ifdef GL_DOOM
   if (V_GetMode() == VID_MODEGL) {
@@ -193,7 +205,9 @@ int wipe_StartScreen(void) {
   wipe_scr_start.int_pitch = screens[0].int_pitch;
 
   // e6y: fixed slowdown at 1024x768 on some systems
-  if (!(wipe_scr_start.byte_pitch % 1024)) wipe_scr_start.byte_pitch += 32;
+  if (!(wipe_scr_start.byte_pitch % 1024)) {
+    wipe_scr_start.byte_pitch += 32;
+  }
 
   wipe_scr_start.not_on_heap = false;
   V_AllocScreen(&wipe_scr_start);
@@ -204,8 +218,10 @@ int wipe_StartScreen(void) {
 }
 
 int wipe_EndScreen(void) {
-  if (!render_wipescreen || !wasWiped) return 0;  // e6y
-  wasWiped = false;                               // e6y
+  if (!render_wipescreen || !wasWiped) {
+    return 0;  // e6y
+  }
+  wasWiped = false;  // e6y
 
 #ifdef GL_DOOM
   if (V_GetMode() == VID_MODEGL) {
@@ -221,7 +237,9 @@ int wipe_EndScreen(void) {
   wipe_scr_end.int_pitch = screens[0].int_pitch;
 
   // e6y: fixed slowdown at 1024x768 on some systems
-  if (!(wipe_scr_end.byte_pitch % 1024)) wipe_scr_end.byte_pitch += 32;
+  if (!(wipe_scr_end.byte_pitch % 1024)) {
+    wipe_scr_end.byte_pitch += 32;
+  }
 
   wipe_scr_end.not_on_heap = false;
   V_AllocScreen(&wipe_scr_end);
@@ -235,9 +253,11 @@ int wipe_EndScreen(void) {
 
 // killough 3/5/98: reformatted and cleaned up
 int wipe_ScreenWipe(int ticks) {
-  static dboolean go;                // when zero, stop the wipe
-  if (!render_wipescreen) return 0;  // e6y
-  if (!go)                           // initial stuff
+  static dboolean go;  // when zero, stop the wipe
+  if (!render_wipescreen) {
+    return 0;  // e6y
+  }
+  if (!go)  // initial stuff
   {
     go = 1;
     wipe_scr = screens[0];

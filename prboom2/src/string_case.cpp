@@ -50,12 +50,28 @@ char* stringStartCase(const char* str) {
   return strToC(MyStartCase{}.myCase(str));
 }
 namespace string {
-std::string titleCase(std::string_view str) { return MyTitleCase{}.myCase(str); }
-std::string trainCase(std::string_view str) { return MyTrainCase{}.myCase(str); }
-std::string snakeCase(std::string_view str) { return MySnakeCase{}.myCase(str); }
-std::string camelCase(std::string_view str) { return MyCamelCase{}.myCase(str); }
-std::string camelBack(std::string_view str) { return MyCamelBack{}.myCase(str); }
-std::string upperCase(std::string_view str) { return MyUpperCase{}.myCase(str); }
-std::string lowerCase(std::string_view str) { return MyLowerCase{}.myCase(str); }
-std::string startCase(std::string_view str) { return MyStartCase{}.myCase(str); }
+std::string titleCase(std::string_view str) {
+  return MyTitleCase{}.myCase(str);
+}
+std::string trainCase(std::string_view str) {
+  return MyTrainCase{}.myCase(str);
+}
+std::string snakeCase(std::string_view str) {
+  return MySnakeCase{}.myCase(str);
+}
+std::string camelCase(std::string_view str) {
+  return MyCamelCase{}.myCase(str);
+}
+std::string camelBack(std::string_view str) {
+  return MyCamelBack{}.myCase(str);
+}
+std::string upperCase(std::string_view str) {
+  return MyUpperCase{}.myCase(str);
+}
+std::string lowerCase(std::string_view str) {
+  return MyLowerCase{}.myCase(str);
+}
+std::string startCase(std::string_view str) {
+  return MyStartCase{}.myCase(str);
+}
 }  // namespace string

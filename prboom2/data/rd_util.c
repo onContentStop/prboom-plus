@@ -24,7 +24,9 @@ void ATTR((noreturn)) die(const char *error, ...) {
 void *xmalloc(size_t size) {
   void *ptr = malloc(size);
 
-  if (!ptr) die("Failure to allocate %lu bytes\n", (unsigned long)size);
+  if (!ptr) {
+    die("Failure to allocate %lu bytes\n", (unsigned long)size);
+  }
 
   return ptr;
 }
@@ -32,7 +34,9 @@ void *xmalloc(size_t size) {
 void *xrealloc(void *ptr, size_t size) {
   ptr = realloc(ptr, size);
 
-  if (!ptr) die("Failure to reallocate %lu bytes\n", (unsigned long)size);
+  if (!ptr) {
+    die("Failure to reallocate %lu bytes\n", (unsigned long)size);
+  }
 
   return ptr;
 }
@@ -73,7 +77,9 @@ size_t read_or_die(void **ptr, const char *file) {
       free(path);
     }
   }
-  if (!f) die("Cannot open %s\n", file);
+  if (!f) {
+    die("Cannot open %s\n", file);
+  }
 
   while (!feof(f)) {
     size_t size_read;

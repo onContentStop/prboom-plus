@@ -704,21 +704,26 @@ static void alsa_setchvolume(int ch, int v, unsigned long when) {
 static void alsa_refreshvolume(void) {
   int i;
 
-  for (i = 0; i < 16; i++)
+  for (i = 0; i < 16; i++) {
     alsa_midi_write_control_now(i, 7, channelvol[i] * alsa_volume / 15);
+  }
 
   alsa_midi_evt_flush();
 }
 
 static void alsa_clearchvolume(void) {
   int i;
-  for (i = 0; i < 16; i++) channelvol[i] = 127;  // default: max
+  for (i = 0; i < 16; i++) {
+    channelvol[i] = 127;  // default: max
+  }
 }
 
 static void alsa_setvolume(int v) {
   static int firsttime = 1;
 
-  if (alsa_volume == v && !firsttime) return;
+  if (alsa_volume == v && !firsttime) {
+    return;
+  }
   firsttime = 0;
 
   alsa_volume = v;
@@ -886,7 +891,9 @@ static void alsa_render(void *vdest, unsigned bufflen) {
 
   memset(vdest, 0, bufflen * 4);
 
-  if (!alsa_playing || alsa_paused) return;
+  if (!alsa_playing || alsa_paused) {
+    return;
+  }
 
   while (1) {
     double eventdelta;
@@ -917,17 +924,18 @@ static void alsa_render(void *vdest, unsigned bufflen) {
         break;
       case MIDI_EVENT_META:  // tempo is the only meta message we're interested
                              // in
-        if (currevent->data.meta.type == MIDI_META_SET_TEMPO)
+        if (currevent->data.meta.type == MIDI_META_SET_TEMPO) {
           spmc = MIDI_spmc(midifile, currevent, 1000);
-        else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
+        } else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
           if (alsa_looping) {
             int i;
             eventpos = 0;
             alsa_delta += eventdelta;
             // fix buggy songs that forget to terminate notes held over loop
             // point sdl_mixer does this as well
-            for (i = 0; i < 16; i++)
+            for (i = 0; i < 16; i++) {
               alsa_midi_write_control(when, i, 123, 0);  // all notes off
+            }
             continue;
           }
           // stop
@@ -950,8 +958,9 @@ static void alsa_render(void *vdest, unsigned bufflen) {
     // if the event was a "reset all controllers", we need to additionally
     // re-fix the volume (which itself was reset)
     if (currevent->event_type == MIDI_EVENT_CONTROLLER &&
-        currevent->data.channel.param1 == 121)
+        currevent->data.channel.param1 == 121) {
       alsa_setchvolume(currevent->data.channel.channel, 127, when);
+    }
 
     // event processed so advance midiclock
     alsa_delta += eventdelta;

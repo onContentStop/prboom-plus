@@ -75,16 +75,18 @@ void FMI_StartFinale(void) {
     finaletext = gamemapinfo->intertext;
   }
 
-  if (!finaletext)
+  if (!finaletext) {
     finaletext = "The End";  // this is to avoid a crash on a missing text in
-                             // the last map.
+  }
+  // the last map.
 
   if (gamemapinfo->interbackdrop[0]) {
     finaleflat = gamemapinfo->interbackdrop[0];
   }
 
-  if (!finaleflat)
+  if (!finaleflat) {
     finaleflat = "FLOOR4_8";  // use a single fallback for all maps.
+  }
 
   using_FMI = true;
 }
@@ -104,11 +106,15 @@ void FMI_StartFinale(void) {
 
 void FMI_Ticker(void) {
   int i;
-  if (!demo_compatibility)
+  if (!demo_compatibility) {
     WI_checkForAccelerate();  // killough 3/28/98: check for acceleration
-  else
-    for (i = 0; i < MAXPLAYERS; i++)
-      if (players[i].cmd.buttons) goto next_level;  // go on to the next level
+  } else {
+    for (i = 0; i < MAXPLAYERS; i++) {
+      if (players[i].cmd.buttons) {
+        goto next_level;  // go on to the next level
+      }
+    }
+  }
 
   // advance animation
   finalecount++;

@@ -101,10 +101,11 @@ static int fl_init(int samplerate) {
     fluid_version(&major, &minor, &micro);
     lprintf(LO_INFO, "Fluidplayer: Fluidsynth version %i.%i.%i\n", major, minor,
             micro);
-    if (major >= 2 || (minor >= 1 && micro >= 4))
+    if (major >= 2 || (minor >= 1 && micro >= 4)) {
       sratemin = 8000;
-    else
+    } else {
       sratemin = 22050;
+    }
     if (f_soundrate < sratemin) {
       lprintf(LO_INFO, "Fluidplayer: samplerates under %i are not supported\n",
               sratemin);
@@ -275,7 +276,9 @@ static void fl_writesamples_ex(
 
   if (nsamp * 2 > fbuff_siz) {
     float *newfbuff = (float *)realloc(fbuff, nsamp * 2 * sizeof(float));
-    if (!newfbuff) return;
+    if (!newfbuff) {
+      return;
+    }
     fbuff = newfbuff;
     fbuff_siz = nsamp * 2;
   }
@@ -285,8 +288,12 @@ static void fl_writesamples_ex(
   for (i = 0; i < nsamp * 2; i++) {
     // data is NOT already clipped
     float f = fbuff[i];
-    if (f > 1.0f) f = 1.0f;
-    if (f < -1.0f) f = -1.0f;
+    if (f > 1.0f) {
+      f = 1.0f;
+    }
+    if (f < -1.0f) {
+      f = -1.0f;
+    }
     dest[i] = (short)(f * multiplier);
   }
 }
@@ -392,9 +399,9 @@ static void fl_render(void *vdest, unsigned length) {
         writesysex(currevent->data.sysex.data, currevent->data.sysex.length);
         break;
       case MIDI_EVENT_META:
-        if (currevent->data.meta.type == MIDI_META_SET_TEMPO)
+        if (currevent->data.meta.type == MIDI_META_SET_TEMPO) {
           spmc = MIDI_spmc(midifile, currevent, f_soundrate);
-        else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
+        } else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
           if (f_looping) {
             int i;
             eventpos = 0;

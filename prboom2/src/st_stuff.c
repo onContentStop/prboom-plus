@@ -402,7 +402,9 @@ static void ST_Stop(void);
 void ST_SetScaledWidth(void) {
   int width = stbarbg.width;
 
-  if (width == 0) width = ST_WIDTH;
+  if (width == 0) {
+    width = ST_WIDTH;
+  }
 
   switch (render_stretch_hud) {
     case patch_stretch_16x10:
@@ -418,7 +420,9 @@ void ST_SetScaledWidth(void) {
 
   ST_SCALED_WIDTH = (ST_SCALED_WIDTH + 3) & (int)~3;
 
-  if (ST_SCALED_WIDTH > SCREENWIDTH) ST_SCALED_WIDTH = SCREENWIDTH;
+  if (ST_SCALED_WIDTH > SCREENWIDTH) {
+    ST_SCALED_WIDTH = SCREENWIDTH;
+  }
 
   ST_SCALED_OFFSETX = (SCREENWIDTH - ST_SCALED_WIDTH) / 2;
 }
@@ -431,7 +435,9 @@ static void ST_refreshBackground(void) {
     flags = VPT_ALIGN_BOTTOM;
 
     // Applies palette to backfill
-    if (V_GetMode() != VID_MODE8) R_FillBackScreen();
+    if (V_GetMode() != VID_MODE8) {
+      R_FillBackScreen();
+    }
 
     V_DrawNumPatch(ST_X, y, BG, stbarbg.lumpnum, CR_DEFAULT, flags);
     if (!deathmatch) {
@@ -466,8 +472,9 @@ dboolean ST_Responder(event_t *ev) {
         break;
     }
   } else                             // if a user keypress...
-      if (ev->type == ev_keydown)    // Try cheat responder in m_cheat.c
+      if (ev->type == ev_keydown) {  // Try cheat responder in m_cheat.c
     return M_FindCheats(ev->data1);  // killough 4/17/98, 5/2/98
+  }
   return false;
 }
 
@@ -543,7 +550,9 @@ static void ST_updateFaceWidget(void) {
         // There are TWO bugs in the ouch face code.
         // Not only was the condition reversed, but the priority system is
         // broken in a way that makes the face not work with monster damage.
-        if (!default_comp[comp_ouchface]) priority = 8;
+        if (!default_comp[comp_ouchface]) {
+          priority = 8;
+        }
 
         st_facecount = ST_TURNCOUNT;
         st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
@@ -602,16 +611,17 @@ static void ST_updateFaceWidget(void) {
   if (priority < 6) {
     // rapid firing
     if (plyr->attackdown) {
-      if (lastattackdown == -1)
+      if (lastattackdown == -1) {
         lastattackdown = ST_RAMPAGEDELAY;
-      else if (!--lastattackdown) {
+      } else if (!--lastattackdown) {
         priority = 5;
         st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
         st_facecount = 1;
         lastattackdown = 1;
       }
-    } else
+    } else {
       lastattackdown = -1;
+    }
   }
 
   if (priority < 5) {
@@ -643,10 +653,11 @@ static void ST_updateWidgets(void) {
   // must redirect the pointer if the ready weapon has changed.
   //  if (w_ready.data != plyr->readyweapon)
   //  {
-  if (weaponinfo[plyr->readyweapon].ammo == am_noammo)
+  if (weaponinfo[plyr->readyweapon].ammo == am_noammo) {
     w_ready.num = &largeammo;
-  else
+  } else {
     w_ready.num = &plyr->ammo[weaponinfo[plyr->readyweapon].ammo];
+  }
   //{
   // static int tic=0;
   // static int dir=-1;
@@ -670,8 +681,9 @@ static void ST_updateWidgets(void) {
     // jff 2/24/98 select double key
     // killough 2/28/98: preserve traditional keys by config option
 
-    if (plyr->cards[i + 3])
+    if (plyr->cards[i + 3]) {
       keyboxes[i] = keyboxes[i] == -1 || sts_traditional_keys ? i + 3 : i + 6;
+    }
   }
 
   // refresh everything if this is him coming back to life
@@ -688,14 +700,17 @@ static void ST_updateWidgets(void) {
   st_fragscount = 0;
 
   for (i = 0; i < MAXPLAYERS; i++) {
-    if (i != displayplayer)  // killough 3/7/98
+    if (i != displayplayer) {  // killough 3/7/98
       st_fragscount += plyr->frags[i];
-    else
+    } else {
       st_fragscount -= plyr->frags[i];
+    }
   }
 
   // get rid of chat window if up because of message
-  if (!--st_msgcounter) st_chat = st_oldchat;
+  if (!--st_msgcounter) {
+    st_chat = st_oldchat;
+  }
 }
 
 void ST_Ticker(void) {
@@ -714,27 +729,36 @@ static void ST_doPaletteStuff(void) {
   if (palette_onpowers && plyr->powers[pw_strength]) {
     // slowly fade the berzerk out
     int bzc = 12 - (plyr->powers[pw_strength] >> 6);
-    if (bzc > cnt) cnt = bzc;
+    if (bzc > cnt) {
+      cnt = bzc;
+    }
   }
 
   if (cnt) {
     palette = (cnt + 7) >> 3;
-    if (palette >= NUMREDPALS) palette = NUMREDPALS - 1;
+    if (palette >= NUMREDPALS) {
+      palette = NUMREDPALS - 1;
+    }
 
     /* cph 2006/08/06 - if in the menu, reduce the red tint - navigating to
      * load a game can be tricky if the screen is all red */
-    if (menuactive) palette >>= 1;
+    if (menuactive) {
+      palette >>= 1;
+    }
 
     palette += STARTREDPALS;
   } else if (palette_onbonus && plyr->bonuscount) {
     palette = (plyr->bonuscount + 7) >> 3;
-    if (palette >= NUMBONUSPALS) palette = NUMBONUSPALS - 1;
+    if (palette >= NUMBONUSPALS) {
+      palette = NUMBONUSPALS - 1;
+    }
     palette += STARTBONUSPALS;
   } else if (palette_onpowers && (plyr->powers[pw_ironfeet] > 4 * 32 ||
-                                  plyr->powers[pw_ironfeet] & 8))
+                                  plyr->powers[pw_ironfeet] & 8)) {
     palette = RADIATIONPAL;
-  else
+  } else {
     palette = 0;
+  }
 
   // In Chex Quest, the player never sees red.  Instead, the
   // radiation suit palette is used to tint the screen green,
@@ -752,13 +776,16 @@ static void ST_doPaletteStuff(void) {
     // have to redraw the entire status bar when the palette changes
     // in truecolor modes - POPE
     if (V_GetMode() == VID_MODE15 || V_GetMode() == VID_MODE16 ||
-        V_GetMode() == VID_MODE32)
+        V_GetMode() == VID_MODE32) {
       st_firsttime = true;
+    }
   }
 }
 
 void M_ChangeApplyPalette(void) {
-  if (gamestate == GS_LEVEL) ST_doPaletteStuff();
+  if (gamestate == GS_LEVEL) {
+    ST_doPaletteStuff();
+  }
 }
 
 static void ST_drawWidgets(dboolean refresh) {
@@ -774,20 +801,23 @@ static void ST_drawWidgets(dboolean refresh) {
   // jff 2/16/98 make color of ammo depend on amount
   if ((*w_ready.num == plyr->maxammo[weaponinfo[w_ready.data].ammo]) ||
       (ammo_colour_behaviour == ammo_colour_behaviour_no && plyr->backpack &&
-       *w_ready.num * 2 >= plyr->maxammo[weaponinfo[w_ready.data].ammo]))
+       *w_ready.num * 2 >= plyr->maxammo[weaponinfo[w_ready.data].ammo])) {
     STlib_updateNum(&w_ready, CR_BLUE2, refresh);
-  else {
-    if (plyr->maxammo[weaponinfo[w_ready.data].ammo])
+  } else {
+    if (plyr->maxammo[weaponinfo[w_ready.data].ammo]) {
       ammopct =
           (*w_ready.num * 100) / plyr->maxammo[weaponinfo[w_ready.data].ammo];
-    if (plyr->backpack && ammo_colour_behaviour != ammo_colour_behaviour_yes)
+    }
+    if (plyr->backpack && ammo_colour_behaviour != ammo_colour_behaviour_yes) {
       ammopct *= 2;
-    if (ammopct < ammo_red)
+    }
+    if (ammopct < ammo_red) {
       STlib_updateNum(&w_ready, CR_RED, refresh);
-    else if (ammopct < ammo_yellow)
+    } else if (ammopct < ammo_yellow) {
       STlib_updateNum(&w_ready, CR_GOLD, refresh);
-    else
+    } else {
       STlib_updateNum(&w_ready, CR_GREEN, refresh);
+    }
   }
   for (i = 0; i < 4; i++) {
     STlib_updateNum(&w_ammo[i], CR_DEFAULT, refresh);  // jff 2/16/98 no xlation
@@ -795,43 +825,50 @@ static void ST_drawWidgets(dboolean refresh) {
   }
 
   // jff 2/16/98 make color of health depend on amount
-  if (*w_health.n.num < health_red)
+  if (*w_health.n.num < health_red) {
     STlib_updatePercent(&w_health, CR_RED, refresh);
-  else if (*w_health.n.num < health_yellow)
+  } else if (*w_health.n.num < health_yellow) {
     STlib_updatePercent(&w_health, CR_GOLD, refresh);
-  else if (*w_health.n.num <= health_green)
+  } else if (*w_health.n.num <= health_green) {
     STlib_updatePercent(&w_health, CR_GREEN, refresh);
-  else
+  } else {
     STlib_updatePercent(&w_health, CR_BLUE2, refresh);  // killough 2/28/98
+  }
 
   if (sts_armorcolor_type) {
     // armor color dictated by type (Status Bar)
-    if (plyr->armortype >= 2)
+    if (plyr->armortype >= 2) {
       STlib_updatePercent(&w_armor, CR_BLUE2, refresh);
-    else if (plyr->armortype == 1)
+    } else if (plyr->armortype == 1) {
       STlib_updatePercent(&w_armor, CR_GREEN, refresh);
-    else if (plyr->armortype == 0)
+    } else if (plyr->armortype == 0) {
       STlib_updatePercent(&w_armor, CR_RED, refresh);
+    }
   } else {
     // jff 2/16/98 make color of armor depend on amount
-    if (*w_armor.n.num < armor_red)
+    if (*w_armor.n.num < armor_red) {
       STlib_updatePercent(&w_armor, CR_RED, refresh);
-    else if (*w_armor.n.num < armor_yellow)
+    } else if (*w_armor.n.num < armor_yellow) {
       STlib_updatePercent(&w_armor, CR_GOLD, refresh);
-    else if (*w_armor.n.num <= armor_green)
+    } else if (*w_armor.n.num <= armor_green) {
       STlib_updatePercent(&w_armor, CR_GREEN, refresh);
-    else
+    } else {
       STlib_updatePercent(&w_armor, CR_BLUE2, refresh);  // killough 2/28/98
+    }
   }
 
   // e6y: moved to ST_refreshBackground() for correct single-pass stretching
   // STlib_updateBinIcon(&w_armsbg, refresh);
 
-  for (i = 0; i < 6; i++) STlib_updateMultIcon(&w_arms[i], refresh);
+  for (i = 0; i < 6; i++) {
+    STlib_updateMultIcon(&w_arms[i], refresh);
+  }
 
   STlib_updateMultIcon(&w_faces, refresh);
 
-  for (i = 0; i < 3; i++) STlib_updateMultIcon(&w_keyboxes[i], refresh);
+  for (i = 0; i < 3; i++) {
+    STlib_updateMultIcon(&w_keyboxes[i], refresh);
+  }
 
   STlib_updateNum(&w_frags, CR_DEFAULT, refresh);
 }
@@ -855,10 +892,14 @@ void ST_Drawer(dboolean statusbaron, dboolean refresh, dboolean fullmenu) {
       /* If just after ST_Start(), refresh all */
       st_firsttime = false;
       ST_refreshBackground();  // draw status bar background to off-screen buff
-      if (!fullmenu) ST_drawWidgets(true);  // and refresh all widgets
+      if (!fullmenu) {
+        ST_drawWidgets(true);  // and refresh all widgets
+      }
     } else {
       /* Otherwise, update as little as possible */
-      if (!fullmenu) ST_drawWidgets(false);  // update all widgets
+      if (!fullmenu) {
+        ST_drawWidgets(false);  // update all widgets
+      }
     }
   }
 }
@@ -974,9 +1015,13 @@ static void ST_initData(void) {
 
   st_oldhealth = -1;
 
-  for (i = 0; i < NUMWEAPONS; i++) oldweaponsowned[i] = plyr->weaponowned[i];
+  for (i = 0; i < NUMWEAPONS; i++) {
+    oldweaponsowned[i] = plyr->weaponowned[i];
+  }
 
-  for (i = 0; i < 3; i++) keyboxes[i] = -1;
+  for (i = 0; i < 3; i++) {
+    keyboxes[i] = -1;
+  }
 
   STlib_init();
 }
@@ -1059,14 +1104,18 @@ static void ST_createWidgets(void) {
 static dboolean st_stopped = true;
 
 void ST_Start(void) {
-  if (!st_stopped) ST_Stop();
+  if (!st_stopped) {
+    ST_Stop();
+  }
   ST_initData();
   ST_createWidgets();
   st_stopped = false;
 }
 
 static void ST_Stop(void) {
-  if (st_stopped) return;
+  if (st_stopped) {
+    return;
+  }
   V_SetPalette(0);
   st_stopped = true;
 }

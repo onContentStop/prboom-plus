@@ -65,8 +65,9 @@ void P_InitThinkers(void) {
   int i;
 
   for (i = 0; i < NUMTHCLASS;
-       i++)  // killough 8/29/98: initialize threaded lists
+       i++) {  // killough 8/29/98: initialize threaded lists
     thinkerclasscap[i].cprev = thinkerclasscap[i].cnext = &thinkerclasscap[i];
+  }
 
   thinkercap.prev = thinkercap.next = &thinkercap;
 }
@@ -92,7 +93,9 @@ void P_UpdateThinker(thinker_t *thinker) {
 
   {
     /* Remove from current thread, if in one */
-    if ((th = thinker->cnext) != NULL) (th->cprev = thinker->cprev)->cnext = th;
+    if ((th = thinker->cnext) != NULL) {
+      (th->cprev = thinker->cprev)->cnext = th;
+    }
   }
 
   // Add to appropriate thread
@@ -185,7 +188,9 @@ void P_RemoveThinker(thinker_t *thinker) {
  */
 thinker_t *P_NextThinker(thinker_t *th, th_class cl) {
   thinker_t *top = &thinkerclasscap[cl];
-  if (!th) th = top;
+  if (!th) {
+    th = top;
+  }
   th = cl == th_all ? th->next : th->cnext;
   return th == top ? NULL : th;
 }
@@ -203,10 +208,12 @@ thinker_t *P_NextThinker(thinker_t *th, th_class cl) {
  */
 
 void P_SetTarget(mobj_t **mop, mobj_t *targ) {
-  if (*mop)  // If there was a target already, decrease its refcount
+  if (*mop) {  // If there was a target already, decrease its refcount
     (*mop)->thinker.references--;
-  if ((*mop = targ))  // Set new target and if non-NULL, increase its counter
+  }
+  if ((*mop = targ)) {  // Set new target and if non-NULL, increase its counter
     targ->thinker.references++;
+  }
 }
 
 //
@@ -235,8 +242,12 @@ void P_SetTarget(mobj_t **mop, mobj_t *targ) {
 static void P_RunThinkers(void) {
   for (currentthinker = thinkercap.next; currentthinker != &thinkercap;
        currentthinker = currentthinker->next) {
-    if (newthinkerpresent) R_ActivateThinkerInterpolations(currentthinker);
-    if (currentthinker->function) currentthinker->function(currentthinker);
+    if (newthinkerpresent) {
+      R_ActivateThinkerInterpolations(currentthinker);
+    }
+    if (currentthinker->function) {
+      currentthinker->function(currentthinker);
+    }
   }
   newthinkerpresent = false;
 
@@ -270,9 +281,13 @@ void P_Ticker(void) {
 
   P_MapStart();
   // not if this is an intermission screen
-  if (gamestate == GS_LEVEL)
-    for (i = 0; i < MAXPLAYERS; i++)
-      if (playeringame[i]) P_PlayerThink(&players[i]);
+  if (gamestate == GS_LEVEL) {
+    for (i = 0; i < MAXPLAYERS; i++) {
+      if (playeringame[i]) {
+        P_PlayerThink(&players[i]);
+      }
+    }
+  }
 
   P_RunThinkers();
   P_UpdateSpecials();

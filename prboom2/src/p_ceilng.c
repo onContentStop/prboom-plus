@@ -145,8 +145,9 @@ void T_MoveCeiling(ceiling_t *ceiling) {
           // start back up
           case genSilentCrusher:
           case genCrusher:
-            if (ceiling->oldspeed < CEILSPEED * 3)
+            if (ceiling->oldspeed < CEILSPEED * 3) {
               ceiling->speed = ceiling->oldspeed;
+            }
             ceiling->direction = 1;  // jff 2/22/98 make it go back up!
             break;
 
@@ -195,8 +196,9 @@ void T_MoveCeiling(ceiling_t *ceiling) {
             // jff 02/08/98 slow down slow crushers on obstacle
             case genCrusher:
             case genSilentCrusher:
-              if (ceiling->oldspeed < CEILSPEED * 3)
+              if (ceiling->oldspeed < CEILSPEED * 3) {
                 ceiling->speed = CEILSPEED / 8;
+              }
               break;
             case silentCrushAndRaise:
             case crushAndRaise:
@@ -231,9 +233,9 @@ int EV_DoCeiling(line_t *line, ceiling_e type) {
   rtn = 0;
 
   if (ProcessNoTagLines(line, &sec, &secnum)) {
-    if (zerotag_manual)
+    if (zerotag_manual) {
       goto manual_ceiling;
-    else {
+    } else {
       return rtn;
     }
   };  // e6y
@@ -256,9 +258,9 @@ int EV_DoCeiling(line_t *line, ceiling_e type) {
   manual_ceiling:  // e6y
     // if ceiling already moving, don't start a second function on it
     if (P_SectorActive(ceiling_special, sec)) {  // jff 2/22/98
-      if (!zerotag_manual)
+      if (!zerotag_manual) {
         continue;
-      else {
+      } else {
         return rtn;
       }
     };  // e6y
@@ -291,7 +293,9 @@ int EV_DoCeiling(line_t *line, ceiling_e type) {
       case lowerAndCrush:
       case lowerToFloor:
         ceiling->bottomheight = sec->floorheight;
-        if (type != lowerToFloor) ceiling->bottomheight += 8 * FRACUNIT;
+        if (type != lowerToFloor) {
+          ceiling->bottomheight += 8 * FRACUNIT;
+        }
         ceiling->direction = -1;
         ceiling->speed = CEILSPEED;
         break;
@@ -322,7 +326,9 @@ int EV_DoCeiling(line_t *line, ceiling_e type) {
     ceiling->tag = sec->tag;
     ceiling->type = type;
     P_AddActiveCeiling(ceiling);
-    if (zerotag_manual) return rtn;  // e6y
+    if (zerotag_manual) {
+      return rtn;  // e6y
+    }
   }
   return rtn;
 }
@@ -404,7 +410,9 @@ void P_AddActiveCeiling(ceiling_t *ceiling) {
   ceilinglist_t *list = malloc(sizeof *list);
   list->ceiling = ceiling;
   ceiling->list = list;
-  if ((list->next = activeceilings)) list->next->prev = &list->next;
+  if ((list->next = activeceilings)) {
+    list->next->prev = &list->next;
+  }
   list->prev = &activeceilings;
   activeceilings = list;
 }
@@ -421,7 +429,9 @@ void P_RemoveActiveCeiling(ceiling_t *ceiling) {
   ceilinglist_t *list = ceiling->list;
   ceiling->sector->ceilingdata = NULL;  // jff 2/22/98
   P_RemoveThinker(&ceiling->thinker);
-  if ((*list->prev = list->next)) list->next->prev = list->prev;
+  if ((*list->prev = list->next)) {
+    list->next->prev = list->prev;
+  }
   free(list);
 }
 

@@ -103,11 +103,13 @@ void HUlib_initTextLine(hu_textline_t* t, int x, int y, const patchnum_t* f,
 //
 dboolean HUlib_addCharToTextLine(hu_textline_t* t, char ch) {
   // killough 1/23/98 -- support multiple lines
-  if (t->linelen == HU_MAXLINELENGTH)
+  if (t->linelen == HU_MAXLINELENGTH) {
     return false;
-  else {
+  } else {
     t->linelen++;
-    if (ch == '\n') t->linelen = 0;
+    if (ch == '\n') {
+      t->linelen = 0;
+    }
 
     t->l[t->len++] = ch;
     t->l[t->len] = 0;
@@ -125,9 +127,9 @@ dboolean HUlib_addCharToTextLine(hu_textline_t* t, char ch) {
 // Returns false if already empty, true if the character deleted
 //
 static dboolean HUlib_delCharFromTextLine(hu_textline_t* t) {
-  if (!t->len)
+  if (!t->len) {
     return false;
-  else {
+  } else {
     t->l[--t->len] = 0;
     t->needsupdate = 4;
     return true;
@@ -154,14 +156,15 @@ void HUlib_drawTextLine(hu_textline_t* l, dboolean drawcursor) {
   if (l->w == 0) {
     for (i = 0; i < l->len; i++) {
       c = toupper(l->l[i]);
-      if (c == '\n')
+      if (c == '\n') {
         continue;
-      else if (c == '\x1b')
+      } else if (c == '\x1b') {
         i++;
-      else if (c != ' ' && c >= l->sc && c <= 127)
+      } else if (c != ' ' && c >= l->sc && c <= 127) {
         l->w += l->f[c - l->sc].width;
-      else
+      } else {
         l->w += 4;
+      }
     }
   }
 
@@ -172,17 +175,22 @@ void HUlib_drawTextLine(hu_textline_t* l, dboolean drawcursor) {
   for (i = 0; i < l->len; i++) {
     c = toupper(l->l[i]);  // jff insure were not getting a cheap toupper conv.
 
-    if (c == '\n')  // killough 1/18/98 -- support multiple lines
+    if (c == '\n') {  // killough 1/18/98 -- support multiple lines
       x = 0, y += 8;
-    else if (c == '\t')  // killough 1/23/98 -- support tab stops
+    } else if (c == '\t') {  // killough 1/23/98 -- support tab stops
       x = x - x % 80 + 80;
-    else if (c == '\x1b')  // jff 2/17/98 escape code for color change
-    {                      // jff 3/26/98 changed to actual escape char
-      if (++i < l->len)
-        if (l->l[i] >= '0' && l->l[i] <= '9') l->cm = l->l[i] - '0';
+    } else if (c == '\x1b')  // jff 2/17/98 escape code for color change
+    {                        // jff 3/26/98 changed to actual escape char
+      if (++i < l->len) {
+        if (l->l[i] >= '0' && l->l[i] <= '9') {
+          l->cm = l->l[i] - '0';
+        }
+      }
     } else if (c != ' ' && c >= l->sc && c <= 127) {
       w = l->f[c - l->sc].width;
-      if (x + w - l->f[c - l->sc].leftoffset > BASE_WIDTH) break;
+      if (x + w - l->f[c - l->sc].leftoffset > BASE_WIDTH) {
+        break;
+      }
       // killough 1/18/98 -- support multiple lines:
       // CPhipps - patch drawing updated
       V_DrawNumPatch(x, y, FG, l->f[c - l->sc].lumpnum, l->cm,
@@ -190,7 +198,9 @@ void HUlib_drawTextLine(hu_textline_t* l, dboolean drawcursor) {
       x += w;
     } else {
       x += 4;
-      if (x >= BASE_WIDTH) break;
+      if (x >= BASE_WIDTH) {
+        break;
+      }
     }
   }
   l->cm = oc;  // jff 2/17/98 restore original color
@@ -234,9 +244,9 @@ void HUlib_eraseTextLine(hu_textline_t* l) {
     }
 
     for (y = top; y <= bottom; y++) {
-      if (y < viewwindowy || y >= viewwindowy + viewheight)
+      if (y < viewwindowy || y >= viewwindowy + viewheight) {
         R_VideoErase(0, y, SCREENWIDTH);  // erase entire line
-      else {
+      } else {
         // erase left border
         R_VideoErase(0, y, viewwindowx);
         // erase right border
@@ -245,7 +255,9 @@ void HUlib_eraseTextLine(hu_textline_t* l) {
     }
   }
 
-  if (l->needsupdate) l->needsupdate--;
+  if (l->needsupdate) {
+    l->needsupdate--;
+  }
 }
 
 ////////////////////////////////////////////////////////
@@ -273,9 +285,10 @@ void HUlib_initSText(hu_stext_t* s, int x, int y, int h, const patchnum_t* font,
   s->on = on;
   s->laston = true;
   s->cl = 0;
-  for (i = 0; i < h; i++)
+  for (i = 0; i < h; i++) {
     HUlib_initTextLine(&s->l[i], x, y - i * (font[0].height + 1), font,
                        startchar, cm, flags);
+  }
 }
 
 //
@@ -290,11 +303,15 @@ static void HUlib_addLineToSText(hu_stext_t* s) {
   int i;
 
   // add a clear line
-  if (++s->cl == s->h) s->cl = 0;
+  if (++s->cl == s->h) {
+    s->cl = 0;
+  }
   HUlib_clearTextLine(&s->l[s->cl]);
 
   // everything needs updating
-  for (i = 0; i < s->h; i++) s->l[i].needsupdate = 4;
+  for (i = 0; i < s->h; i++) {
+    s->l[i].needsupdate = 4;
+  }
 }
 
 //
@@ -308,10 +325,15 @@ static void HUlib_addLineToSText(hu_stext_t* s) {
 void HUlib_addMessageToSText(hu_stext_t* s, const char* prefix,
                              const char* msg) {
   HUlib_addLineToSText(s);
-  if (prefix)
-    while (*prefix) HUlib_addCharToTextLine(&s->l[s->cl], *(prefix++));
+  if (prefix) {
+    while (*prefix) {
+      HUlib_addCharToTextLine(&s->l[s->cl], *(prefix++));
+    }
+  }
 
-  while (*msg) HUlib_addCharToTextLine(&s->l[s->cl], *(msg++));
+  while (*msg) {
+    HUlib_addCharToTextLine(&s->l[s->cl], *(msg++));
+  }
 }
 
 //
@@ -326,12 +348,16 @@ void HUlib_drawSText(hu_stext_t* s) {
   int i, idx;
   hu_textline_t* l;
 
-  if (!*s->on) return;  // if not on, don't draw
+  if (!*s->on) {
+    return;  // if not on, don't draw
+  }
 
   // draw everything
   for (i = 0; i < s->h; i++) {
     idx = s->cl - i;
-    if (idx < 0) idx += s->h;  // handle queue of lines
+    if (idx < 0) {
+      idx += s->h;  // handle queue of lines
+    }
 
     l = &s->l[idx];
 
@@ -352,7 +378,9 @@ void HUlib_eraseSText(hu_stext_t* s) {
   int i;
 
   for (i = 0; i < s->h; i++) {
-    if (s->laston && !*s->on) s->l[i].needsupdate = 4;
+    if (s->laston && !*s->on) {
+      s->l[i].needsupdate = 4;
+    }
     HUlib_eraseTextLine(&s->l[i]);
   }
   s->laston = *s->on;
@@ -408,10 +436,14 @@ void HUlib_initMText(hu_mtext_t* m, int x, int y, int w, int h,
 //
 static void HUlib_addLineToMText(hu_mtext_t* m) {
   // add a clear line
-  if (++m->cl == hud_msg_lines) m->cl = 0;
+  if (++m->cl == hud_msg_lines) {
+    m->cl = 0;
+  }
   HUlib_clearTextLine(&m->l[m->cl]);
 
-  if (m->nl < hud_msg_lines) m->nl++;
+  if (m->nl < hud_msg_lines) {
+    m->nl++;
+  }
 
   // needs updating
   m->l[m->cl].needsupdate = 4;
@@ -428,10 +460,15 @@ static void HUlib_addLineToMText(hu_mtext_t* m) {
 void HUlib_addMessageToMText(hu_mtext_t* m, const char* prefix,
                              const char* msg) {
   HUlib_addLineToMText(m);
-  if (prefix)
-    while (*prefix) HUlib_addCharToTextLine(&m->l[m->cl], *(prefix++));
+  if (prefix) {
+    while (*prefix) {
+      HUlib_addCharToTextLine(&m->l[m->cl], *(prefix++));
+    }
+  }
 
-  while (*msg) HUlib_addCharToTextLine(&m->l[m->cl], *(msg++));
+  while (*msg) {
+    HUlib_addCharToTextLine(&m->l[m->cl], *(msg++));
+  }
 }
 
 //
@@ -451,22 +488,25 @@ void HUlib_drawMBg(int x, int y, int w, int h, const patchnum_t* bgp) {
   // CPhipps - patch drawing updated
   // top rows
   V_DrawNumPatch(x, y, FG, bgp[0].lumpnum, CR_DEFAULT, VPT_STRETCH);  // ul
-  for (j = x + xs; j < x + w - xs; j += xs)                           // uc
+  for (j = x + xs; j < x + w - xs; j += xs) {                         // uc
     V_DrawNumPatch(j, y, FG, bgp[1].lumpnum, CR_DEFAULT, VPT_STRETCH);
+  }
   V_DrawNumPatch(j, y, FG, bgp[2].lumpnum, CR_DEFAULT, VPT_STRETCH);  // ur
 
   // middle rows
   for (i = y + ys; i < y + h - ys; i += ys) {
     V_DrawNumPatch(x, i, FG, bgp[3].lumpnum, CR_DEFAULT, VPT_STRETCH);  // cl
-    for (j = x + xs; j < x + w - xs; j += xs)                           // cc
+    for (j = x + xs; j < x + w - xs; j += xs) {                         // cc
       V_DrawNumPatch(j, i, FG, bgp[4].lumpnum, CR_DEFAULT, VPT_STRETCH);
+    }
     V_DrawNumPatch(j, i, FG, bgp[5].lumpnum, CR_DEFAULT, VPT_STRETCH);  // cr
   }
 
   // bottom row
   V_DrawNumPatch(x, i, FG, bgp[6].lumpnum, CR_DEFAULT, VPT_STRETCH);  // ll
-  for (j = x + xs; j < x + w - xs; j += xs)                           // lc
+  for (j = x + xs; j < x + w - xs; j += xs) {                         // lc
     V_DrawNumPatch(j, i, FG, bgp[7].lumpnum, CR_DEFAULT, VPT_STRETCH);
+  }
   V_DrawNumPatch(j, i, FG, bgp[8].lumpnum, CR_DEFAULT, VPT_STRETCH);  // lr
 }
 
@@ -482,14 +522,20 @@ void HUlib_drawMText(hu_mtext_t* m) {
   int i, idx, y;
   hu_textline_t* l;
 
-  if (!*m->on) return;  // if not on, don't draw
+  if (!*m->on) {
+    return;  // if not on, don't draw
+  }
 
   // draw everything
-  if (hud_list_bgon) HUlib_drawMBg(m->x, m->y, m->w, m->h, m->bg);
+  if (hud_list_bgon) {
+    HUlib_drawMBg(m->x, m->y, m->w, m->h, m->bg);
+  }
   y = m->y + HU_REFRESHSPACING;
   for (i = 0; i < m->nl; i++) {
     idx = m->cl - i;
-    if (idx < 0) idx += m->nl;  // handle queue of lines
+    if (idx < 0) {
+      idx += m->nl;  // handle queue of lines
+    }
 
     l = &m->l[idx];
     if (hud_list_bgon) {
@@ -524,9 +570,9 @@ static void HUlib_eraseMBg(hu_mtext_t* m) {
   if (!(automapmode & am_active) && viewwindowx) {
     lh = m->l[0].f[0].height + 1;
     for (y = m->y; y < m->y + lh * (hud_msg_lines + 2); y++) {
-      if (y < viewwindowy || y >= viewwindowy + viewheight)
+      if (y < viewwindowy || y >= viewwindowy + viewheight) {
         R_VideoErase(0, y, SCREENWIDTH);  // erase entire line
-      else {
+      } else {
         // erase left border
         R_VideoErase(0, y, viewwindowx);
         // erase right border
@@ -547,7 +593,9 @@ static void HUlib_eraseMBg(hu_mtext_t* m) {
 void HUlib_eraseMText(hu_mtext_t* m) {
   int i;
 
-  if (hud_list_bgon) HUlib_eraseMBg(m);
+  if (hud_list_bgon) {
+    HUlib_eraseMBg(m);
+  }
 
   for (i = 0; i < m->nl; i++) {
     m->l[i].needsupdate = 4;
@@ -591,7 +639,9 @@ void HUlib_initIText(hu_itext_t* it, int x, int y, const patchnum_t* font,
 // Returns nothing
 //
 static void HUlib_delCharFromIText(hu_itext_t* it) {
-  if (it->l.len != it->lm) HUlib_delCharFromTextLine(&it->l);
+  if (it->l.len != it->lm) {
+    HUlib_delCharFromTextLine(&it->l);
+  }
 }
 
 //
@@ -603,7 +653,9 @@ static void HUlib_delCharFromIText(hu_itext_t* it) {
 // Returns nothing
 //
 static void HUlib_eraseLineFromIText(hu_itext_t* it) {
-  while (it->lm != it->l.len) HUlib_delCharFromTextLine(&it->l);
+  while (it->lm != it->l.len) {
+    HUlib_delCharFromTextLine(&it->l);
+  }
 }
 
 //
@@ -630,7 +682,9 @@ void HUlib_resetIText(hu_itext_t* it) {
 // Returns nothing
 //
 void HUlib_addPrefixToIText(hu_itext_t* it, char* str) {
-  while (*str) HUlib_addCharToTextLine(&it->l, *(str++));
+  while (*str) {
+    HUlib_addCharToTextLine(&it->l, *(str++));
+  }
   it->lm = it->l.len;
 }
 
@@ -643,12 +697,13 @@ void HUlib_addPrefixToIText(hu_itext_t* it, char* str) {
 // Returns true if it ate the key
 //
 dboolean HUlib_keyInIText(hu_itext_t* it, unsigned char ch) {
-  if (ch >= ' ' && ch <= '_')
+  if (ch >= ' ' && ch <= '_') {
     HUlib_addCharToTextLine(&it->l, (char)ch);
-  else if (ch == key_backspace)  // phares
+  } else if (ch == key_backspace) {  // phares
     HUlib_delCharFromIText(it);
-  else if (ch != key_enter)  // phares
-    return false;            // did not eat key
+  } else if (ch != key_enter) {  // phares
+    return false;                // did not eat key
+  }
 
   return true;  // ate the key
 }
@@ -664,7 +719,9 @@ dboolean HUlib_keyInIText(hu_itext_t* it, unsigned char ch) {
 void HUlib_drawIText(hu_itext_t* it) {
   hu_textline_t* l = &it->l;
 
-  if (!*it->on) return;
+  if (!*it->on) {
+    return;
+  }
   HUlib_drawTextLine(l, true);  // draw the line w/ cursor
 }
 
@@ -677,7 +734,9 @@ void HUlib_drawIText(hu_itext_t* it) {
 // Returns nothing
 //
 void HUlib_eraseIText(hu_itext_t* it) {
-  if (it->laston && !*it->on) it->l.needsupdate = 4;
+  if (it->laston && !*it->on) {
+    it->l.needsupdate = 4;
+  }
   HUlib_eraseTextLine(&it->l);
   it->laston = *it->on;
 }
@@ -697,7 +756,9 @@ void HUlib_setTextXCenter(hu_textline_t* t) {
     int c = toupper(*(s++)) - HU_FONTSTART;
     t->x -= (c < 0 || c > HU_FONTSIZE ? 4 : t->f[c].width);
   }
-  if (t->x < 0) t->x = 0;
+  if (t->x < 0) {
+    t->x = 0;
+  }
 
   t->x >>= 1;
 }

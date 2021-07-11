@@ -47,12 +47,14 @@ static mobj_t *P_TeleportDestination(line_t *line) {
   int i;
   for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;) {
     register thinker_t *th = NULL;
-    while ((th = P_NextThinker(th, th_misc)) != NULL)
+    while ((th = P_NextThinker(th, th_misc)) != NULL) {
       if (th->function == P_MobjThinker) {
         register mobj_t *m = (mobj_t *)th;
-        if (m->type == MT_TELEPORTMAN && m->subsector->sector->iSectorID == i)
+        if (m->type == MT_TELEPORTMAN && m->subsector->sector->iSectorID == i) {
           return m;
+        }
       }
+    }
   }
   return NULL;
 }
@@ -67,7 +69,9 @@ int EV_Teleport(line_t *line, int side, mobj_t *thing) {
   // don't teleport missiles
   // Don't teleport if hit back of line,
   //  so you can get out of teleporter.
-  if (side || thing->flags & MF_MISSILE) return 0;
+  if (side || thing->flags & MF_MISSILE) {
+    return 0;
+  }
 
   // killough 1/31/98: improve performance by using
   // P_FindSectorFromLineTag instead of simple linear search.
@@ -77,16 +81,22 @@ int EV_Teleport(line_t *line, int side, mobj_t *thing) {
     player_t *player = thing->player;
 
     // killough 5/12/98: exclude voodoo dolls:
-    if (player && player->mo != thing) player = NULL;
+    if (player && player->mo != thing) {
+      player = NULL;
+    }
 
-    if (!P_TeleportMove(thing, m->x, m->y, false)) /* killough 8/9/98 */
+    if (!P_TeleportMove(thing, m->x, m->y, false)) { /* killough 8/9/98 */
       return 0;
+    }
 
-    if (compatibility_level != finaldoom_compatibility)
+    if (compatibility_level != finaldoom_compatibility) {
       thing->z = thing->floorz;
+    }
     thing->PrevZ = thing->z;
 
-    if (player) player->viewz = thing->z + player->viewheight;
+    if (player) {
+      player->viewz = thing->z + player->viewheight;
+    }
 
     // spawn teleport fog and emit sound at source
     S_StartSound(P_SpawnMobj(oldx, oldy, oldz, MT_TFOG), sfx_telept);
@@ -100,17 +110,23 @@ int EV_Teleport(line_t *line, int side, mobj_t *thing) {
 
     /* don't move for a bit
      * cph - DEMOSYNC - BOOM had (player) here? */
-    if (thing->player) thing->reactiontime = 18;
+    if (thing->player) {
+      thing->reactiontime = 18;
+    }
 
     thing->angle = m->angle;
 
     thing->momx = thing->momy = thing->momz = 0;
 
     /* killough 10/98: kill all bobbing momentum too */
-    if (player) player->momx = player->momy = 0;
+    if (player) {
+      player->momx = player->momy = 0;
+    }
 
     // e6y
-    if (player && player->mo == thing) R_ResetAfterTeleport(player);
+    if (player && player->mo == thing) {
+      R_ResetAfterTeleport(player);
+    }
 
     return 1;
   }
@@ -129,7 +145,9 @@ int EV_SilentTeleport(line_t *line, int side, mobj_t *thing) {
   // Don't teleport if hit back of line,
   // so you can get out of teleporter.
 
-  if (side || thing->flags & MF_MISSILE) return 0;
+  if (side || thing->flags & MF_MISSILE) {
+    return 0;
+  }
 
   if ((m = P_TeleportDestination(line)) != NULL) {
     // Height of thing above ground, in case of mid-air teleports:
@@ -154,8 +172,9 @@ int EV_SilentTeleport(line_t *line, int side, mobj_t *thing) {
     player_t *player = thing->player;
 
     // Attempt to teleport, aborting if blocked
-    if (!P_TeleportMove(thing, m->x, m->y, false)) /* killough 8/9/98 */
+    if (!P_TeleportMove(thing, m->x, m->y, false)) { /* killough 8/9/98 */
       return 0;
+    }
 
     // Rotate thing according to difference in angles
     thing->angle += angle;
@@ -185,7 +204,9 @@ int EV_SilentTeleport(line_t *line, int side, mobj_t *thing) {
     }
 
     // e6y
-    if (player && player->mo == thing) R_ResetAfterTeleport(player);
+    if (player && player->mo == thing) {
+      R_ResetAfterTeleport(player);
+    }
 
     return 1;
   }
@@ -207,9 +228,11 @@ int EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing,
   int i;
   line_t *l;
 
-  if (side || thing->flags & MF_MISSILE) return 0;
+  if (side || thing->flags & MF_MISSILE) {
+    return 0;
+  }
 
-  for (i = -1; (i = P_FindLineFromLineTag(line, i)) >= 0;)
+  for (i = -1; (i = P_FindLineFromLineTag(line, i)) >= 0;) {
     if ((l = lines + i) != line && l->backsector) {
       // Get the thing's position along the source linedef
       fixed_t pos = D_abs(line->dx) > D_abs(line->dy)
@@ -271,18 +294,23 @@ int EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing,
       int side = reverse || (player && stepdown);
 
       // Make sure we are on correct side of exit linedef.
-      while (P_PointOnLineSide(x, y, l) != side && --fudge >= 0)
-        if (D_abs(l->dx) > D_abs(l->dy))
+      while (P_PointOnLineSide(x, y, l) != side && --fudge >= 0) {
+        if (D_abs(l->dx) > D_abs(l->dy)) {
           y -= (l->dx < 0) != side ? -1 : 1;
-        else
+        } else {
           x += (l->dy < 0) != side ? -1 : 1;
+        }
+      }
 
       // Attempt to teleport, aborting if blocked
-      if (!P_TeleportMove(thing, x, y, false)) /* killough 8/9/98 */
+      if (!P_TeleportMove(thing, x, y, false)) { /* killough 8/9/98 */
         return 0;
+      }
 
       // e6y
-      if (player && player->mo == thing) R_ResetAfterTeleport(player);
+      if (player && player->mo == thing) {
+        R_ResetAfterTeleport(player);
+      }
 
       // Adjust z position to be same height above ground as before.
       // Ground level at the exit is measured as the higher of the
@@ -317,9 +345,12 @@ int EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing,
       }
 
       // e6y
-      if (player && player->mo == thing) R_ResetAfterTeleport(player);
+      if (player && player->mo == thing) {
+        R_ResetAfterTeleport(player);
+      }
 
       return 1;
     }
+  }
   return 0;
 }

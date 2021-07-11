@@ -104,7 +104,9 @@ void F_StartFinale(void) {
     case shareware:
     case registered:
     case retail: {
-      if (!mus_changed) S_ChangeMusic(mus_victor, true);
+      if (!mus_changed) {
+        S_ChangeMusic(mus_victor, true);
+      }
 
       switch (gameepisode) {
         case 1:
@@ -132,7 +134,9 @@ void F_StartFinale(void) {
 
     // DOOM II and missions packs with E1, M34
     case commercial: {
-      if (!mus_changed) S_ChangeMusic(mus_read_m, true);
+      if (!mus_changed) {
+        S_ChangeMusic(mus_read_m, true);
+      }
 
       // Ty 08/27/98 - added the gamemission logic
       switch (gamemap) {
@@ -186,7 +190,9 @@ void F_StartFinale(void) {
 
     // Indeterminate.
     default:  // Ty 03/30/98 - not externalized
-      if (!mus_changed) S_ChangeMusic(mus_read_m, true);
+      if (!mus_changed) {
+        S_ChangeMusic(mus_read_m, true);
+      }
       finaleflat = "F_SKY1";  // Not used anywhere else.
       finaletext = s_C1TEXT;  // FIXME - other text, music?
       break;
@@ -201,7 +207,9 @@ void F_StartFinale(void) {
 }
 
 dboolean F_Responder(event_t* event) {
-  if (finalestage == 2) return F_CastResponder(event);
+  if (finalestage == 2) {
+    return F_CastResponder(event);
+  }
 
   return false;
 }
@@ -237,16 +245,23 @@ void F_Ticker(void) {
     return;
   }
 
-  if (!demo_compatibility)
+  if (!demo_compatibility) {
     WI_checkForAccelerate();  // killough 3/28/98: check for acceleration
-  else if (gamemode == commercial && finalecount > 50)  // check for skipping
-    for (i = 0; i < MAXPLAYERS; i++)
-      if (players[i].cmd.buttons) goto next_level;  // go on to the next level
+  } else if (gamemode == commercial &&
+             finalecount > 50) {  // check for skipping
+    for (i = 0; i < MAXPLAYERS; i++) {
+      if (players[i].cmd.buttons) {
+        goto next_level;  // go on to the next level
+      }
+    }
+  }
 
   // advance animation
   finalecount++;
 
-  if (finalestage == 2) F_CastTicker();
+  if (finalestage == 2) {
+    F_CastTicker();
+  }
 
   if (!finalestage) {
     float speed = demo_compatibility ? TEXTSPEED : Get_TextSpeed();
@@ -259,15 +274,18 @@ void F_Ticker(void) {
         finalecount = 0;
         finalestage = 1;
         wipegamestate = -1;  // force a wipe
-        if (gameepisode == 3) S_StartMusic(mus_bunny);
+        if (gameepisode == 3) {
+          S_StartMusic(mus_bunny);
+        }
       } else  // you must press a button to continue in Doom 2
           if (!demo_compatibility && midstage) {
       next_level:
         if (gamemap == 30 ||
-            (gamemission == pack_nerve && singleplayer && gamemap == 8))
+            (gamemission == pack_nerve && singleplayer && gamemap == 8)) {
           F_StartCast();  // cast of Doom 2 characters
-        else
+        } else {
           gameaction = ga_worlddone;  // next level, e.g. MAP07
+        }
       }
     }
   }
@@ -295,8 +313,9 @@ void F_TextWrite(void) {
       (W_CheckNumForName)(finaleflat, ns_flats) == -1) {
     V_FillBorder(-1, 0);
     V_DrawNamePatch(0, 0, 0, finaleflat, CR_DEFAULT, VPT_STRETCH);
-  } else
+  } else {
     V_DrawBackground(finaleflat, 0);
+  }
   {  // draw some of the text onto the screen
     int cx = 10;
     int cy = 10;
@@ -304,12 +323,16 @@ void F_TextWrite(void) {
     int count = (int)((float)(finalecount - 10) / Get_TextSpeed());  // phares
     int w;
 
-    if (count < 0) count = 0;
+    if (count < 0) {
+      count = 0;
+    }
 
     for (; count; count--) {
       int c = *ch++;
 
-      if (!c) break;
+      if (!c) {
+        break;
+      }
       if (c == '\n') {
         cx = 10;
         cy += 11;
@@ -323,7 +346,9 @@ void F_TextWrite(void) {
       }
 
       w = hu_font[c].width;
-      if (cx + w > SCREENWIDTH) break;
+      if (cx + w > SCREENWIDTH) {
+        break;
+      }
       // CPhipps - patch drawing updated
       V_DrawNumPatch(cx, cy, 0, hu_font[c].lumpnum, CR_DEFAULT, VPT_STRETCH);
       cx += w;
@@ -385,20 +410,27 @@ void F_CastTicker(void) {
   int st;
   int sfx;
 
-  if (--casttics > 0) return;  // not time to change state yet
+  if (--casttics > 0) {
+    return;  // not time to change state yet
+  }
 
   if (caststate->tics == -1 || caststate->nextstate == S_NULL) {
     // switch from deathstate to next monster
     castnum++;
     castdeath = false;
-    if (castorder[castnum].name == NULL) castnum = 0;
-    if (mobjinfo[castorder[castnum].type].seesound)
+    if (castorder[castnum].name == NULL) {
+      castnum = 0;
+    }
+    if (mobjinfo[castorder[castnum].type].seesound) {
       S_StartSound(NULL, mobjinfo[castorder[castnum].type].seesound);
+    }
     caststate = &states[mobjinfo[castorder[castnum].type].seestate];
     castframes = 0;
   } else {
     // just advance to next state in animation
-    if (caststate == &states[S_PLAY_ATK1]) goto stopattack;  // Oh, gross hack!
+    if (caststate == &states[S_PLAY_ATK1]) {
+      goto stopattack;  // Oh, gross hack!
+    }
     st = caststate->nextstate;
     caststate = &states[st];
     castframes++;
@@ -470,22 +502,26 @@ void F_CastTicker(void) {
         break;
     }
 
-    if (sfx) S_StartSound(NULL, sfx);
+    if (sfx) {
+      S_StartSound(NULL, sfx);
+    }
   }
 
   if (castframes == 12) {
     // go into attack frame
     castattacking = true;
-    if (castonmelee)
+    if (castonmelee) {
       caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
-    else
+    } else {
       caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
+    }
     castonmelee ^= 1;
     if (caststate == &states[S_NULL]) {
-      if (castonmelee)
+      if (castonmelee) {
         caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
-      else
+      } else {
         caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
+      }
     }
   }
 
@@ -500,7 +536,9 @@ void F_CastTicker(void) {
   }
 
   casttics = caststate->tics;
-  if (casttics == -1) casttics = 15;
+  if (casttics == -1) {
+    casttics = 15;
+  }
 }
 
 //
@@ -508,9 +546,13 @@ void F_CastTicker(void) {
 //
 
 dboolean F_CastResponder(event_t* ev) {
-  if (ev->type != ev_keydown) return false;
+  if (ev->type != ev_keydown) {
+    return false;
+  }
 
-  if (castdeath) return true;  // already in dying frames
+  if (castdeath) {
+    return true;  // already in dying frames
+  }
 
   // go into death frame
   castdeath = true;
@@ -518,8 +560,9 @@ dboolean F_CastResponder(event_t* ev) {
   casttics = caststate->tics;
   castframes = 0;
   castattacking = false;
-  if (mobjinfo[castorder[castnum].type].deathsound)
+  if (mobjinfo[castorder[castnum].type].deathsound) {
     S_StartSound(NULL, mobjinfo[castorder[castnum].type].deathsound);
+  }
 
   return true;
 }
@@ -538,7 +581,9 @@ static void F_CastPrint(const char* text)  // CPhipps - static, const char*
 
   while (ch) {
     c = *ch++;
-    if (!c) break;
+    if (!c) {
+      break;
+    }
     c = toupper(c) - HU_FONTSTART;
     if (c < 0 || c > HU_FONTSIZE) {
       width += 4;
@@ -554,7 +599,9 @@ static void F_CastPrint(const char* text)  // CPhipps - static, const char*
   ch = text;
   while (ch) {
     c = *ch++;
-    if (!c) break;
+    if (!c) {
+      break;
+    }
     c = toupper(c) - HU_FONTSTART;
     if (c < 0 || c > HU_FONTSIZE) {
       cx += 4;
@@ -634,17 +681,22 @@ void F_BunnyScroll(void) {
       V_DrawNamePatch(0, 0, 0, pfub2, CR_DEFAULT, VPT_STRETCH);
     } else if (scrolled >= 320) {
       V_DrawNamePatch(p1offset, 0, 0, pfub1, CR_DEFAULT, VPT_STRETCH);
-      if (p1offset > 0)
+      if (p1offset > 0) {
         V_DrawNamePatch(-320, 0, 0, pfub2, CR_DEFAULT, VPT_STRETCH);
+      }
     } else {
       V_DrawNamePatch(p1offset + 320 - scrolled, 0, 0, pfub1, CR_DEFAULT,
                       VPT_STRETCH);
       V_DrawNamePatch(-scrolled, 0, 0, pfub2, CR_DEFAULT, VPT_STRETCH);
     }
-    if (p2width == 320) V_FillBorder(-1, 0);
+    if (p2width == 320) {
+      V_FillBorder(-1, 0);
+    }
   }
 
-  if (finalecount < 1130) return;
+  if (finalecount < 1130) {
+    return;
+  }
   if (finalecount < 1180) {
     // CPhipps - patch drawing updated
     V_DrawNamePatch((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, 0, "END0",
@@ -654,7 +706,9 @@ void F_BunnyScroll(void) {
   }
 
   stage = (finalecount - 1180) / 5;
-  if (stage > 6) stage = 6;
+  if (stage > 6) {
+    stage = 6;
+  }
   if (stage > laststage) {
     S_StartSound(NULL, sfx_pistol);
     laststage = stage;
@@ -680,18 +734,19 @@ void F_Drawer(void) {
     return;
   }
 
-  if (!finalestage)
+  if (!finalestage) {
     F_TextWrite();
-  else {
+  } else {
     // e6y: wide-res
     V_FillBorder(-1, 0);
     switch (gameepisode) {
       // CPhipps - patch drawing updated
       case 1:
-        if (gamemode == retail)
+        if (gamemode == retail) {
           V_DrawNamePatch(0, 0, 0, "CREDIT", CR_DEFAULT, VPT_STRETCH);
-        else
+        } else {
           V_DrawNamePatch(0, 0, 0, "HELP2", CR_DEFAULT, VPT_STRETCH);
+        }
         break;
       case 2:
         V_DrawNamePatch(0, 0, 0, "VICTORY2", CR_DEFAULT, VPT_STRETCH);

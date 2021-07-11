@@ -48,38 +48,42 @@ int main(int argc, char **argv) {
   enum argtype argtype = ARG_NONE;
   const char *output = NULL;
 
-  if (argc <= 1) usage(0);
+  if (argc <= 1) {
+    usage(0);
+  }
 
   while (*(++argv)) {
     char *arg = *argv;
 
     if (*arg == '-') {
-      if (*(arg + 1) == '-')  // allow both -switch and --switch
+      if (*(arg + 1) == '-') {  // allow both -switch and --switch
         arg++;
+      }
 
-      if (!strcmp(arg, "-o"))
+      if (!strcmp(arg, "-o")) {
         argtype = ARG_OUTPUT;
-      else if (!strcmp(arg, "-I"))
+      } else if (!strcmp(arg, "-I")) {
         argtype = ARG_INCLUDE;
-      else if (!strcmp(arg, "-palette"))
+      } else if (!strcmp(arg, "-palette")) {
         argtype = ARG_PALETTE;
-      else if (!strcmp(arg, "-marker"))
+      } else if (!strcmp(arg, "-marker")) {
         argtype = ARG_MARKER;
-      else if (!strcmp(arg, "-lumps"))
+      } else if (!strcmp(arg, "-lumps")) {
         argtype = ARG_LUMP;
-      else if (!strcmp(arg, "-graphics"))
+      } else if (!strcmp(arg, "-graphics")) {
         argtype = ARG_GRAPHIC;
-      else if (!strcmp(arg, "-sounds"))
+      } else if (!strcmp(arg, "-sounds")) {
         argtype = ARG_SOUND;
-      else if (!strcmp(arg, "-flats"))
+      } else if (!strcmp(arg, "-flats")) {
         argtype = ARG_FLAT;
-      else if (!strcmp(arg, "-sprites"))
+      } else if (!strcmp(arg, "-sprites")) {
         argtype = ARG_SPRITE;
-      else if (!strcmp(arg, "-help") || !strcmp(arg, "-version"))
+      } else if (!strcmp(arg, "-help") || !strcmp(arg, "-version")) {
         usage(0);
-      else
+      } else {
         usage(1);
-    } else
+      }
+    } else {
       switch (argtype) {
         case ARG_NONE:
           usage(1);
@@ -134,27 +138,31 @@ int main(int argc, char **argv) {
           int x, y;
 
           x = strtol(pos, &pos, 0);
-          if (*pos == ',')
+          if (*pos == ',') {
             pos++;
-          else if (!isspace(*pos) && !isdigit(*pos))
+          } else if (!isspace(*pos) && !isdigit(*pos)) {
             usage(1);
+          }
 
           y = strtol(pos, &pos, 0);
-          if (*pos == ',')
+          if (*pos == ',') {
             pos++;
-          else if (!isspace(*pos) && !isdigit(*pos))
+          } else if (!isspace(*pos) && !isdigit(*pos)) {
             usage(1);
+          }
 
           size = ppm_to_patch(&data, pos, x, y);
           output_add(pos, data, size);
         } break;
       }
+    }
   }
 
-  if (output)
+  if (output) {
     output_write(output);
-  else
+  } else {
     die("No output file specified\n");
+  }
 
   return 0;
 }

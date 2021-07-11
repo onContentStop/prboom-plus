@@ -108,7 +108,9 @@ void gld_SplitLeftEdge(const GLWall *wall, dboolean detail) {
 
   v = wall->seg->linedef->v1;
 
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   vi = &gl_vertexsplit[v - vertexes];
 
@@ -121,7 +123,9 @@ void gld_SplitLeftEdge(const GLWall *wall, dboolean detail) {
 
     detail = detail && wall->gltexture->detail;
 
-    while (i < vi->numheights && vi->heightlist[i] <= wall->ybottom) i++;
+    while (i < vi->numheights && vi->heightlist[i] <= wall->ybottom) {
+      i++;
+    }
 
     while (i < vi->numheights && vi->heightlist[i] < wall->ytop) {
       GLTexture *tex = wall->gltexture;
@@ -158,7 +162,9 @@ void gld_SplitRightEdge(const GLWall *wall, dboolean detail) {
 
   v = wall->seg->linedef->v2;
 
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   vi = &gl_vertexsplit[v - vertexes];
 
@@ -171,7 +177,9 @@ void gld_SplitRightEdge(const GLWall *wall, dboolean detail) {
 
     detail = detail && wall->gltexture->detail;
 
-    while (i > 0 && vi->heightlist[i] >= wall->ytop) i--;
+    while (i > 0 && vi->heightlist[i] >= wall->ytop) {
+      i--;
+    }
 
     while (i > 0 && vi->heightlist[i] > wall->ybottom) {
       GLTexture *tex = wall->gltexture;
@@ -211,24 +219,31 @@ void gld_RecalcVertexHeights(const vertex_t *v) {
 
   vi = &gl_vertexsplit[v - vertexes];
 
-  if (vi->validcount == rendermarker) return;
+  if (vi->validcount == rendermarker) {
+    return;
+  }
 
   vi->validcount = rendermarker;
 
-  if (!vi->changed) return;
+  if (!vi->changed) {
+    return;
+  }
 
   vi->changed = false;
 
   vi->numheights = 0;
   for (i = 0; i < vi->numsectors; i++) {
     for (j = 0; j < 2; j++) {
-      if (j == 0)
+      if (j == 0) {
         height = (float)vi->sectors[i]->ceilingheight / MAP_SCALE + SMALLDELTA;
-      else
+      } else {
         height = (float)vi->sectors[i]->floorheight / MAP_SCALE - SMALLDELTA;
+      }
 
       for (k = 0; k < vi->numheights; k++) {
-        if (height == vi->heightlist[k]) break;
+        if (height == vi->heightlist[k]) {
+          break;
+        }
 
         if (height < vi->heightlist[k]) {
           memmove(&vi->heightlist[k + 1], &vi->heightlist[k],
@@ -238,12 +253,15 @@ void gld_RecalcVertexHeights(const vertex_t *v) {
           break;
         }
       }
-      if (k == vi->numheights) vi->heightlist[vi->numheights++] = height;
+      if (k == vi->numheights) {
+        vi->heightlist[vi->numheights++] = height;
+      }
     }
   }
 
-  if (vi->numheights <= 2)
+  if (vi->numheights <= 2) {
     vi->numheights = 0;  // is not in need of any special attention
+  }
 }
 
 //==========================================================================
@@ -256,7 +274,9 @@ static void AddToVertex(const sector_t *sec, int **list, unsigned int *size) {
   int secno = sec->iSectorID;
 
   for (i = 0; i < (*size); i++) {
-    if ((*list)[i] == secno) return;
+    if ((*list)[i] == secno) {
+      return;
+    }
   }
   (*list) = realloc((*list), sizeof(*list) * ((*size) + 1));
   (*list)[(*size)] = secno;
@@ -272,7 +292,9 @@ static void AddToSplitBySector(vertexsplit_info_t *vi,
                                splitsbysector_t *splitsbysector) {
   int i;
   for (i = 0; i < splitsbysector->numsplits; i++) {
-    if (splitsbysector->splits[i] == vi) return;
+    if (splitsbysector->splits[i] == vi) {
+      return;
+    }
   }
   splitsbysector->splits =
       realloc(splitsbysector->splits,
@@ -292,7 +314,9 @@ void gld_InitVertexData() {
   int **vt_sectorlists;
   unsigned int *vt_sectorlists_size;
 
-  if (gl_vertexsplit) return;
+  if (gl_vertexsplit) {
+    return;
+  }
 
   vt_sectorlists = calloc(sizeof(vt_sectorlists[0]), numvertexes);
   vt_sectorlists_size = calloc(sizeof(vt_sectorlists_size[0]), numvertexes);
@@ -365,13 +389,16 @@ void gld_InitVertexData() {
       vertexsplit_info_t *vi = &gl_vertexsplit[j];
 
       for (k = 0; k < vi->numsectors; k++) {
-        if (vi->sectors[k] == &sectors[i])
+        if (vi->sectors[k] == &sectors[i]) {
           AddToSplitBySector(vi, &gl_splitsbysector[i]);
+        }
       }
     }
   }
 
-  for (i = 0; i < numvertexes; i++) gld_RecalcVertexHeights(&vertexes[i]);
+  for (i = 0; i < numvertexes; i++) {
+    gld_RecalcVertexHeights(&vertexes[i]);
+  }
 
   free(vt_sectorlists);
   free(vt_sectorlists_size);

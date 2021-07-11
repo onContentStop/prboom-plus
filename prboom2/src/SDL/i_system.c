@@ -110,13 +110,16 @@ int I_GetTime_RealTime(void) {
   int t = SDL_GetTicks();
 
   // e6y: removing startup delay
-  if (basetime == 0) basetime = t;
+  if (basetime == 0) {
+    basetime = t;
+  }
   t -= basetime;
 
   i = t * (TICRATE / 5) / 200;
   ms_to_next_tick = (i + 1) * 200 / (TICRATE / 5) - t;
-  if (ms_to_next_tick > 1000 / TICRATE || ms_to_next_tick < 1)
+  if (ms_to_next_tick > 1000 / TICRATE || ms_to_next_tick < 1) {
     ms_to_next_tick = 1;
+  }
   return i;
 }
 
@@ -128,11 +131,15 @@ static int saved_gametic = -1;
 dboolean realframe = false;
 
 dboolean I_StartDisplay(void) {
-  if (InDisplay) return false;
+  if (InDisplay) {
+    return false;
+  }
 
   realframe = (!movement_smooth) || (gametic > saved_gametic);
 
-  if (realframe) saved_gametic = gametic;
+  if (realframe) {
+    saved_gametic = gametic;
+  }
 
   start_displaytime = SDL_GetTicks();
   InDisplay = true;
@@ -175,7 +182,9 @@ fixed_t I_GetTimeFrac(void) {
 }
 
 void I_GetTime_SaveMS(void) {
-  if (!movement_smooth) return;
+  if (!movement_smooth) {
+    return;
+  }
 
   tic_vars.start = SDL_GetTicks();
   tic_vars.next =
@@ -207,11 +216,14 @@ const char* I_GetVersionString(char* buf, size_t sz) {
  */
 const char* I_SigString(char* buf, size_t sz, int signum) {
 #ifdef HAVE_STRSIGNAL
-  if (strsignal(signum) && strlen(strsignal(signum)) < sz)
+  if (strsignal(signum) && strlen(strsignal(signum)) < sz) {
     strcpy(buf, strsignal(signum));
-  else
+  } else {
 #endif
     snprintf(buf, sz, "signal %d", signum);
+#ifdef HAVE_STRSIGNAL
+  }
+#endif
   return buf;
 }
 
@@ -283,8 +295,9 @@ void I_Read(int fd, void* vbuf, size_t sz) {
 
 int I_Filelength(int handle) {
   struct stat fileinfo;
-  if (fstat(handle, &fileinfo) == -1)
+  if (fstat(handle, &fileinfo) == -1) {
     I_Error("I_Filelength: %s", strerror(errno));
+  }
   return fileinfo.st_size;
 }
 
@@ -371,7 +384,9 @@ const char* I_DoomExeDir(void) {
     base = malloc(len + strlen(prboom_dir) + 1);
     strcpy(base, home);
     // I've had trouble with trailing slashes before...
-    if (base[len - 1] == '/') base[len - 1] = 0;
+    if (base[len - 1] == '/') {
+      base[len - 1] = 0;
+    }
     strcat(base, prboom_dir);
     mkdir(base, S_IRUSR | S_IWUSR | S_IXUSR);  // Make sure it exists
   }
@@ -452,7 +467,9 @@ char* I_FindFileInternal(const char* wfname, const char* ext,
   char* dinamic_p = NULL;
   char* p = (isStatic ? static_p : dinamic_p);
 
-  if (!wfname) return NULL;
+  if (!wfname) {
+    return NULL;
+  }
 
   if (!num_search) {
     char* dwp;
@@ -504,24 +521,34 @@ char* I_FindFileInternal(const char* wfname, const char* ext,
      * and optionally s to a subdirectory of d */
     // switch replaced with lookup table
     if (search[i].env) {
-      if (!(d = getenv(search[i].env))) continue;
-    } else if (search[i].func)
+      if (!(d = getenv(search[i].env))) {
+        continue;
+      }
+    } else if (search[i].func) {
       d = search[i].func();
-    else
+    } else {
       d = search[i].dir;
+    }
     s = search[i].sub;
 
-    if (!isStatic)
+    if (!isStatic) {
       p = (char*)malloc((d ? strlen(d) : 0) + (s ? strlen(s) : 0) + pl);
+    }
     sprintf(p, "%s%s%s%s%s", d ? d : "", (d && !HasTrailingSlash(d)) ? "/" : "",
             s ? s : "", (s && !HasTrailingSlash(s)) ? "/" : "", wfname);
 
-    if (ext && access(p, F_OK)) strcat(p, ext);
+    if (ext && access(p, F_OK)) {
+      strcat(p, ext);
+    }
     if (!access(p, F_OK)) {
-      if (!isStatic) lprintf(LO_INFO, " found %s\n", p);
+      if (!isStatic) {
+        lprintf(LO_INFO, " found %s\n", p);
+      }
       return p;
     }
-    if (!isStatic) free(p);
+    if (!isStatic) {
+      free(p);
+    }
   }
   return NULL;
 }

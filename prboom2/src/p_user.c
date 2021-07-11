@@ -94,7 +94,9 @@ void P_Thrust(player_t *player, angle_t angle, fixed_t move) {
 
 static void P_Bob(player_t *player, angle_t angle, fixed_t move) {
   // e6y
-  if (!mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state) return;
+  if (!mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state) {
+    return;
+  }
 
   player->momx += FixedMul(move, finecosine[angle >>= ANGLETOFINESHIFT]);
   player->momy += FixedMul(move, finesine[angle]);
@@ -150,16 +152,21 @@ void P_CalcHeight(player_t *player) {
       compatibility_level <= lxdoom_1_compatibility &&
       player->mo->friction > ORIG_FRICTION)  // ice?
   {
-    if (player->bob > (MAXBOB >> 2)) player->bob = MAXBOB >> 2;
+    if (player->bob > (MAXBOB >> 2)) {
+      player->bob = MAXBOB >> 2;
+    }
   } else {
-    if (player->bob > MAXBOB) player->bob = MAXBOB;
+    if (player->bob > MAXBOB) {
+      player->bob = MAXBOB;
+    }
   }
 
   if (!onground || player->cheats & CF_NOMOMENTUM) {
     player->viewz = player->mo->z + VIEWHEIGHT;
 
-    if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT)
+    if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT) {
       player->viewz = player->mo->ceilingz - 4 * FRACUNIT;
+    }
 
     // The following line was in the Id source and appears      // phares
     // 2/25/98 to be a bug. player->viewz is checked in a similar manner at a
@@ -184,19 +191,24 @@ void P_CalcHeight(player_t *player) {
 
     if (player->viewheight < VIEWHEIGHT / 2) {
       player->viewheight = VIEWHEIGHT / 2;
-      if (player->deltaviewheight <= 0) player->deltaviewheight = 1;
+      if (player->deltaviewheight <= 0) {
+        player->deltaviewheight = 1;
+      }
     }
 
     if (player->deltaviewheight) {
       player->deltaviewheight += FRACUNIT / 4;
-      if (!player->deltaviewheight) player->deltaviewheight = 1;
+      if (!player->deltaviewheight) {
+        player->deltaviewheight = 1;
+      }
     }
   }
 
   player->viewz = player->mo->z + player->viewheight + bob;
 
-  if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT)
+  if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT) {
     player->viewz = player->mo->ceilingz - 4 * FRACUNIT;
+  }
 }
 
 //
@@ -305,7 +317,9 @@ void P_MovePlayer(player_t *player) {
         }
       }
     }
-    if (mo->state == states + S_PLAY) P_SetMobjState(mo, S_PLAY_RUN1);
+    if (mo->state == states + S_PLAY) {
+      P_SetMobjState(mo, S_PLAY_RUN1);
+    }
   }
 }
 
@@ -334,9 +348,13 @@ void P_DeathThink(player_t *player) {
       player->mo->pitch -= ((int)ANG1 * 19 - player->mo->pitch) / 8;
     }
   } else {
-    if (player->viewheight > 6 * FRACUNIT) player->viewheight -= FRACUNIT;
+    if (player->viewheight > 6 * FRACUNIT) {
+      player->viewheight -= FRACUNIT;
+    }
 
-    if (player->viewheight < 6 * FRACUNIT) player->viewheight = 6 * FRACUNIT;
+    if (player->viewheight < 6 * FRACUNIT) {
+      player->viewheight = 6 * FRACUNIT;
+    }
 
     player->deltaviewheight = 0;
   }
@@ -355,15 +373,21 @@ void P_DeathThink(player_t *player) {
 
       player->mo->angle = angle;
 
-      if (player->damagecount) player->damagecount--;
-    } else if (delta < ANG180)
+      if (player->damagecount) {
+        player->damagecount--;
+      }
+    } else if (delta < ANG180) {
       player->mo->angle += ANG5;
-    else
+    } else {
       player->mo->angle -= ANG5;
-  } else if (player->damagecount)
+    }
+  } else if (player->damagecount) {
     player->damagecount--;
+  }
 
-  if (player->cmd.buttons & BT_USE) player->playerstate = PST_REBORN;
+  if (player->cmd.buttons & BT_USE) {
+    player->playerstate = PST_REBORN;
+  }
   R_SmoothPlaying_Reset(player);  // e6y
 }
 
@@ -386,10 +410,11 @@ void P_PlayerThink(player_t *player) {
   }
 
   // killough 2/8/98, 3/21/98:
-  if (player->cheats & CF_NOCLIP)
+  if (player->cheats & CF_NOCLIP) {
     player->mo->flags |= MF_NOCLIP;
-  else
+  } else {
     player->mo->flags &= ~MF_NOCLIP;
+  }
 
   // chain saw run forward
 
@@ -413,10 +438,11 @@ void P_PlayerThink(player_t *player) {
   // Reactiontime is used to prevent movement
   //  for a bit after a teleport.
 
-  if (player->mo->reactiontime)
+  if (player->mo->reactiontime) {
     player->mo->reactiontime--;
-  else
+  } else {
     P_MovePlayer(player);
+  }
 
   P_SetPitch(player);
 
@@ -425,7 +451,9 @@ void P_PlayerThink(player_t *player) {
   // Determine if there's anything about the sector you're in that's
   // going to affect you, like painful floors.
 
-  if (player->mo->subsector->sector->special) P_PlayerInSpecialSector(player);
+  if (player->mo->subsector->sector->special) {
+    P_PlayerInSpecialSector(player);
+  }
 
   // Check for weapon change.
 
@@ -443,28 +471,33 @@ void P_PlayerThink(player_t *player) {
     if (demo_compatibility) {  // compatibility mode -- required for old demos
                                // -- killough
       // e6y
-      if (!prboom_comp[PC_ALLOW_SSG_DIRECT].state)
+      if (!prboom_comp[PC_ALLOW_SSG_DIRECT].state) {
         newweapon = (cmd->buttons & BT_WEAPONMASK_OLD) >> BT_WEAPONSHIFT;
+      }
 
       if (newweapon == wp_fist && player->weaponowned[wp_chainsaw] &&
-          (player->readyweapon != wp_chainsaw || !player->powers[pw_strength]))
+          (player->readyweapon != wp_chainsaw ||
+           !player->powers[pw_strength])) {
         newweapon = wp_chainsaw;
+      }
       if (gamemode == commercial && newweapon == wp_shotgun &&
           player->weaponowned[wp_supershotgun] &&
-          player->readyweapon != wp_supershotgun)
+          player->readyweapon != wp_supershotgun) {
         newweapon = wp_supershotgun;
+      }
     }
 
     // killough 2/8/98, 3/22/98 -- end of weapon selection changes
 
-    if (player->weaponowned[newweapon] && newweapon != player->readyweapon)
-
+    if (player->weaponowned[newweapon] && newweapon != player->readyweapon) {
       // Do not go to plasma or BFG in shareware,
       //  even if cheated.
 
       if ((newweapon != wp_plasma && newweapon != wp_bfg) ||
-          (gamemode != shareware))
+          (gamemode != shareware)) {
         player->pendingweapon = newweapon;
+      }
+    }
   }
 
   // check for use
@@ -474,8 +507,9 @@ void P_PlayerThink(player_t *player) {
       P_UseLines(player);
       player->usedown = true;
     }
-  } else
+  } else {
     player->usedown = false;
+  }
 
   // cycle psprites
 
@@ -485,25 +519,37 @@ void P_PlayerThink(player_t *player) {
 
   // Strength counts up to diminish fade.
 
-  if (player->powers[pw_strength]) player->powers[pw_strength]++;
+  if (player->powers[pw_strength]) {
+    player->powers[pw_strength]++;
+  }
 
   // killough 1/98: Make idbeholdx toggle:
 
-  if (player->powers[pw_invulnerability] > 0)  // killough
+  if (player->powers[pw_invulnerability] > 0) {  // killough
     player->powers[pw_invulnerability]--;
+  }
 
-  if (player->powers[pw_invisibility] > 0)  // killough
-    if (!--player->powers[pw_invisibility]) player->mo->flags &= ~MF_SHADOW;
+  if (player->powers[pw_invisibility] > 0) {  // killough
+    if (!--player->powers[pw_invisibility]) {
+      player->mo->flags &= ~MF_SHADOW;
+    }
+  }
 
-  if (player->powers[pw_infrared] > 0)  // killough
+  if (player->powers[pw_infrared] > 0) {  // killough
     player->powers[pw_infrared]--;
+  }
 
-  if (player->powers[pw_ironfeet] > 0)  // killough
+  if (player->powers[pw_ironfeet] > 0) {  // killough
     player->powers[pw_ironfeet]--;
+  }
 
-  if (player->damagecount) player->damagecount--;
+  if (player->damagecount) {
+    player->damagecount--;
+  }
 
-  if (player->bonuscount) player->bonuscount--;
+  if (player->bonuscount) {
+    player->bonuscount--;
+  }
 
   // Handling colormaps.
   // killough 3/20/98: reformat to terse C syntax

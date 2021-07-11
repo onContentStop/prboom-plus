@@ -121,7 +121,9 @@ static int pm_init(int samplerate) {
   lprintf(LO_INFO, "portmidiplayer device list:\n");
   for (i = 0; i < Pm_CountDevices(); i++) {
     oinfo = Pm_GetDeviceInfo(i);
-    if (!oinfo || !oinfo->output) continue;
+    if (!oinfo || !oinfo->output) {
+      continue;
+    }
     doom_snprintf(devname, 64, "%s:%s", oinfo->interf, oinfo->name);
     if (strlen(snd_mididev) && strstr(devname, snd_mididev)) {
       outputdevice = i;
@@ -245,20 +247,25 @@ static void pm_refreshvolume(void) {
   int i;
   unsigned long when = Pt_Time();
 
-  for (i = 0; i < 16; i++)
+  for (i = 0; i < 16; i++) {
     writeevent(when, MIDI_EVENT_CONTROLLER, i, 7,
                channelvol[i] * pm_volume / 15);
+  }
 }
 
 static void pm_clearchvolume(void) {
   int i;
-  for (i = 0; i < 16; i++) channelvol[i] = 127;  // default: max
+  for (i = 0; i < 16; i++) {
+    channelvol[i] = 127;  // default: max
+  }
 }
 
 static void pm_setvolume(int v) {
   static int firsttime = 1;
 
-  if (pm_volume == v && !firsttime) return;
+  if (pm_volume == v && !firsttime) {
+    return;
+  }
   firsttime = 0;
 
   pm_volume = v;
@@ -372,7 +379,9 @@ static void pm_render(void *vdest, unsigned bufflen) {
 
   memset(vdest, 0, bufflen * 4);
 
-  if (!pm_playing || pm_paused) return;
+  if (!pm_playing || pm_paused) {
+    return;
+  }
 
   while (1) {
     double eventdelta;
@@ -402,18 +411,19 @@ static void pm_render(void *vdest, unsigned bufflen) {
         break;
       case MIDI_EVENT_META:  // tempo is the only meta message we're interested
                              // in
-        if (currevent->data.meta.type == MIDI_META_SET_TEMPO)
+        if (currevent->data.meta.type == MIDI_META_SET_TEMPO) {
           spmc = MIDI_spmc(midifile, currevent, 1000);
-        else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
+        } else if (currevent->data.meta.type == MIDI_META_END_OF_TRACK) {
           if (pm_looping) {
             int i;
             eventpos = 0;
             pm_delta += eventdelta;
             // fix buggy songs that forget to terminate notes held over loop
             // point sdl_mixer does this as well
-            for (i = 0; i < 16; i++)
+            for (i = 0; i < 16; i++) {
               writeevent(when, MIDI_EVENT_CONTROLLER, i, 123,
                          0);  // all notes off
+            }
             continue;
           }
           // stop
@@ -441,8 +451,9 @@ static void pm_render(void *vdest, unsigned bufflen) {
     // if the event was a "reset all controllers", we need to additionally
     // re-fix the volume (which itself was reset)
     if (currevent->event_type == MIDI_EVENT_CONTROLLER &&
-        currevent->data.channel.param1 == 121)
+        currevent->data.channel.param1 == 121) {
       pm_setchvolume(currevent->data.channel.channel, 127, when);
+    }
 
     // event processed so advance midiclock
     pm_delta += eventdelta;

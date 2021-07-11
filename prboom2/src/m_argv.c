@@ -50,8 +50,11 @@ char **myargv;
 
 int M_CheckParm(const char *check) {
   signed int i = myargc;
-  while (--i > 0)
-    if (!strcasecmp(check, myargv[i])) return i;
+  while (--i > 0) {
+    if (!strcasecmp(check, myargv[i])) {
+      return i;
+    }
+  }
   return 0;
 }
 
@@ -125,12 +128,18 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
 
   /* loop on each argument */
   for (;;) {
-    while (IsSpace((int)*p)) ++p;
+    while (IsSpace((int)*p)) {
+      ++p;
+    }
 
-    if (*p == '\0') break; /* end of args */
+    if (*p == '\0') {
+      break; /* end of args */
+    }
 
     /* scan an argument */
-    if (argv) *argv++ = args; /* store ptr to arg */
+    if (argv) {
+      *argv++ = args; /* store ptr to arg */
+    }
     ++*numargs;
 
     /* loop through scanning one argument */
@@ -149,12 +158,14 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
           copy literally */
         if ((numslash & 1) == 0) {
           if (inquote) {
-            if (p[1] == '\"')
-              p++; /* Double quote inside quoted string */
-            else   /* skip first quote char and copy second */
+            if (p[1] == '\"') {
+              p++;   /* Double quote inside quoted string */
+            } else { /* skip first quote char and copy second */
               copychar = 0;
-          } else
+            }
+          } else {
             copychar = 0; /* don't copy quote */
+          }
           inquote = !inquote;
         }
         numslash >>= 1; /* divide numslash by two */
@@ -162,16 +173,22 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
 
       /* copy slashes */
       while (numslash--) {
-        if (args) *args++ = '\\';
+        if (args) {
+          *args++ = '\\';
+        }
         ++*numchars;
       }
 
       /* if at end of arg, break loop */
-      if (*p == '\0' || (!inquote && IsSpace((int)*p))) break;
+      if (*p == '\0' || (!inquote && IsSpace((int)*p))) {
+        break;
+      }
 
       /* copy character into argument */
       if (copychar) {
-        if (args) *args++ = *p;
+        if (args) {
+          *args++ = *p;
+        }
         ++*numchars;
       }
       ++p;
@@ -179,7 +196,9 @@ void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
 
     /* null-terminate the argument */
 
-    if (args) *args++ = '\0'; /* terminate string */
+    if (args) {
+      *args++ = '\0'; /* terminate string */
+    }
     ++*numchars;
   }
 }

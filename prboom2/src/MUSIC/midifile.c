@@ -198,7 +198,9 @@ static void *ReadByteSequence(unsigned int num_bytes, midimem_t *mf) {
   byte *result;
 
   // events can be length 0.  malloc(0) is not portable (can return NULL)
-  if (!num_bytes) return malloc(4);
+  if (!num_bytes) {
+    return malloc(4);
+  }
 
   // Allocate a buffer:
 
@@ -675,7 +677,9 @@ static void MIDI_PrintFlatListDBG(const midi_event_t **evs) {
   while (1) {
     event = *evs++;
 
-    if (event->delta_time > 0) printf("Delay: %i ticks\n", event->delta_time);
+    if (event->delta_time > 0) {
+      printf("Delay: %i ticks\n", event->delta_time);
+    }
 
     switch (event->event_type) {
       case MIDI_EVENT_NOTE_OFF:
@@ -760,8 +764,9 @@ midi_event_t **MIDI_GenerateFlatList(midi_file_t *file) {
   midi_event_t **ret;
   midi_event_t **epos;
 
-  for (i = 0; i < file->num_tracks; i++)
+  for (i = 0; i < file->num_tracks; i++) {
     totalevents += file->tracks[i].num_events;
+  }
 
   ret = (midi_event_t **)malloc(totalevents * sizeof(midi_event_t **));
 
@@ -778,8 +783,9 @@ midi_event_t **MIDI_GenerateFlatList(midi_file_t *file) {
         nextrk = i;
       }
     }
-    if (nextrk == -1)  // unexpected EOF (not every track got end track)
+    if (nextrk == -1) {  // unexpected EOF (not every track got end track)
       break;
+    }
 
     *epos = file->tracks[nextrk].events + trackpos[nextrk];
 
@@ -787,8 +793,9 @@ midi_event_t **MIDI_GenerateFlatList(midi_file_t *file) {
       if (i == (unsigned)nextrk) {
         tracktime[i] = 0;
         trackpos[i]++;
-      } else
+      } else {
         tracktime[i] += delta;
+      }
     }
     // yes, this clobbers the original timecodes
     epos[0]->delta_time = delta;
@@ -918,11 +925,13 @@ double MIDI_spmc(const midi_file_t *file, const midi_event_t *ev,
         tempo = (unsigned)ev->data.meta.data[0] << 16 |
                 (unsigned)ev->data.meta.data[1] << 8 |
                 (unsigned)ev->data.meta.data[2];
-      } else
+      } else {
         lprintf(LO_WARN,
                 "MIDI_spmc: wrong length tempo meta message in midi file\n");
-    } else
+      }
+    } else {
       lprintf(LO_WARN, "MIDI_spmc: passed non-meta event\n");
+    }
   }
 
   return compute_spmc_normal(headerval, tempo, sndrate);
@@ -944,7 +953,9 @@ midi_file_t *MIDI_LoadFileSpecial(midimem_t *mf) {
 
   int epos = 0;
 
-  if (!base) return NULL;
+  if (!base) {
+    return NULL;
+  }
 
   flatlist = MIDI_GenerateFlatList(base);
   if (!flatlist) {

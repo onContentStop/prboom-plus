@@ -230,10 +230,11 @@ void ParamsMatchingCheck() {
                                  M_CheckParm("-timedemo") ||
                                  M_CheckParm("-fastdemo");
 
-  if (recording_attempt && playbacking_attempt)
+  if (recording_attempt && playbacking_attempt) {
     I_Error(
         "Params are not matching: Can not being played back and recorded at "
         "the same time.");
+  }
 }
 
 prboom_comp_t prboom_comp[PC_MAX] = {
@@ -271,16 +272,20 @@ void e6y_InitCommandLine(void) {
   if ((p = M_CheckParm("-skipsec")) && (p < myargc - 1)) {
     float min, sec;
 
-    if (sscanf(myargv[p + 1], "%f:%f", &min, &sec) == 2)
+    if (sscanf(myargv[p + 1], "%f:%f", &min, &sec) == 2) {
       demo_skiptics = (int)((60 * min + sec) * TICRATE);
-    else if (sscanf(myargv[p + 1], "%f", &sec) == 1)
+    } else if (sscanf(myargv[p + 1], "%f", &sec) == 1) {
       demo_skiptics = (int)(sec * TICRATE);
+    }
   }
 
-  if ((IsDemoPlayback() || IsDemoContinue()) && (startmap > 1 || demo_skiptics))
+  if ((IsDemoPlayback() || IsDemoContinue()) &&
+      (startmap > 1 || demo_skiptics)) {
     G_SkipDemoStart();
-  if ((p = M_CheckParm("-avidemo")) && (p < myargc - 1))
+  }
+  if ((p = M_CheckParm("-avidemo")) && (p < myargc - 1)) {
     avi_shot_fname = myargv[p + 1];
+  }
   stats_level = M_CheckParm("-levelstat");
 
   if ((stroller = M_CheckParm("-stroller"))) {
@@ -394,10 +399,11 @@ int G_GotoNextLevel(int *e, int *m) {
   int changed = false;
   if (gamemapinfo != NULL) {
     const char *n;
-    if (gamemapinfo->nextsecret[0])
+    if (gamemapinfo->nextsecret[0]) {
       n = gamemapinfo->nextsecret;
-    else
+    } else {
       n = gamemapinfo->nextmap;
+    }
     G_ValidateMapName(n, &epsd, &map);
   }
 
@@ -410,8 +416,9 @@ int G_GotoNextLevel(int *e, int *m) {
         doom2_next[3] = 9;
         doom2_next[7] = 1;
         doom2_next[8] = 5;
-      } else
+      } else {
         doom2_next[1] = 33;
+      }
     }
 
     // shareware doom has only episode 1
@@ -430,10 +437,11 @@ int G_GotoNextLevel(int *e, int *m) {
 
     if (gamemode == commercial) {
       epsd = 1;
-      if (map >= 0 && map <= 32)
+      if (map >= 0 && map <= 32) {
         map = doom2_next[map];
-      else
+      } else {
         map = gamemap + 1;
+      }
     } else {
       if (epsd >= 0 && epsd <= 3 && map >= 0 && map <= 8) {
         int next = doom_next[epsd][map];
@@ -448,8 +456,12 @@ int G_GotoNextLevel(int *e, int *m) {
 
   // [FG] report next level without changing
   if (e || m) {
-    if (e) *e = epsd;
-    if (m) *m = map;
+    if (e) {
+      *e = epsd;
+    }
+    if (m) {
+      *m = map;
+    }
   } else if ((gamestate == GS_LEVEL) && !deathmatch && !netgame &&
              !demorecording && !demoplayback && !menuactive) {
     char *next = MAPNAME(epsd, map);
@@ -473,10 +485,11 @@ void M_ChangeMouseLook(void) {
   R_InitSkyMap();
 
 #ifdef GL_DOOM
-  if (gl_skymode == skytype_auto)
+  if (gl_skymode == skytype_auto) {
     gl_drawskys = (movement_mouselook ? skytype_skydome : skytype_standard);
-  else
+  } else {
     gl_drawskys = gl_skymode;
+  }
 #endif  // GL_DOOM
 }
 
@@ -508,8 +521,12 @@ dboolean GetMouseLook(void) { return movement_mouselook; }
 dboolean HaveMouseLook(void) { return (viewpitch != 0); }
 
 void CheckPitch(signed int *pitch) {
-  if (*pitch > maxViewPitch) *pitch = maxViewPitch;
-  if (*pitch < minViewPitch) *pitch = minViewPitch;
+  if (*pitch > maxViewPitch) {
+    *pitch = maxViewPitch;
+  }
+  if (*pitch < minViewPitch) {
+    *pitch = minViewPitch;
+  }
 
   (*pitch) >>= 16;
   (*pitch) <<= 16;
@@ -569,10 +586,11 @@ void M_ChangeFOV(void) {
 
   f1 = (float)(320.0f / 200.0f * (float)render_fov / (float)FOV90 - 0.2f);
   f2 = (float)tan(DEG2RAD(render_fovy) / 2.0f);
-  if (f1 - f2 < 1)
+  if (f1 - f2 < 1) {
     skyUpAngle = (float)-RAD2DEG(asin(f1 - f2));
-  else
+  } else {
     skyUpAngle = -90.0f;
+  }
 
   skyUpShift = (float)tan(DEG2RAD(render_fovy) / 2.0f);
 
@@ -664,26 +682,35 @@ int StepwiseSum(int value, int direction, int step, int minval, int maxval,
   int newvalue;
   int val = (direction > 0 ? value : value - 1);
 
-  if (direction == 0) return defval;
+  if (direction == 0) {
+    return defval;
+  }
 
   direction = (direction > 0 ? 1 : -1);
 
-  if (step != 0)
+  if (step != 0) {
     newvalue = (prev_direction * direction < 0 ? prev_value
                                                : value + direction * step);
-  else {
+  } else {
     int exp = 1;
-    while (exp * 10 <= val) exp *= 10;
+    while (exp * 10 <= val) {
+      exp *= 10;
+    }
     newvalue = direction * (val < exp * 5 && exp > 1 ? exp / 2 : exp);
     newvalue = (value + newvalue) / newvalue * newvalue;
   }
 
-  if (newvalue > maxval) newvalue = maxval;
-  if (newvalue < minval) newvalue = minval;
+  if (newvalue > maxval) {
+    newvalue = maxval;
+  }
+  if (newvalue < minval) {
+    newvalue = minval;
+  }
 
   if ((value < defval && newvalue > defval) ||
-      (value > defval && newvalue < defval))
+      (value > defval && newvalue < defval)) {
     newvalue = defval;
+  }
 
   if (newvalue != value) {
     prev_value = value;
@@ -796,9 +823,13 @@ timetable_t *stats = NULL;
 void e6y_G_DoCompleted(void) {
   int i;
 
-  if (doSkip && (demo_stoponend || demo_warp)) G_SkipDemoStop();
+  if (doSkip && (demo_stoponend || demo_warp)) {
+    G_SkipDemoStop();
+  }
 
-  if (!stats_level) return;
+  if (!stats_level) {
+    return;
+  }
 
   if (numlevels >= levels_max) {
     levels_max = levels_max ? levels_max * 2 : 32;
@@ -807,14 +838,17 @@ void e6y_G_DoCompleted(void) {
 
   memset(&stats[numlevels], 0, sizeof(timetable_t));
 
-  if (gamemode == commercial)
+  if (gamemode == commercial) {
     sprintf(stats[numlevels].map, "MAP%02i", gamemap);
-  else
+  } else {
     sprintf(stats[numlevels].map, "E%iM%i", gameepisode, gamemap);
+  }
 
   if (secretexit) {
     size_t end_of_string = strlen(stats[numlevels].map);
-    if (end_of_string < 15) stats[numlevels].map[end_of_string] = 's';
+    if (end_of_string < 15) {
+      stats[numlevels].map[end_of_string] = 's';
+    }
   }
 
   stats[numlevels].stat[TT_TIME] = leveltime;
@@ -862,8 +896,11 @@ void e6y_WriteStats(void) {
   memset(&max, 0, sizeof(timetable_t));
 
   playerscount = 0;
-  for (i = 0; i < MAXPLAYERS; i++)
-    if (playeringame[i]) playerscount++;
+  for (i = 0; i < MAXPLAYERS; i++) {
+    if (playeringame[i]) {
+      playerscount++;
+    }
+  }
 
   for (level = 0; level < numlevels; level++) {
     memset(&tmp, 0, sizeof(tmpdata_t));
@@ -885,24 +922,29 @@ void e6y_WriteStats(void) {
         strcpy(tmp.secret, strtmp);
       }
     }
-    if (playerscount < 2)
+    if (playerscount < 2) {
       memset(&all[level], 0, sizeof(tmpdata_t));
-    else {
+    } else {
       sprintf(all[level].kill, " (%s)", tmp.kill);
       sprintf(all[level].item, " (%s)", tmp.item);
       sprintf(all[level].secret, " (%s)", tmp.secret);
     }
 
-    if (strlen(all[level].kill) > allkills_len)
+    if (strlen(all[level].kill) > allkills_len) {
       allkills_len = strlen(all[level].kill);
-    if (strlen(all[level].item) > allitems_len)
+    }
+    if (strlen(all[level].item) > allitems_len) {
       allitems_len = strlen(all[level].item);
-    if (strlen(all[level].secret) > allsecrets_len)
+    }
+    if (strlen(all[level].secret) > allsecrets_len) {
       allsecrets_len = strlen(all[level].secret);
+    }
 
-    for (i = 0; i < TT_MAX; i++)
-      if (stats[level].stat[i] > max.stat[i])
+    for (i = 0; i < TT_MAX; i++) {
+      if (stats[level].stat[i] > max.stat[i]) {
         max.stat[i] = stats[level].stat[i];
+      }
+    }
   }
   max.stat[TT_TIME] = max.stat[TT_TIME] / TICRATE / 60;
   max.stat[TT_TOTALTIME] = max.stat[TT_TOTALTIME] / TICRATE / 60;
@@ -945,7 +987,9 @@ void e6y_G_DoWorldDone(void) {
 
     if ((p = M_CheckParm("-warp"))) {
       if (gamemode == commercial) {
-        if (p < myargc - 1) map = atoi(myargv[p + 1]);
+        if (p < myargc - 1) {
+          map = atoi(myargv[p + 1]);
+        }
       } else {
         if (p < myargc - 2) {
           episode = atoi(myargv[++p]);
@@ -959,7 +1003,9 @@ void e6y_G_DoWorldDone(void) {
         (gamemode == commercial ? (map == gamemap)
                                 : (episode == gameepisode && map == gamemap));
 
-    if (demo_warp && demo_skiptics == 0 && !firstmap) G_SkipDemoStop();
+    if (demo_warp && demo_skiptics == 0 && !firstmap) {
+      G_SkipDemoStop();
+    }
 
     firstmap = 0;
   }
@@ -968,9 +1014,13 @@ void e6y_G_DoWorldDone(void) {
 //--------------------------------------------------
 
 int AccelerateMouse(int val) {
-  if (!mouse_acceleration) return val;
+  if (!mouse_acceleration) {
+    return val;
+  }
 
-  if (val < 0) return -AccelerateMouse(-val);
+  if (val < 0) {
+    return -AccelerateMouse(-val);
+  }
 
   return M_DoubleToInt(pow((double)val, (double)mouse_accelfactor));
 }
@@ -1004,13 +1054,17 @@ void e6y_G_Compatibility(void) {
     }
 
     for (i = 0; i < PC_MAX; i++) {
-      if (M_CheckParm(prboom_comp[i].cmd)) prboom_comp[i].state = true;
+      if (M_CheckParm(prboom_comp[i].cmd)) {
+        prboom_comp[i].state = true;
+      }
     }
   }
 
   P_CrossSubsector = P_CrossSubsector_PrBoom;
   if (!prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state) {
-    if (demo_compatibility) P_CrossSubsector = P_CrossSubsector_Doom;
+    if (demo_compatibility) {
+      P_CrossSubsector = P_CrossSubsector_Doom;
+    }
 
     switch (compatibility_level) {
       case boom_compatibility_compatibility:
@@ -1028,7 +1082,9 @@ dboolean zerotag_manual;
 dboolean ProcessNoTagLines(line_t *line, sector_t **sec, int *secnum) {
   zerotag_manual = false;
   if (line->tag == 0 && comperr(comperr_zerotag)) {
-    if (!(*sec = line->backsector)) return true;
+    if (!(*sec = line->backsector)) {
+      return true;
+    }
     *secnum = (*sec)->iSectorID;
     zerotag_manual = true;
     return true;
@@ -1042,8 +1098,9 @@ char *PathFindFileName(const char *pPath) {
   if (pPath) {
     for (; *pPath; pPath++) {
       if ((pPath[0] == '\\' || pPath[0] == ':' || pPath[0] == '/') &&
-          pPath[1] && pPath[1] != '\\' && pPath[1] != '/')
+          pPath[1] && pPath[1] != '\\' && pPath[1] != '/') {
         pT = pPath + 1;
+      }
     }
   }
 
@@ -1053,17 +1110,26 @@ char *PathFindFileName(const char *pPath) {
 void NormalizeSlashes2(char *str) {
   size_t l;
 
-  if (!str || !(l = strlen(str))) return;
-  if (str[--l] == '\\' || str[l] == '/') str[l] = 0;
-  while (l--)
-    if (str[l] == '/') str[l] = '\\';
+  if (!str || !(l = strlen(str))) {
+    return;
+  }
+  if (str[--l] == '\\' || str[l] == '/') {
+    str[l] = 0;
+  }
+  while (l--) {
+    if (str[l] == '/') {
+      str[l] = '\\';
+    }
+  }
 }
 
 unsigned int AfxGetFileName(const char *lpszPathName, char *lpszTitle,
                             unsigned int nMax) {
   char *lpszTemp = PathFindFileName(lpszPathName);
 
-  if (lpszTitle == NULL) return strlen(lpszTemp) + 1;
+  if (lpszTitle == NULL) {
+    return strlen(lpszTemp) + 1;
+  }
 
   strncpy(lpszTitle, lpszTemp, nMax - 1);
   return 0;
@@ -1081,7 +1147,9 @@ void AbbreviateName(char *lpszCanon, int cchMax, int bAtLeastName) {
   cchFileName = AfxGetFileName(lpszCanon, NULL, 0) - 1;
   lpszFileName = lpszBase + (cchFullPath - cchFileName);
 
-  if (cchMax >= cchFullPath) return;
+  if (cchMax >= cchFullPath) {
+    return;
+  }
 
   if (cchMax < cchFileName) {
     strcpy(lpszCanon, (bAtLeastName) ? lpszFileName : "");
@@ -1091,12 +1159,16 @@ void AbbreviateName(char *lpszCanon, int cchMax, int bAtLeastName) {
   lpszCur = lpszBase + 2;
 
   if (lpszBase[0] == '\\' && lpszBase[1] == '\\') {
-    while (*lpszCur != '\\') lpszCur++;
+    while (*lpszCur != '\\') {
+      lpszCur++;
+    }
   }
 
   if (cchFullPath - cchFileName > 3) {
     lpszCur++;
-    while (*lpszCur != '\\') lpszCur++;
+    while (*lpszCur != '\\') {
+      lpszCur++;
+    }
   }
 
   cchVolName = (int)(lpszCur - lpszBase);
@@ -1128,8 +1200,9 @@ int HU_DrawDemoProgress(int force) {
   unsigned int tick, max_period;
 
   if (gamestate == GS_DEMOSCREEN || (!demoplayback && !democontinue) ||
-      !hudadd_demoprogressbar)
+      !hudadd_demoprogressbar) {
     return false;
+  }
 
   tics_count =
       ((doSkip && demo_skiptics > 0) ? MIN(demo_skiptics, demo_tics_count)
@@ -1145,19 +1218,24 @@ int HU_DrawDemoProgress(int force) {
     // Unnecessary updates of progress bar
     // can slow down demo skipping and playback
     tick = SDL_GetTicks();
-    if (tick - last_update < max_period) return false;
+    if (tick - last_update < max_period) {
+      return false;
+    }
     last_update = tick;
 
     // Do not update progress bar if difference is small
     diff = len - prev_len;
-    if (diff == 0 || diff == 1)  // because of static prev_len
+    if (diff == 0 || diff == 1) {  // because of static prev_len
       return false;
+    }
   }
 
   prev_len = len;
 
   V_FillRect(0, 0, SCREENHEIGHT - 4, len - 0, 4, 4);
-  if (len > 4) V_FillRect(0, 2, SCREENHEIGHT - 3, len - 4, 2, 0);
+  if (len > 4) {
+    V_FillRect(0, 2, SCREENHEIGHT - 3, len - 4, 2, 0);
+  }
 
   return true;
 }
@@ -1289,34 +1367,54 @@ dboolean SmoothEdges(unsigned char *buffer, int w, int h) {
   // e6y: Do not smooth small patches.
   // Makes sense for HUD small digits
   // 2 and 7 still look ugly
-  if (h <= 8 || w <= 8) return false;
+  if (h <= 8 || w <= 8) {
+    return false;
+  }
 
   l1 = buffer;
 
-  if (l1[MSB] == 0 && !CHKPIX(1)) CHKPIX(w);
+  if (l1[MSB] == 0 && !CHKPIX(1)) {
+    CHKPIX(w);
+  }
   l1 += 4;
   for (x = 1; x < w - 1; x++, l1 += 4) {
-    if (l1[MSB] == 0 && !CHKPIX(-1) && !CHKPIX(1)) CHKPIX(w);
+    if (l1[MSB] == 0 && !CHKPIX(-1) && !CHKPIX(1)) {
+      CHKPIX(w);
+    }
   }
-  if (l1[MSB] == 0 && !CHKPIX(-1)) CHKPIX(w);
+  if (l1[MSB] == 0 && !CHKPIX(-1)) {
+    CHKPIX(w);
+  }
   l1 += 4;
 
   for (y = 1; y < h - 1; y++) {
-    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(1)) CHKPIX(w);
+    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(1)) {
+      CHKPIX(w);
+    }
     l1 += 4;
     for (x = 1; x < w - 1; x++, l1 += 4) {
-      if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1) && !CHKPIX(1)) CHKPIX(w);
+      if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1) && !CHKPIX(1)) {
+        CHKPIX(w);
+      }
     }
-    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1)) CHKPIX(w);
+    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1)) {
+      CHKPIX(w);
+    }
     l1 += 4;
   }
 
-  if (l1[MSB] == 0 && !CHKPIX(-w)) CHKPIX(1);
+  if (l1[MSB] == 0 && !CHKPIX(-w)) {
+    CHKPIX(1);
+  }
   l1 += 4;
   for (x = 1; x < w - 1; x++, l1 += 4) {
-    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1)) CHKPIX(1);
+    if (l1[MSB] == 0 && !CHKPIX(-w) && !CHKPIX(-1)) {
+      CHKPIX(1);
+    }
   }
-  if (l1[MSB] == 0 && !CHKPIX(-w)) CHKPIX(-1);
+  if (l1[MSB] == 0 && !CHKPIX(-w)) {
+    CHKPIX(-1);
+  }
 
   return trans;
 }

@@ -122,7 +122,9 @@ int gld_SetGammaRamp(int gamma) {
   float g = (BETWEEN(0, MAX_GLGAMMA, gamma)) / 10.0f + 1.0f;
   Uint16 gammatable[256];
 
-  if (!gl_DeviceSupportsGamma) return false;
+  if (!gl_DeviceSupportsGamma) {
+    return false;
+  }
 
   if (gamma == -1) {
     succeeded = (SDL_SetWindowGammaRamp(sdl_window, gl_oldHardwareGamma[0],

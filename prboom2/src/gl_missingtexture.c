@@ -100,14 +100,18 @@ static void gld_PrepareSectorSpecialEffects(void) {
       side_t *side1 = (sidenum1 == NO_INDEX ? NULL : &sides[sidenum1]);
 
       if (side0 && side1) {
-        if (side0->toptexture != NO_TEXTURE)
+        if (side0->toptexture != NO_TEXTURE) {
           sectors[num].flags &= ~NO_TOPTEXTURES;
-        if (side0->bottomtexture != NO_TEXTURE)
+        }
+        if (side0->bottomtexture != NO_TEXTURE) {
           sectors[num].flags &= ~NO_BOTTOMTEXTURES;
-        if (side1->toptexture != NO_TEXTURE)
+        }
+        if (side1->toptexture != NO_TEXTURE) {
           sectors[num].flags &= ~NO_TOPTEXTURES;
-        if (side1->bottomtexture != NO_TEXTURE)
+        }
+        if (side1->bottomtexture != NO_TEXTURE) {
           sectors[num].flags &= ~NO_BOTTOMTEXTURES;
+        }
 
         /* sides should not have null sectors, but we check anyway */
         if (side0->sector && side1->sector) {
@@ -175,15 +179,20 @@ static void gld_RegisterBleedthroughSector(sector_t *source, sector_t *target,
   assert(target);
 
   /* check whether the sector is processed already */
-  for (i = 0; i < numbleedsectors && source_idx == -1; i++)
-    if (bleedsectors[i].source == source && bleedsectors[i].ceiling == ceiling)
+  for (i = 0; i < numbleedsectors && source_idx == -1; i++) {
+    if (bleedsectors[i].source == source &&
+        bleedsectors[i].ceiling == ceiling) {
       source_idx = i;
+    }
+  }
 
   if (source_idx == -1) {
     /* allocate memory for new sector */
     bleedsectors = (bleedthrough_t *)realloc(
         bleedsectors, (numbleedsectors + 1) * sizeof(bleedthrough_t));
-    if (!bleedsectors) I_Error("gld_RegisterBleedthroughSector: Out of memory");
+    if (!bleedsectors) {
+      I_Error("gld_RegisterBleedthroughSector: Out of memory");
+    }
     memset(&bleedsectors[numbleedsectors], 0, sizeof(bleedthrough_t));
     numbleedsectors++;
 
@@ -208,9 +217,12 @@ static void gld_RegisterBleedthroughSector(sector_t *source, sector_t *target,
 
 sector_t *GetBestBleedSector(sector_t *source, int ceiling) {
   int i;
-  for (i = 0; i < numbleedsectors; i++)
-    if (bleedsectors[i].source == source && bleedsectors[i].ceiling == ceiling)
+  for (i = 0; i < numbleedsectors; i++) {
+    if (bleedsectors[i].source == source &&
+        bleedsectors[i].ceiling == ceiling) {
       return bleedsectors[i].target;
+    }
+  }
   return NULL;
 }
 
@@ -330,7 +342,9 @@ sector_t *GetBestFake(sector_t *sector, int ceiling, int validcount) {
   int i;
   int groupid = sector->fakegroup[ceiling];
 
-  if (groupid == -1) return NULL;
+  if (groupid == -1) {
+    return NULL;
+  }
 
   if (fakeplanes[groupid].validcount != validcount) {
     fakeplanes[groupid].validcount = validcount;

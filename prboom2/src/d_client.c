@@ -98,7 +98,9 @@ void D_InitNetGame(void) {
   int numplayers = 1;
 
   i = M_CheckParm("-net");
-  if (i && i < myargc - 1) i++;
+  if (i && i < myargc - 1) {
+    i++;
+  }
 
   if (!(netgame = server = !!i)) {
     playeringame[consoleplayer = 0] = true;
@@ -129,7 +131,9 @@ void D_InitNetGame(void) {
         I_SendPacket(&initpacket.head, sizeof(initpacket));
         I_WaitForPacket(5000);
       } while (!I_GetPacket(packet, 1000));
-      if (packet->type == PKT_DOWN) I_Error("Server aborted the game");
+      if (packet->type == PKT_DOWN) {
+        I_Error("Server aborted the game");
+      }
     } while (packet->type != PKT_SETUP);
 
     // Once we have been accepted by the server, we should tell it when we leave
@@ -161,10 +165,15 @@ void D_InitNetGame(void) {
     Z_Free(packet);
   }
   localcmds = netcmds[displayplayer = consoleplayer];
-  for (i = 0; i < numplayers; i++) playeringame[i] = true;
-  for (; i < MAXPLAYERS; i++) playeringame[i] = false;
-  if (!playeringame[consoleplayer])
+  for (i = 0; i < numplayers; i++) {
+    playeringame[i] = true;
+  }
+  for (; i < MAXPLAYERS; i++) {
+    playeringame[i] = false;
+  }
+  if (!playeringame[consoleplayer]) {
     I_Error("D_InitNetGame: consoleplayer not in game");
+  }
 }
 #else
 void D_InitNetGame(void) {
@@ -271,7 +280,9 @@ dboolean D_NetGetWad(const char *name) {
 
 void NetUpdate(void) {
   static int lastmadetic;
-  if (isExtraDDisplay) return;
+  if (isExtraDDisplay) {
+    return;
+  }
   if (server) {  // Receive network packets
     size_t recvlen;
     packet_header_t *packet = Z_Malloc(10000, PU_STATIC, NULL);
@@ -286,8 +297,9 @@ void NetUpdate(void) {
             *(byte *)(packet + 1) = consoleplayer;
             I_SendPacket(packet, sizeof(*packet) + 1);
           } else {
-            if (ptic + tics <= (unsigned)remotetic)
+            if (ptic + tics <= (unsigned)remotetic) {
               break;  // Will not improve things
+            }
             remotetic = ptic;
             while (tics--) {
               int players = *p++;
@@ -306,8 +318,11 @@ void NetUpdate(void) {
         case PKT_DOWN:  // Server downed
         {
           int j;
-          for (j = 0; j < MAXPLAYERS; j++)
-            if (j != consoleplayer) playeringame[j] = false;
+          for (j = 0; j < MAXPLAYERS; j++) {
+            if (j != consoleplayer) {
+              playeringame[j] = false;
+            }
+          }
           server = false;
           doom_printf(
               "Server is down\nAll other players are no longer in the game\n");
@@ -340,17 +355,22 @@ void NetUpdate(void) {
     int newtics = I_GetTime() - lastmadetic;
     // e6y    newtics = (newtics > 0 ? newtics : 0);
     lastmadetic += newtics;
-    if (ffmap) newtics++;
+    if (ffmap) {
+      newtics++;
+    }
     while (newtics--) {
       I_StartTic();
-      if (maketic - gametic > BACKUPTICS / 2) break;
+      if (maketic - gametic > BACKUPTICS / 2) {
+        break;
+      }
 
       // e6y
       // Eliminating the sudden jump of six frames(BACKUPTICS/2)
       // after change of realtic_clock_rate.
       if (maketic - gametic && gametic <= force_singletics_to &&
-          realtic_clock_rate < 200)
+          realtic_clock_rate < 200) {
         break;
+      }
 
       G_BuildTiccmd(&localcmds[maketic % BACKUPTICS]);
       maketic++;
@@ -358,7 +378,9 @@ void NetUpdate(void) {
     if (server && maketic > remotesend) {  // Send the tics to the server
       int sendtics;
       remotesend -= xtratics;
-      if (remotesend < 0) remotesend = 0;
+      if (remotesend < 0) {
+        remotesend = 0;
+      }
       sendtics = MIN(maketic - remotesend,
                      128);  // limit number of sent tics (CVE-2019-20797)
       {
@@ -418,8 +440,8 @@ void D_NetSendMisc(netmisctype_t type, size_t len, void *data) {
 
 static void CheckQueuedPackets(void) {
   int i;
-  for (i = 0; (unsigned)i < numqueuedpackets; i++)
-    if (doom_ntohl(queuedpacket[i]->tic) <= gametic)
+  for (i = 0; (unsigned)i < numqueuedpackets; i++) {
+    if (doom_ntohl(queuedpacket[i]->tic) <= gametic) {
       switch (queuedpacket[i]->type) {
         case PKT_QUIT:  // Player quit the game
         {
@@ -446,18 +468,22 @@ static void CheckQueuedPackets(void) {
         default:  // Should not be queued
           break;
       }
+    }
+  }
 
   {  // Requeue remaining packets
     int newnum = 0;
     packet_header_t **newqueue = NULL;
 
-    for (i = 0; (unsigned)i < numqueuedpackets; i++)
+    for (i = 0; (unsigned)i < numqueuedpackets; i++) {
       if (doom_ntohl(queuedpacket[i]->tic) > gametic) {
         newqueue =
             Z_Realloc(newqueue, ++newnum * sizeof *newqueue, PU_STATIC, NULL);
         newqueue[newnum - 1] = queuedpacket[i];
-      } else
+      } else {
         Z_Free(queuedpacket[i]);
+      }
+    }
 
     Z_Free(queuedpacket);
     numqueuedpackets = newnum;
@@ -481,11 +507,14 @@ void TryRunTics(void) {
     if (!runtics) {
       if (!movement_smooth || !window_focused) {
 #ifdef HAVE_NET
-        if (server)
+        if (server) {
           I_WaitForPacket(ms_to_next_tick);
-        else
+        } else {
 #endif
           I_uSleep(ms_to_next_tick * 1000);
+#ifdef HAVE_NET
+        }
+#endif
       }
       if (I_GetTime() - entertime > 10) {
 #ifdef HAVE_NET
@@ -509,15 +538,20 @@ void TryRunTics(void) {
           isExtraDDisplay = false;
         }
       }
-    } else
+    } else {
       break;
+    }
   }
 
   while (runtics--) {
 #ifdef HAVE_NET
-    if (server) CheckQueuedPackets();
+    if (server) {
+      CheckQueuedPackets();
+    }
 #endif
-    if (advancedemo) D_DoAdvanceDemo();
+    if (advancedemo) {
+      D_DoAdvanceDemo();
+    }
     M_Ticker();
     I_GetTime_SaveMS();
     G_Ticker();
@@ -535,7 +569,9 @@ static void D_QuitNetGame(void) {
   packet_header_t *packet = (void *)buf;
   int i;
 
-  if (!server) return;
+  if (!server) {
+    return;
+  }
   buf[sizeof(packet_header_t)] = consoleplayer;
   packet_set(packet, PKT_QUIT, gametic);
 

@@ -82,7 +82,9 @@ OggVorbis_File vf;
 static size_t vread(void *dst, size_t s, size_t n, void *src) {
   size_t size = s * n;
 
-  if (vorb_pos + size >= vorb_len) size = vorb_len - vorb_pos;
+  if (vorb_pos + size >= vorb_len) {
+    size = vorb_len - vorb_pos;
+  }
 
   memcpy(dst, vorb_data + vorb_pos, size);
   vorb_pos += size;
@@ -104,8 +106,9 @@ static int vseek(void *src, ogg_int64_t offset, int whence) {
       desired_pos = vorb_len + (size_t)offset;
       break;
   }
-  if (desired_pos > vorb_len)  // placing exactly at the end is allowed)
+  if (desired_pos > vorb_len) {  // placing exactly at the end is allowed)
     return -1;
+  }
   vorb_pos = desired_pos;
   return 0;
 }
@@ -139,7 +142,9 @@ static unsigned parsetag(const char *str, int samplerate) {
       mult *= 10;
       digincol++;
     } else if (*pos == '.') {
-      if (seencolon || seendot) return 0;
+      if (seencolon || seendot) {
+        return 0;
+      }
       seendot = 1;
       // convert decimal to samplerate and move on
       ret *= samplerate;
@@ -147,8 +152,9 @@ static unsigned parsetag(const char *str, int samplerate) {
       mult = samplerate;
       digincol = 0;
     } else if (*pos == ':') {
-      if (seencolon == 2)  // no mention of anything past hours in spec
+      if (seencolon == 2) {  // no mention of anything past hours in spec
         return 0;
+      }
       seencolon++;
       mult *= 6;
 
@@ -163,8 +169,9 @@ static unsigned parsetag(const char *str, int samplerate) {
         mult *= 10;
       }
       digincol = 0;
-    } else
+    } else {
       return 0;
+    }
   }
   if (seencolon && !seendot) {  // HH:MM:SS, but we never converted to samples
     return ret * samplerate;
@@ -227,15 +234,17 @@ static const void *vorb_registersong(const void *data, unsigned len) {
 
   vcom = ov_comment(&vf, -1);
   for (i = 0; i < vcom->comments; i++) {
-    if (strncmp("LOOP_START=", vcom->user_comments[i], 11) == 0)
+    if (strncmp("LOOP_START=", vcom->user_comments[i], 11) == 0) {
       vorb_loop_to = parsetag(vcom->user_comments[i] + 11, vorb_samplerate_in);
-    else if (strncmp("LOOP_END=", vcom->user_comments[i], 9) == 0)
+    } else if (strncmp("LOOP_END=", vcom->user_comments[i], 9) == 0) {
       vorb_loop_from = parsetag(vcom->user_comments[i] + 9, vorb_samplerate_in);
+    }
   }
-  if (vorb_loop_from == 0)
+  if (vorb_loop_from == 0) {
     vorb_loop_from = 0xffffffff;
-  else if (vorb_loop_to >= vorb_loop_from)
+  } else if (vorb_loop_to >= vorb_loop_from) {
     vorb_loop_to = 0;
+  }
 #endif  // ZDOOM_AUDIO_LOOP
 
   // handle not used
@@ -297,12 +306,13 @@ static void vorb_render_ex(void *dest, unsigned nsamp) {
   while (nsamp > 0) {
 #ifdef ZDOOM_AUDIO_LOOP
     // don't use custom loop end point when not in looping mode
-    if (vorb_looping && vorb_total_pos + nsamp > vorb_loop_from)
+    if (vorb_looping && vorb_total_pos + nsamp > vorb_loop_from) {
       numread = ov_read_float(&vf, &pcmdata, vorb_loop_from - vorb_total_pos,
                               &bitstreamnum);
-    else
+    } else {
 #endif  // ZDOOM_AUDIO_LOOP
       numread = ov_read_float(&vf, &pcmdata, nsamp, &bitstreamnum);
+    }
     if (numread ==
         OV_HOLE) {  // recoverable error, but discontinue if we get too many
       localerrors++;
@@ -319,7 +329,7 @@ static void vorb_render_ex(void *dest, unsigned nsamp) {
         ov_pcm_seek_lap(&vf, vorb_loop_to);
         vorb_total_pos = vorb_loop_to;
 #else   // ZDOOM_AUDIO_LOOP
-        ov_raw_seek_lap(&vf, 0);
+      ov_raw_seek_lap(&vf, 0);
 #endif  // ZDOOM_AUDIO_LOOP
         continue;
       } else {

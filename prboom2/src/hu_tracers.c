@@ -79,7 +79,9 @@ void InitTracers(void) {
         sprintf(traces[i].items[count].value, "\x1b\x36%d\x1b\x33 0", value);
         traces[i].items[count].index = value;
 
-        if (traces[i].ApplyFunc) traces[i].ApplyFunc(i);
+        if (traces[i].ApplyFunc) {
+          traces[i].ApplyFunc(i);
+        }
 
         traces_present = true;
         count++;
@@ -230,15 +232,17 @@ void TracerAddPlayerStart(int num, int index) {
 }
 
 int TracerGetDeathmatchStart(int index) {
-  if (index >= num_deathmatchstarts_indexes)
+  if (index >= num_deathmatchstarts_indexes) {
     I_Error("TracerGetDeathmatchStart: index out of bounds");
+  }
 
   return deathmatchstarts_indexes[index].index;
 }
 
 int TracerGetPlayerStart(int index) {
-  if (index >= MAXPLAYERS)
+  if (index >= MAXPLAYERS) {
     I_Error("TracerGetDeathmatchStart: index out of bounds");
+  }
 
   return playerstarts_indexes[index].index;
 }

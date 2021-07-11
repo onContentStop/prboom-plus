@@ -182,12 +182,15 @@ static void gld_InitLightTable_gzdoom(void) {
   float light;
 
   for (i = 0; i < 256; i++) {
-    if (i < 192)
+    if (i < 192) {
       light = (192.0f - (192 - i) * 1.95f);
-    else
+    } else {
       light = (float)i;
+    }
 
-    if (light < gl_light_ambient) light = (float)gl_light_ambient;
+    if (light < gl_light_ambient) {
+      light = (float)gl_light_ambient;
+    }
 
     lighttable_gzdoom[i] = light / 255.0f;
   }
@@ -200,10 +203,11 @@ static void gld_InitLightTable_fogbased(void) {
   float light;
 
   for (i = 0; i < 256; i++) {
-    if (i < 192)
+    if (i < 192) {
       light = (float)255;
-    else
+    } else {
       light = (float)i;
+    }
 
     lighttable_fogbased[i] = light / 255.0f;
   }
@@ -218,13 +222,14 @@ static float gld_CalcLightLevel_gzdoom(int lightlevel) {
 }
 
 static float gld_CalcLightLevel_fogbased(int lightlevel) {
-  if (players[displayplayer].fixedcolormap)
+  if (players[displayplayer].fixedcolormap) {
     return lighttable_gzdoom[BETWEEN(0, 255, lightlevel)];
-  else {
-    if (extralight)
+  } else {
+    if (extralight) {
       return lighttable_fogbased[255];
-    else
+    } else {
       return lighttable_fogbased[BETWEEN(0, 255, lightlevel)];
+    }
   }
 }
 
@@ -304,7 +309,9 @@ void M_ChangeAllowFog(void) {
     if (i <= 128) {
       distfogtable[2][i] =
           (float)(1 << 16) / (float)pow(1.46f, ((float)i / 8.0f));
-      if (distfogtable[2][i] > 2048) distfogtable[2][i] = 2048;
+      if (distfogtable[2][i] > 2048) {
+        distfogtable[2][i] = 2048;
+      }
     } else if (i < 192) {
       distfogtable[2][i] =
           (float)(1 << 13) / (float)pow(1.30f, ((float)i / 8.0f));
@@ -339,10 +346,11 @@ static float gld_CalcFogDensity_fogbased(sector_t *sector, int lightlevel,
     float fog = distfogtable[2][BETWEEN(0, 255, lightlevel)];
 
     if (extralight) {
-      if (extralight == 1)
+      if (extralight == 1) {
         fog -= fog / 3.0f;
-      else
+      } else {
         fog -= fog / 2.0f;
+      }
     }
 
     if (type == GLDIT_CEILING || type == GLDIT_FLOOR || type == GLDIT_FWALL) {
@@ -368,9 +376,13 @@ void gld_SetFog(float fogdensity) {
 
 void gl_EnableFog(int on) {
   if (on) {
-    if (!gl_fogenabled) glEnable(GL_FOG);
+    if (!gl_fogenabled) {
+      glEnable(GL_FOG);
+    }
   } else {
-    if (gl_fogenabled) glDisable(GL_FOG);
+    if (gl_fogenabled) {
+      glDisable(GL_FOG);
+    }
   }
   gl_fogenabled = on;
 }

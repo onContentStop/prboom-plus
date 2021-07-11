@@ -93,20 +93,21 @@ void R_FilterInit(void) {
     for (j = 0; j < FILTER_UVDIM; j++) {
       s = (FILTER_UVDIM / 2) - i;
       t = (FILTER_UVDIM / 2) - j;
-      if (s >= 0 && t >= 0)
+      if (s >= 0 && t >= 0) {
         filter_roundedUVMap[i * FILTER_UVDIM + j] =
             (s + t > FILTER_UVDIM / 2) ? 0 : 4;
-      else if (s >= 0 && t <= 0)
+      } else if (s >= 0 && t <= 0) {
         filter_roundedUVMap[i * FILTER_UVDIM + j] =
             (s - t > FILTER_UVDIM / 2) ? 2 : 4;
-      else if (s <= 0 && t >= 0)
+      } else if (s <= 0 && t >= 0) {
         filter_roundedUVMap[i * FILTER_UVDIM + j] =
             (-s + t > FILTER_UVDIM / 2) ? 1 : 4;
-      else if (s <= 0 && t <= 0)
+      } else if (s <= 0 && t <= 0) {
         filter_roundedUVMap[i * FILTER_UVDIM + j] =
             (-s - t > FILTER_UVDIM / 2) ? 3 : 4;
-      else
+      } else {
         filter_roundedUVMap[i * FILTER_UVDIM + j] = 4;
+      }
     }
   }
 }

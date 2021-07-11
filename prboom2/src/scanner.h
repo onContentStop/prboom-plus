@@ -61,7 +61,9 @@ struct ParserState {
 
   ParserState() { string = NULL; }
   ~ParserState() {
-    if (string != NULL) free(string);
+    if (string != NULL) {
+      free(string);
+    }
   }
 };
 

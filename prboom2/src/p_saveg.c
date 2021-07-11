@@ -62,7 +62,7 @@ void P_ArchivePlayers(void) {
   int i;
 
   CheckSaveGame(sizeof(player_t) * MAXPLAYERS);  // killough
-  for (i = 0; i < MAXPLAYERS; i++)
+  for (i = 0; i < MAXPLAYERS; i++) {
     if (playeringame[i]) {
       int j;
       player_t *dest;
@@ -71,11 +71,14 @@ void P_ArchivePlayers(void) {
       dest = (player_t *)save_p;
       memcpy(dest, &players[i], sizeof(player_t));
       save_p += sizeof(player_t);
-      for (j = 0; j < NUMPSPRITES; j++)
-        if (dest->psprites[j].state)
+      for (j = 0; j < NUMPSPRITES; j++) {
+        if (dest->psprites[j].state) {
           dest->psprites[j].state =
               (state_t *)(dest->psprites[j].state - states);
+        }
+      }
     }
+  }
 }
 
 //
@@ -84,7 +87,7 @@ void P_ArchivePlayers(void) {
 void P_UnArchivePlayers(void) {
   int i;
 
-  for (i = 0; i < MAXPLAYERS; i++)
+  for (i = 0; i < MAXPLAYERS; i++) {
     if (playeringame[i]) {
       int j;
 
@@ -98,11 +101,14 @@ void P_UnArchivePlayers(void) {
       players[i].message = NULL;
       players[i].attacker = NULL;
 
-      for (j = 0; j < NUMPSPRITES; j++)
-        if (players[i].psprites[j].state)
+      for (j = 0; j < NUMPSPRITES; j++) {
+        if (players[i].psprites[j].state) {
           players[i].psprites[j].state =
               &states[(size_t)players[i].psprites[j].state];
+        }
+      }
     }
+  }
 }
 
 //
@@ -123,12 +129,14 @@ void P_ArchiveWorld(void) {
                 sizeof(short) * 3 * numlines + 4 + 2;
 
   for (i = 0; i < numlines; i++) {
-    if (lines[i].sidenum[0] != NO_INDEX)
+    if (lines[i].sidenum[0] != NO_INDEX) {
       size +=
           sizeof(short) * 3 + sizeof si->textureoffset + sizeof si->rowoffset;
-    if (lines[i].sidenum[1] != NO_INDEX)
+    }
+    if (lines[i].sidenum[1] != NO_INDEX) {
       size +=
           sizeof(short) * 3 + sizeof si->textureoffset + sizeof si->rowoffset;
+    }
   }
 
   CheckSaveGame(size);  // killough
@@ -160,7 +168,7 @@ void P_ArchiveWorld(void) {
     *put++ = li->special;
     *put++ = li->tag;
 
-    for (j = 0; j < 2; j++)
+    for (j = 0; j < 2; j++) {
       if (li->sidenum[j] != NO_INDEX) {
         si = &sides[li->sidenum[j]];
 
@@ -176,6 +184,7 @@ void P_ArchiveWorld(void) {
         *put++ = si->bottomtexture;
         *put++ = si->midtexture;
       }
+    }
   }
 
   *put++ = musinfo.current_item;
@@ -223,7 +232,7 @@ void P_UnArchiveWorld(void) {
     li->flags = *get++;
     li->special = *get++;
     li->tag = *get++;
-    for (j = 0; j < 2; j++)
+    for (j = 0; j < 2; j++) {
       if (li->sidenum[j] != NO_INDEX) {
         side_t *si = &sides[li->sidenum[j]];
 
@@ -238,6 +247,7 @@ void P_UnArchiveWorld(void) {
         si->bottomtexture = *get++;
         si->midtexture = *get++;
       }
+    }
   }
 
   musinfo.current_item = *get++;
@@ -264,9 +274,11 @@ void P_ThinkerToIndex(void) {
   // the prev field as a placeholder, since it can be restored later.
 
   number_of_thinkers = 0;
-  for (th = thinkercap.next; th != &thinkercap; th = th->next)
-    if (th->function == P_MobjThinker)
+  for (th = thinkercap.next; th != &thinkercap; th = th->next) {
+    if (th->function == P_MobjThinker) {
       th->prev = (thinker_t *)(intptr_t)++number_of_thinkers;
+    }
+  }
 }
 
 // phares 9/13/98: Moved this code outside of P_ArchiveThinkers so the
@@ -277,8 +289,9 @@ void P_IndexToThinker(void) {
   thinker_t *th;
   thinker_t *prev = &thinkercap;
 
-  for (th = thinkercap.next; th != &thinkercap; prev = th, th = th->next)
+  for (th = thinkercap.next; th != &thinkercap; prev = th, th = th->next) {
     th->prev = prev;
+  }
 }
 
 //
@@ -306,7 +319,7 @@ void P_ArchiveThinkers(void) {
                 1);
 
   // save off the current thinkers
-  for (th = thinkercap.next; th != &thinkercap; th = th->next)
+  for (th = thinkercap.next; th != &thinkercap; th = th->next) {
     if (th->function == P_MobjThinker) {
       mobj_t *mobj;
 
@@ -326,30 +339,35 @@ void P_ArchiveThinkers(void) {
       // the thinker pointed to by these fields is not a
       // mobj thinker.
 
-      if (mobj->target)
+      if (mobj->target) {
         mobj->target = mobj->target->thinker.function == P_MobjThinker
                            ? (mobj_t *)mobj->target->thinker.prev
                            : NULL;
+      }
 
-      if (mobj->tracer)
+      if (mobj->tracer) {
         mobj->tracer = mobj->tracer->thinker.function == P_MobjThinker
                            ? (mobj_t *)mobj->tracer->thinker.prev
                            : NULL;
+      }
 
       // killough 2/14/98: new field: save last known enemy. Prevents
       // monsters from going to sleep after killing monsters and not
       // seeing player anymore.
 
-      if (mobj->lastenemy)
+      if (mobj->lastenemy) {
         mobj->lastenemy = mobj->lastenemy->thinker.function == P_MobjThinker
                               ? (mobj_t *)mobj->lastenemy->thinker.prev
                               : NULL;
+      }
 
       // killough 2/14/98: end changes
 
-      if (mobj->player)
+      if (mobj->player) {
         mobj->player = (player_t *)((mobj->player - players) + 1);
+      }
     }
+  }
 
   // add a terminating marker
   *save_p++ = tc_end;
@@ -362,10 +380,11 @@ void P_ArchiveThinkers(void) {
       mobj_t *target = sectors[i].soundtarget;
       // Fix crash on reload when a soundtarget points to a removed corpse
       // (prboom bug #1590350)
-      if (target && target->thinker.function == P_MobjThinker)
+      if (target && target->thinker.function == P_MobjThinker) {
         target = (mobj_t *)target->thinker.prev;
-      else
+      } else {
         target = NULL;
+      }
       memcpy(save_p, &target, sizeof target);
       save_p += sizeof target;
     }
@@ -395,7 +414,9 @@ static void P_SetNewTarget(mobj_t **mop, mobj_t *targ) {
 // safely casts them back to int.
 static int P_GetMobj(mobj_t *mi, size_t s) {
   size_t i = (size_t)mi;
-  if (i >= s) I_Error("Corrupt savegame");
+  if (i >= s) {
+    I_Error("Corrupt savegame");
+  }
   return i;
 }
 
@@ -415,8 +436,9 @@ void P_UnArchiveThinkers(void) {
     if (th->function == P_MobjThinker) {
       P_RemoveMobj((mobj_t *)th);
       P_RemoveThinkerDelayed(th);  // fix mobj leak
-    } else
+    } else {
       Z_Free(th);
+    }
     th = next;
   }
   P_InitThinkers();
@@ -430,8 +452,9 @@ void P_UnArchiveThinkers(void) {
       save_p += sizeof(mobj_t);  // e6y
     }
 
-    if (*--save_p != tc_end)
+    if (*--save_p != tc_end) {
       I_Error("P_UnArchiveThinkers: Unknown tclass %i in savegame", *save_p);
+    }
 
     // first table entry special: 0 maps to NULL
     *(mobj_p = malloc(size * sizeof *mobj_p)) = 0;  // table of pointers
@@ -453,8 +476,9 @@ void P_UnArchiveThinkers(void) {
 
     mobj->state = states + (intptr_t)mobj->state;
 
-    if (mobj->player)
+    if (mobj->player) {
       (mobj->player = &players[(size_t)mobj->player - 1])->mo = mobj;
+    }
 
     P_SetThingPosition(mobj);
     mobj->info = &mobjinfo[mobj->type];
@@ -468,8 +492,9 @@ void P_UnArchiveThinkers(void) {
     P_AddThinker(&mobj->thinker);
 
     if (!((mobj->flags ^ MF_COUNTKILL) &
-          (MF_FRIEND | MF_COUNTKILL | MF_CORPSE)))
+          (MF_FRIEND | MF_COUNTKILL | MF_CORPSE))) {
       totallive++;
+    }
   }
 
   // killough 2/14/98: adjust target and tracer fields, plus
@@ -557,24 +582,27 @@ void P_ArchiveSpecials(void) {
 
   // save off the current thinkers (memory size calculation -- killough)
 
-  for (th = thinkercap.next; th != &thinkercap; th = th->next)
+  for (th = thinkercap.next; th != &thinkercap; th = th->next) {
     if (!th->function) {
       platlist_t *pl;
       ceilinglist_t *cl;  // jff 2/22/98 need this for ceilings too now
-      for (pl = activeplats; pl; pl = pl->next)
+      for (pl = activeplats; pl; pl = pl->next) {
         if (pl->plat == (plat_t *)th)  // killough 2/14/98
         {
           size += 4 + sizeof(plat_t);
           goto end;
         }
-      for (cl = activeceilings; cl; cl = cl->next)  // search for activeceiling
-        if (cl->ceiling == (ceiling_t *)th)         // jff 2/22/98
+      }
+      for (cl = activeceilings; cl;
+           cl = cl->next) {                  // search for activeceiling
+        if (cl->ceiling == (ceiling_t *)th)  // jff 2/22/98
         {
           size += 4 + sizeof(ceiling_t);
           goto end;
         }
+      }
     end:;
-    } else
+    } else {
       size += th->function == T_MoveCeiling    ? 4 + sizeof(ceiling_t)
               : th->function == T_VerticalDoor ? 4 + sizeof(vldoor_t)
               : th->function == T_MoveFloor    ? 4 + sizeof(floormove_t)
@@ -588,6 +616,8 @@ void P_ArchiveSpecials(void) {
               : th->function == T_FireFlicker  ? 4 + sizeof(fireflicker_t)
               : th->function == T_Friction     ? 4 + sizeof(friction_t)
                                                : 0;
+    }
+  }
 
   CheckSaveGame(size + 1);  // killough; cph: +1 for the tc_endspecials
 
@@ -602,13 +632,17 @@ void P_ArchiveSpecials(void) {
       // so check the active plats list, and save this
       // plat (jff: or ceiling) even if it is in stasis.
 
-      for (pl = activeplats; pl; pl = pl->next)
-        if (pl->plat == (plat_t *)th)  // killough 2/14/98
+      for (pl = activeplats; pl; pl = pl->next) {
+        if (pl->plat == (plat_t *)th) {  // killough 2/14/98
           goto plat;
+        }
+      }
 
-      for (cl = activeceilings; cl; cl = cl->next)
-        if (cl->ceiling == (ceiling_t *)th)  // jff 2/22/98
+      for (cl = activeceilings; cl; cl = cl->next) {
+        if (cl->ceiling == (ceiling_t *)th) {  // jff 2/22/98
           goto ceiling;
+        }
+      }
 
       continue;
     }
@@ -756,7 +790,7 @@ void P_UnArchiveSpecials(void) {
   byte tclass;
 
   // read in saved thinkers
-  while ((tclass = *save_p++) != tc_endspecials)  // killough 2/14/98
+  while ((tclass = *save_p++) != tc_endspecials) {  // killough 2/14/98
     switch (tclass) {
       case tc_ceiling:
         PADSAVEP();
@@ -767,8 +801,9 @@ void P_UnArchiveSpecials(void) {
           ceiling->sector = &sectors[(size_t)ceiling->sector];
           ceiling->sector->ceilingdata = ceiling;  // jff 2/22/98
 
-          if (ceiling->thinker.function)
+          if (ceiling->thinker.function) {
             ceiling->thinker.function = T_MoveCeiling;
+          }
 
           P_AddThinker(&ceiling->thinker);
           P_AddActiveCeiling(ceiling);
@@ -815,7 +850,9 @@ void P_UnArchiveSpecials(void) {
           plat->sector = &sectors[(size_t)plat->sector];
           plat->sector->floordata = plat;  // jff 2/22/98
 
-          if (plat->thinker.function) plat->thinker.function = T_PlatRaise;
+          if (plat->thinker.function) {
+            plat->thinker.function = T_PlatRaise;
+          }
 
           P_AddThinker(&plat->thinker);
           P_AddActivePlat(plat);
@@ -921,6 +958,7 @@ void P_UnArchiveSpecials(void) {
       default:
         I_Error("P_UnarchiveSpecials: Unknown tclass %i in savegame", tclass);
     }
+  }
 }
 
 // killough 2/16/98: save/restore random number generator state information
@@ -976,18 +1014,21 @@ void P_UnArchiveMap(void) {
   memcpy(&unused, save_p, sizeof unused);
   save_p += sizeof unused;
 
-  if (automapmode & am_active) AM_Start();
+  if (automapmode & am_active) {
+    AM_Start();
+  }
 
   memcpy(&markpointnum, save_p, sizeof markpointnum);
   save_p += sizeof markpointnum;
 
   if (markpointnum) {
     int i;
-    while (markpointnum >= markpointnum_max)
+    while (markpointnum >= markpointnum_max) {
       markpoints = realloc(
           markpoints, sizeof *markpoints *
                           (markpointnum_max =
                                markpointnum_max ? markpointnum_max * 2 : 16));
+    }
 
     for (i = 0; i < markpointnum; i++) {
       memcpy(&markpoints[i].x, save_p, sizeof(markpoints[i].x));

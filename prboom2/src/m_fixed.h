@@ -111,8 +111,9 @@ inline static CONSTFUNC fixed_t FixedMod(fixed_t a, fixed_t b) {
   if (b & (b - 1)) {
     fixed_t r = a % b;
     return ((r < 0) ? r + b : r);
-  } else
+  } else {
     return (a & (b - 1));
+  }
 }
 
 static CONSTFUNC fixed_t Scale(fixed_t a, fixed_t b, fixed_t c) {

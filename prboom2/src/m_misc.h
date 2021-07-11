@@ -36,6 +36,7 @@
 #define __M_MISC__
 
 #include <stddef.h>
+
 #include "doomtype.h"
 //
 // MISC

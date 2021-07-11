@@ -177,7 +177,9 @@ static int addsfx(int sfxid, int channel, const unsigned char *data,
     ci->enddata =
         data + 44 +
         (data[40] | (data[41] << 8) | (data[42] << 16) | (data[43] << 24));
-    if (ci->enddata > data + len - 2) ci->enddata = data + len - 2;
+    if (ci->enddata > data + len - 2) {
+      ci->enddata = data + len - 2;
+    }
   } else {
     ci->samplerate = (data[3] << 8) + data[2];
     ci->bits = 8;
@@ -226,21 +228,24 @@ static void updateSoundParams(int handle, int volume, int seperation,
     I_Error("I_UpdateSoundParams: handle out of range");
 #endif
 
-  if (snd_pcspeaker) return;
+  if (snd_pcspeaker) {
+    return;
+  }
 
   // Set stepping
   // MWM 2000-12-24: Calculates proportion of channel samplerate
   // to global samplerate for mixing purposes.
   // Patched to shift left *then* divide, to minimize roundoff errors
   // as well as to use SAMPLERATE as defined above, not to assume 11025 Hz
-  if (pitched_sounds)
+  if (pitched_sounds) {
     channelinfo[slot].step =
         (unsigned int)(((uint64_t)channelinfo[slot].samplerate *
                         steptable[pitch]) /
                        snd_samplerate);
-  else
+  } else {
     channelinfo[slot].step =
         ((channelinfo[slot].samplerate << 16) / snd_samplerate);
+  }
 
   // Separation, that is, orientation/stereo.
   //  range is: 1 - 256
@@ -254,9 +259,13 @@ static void updateSoundParams(int handle, int volume, int seperation,
   rightvol = volume - ((volume * seperation * seperation) >> 16);
 
   // Sanity check, clamp volume.
-  if (rightvol < 0 || rightvol > 127) I_Error("rightvol out of bounds");
+  if (rightvol < 0 || rightvol > 127) {
+    I_Error("rightvol out of bounds");
+  }
 
-  if (leftvol < 0 || leftvol > 127) I_Error("leftvol out of bounds");
+  if (leftvol < 0 || leftvol > 127) {
+    I_Error("leftvol out of bounds");
+  }
 
   // Get the proper lookup table piece
   //  for this volume level???
@@ -295,8 +304,9 @@ void I_SetChannels(void) {
 
   // This table provides step widths for pitch parameters.
   // I fail to see that this is currently used.
-  for (i = -128; i < 128; i++)
+  for (i = -128; i < 128; i++) {
     steptablemid[i] = (int)(pow(1.2, (double)i / 64.0) * 65536.0);
+  }
 
   // Generates volume lookup tables
   //  which also turn the unsigned samples
@@ -350,15 +360,18 @@ int I_StartSound(int id, int channel, int vol, int sep, int pitch,
   int lump;
   size_t len;
 
-  if ((channel < 0) || (channel >= MAX_CHANNELS))
+  if ((channel < 0) || (channel >= MAX_CHANNELS)) {
 #ifdef RANGECHECK
     I_Error("I_StartSound: handle out of range");
+
 #else
     return -1;
 #endif
+  }
 
-  if (snd_pcspeaker)
+  if (snd_pcspeaker) {
     return I_PCS_StartSound(id, channel, vol, sep, pitch, priority);
+  }
 
   lump = S_sfx[id].lumpnum;
 
@@ -370,7 +383,9 @@ int I_StartSound(int id, int channel, int vol, int sep, int pitch,
   // Example wad: dakills (http://www.doomworld.com/idgames/index.php?id=2803)
   // The entries DSBSPWLK, DSBSPACT, DSSWTCHN and DSSWTCHX are all zero-length
   // sounds
-  if (len <= 8) return -1;
+  if (len <= 8) {
+    return -1;
+  }
 
   /* Find padded length */
   len -= 8;
@@ -412,7 +427,9 @@ dboolean I_SoundIsPlaying(int handle) {
     I_Error("I_SoundIsPlaying: handle out of range");
 #endif
 
-  if (snd_pcspeaker) return I_PCS_SoundIsPlaying(handle);
+  if (snd_pcspeaker) {
+    return I_PCS_SoundIsPlaying(handle);
+  }
 
   return channelinfo[handle].data != NULL;
 }
@@ -421,9 +438,13 @@ dboolean I_AnySoundStillPlaying(void) {
   dboolean result = false;
   int i;
 
-  if (snd_pcspeaker) return false;
+  if (snd_pcspeaker) {
+    return false;
+  }
 
-  for (i = 0; i < MAX_CHANNELS; i++) result |= channelinfo[i].data != NULL;
+  for (i = 0; i < MAX_CHANNELS; i++) {
+    result |= channelinfo[i].data != NULL;
+  }
 
   return result;
 }
@@ -464,13 +485,16 @@ static void I_UpdateSound(void *unused, Uint8 *stream, int len) {
   // Mixing channel index.
   int chan;
 
-  if (snd_midiplayer == NULL)  // This is but a temporary fix. Please do remove
-                               // after a more definitive one!
+  if (snd_midiplayer == NULL) {  // This is but a temporary fix. Please do
+                                 // remove after a more definitive one!
     memset(stream, 0, len);
+  }
 
   // NSM: when dumping sound, ignore the callback calls and only
   // service dumping calls
-  if (dumping_sound && unused != (void *)0xdeadbeef) return;
+  if (dumping_sound && unused != (void *)0xdeadbeef) {
+    return;
+  }
 
 #ifndef HAVE_OWN_MUSIC
   // do music update
@@ -556,16 +580,19 @@ static void I_UpdateSound(void *unused, Uint8 *stream, int len) {
         ci->stepremainder += ci->step;
 
         // MSB is next sample???
-        if (ci->bits == 16)
+        if (ci->bits == 16) {
           ci->data += (ci->stepremainder >> 16) * 2;
-        else
+        } else {
           ci->data += ci->stepremainder >> 16;
+        }
 
         // Limit to LSB???
         ci->stepremainder &= 0xffff;
 
         // Check whether we are done.
-        if (ci->data >= ci->enddata) stopchan(chan);
+        if (ci->data >= ci->enddata) {
+          stopchan(chan);
+        }
       }
     }
 
@@ -575,20 +602,22 @@ static void I_UpdateSound(void *unused, Uint8 *stream, int len) {
     // else if (dl < -128) *leftout = -128;
     // else *leftout = dl;
 
-    if (dl > SHRT_MAX)
+    if (dl > SHRT_MAX) {
       *leftout = SHRT_MAX;
-    else if (dl < SHRT_MIN)
+    } else if (dl < SHRT_MIN) {
       *leftout = SHRT_MIN;
-    else
+    } else {
       *leftout = (signed short)dl;
+    }
 
     // Same for right hardware channel.
-    if (dr > SHRT_MAX)
+    if (dr > SHRT_MAX) {
       *rightout = SHRT_MAX;
-    else if (dr < SHRT_MIN)
+    } else if (dr < SHRT_MIN) {
       *rightout = SHRT_MIN;
-    else
+    } else {
       *rightout = (signed short)dr;
+    }
 
     // Increment current pointers in stream
     leftout += step;
@@ -629,7 +658,9 @@ void I_InitSound(void) {
     nomusicparm = true;
     return;
   }
-  if (sound_inited) I_ShutdownSound();
+  if (sound_inited) {
+    I_ShutdownSound();
+  }
 
   // Secure and configure sound device first.
   lprintf(LO_INFO, "I_InitSound: ");
@@ -690,9 +721,13 @@ void I_InitSound(void) {
   sfxmutex = SDL_CreateMutex();
 
   // If we are using the PC speaker, we now need to initialise it.
-  if (snd_pcspeaker) I_PCS_InitSound();
+  if (snd_pcspeaker) {
+    I_PCS_InitSound();
+  }
 
-  if (!nomusicparm) I_InitMusic();
+  if (!nomusicparm) {
+    I_InitMusic();
+  }
 
   // Finished initialization.
   lprintf(LO_INFO, "I_InitSound: sound module ready\n");
@@ -711,7 +746,9 @@ unsigned char *I_GrabSound(int len) {
   static size_t buffer_size = 0;
   size_t size;
 
-  if (!dumping_sound) return NULL;
+  if (!dumping_sound) {
+    return NULL;
+  }
 
   size = len * 4;
   if (!buffer || size > buffer_size) {
@@ -747,8 +784,9 @@ void I_ResampleStream(
 
   if (nreq > sinsamp) {
     sin = (short *)realloc(sin, (nreq + 1) * 4);
-    if (!sinsamp)  // avoid pop when first starting stream
+    if (!sinsamp) {  // avoid pop when first starting stream
       sin[0] = sin[1] = 0;
+    }
     sinsamp = nreq;
   }
 
@@ -822,8 +860,9 @@ void I_ShutdownMusic(void) {
     for (i = 0; i < MUSIC_TMP_EXT; i++) {
       name = (char *)malloc(strlen(music_tmp) + strlen(music_tmp_ext[i]) + 1);
       sprintf(name, "%s%s", music_tmp, music_tmp_ext[i]);
-      if (!unlink(name))
+      if (!unlink(name)) {
         lprintf(LO_DEBUG, "I_ShutdownMusic: removed %s\n", name);
+      }
       free(name);
     }
     free(music_tmp);
@@ -849,8 +888,9 @@ void I_InitMusic(void) {
         free(music_tmp);
         music_tmp = NULL;
         return;
-      } else
+      } else {
         close(fd);
+      }
     }
 #else /* !_WIN32 */
     music_tmp = strdup("doom.tmp");
@@ -978,7 +1018,9 @@ int I_RegisterSong(const void *data, size_t len) {
   }
 #ifdef HAVE_MIXER
 
-  if (music_tmp == NULL) return 0;
+  if (music_tmp == NULL) {
+    return 0;
+  }
 
   // e6y: new logic by me
   // Now you can hear title music in deca.wad
@@ -1012,7 +1054,9 @@ int I_RegisterSong(const void *data, size_t len) {
       }
 
       free(name);
-      if (music[0]) break;  // successfully loaded
+      if (music[0]) {
+        break;  // successfully loaded
+      }
     }
   }
 
@@ -1030,8 +1074,8 @@ int I_RegisterSong(const void *data, size_t len) {
 
     // e6y: from chocolate-doom
     // New mus -> mid conversion code thanks to Ben Ryves
-    // <benryves@benryves.com> This plays back a lot of music closer to Vanilla
-    // Doom - eg. tnt.wad map02
+    // <benryves@benryves.com> This plays back a lot of music closer to
+    // Vanilla Doom - eg. tnt.wad map02
     result = mus2mid(instream, outstream);
 
     if (result != 0) {
@@ -1039,8 +1083,8 @@ int I_RegisterSong(const void *data, size_t len) {
       const unsigned char *musptr = (const unsigned char *)data;
 
       // haleyjd 04/04/10: scan forward for a MUS header. Evidently DMX was
-      // capable of doing this, and would skip over any intervening data. That,
-      // or DMX doesn't use the MUS header at all somehow.
+      // capable of doing this, and would skip over any intervening data.
+      // That, or DMX doesn't use the MUS header at all somehow.
       while (musptr < (const unsigned char *)data + len - sizeof(musheader)) {
         // if we found a likely header start, reset the mus pointer to that
         // location, otherwise just leave it alone and pray.
@@ -1105,8 +1149,12 @@ int I_RegisterMusic(const char *filename, musicinfo_t *song) {
   }
 
 #ifdef HAVE_MIXER
-  if (!filename) return 1;
-  if (!song) return 1;
+  if (!filename) {
+    return 1;
+  }
+  if (!song) {
+    return 1;
+  }
   music[0] = Mix_LoadMUS(filename);
   if (music[0] == NULL) {
     lprintf(LO_WARN,
@@ -1219,7 +1267,9 @@ static void Exp_ShutdownMusic(void) {
   S_StopMusic();
 
   for (i = 0; music_players[i]; i++) {
-    if (music_player_was_init[i]) music_players[i]->shutdown();
+    if (music_player_was_init[i]) {
+      music_players[i]->shutdown();
+    }
   }
 
   if (musmutex) {
@@ -1233,8 +1283,9 @@ static void Exp_InitMusic(void) {
   musmutex = SDL_CreateMutex();
 
   // todo not so greedy
-  for (i = 0; music_players[i]; i++)
+  for (i = 0; music_players[i]; i++) {
     music_player_was_init[i] = music_players[i]->init(snd_samplerate);
+  }
   I_AtExit(Exp_ShutdownMusic, true);
 }
 
@@ -1250,7 +1301,9 @@ static void Exp_PlaySong(int handle, int looping) {
 extern int mus_pause_opt;  // From m_misc.c
 
 static void Exp_PauseSong(int handle) {
-  if (!music_handle) return;
+  if (!music_handle) {
+    return;
+  }
 
   SDL_LockMutex(musmutex);
   switch (mus_pause_opt) {
@@ -1267,7 +1320,9 @@ static void Exp_PauseSong(int handle) {
 }
 
 static void Exp_ResumeSong(int handle) {
-  if (!music_handle) return;
+  if (!music_handle) {
+    return;
+  }
 
   SDL_LockMutex(musmutex);
   switch (mus_pause_opt) {
@@ -1326,7 +1381,9 @@ static int Exp_RegisterSongEx(const void *data, size_t len, int try_mus2mid) {
 
   // try_mus2mid = 0; // debug: supress mus2mid conversion completely
 
-  if (music_handle) Exp_UnRegisterSong(0);
+  if (music_handle) {
+    Exp_UnRegisterSong(0);
+  }
 
   // e6y: new logic by me
   // Now you can hear title music in deca.wad
@@ -1356,18 +1413,20 @@ static int Exp_RegisterSongEx(const void *data, size_t len, int try_mus2mid) {
                       music_players[i]->name());
               return 1;
             }
-          } else
+          } else {
             lprintf(LO_INFO,
                     "Exp_RegisterSongEx: Music player %s on preferred list but "
                     "it failed to init\n",
                     music_players[i]->name());
+          }
         }
       }
-      if (!found)
+      if (!found) {
         lprintf(LO_INFO,
                 "Exp_RegisterSongEx: Couldn't find preferred music player %s "
                 "in list\n  (typo or support not included at compile time)\n",
                 music_player_order[j]);
+      }
     }
     // load failed
   }
@@ -1379,16 +1438,16 @@ static int Exp_RegisterSongEx(const void *data, size_t len, int try_mus2mid) {
 
     // e6y: from chocolate-doom
     // New mus -> mid conversion code thanks to Ben Ryves
-    // <benryves@benryves.com> This plays back a lot of music closer to Vanilla
-    // Doom - eg. tnt.wad map02
+    // <benryves@benryves.com> This plays back a lot of music closer to
+    // Vanilla Doom - eg. tnt.wad map02
     result = mus2mid(instream, outstream);
     if (result != 0) {
       size_t muslen = len;
       const unsigned char *musptr = (const unsigned char *)data;
 
       // haleyjd 04/04/10: scan forward for a MUS header. Evidently DMX was
-      // capable of doing this, and would skip over any intervening data. That,
-      // or DMX doesn't use the MUS header at all somehow.
+      // capable of doing this, and would skip over any intervening data.
+      // That, or DMX doesn't use the MUS header at all somehow.
       while (musptr < (const unsigned char *)data + len - sizeof(musheader)) {
         // if we found a likely header start, reset the mus pointer to that
         // location, otherwise just leave it alone and pray.
@@ -1408,7 +1467,9 @@ static int Exp_RegisterSongEx(const void *data, size_t len, int try_mus2mid) {
 
       // recopy so we can free the MEMFILE
       song_data = malloc(outbuf_len);
-      if (song_data) memcpy(song_data, outbuf, outbuf_len);
+      if (song_data) {
+        memcpy(song_data, outbuf, outbuf_len);
+      }
 
       mem_fclose(instream);
       mem_fclose(outstream);
@@ -1445,10 +1506,10 @@ static int Exp_RegisterMusic(const char *filename, musicinfo_t *song) {
   if (!Exp_RegisterSongEx(song_data, len, 1)) {
     free(song_data);
     song_data = NULL;
-    lprintf(
-        LO_WARN,
-        "Couldn't load music from %s\nAttempting to load default MIDI music.\n",
-        filename);
+    lprintf(LO_WARN,
+            "Couldn't load music from %s\nAttempting to load default MIDI "
+            "music.\n",
+            filename);
     return 1;  // failure
   }
 

@@ -143,11 +143,15 @@ void gld_ProgressUpdate(const char *text, int progress, int total) {
   static char last_text[32] = {0};
   unsigned int tic;
 
-  if (!progress_texid) return;
+  if (!progress_texid) {
+    return;
+  }
 
   // do not do it often
   tic = SDL_GetTicks();
-  if (tic - lastupdate < 100) return;
+  if (tic - lastupdate < 100) {
+    return;
+  }
   lastupdate = tic;
 
   if ((text) && (strlen(text) > 0) &&
@@ -155,11 +159,15 @@ void gld_ProgressUpdate(const char *text, int progress, int total) {
     const char *s;
     strcpy(last_text, text);
 
-    if (!w_precache.f) HU_Start();
+    if (!w_precache.f) {
+      HU_Start();
+    }
 
     HUlib_clearTextLine(&w_precache);
     s = text;
-    while (*s) HUlib_addCharToTextLine(&w_precache, *(s++));
+    while (*s) {
+      HUlib_addCharToTextLine(&w_precache, *(s++));
+    }
     HUlib_setTextXCenter(&w_precache);
   }
 
@@ -307,7 +315,7 @@ typedef struct _DDRAW_H_DDSURFACEDESC2 {
   void *lpSurface;                // pointer to the associated surface memory
   union {
     DDRAW_H_DDCOLORKEY
-        ddckCKDestOverlay;           // color key for destination overlay use
+    ddckCKDestOverlay;               // color key for destination overlay use
     unsigned long dwEmptyFaceColor;  // Physical color for empty cubemap faces
   } u3;
   DDRAW_H_DDCOLORKEY ddckCKDestBlt;     // color key for destination blt use
@@ -315,7 +323,7 @@ typedef struct _DDRAW_H_DDSURFACEDESC2 {
   DDRAW_H_DDCOLORKEY ddckCKSrcBlt;      // color key for source blt use
   union {
     DDRAW_H_DDPIXELFORMAT
-        ddpfPixelFormat;  // pixel format description of the surface
+    ddpfPixelFormat;      // pixel format description of the surface
     unsigned long dwFVF;  // vertex format description of vertex buffers
   } u4;
   DDRAW_H_DDSCAPS2 ddsCaps;      // direct draw surface capabilities
@@ -401,7 +409,9 @@ GLGenericImage *ReadDDSFile(const char *filename, int *bufsize,
     /* return data */
     return genericImage;
   } else {
-    if (genericImage) free(genericImage);
+    if (genericImage) {
+      free(genericImage);
+    }
 
     return NULL;
   }
@@ -423,7 +433,9 @@ static const char *gld_HiRes_GetInternalName(GLTexture *gltexture) {
       break;
   }
 
-  if (!texname_p) return NULL;
+  if (!texname_p) {
+    return NULL;
+  }
 
   strncpy(texname, texname_p, 8);
   texname[8] = 0;
@@ -621,7 +633,9 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
   img_path[0] = '\0';
   dds_path[0] = '\0';
 
-  if (!supported) return false;
+  if (!supported) {
+    return false;
+  }
 
   i = 0;
   while (hires_paths[i].gamemission != none) {
@@ -632,7 +646,9 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
     }
     i++;
   }
-  if (!checklist) return false;
+  if (!checklist) {
+    return false;
+  }
 
   switch (useType) {
     case GLDT_TEXTURE: {
@@ -641,8 +657,9 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
 
       if (!gl_hires_override_pwads) {
         for (i = 0; i < texture->patchcount; i++) {
-          if (lumpinfo[texture->patches[i].patch].source != source_iwad)
+          if (lumpinfo[texture->patches[i].patch].source != source_iwad) {
             return false;
+          }
         }
       }
       texname_p = texture->name;
@@ -650,13 +667,17 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
     case GLDT_FLAT:
     case GLDT_PATCH: {
       if (!gl_hires_override_pwads) {
-        if (lumpinfo[gltexture->index].source != source_iwad) return false;
+        if (lumpinfo[gltexture->index].source != source_iwad) {
+          return false;
+        }
       }
       texname_p = lumpinfo[gltexture->index].name;
     } break;
   }
 
-  if (!texname_p) return false;
+  if (!texname_p) {
+    return false;
+  }
 
   strncpy(texname, texname_p, 8);
   texname[8] = 0;
@@ -672,21 +693,26 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
     // guarantee null delimiter
     hiresdir[PATH_MAX - 1] = 0;
 
-    if (!HasTrailingSlash(hiresdir)) strcat(hiresdir, "/");
+    if (!HasTrailingSlash(hiresdir)) {
+      strcat(hiresdir, "/");
+    }
   }
 
   do {
     char checkName[PATH_MAX + 1];
 
-    if (checklist->exists == 0) continue;
+    if (checklist->exists == 0) {
+      continue;
+    }
 
     if (checklist->exists == -1) {
       doom_snprintf(checkName, sizeof(checkName), checklist->path, hiresdir, "",
                     "");
-      if (!access(checkName, F_OK))
+      if (!access(checkName, F_OK)) {
         checklist->exists = 1;
-      else
+      } else {
         checklist->exists = 0;
+      }
     }
 
     if (checklist->exists == 1)  // dir exists
@@ -715,7 +741,9 @@ static int gld_HiRes_GetExternalName(GLTexture *gltexture, char *img_path,
     }
   } while ((++checklist)->path);
 
-  if (dds_path[0]) return true;
+  if (dds_path[0]) {
+    return true;
+  }
 
   return false;
 }
@@ -733,10 +761,12 @@ static void gld_HiRes_Bind(GLTexture *gltexture, GLuint *glTexID) {
       break;
   }
 
-  if ((gltexture->textype == GLDT_TEXTURE) || (gltexture->textype == GLDT_FLAT))
+  if ((gltexture->textype == GLDT_TEXTURE) ||
+      (gltexture->textype == GLDT_FLAT)) {
     gltexture->flags |= GLTEXTURE_MIPMAP;
-  else
+  } else {
     gltexture->flags &= ~GLTEXTURE_MIPMAP;
+  }
 
   gltexture->flags |= GLTEXTURE_HIRES;
 
@@ -745,7 +775,9 @@ static void gld_HiRes_Bind(GLTexture *gltexture, GLuint *glTexID) {
     gltexture->scaleyfac = 1.0f;
   }
 
-  if (*glTexID == 0) glGenTextures(1, glTexID);
+  if (*glTexID == 0) {
+    glGenTextures(1, glTexID);
+  }
 
   glBindTexture(GL_TEXTURE_2D, *glTexID);
 }
@@ -755,7 +787,9 @@ void gld_HiRes_ProcessColormap(unsigned char *buffer, int bufSize) {
   const lighttable_t *colormap;
   const unsigned char *playpal;
 
-  if (!RGB2PAL) return;
+  if (!RGB2PAL) {
+    return;
+  }
 
   playpal = V_GetPlaypal();
   colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
@@ -764,12 +798,13 @@ void gld_HiRes_ProcessColormap(unsigned char *buffer, int bufSize) {
 #if 1
     byte color;
 
-    if (gl_hires_24bit_colormap)
+    if (gl_hires_24bit_colormap) {
       color = RGB2PAL[(buffer[pos + 0] << 16) + (buffer[pos + 1] << 8) +
                       buffer[pos + 2]];
-    else
+    } else {
       color = RGB2PAL[((buffer[pos + 0] >> 3) << 10) +
                       ((buffer[pos + 1] >> 3) << 5) + (buffer[pos + 2] >> 3)];
+    }
 
     buffer[pos + 0] = playpal[colormap[color] * 3 + 0];
     buffer[pos + 1] = playpal[colormap[color] * 3 + 1];
@@ -858,10 +893,13 @@ int gld_HiRes_BuildTables(void) {
   int lump, size;
 
   if ((!gl_boom_colormaps) ||
-      !(gl_texture_internal_hires || gl_texture_external_hires))
+      !(gl_texture_internal_hires || gl_texture_external_hires)) {
     return false;
+  }
 
-  if (RGB2PAL) return true;
+  if (RGB2PAL) {
+    return true;
+  }
 
   if (gl_hires_24bit_colormap) {
     lump = W_CheckNumForName(RGB2PAL_NAME);
@@ -889,7 +927,9 @@ int gld_HiRes_BuildTables(void) {
       }
       free(RGB2PAL_fname);
 
-      if (size == RGB2PAL_size) return true;
+      if (size == RGB2PAL_size) {
+        return true;
+      }
     }
   }
 
@@ -1014,10 +1054,11 @@ static int gld_HiRes_LoadDDSTexture(GLTexture *gltexture, GLuint *texid,
 
         gld_HiRes_Bind(gltexture, texid);
 
-        if (numMipmaps > 1)
+        if (numMipmaps > 1) {
           gltexture->flags |= GLTEXTURE_MIPMAP;
-        else
+        } else {
           gltexture->flags &= ~GLTEXTURE_MIPMAP;
+        }
 
         offset = 0;
         blockSize =
@@ -1027,8 +1068,12 @@ static int gld_HiRes_LoadDDSTexture(GLTexture *gltexture, GLuint *texid,
         for (i = 0; i < (numMipmaps ? numMipmaps : 1) &&
                     (ddsimage->width || ddsimage->height);
              i++) {
-          if (ddsimage->width == 0) ddsimage->width = 1;
-          if (ddsimage->height == 0) ddsimage->height = 1;
+          if (ddsimage->width == 0) {
+            ddsimage->width = 1;
+          }
+          if (ddsimage->height == 0) {
+            ddsimage->height = 1;
+          }
 
           size = ((ddsimage->width + 3) / 4) * ((ddsimage->height + 3) / 4) *
                  blockSize;
@@ -1155,10 +1200,11 @@ static int gld_HiRes_LoadFromFile(GLTexture *gltexture, GLuint *texid,
 
     if (surf) {
       if (SDL_LockSurface(surf) >= 0) {
-        if (SmoothEdges(surf->pixels, surf->pitch / 4, surf->h))
+        if (SmoothEdges(surf->pixels, surf->pitch / 4, surf->h)) {
           gltexture->flags |= GLTEXTURE_HASHOLES;
-        else
+        } else {
           gltexture->flags &= ~GLTEXTURE_HASHOLES;
+        }
         SDL_UnlockSurface(surf);
       }
       gld_HiRes_Bind(gltexture, texid);
@@ -1210,10 +1256,11 @@ int gld_LoadHiresTex(GLTexture *gltexture, int cm) {
 
               if (surf) {
                 if (SDL_LockSurface(surf) >= 0) {
-                  if (SmoothEdges(surf->pixels, surf->pitch / 4, surf->h))
+                  if (SmoothEdges(surf->pixels, surf->pitch / 4, surf->h)) {
                     gltexture->flags |= GLTEXTURE_HASHOLES;
-                  else
+                  } else {
                     gltexture->flags &= ~GLTEXTURE_HASHOLES;
+                  }
                   SDL_UnlockSurface(surf);
                 }
                 gld_HiRes_Bind(gltexture, texid);
@@ -1318,13 +1365,17 @@ int gld_PrecacheGUIPatches(void) {
   const char **patch_p;
   int count, total;
 
-  if (!gl_texture_external_hires) return 0;
+  if (!gl_texture_external_hires) {
+    return 0;
+  }
 
   gld_ProgressStart();
 
   count = 0;
   total = 0;
-  for (patch_p = staticpatches; *patch_p; patch_p++) total++;
+  for (patch_p = staticpatches; *patch_p; patch_p++) {
+    total++;
+  }
 
   for (patch_p = staticpatches; *patch_p; patch_p++) {
     int lump = W_CheckNumForName(*patch_p);
