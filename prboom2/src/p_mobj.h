@@ -50,6 +50,10 @@
 // Needs precompiled tables/data structures.
 #include "info.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // NOTES: mobj_t
 //
@@ -426,4 +430,8 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index);
 void P_SpawnPlayer(int n, const mapthing_t* mthing);
 void P_CheckMissileSpawn(mobj_t*);  // killough 8/2/98
 void P_ExplodeMissile(mobj_t*);     // killough
+
+#ifdef __cplusplus
+}
+#endif
 #endif

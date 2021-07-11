@@ -79,7 +79,32 @@ int lprintf(OutputLevels pri, const char *s, ...) {
     // do not crash with unicode dirs
     if (fileno(stdout) != -1)
 #endif
-      r = fprintf(stdout, "%s", msg);
+      switch (lvl) {
+        case LO_INFO:
+          r = printf("[\x1b[1;35mINF\x1b[0m] ");
+          break;
+        case LO_DEBUG:
+          r = printf("[\x1b[1;31mDBG\x1b[0m] ");
+          break;
+        case LO_ERROR:
+          r = printf("[\x1b[1;31mERR\x1b[0m] ");
+          break;
+        case LO_FATAL:
+          r = printf("\x1b[1;31mFTL\x1b[0m] ");
+          break;
+        case LO_WARN:
+          r = printf("[\x1b[1;32mWRN\x1b[0m] ");
+          break;
+        case LO_ALWAYS:
+          r = printf("[\x1b[0;35mLOG\x1b[0m] ");
+          break;
+        case LO_CONFIRM:
+          r = printf("[\x1b[0;35mCNF\x1b[0m] ");
+          break;
+        default:
+          break;
+      }
+    r = r || fprintf(stdout, "%s", msg);
   }
   if (!isatty(1) && lvl & cons_error_mask) /* if stdout redirected     */
     r = fprintf(stderr, "%s", msg);        /* select output at console */

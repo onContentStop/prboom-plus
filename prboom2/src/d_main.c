@@ -96,6 +96,7 @@
 #endif
 
 // NSM
+#include "data_manager.h"
 #include "i_capture.h"
 #include "i_glob.h"
 
@@ -1869,6 +1870,9 @@ static void D_DoomMainSetup(void) {
   I_AtExit(weaponstats_cleanup, true);
   weaponstats_load();
   I_AtExit(weaponstats_save, true);
+
+  data_InitDataDir();
+  data_InitSaveDir();
 
   if (!parse_sndinfo()) {
     printf("[\x1b[1;32mSND\x1b[0m] Applied SNDINFO patch\n");

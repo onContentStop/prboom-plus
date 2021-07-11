@@ -34,6 +34,10 @@
 #ifndef __I_SYSTEM__
 #define __I_SYSTEM__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -105,5 +109,9 @@ int I_Filelength(int handle);
 
 typedef void (*atexit_func_t)(void);
 void I_AtExit(atexit_func_t func, dboolean run_if_error);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

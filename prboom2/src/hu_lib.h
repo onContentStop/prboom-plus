@@ -35,6 +35,11 @@
 
 // We are referring to patches.
 #include "r_defs.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "v_video.h"  //jff 2/16/52 include color range defs
 
 /* background and foreground screen numbers
@@ -219,5 +224,9 @@ void HUlib_eraseIText(hu_itext_t* it);
 
 // e6y
 void HUlib_setTextXCenter(hu_textline_t* t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

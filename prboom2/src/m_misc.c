@@ -84,6 +84,7 @@
 #endif
 
 // NSM
+#include "data_manager.h"
 #include "i_capture.h"
 
 #ifdef _WIN32
@@ -308,6 +309,7 @@ default_t defaults[] = {
      MAX_COMPATIBILITY_LEVEL - 1,
      def_int,
      ss_none},  // compatibility level" - CPhipps
+    {"organized_saves", {&organized_saves}, {1}, 0, 1, def_bool, ss_plusplus},
     {"realtic_clock_rate",
      {&realtic_clock_rate},
      {100},

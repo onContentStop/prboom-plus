@@ -34,6 +34,10 @@
 #ifndef __LPRINTF__
 #define __LPRINTF__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -64,4 +68,9 @@ void I_Error(const char *error, ...) __attribute__((format(printf, 1, 2)));
 int doom_vsnprintf(char *buf, size_t max, const char *fmt, va_list va);
 int doom_snprintf(char *buf, size_t max, const char *fmt, ...)
     __attribute__((format(printf, 3, 4)));
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

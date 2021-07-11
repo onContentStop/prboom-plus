@@ -42,6 +42,10 @@
 #ifndef __D_DEH__
 #define __D_DEH__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int deh_apply_cheats;
 
 void ProcessDehFile(const char *filename, const char *outfilename, int lumpnum);
@@ -85,7 +89,7 @@ extern const char *s_SAVEDEAD;  // = SAVEDEAD;
 //#define QSPROMPT      "quicksave over your game named\n\n'%s'?\n\n"PRESSYN
 extern const char *s_QSPROMPT;  // = QSPROMPT;
 //#define QLPROMPT      "do you want to quickload the game
-//named\n\n'%s'?\n\n"PRESSYN
+// named\n\n'%s'?\n\n"PRESSYN
 extern const char *s_QLPROMPT;  // = QLPROMPT;
 
 /*
@@ -1106,5 +1110,9 @@ extern const char *savegamename;
 void D_BuildBEXTables(void);
 void deh_changeCompTranslucency(void);
 void deh_applyCompatibility(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

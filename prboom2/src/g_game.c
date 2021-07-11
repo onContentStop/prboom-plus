@@ -1223,6 +1223,7 @@ static void G_PlayerFinishLevel(int player) {
 //
 // G_SetPlayerColour
 
+#include "data_manager.h"
 #include "r_draw.h"
 
 void G_ChangedPlayerColour(int pn, int cl) {
@@ -1979,7 +1980,6 @@ void RecalculateDrawnSubsectors(void) {
 void G_DoLoadGame(void) {
   int length, i;
   // CPhipps - do savegame filename stuff here
-  char *name;  // killough 3/22/98
   int savegame_compatibility = -1;
   // e6y: numeric version number of package should be zero before initializing
   // from savegame
@@ -1987,16 +1987,14 @@ void G_DoLoadGame(void) {
   char maplump[8];
   int time, ttime;
 
-  length = G_SaveGameName(NULL, 0, savegameslot, demoplayback);
-  name = malloc(length + 1);
-  G_SaveGameName(name, length + 1, savegameslot, demoplayback);
+  char *name = data_SaveGameName(savegameslot, demoplayback);
 
   gameaction = ga_nothing;
 
   length = M_ReadFile(name, &savebuffer);
   if (length <= 0)
     I_Error("Couldn't read file %s: %s", name, "(Unknown Error)");
-  free(name);
+  (free)(name);
   save_p = savebuffer + SAVESTRINGSIZE;
 
   // CPhipps - read the description field, compare with supported ones
@@ -2229,10 +2227,7 @@ static void G_DoSaveGame(dboolean menu) {
   gameaction = ga_nothing;  // cph - cancel savegame at top of this function,
                             // in case later problems cause a premature exit
 
-  length = G_SaveGameName(NULL, 0, savegameslot, demoplayback && !menu);
-  name = malloc(length + 1);
-  G_SaveGameName(name, length + 1, savegameslot, demoplayback && !menu);
-
+  name = data_SaveGameName(savegameslot, demoplayback && !menu);
   description = savedescription;
 
   save_p = savebuffer = malloc(savegamesize);
@@ -2363,7 +2358,7 @@ static void G_DoSaveGame(dboolean menu) {
   savebuffer = save_p = NULL;
 
   savedescription[0] = 0;
-  free(name);
+  (free)(name);
 }
 
 static skill_t d_skill;
@@ -2536,6 +2531,8 @@ void G_ReloadDefaults(void) {
   // and savegames without messing up defaults).
 
   infammo = false;
+
+  organized_saves = true;
 
   weapon_recoil = default_weapon_recoil;  // weapon recoil
 

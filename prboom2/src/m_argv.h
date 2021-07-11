@@ -34,6 +34,10 @@
 #ifndef __M_ARGV__
 #define __M_ARGV__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * MISC
  */
@@ -54,5 +58,9 @@ void M_AddParam(const char *param);
 /* Parses the command line and sets up the argv[] array */
 void M_ParseCmdLine(char *cmdstart, char **argv, char *args, int *numargs,
                     int *numchars);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

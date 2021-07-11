@@ -324,6 +324,7 @@ typedef enum {
   ss_chat,
   ss_gen,  /* killough 10/98 */
   ss_comp, /* killough 10/98 */
+  ss_plusplus,
   ss_max
 } ss_types;
 

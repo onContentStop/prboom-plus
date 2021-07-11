@@ -34,6 +34,13 @@
 #ifndef __R_DEFS__
 #define __R_DEFS__
 
+// SECTORS do store MObjs anyway.
+#include "p_mobj.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Screenwidth.
 #include "doomdef.h"
 
@@ -44,9 +51,6 @@
 // We rely on the thinker data struct
 // to handle sound origins in sectors.
 #include "d_think.h"
-
-// SECTORS do store MObjs anyway.
-#include "p_mobj.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -451,5 +455,9 @@ typedef struct visplane {
   unsigned short pad1;  // leave pads for [minx-1]/[maxx+1]
   unsigned short top[3];
 } visplane_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

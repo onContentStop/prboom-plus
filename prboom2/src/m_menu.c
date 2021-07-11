@@ -45,6 +45,7 @@
 #include "am_map.h"
 #include "d_deh.h"
 #include "d_main.h"
+#include "data_manager.h"
 #include "doomdef.h"
 #include "doomstat.h"
 #include "dstrings.h"
@@ -290,6 +291,7 @@ void M_Automap(int);
 void M_Enemy(int);
 void M_Messages(int);
 void M_ChatStrings(int);
+void M_PlusPlus(int);
 void M_InitExtendedHelp(void);
 void M_ExtHelpNextScreen(int);
 void M_ExtHelp(int);
@@ -305,6 +307,7 @@ void M_DrawAutoMap(void);
 void M_DrawEnemy(void);
 void M_DrawMessages(void);
 void M_DrawChatStrings(void);
+void M_DrawPlusPlus(void);
 void M_Compat(int);  // killough 10/98
 void M_ChangeDemoSmoothTurns(void);
 void M_ChangeTextureParams(void);
@@ -693,14 +696,12 @@ static dboolean delete_verify = false;
 static void M_DrawDelVerify(void);
 
 static void M_DeleteGame(int i) {
-  char *name;
+  const char *name;
   int len;
 
-  len = G_SaveGameName(NULL, 0, i, false);
-  name = malloc(len + 1);
-  G_SaveGameName(name, len + 1, i, false);
+  name = data_SaveGameName(i, false);
   remove(name);
-  free(name);
+  (free)(name);
 
   M_ReadSaveStrings();
 }
@@ -826,11 +827,9 @@ void M_ReadSaveStrings(void) {
 
     /* killough 3/22/98
      * cph - add not-demoplayback parameter */
-    len = G_SaveGameName(NULL, 0, i, false);
-    name = malloc(len + 1);
-    G_SaveGameName(name, len + 1, i, false);
+    name = data_SaveGameName(i, false);
     fp = fopen(name, "rb");
-    free(name);
+    (free)(name);
     if (!fp) {  // Ty 03/27/98 - externalized:
       strcpy(&savegamestrings[i][0], s_EMPTYSTRING);
       LoadMenue[i].status = 0;
@@ -1427,10 +1426,11 @@ dboolean set_auto_active = false;    // in automap setup screen
 dboolean set_enemy_active = false;   // in enemies setup screen
 dboolean set_mess_active = false;    // in messages setup screen
 dboolean set_chat_active = false;    // in chat string setup screen
-dboolean setup_select = false;       // changing an item
-dboolean setup_gather = false;       // gathering keys for value
-dboolean colorbox_active = false;    // color palette being shown
-dboolean default_verify = false;     // verify reset defaults decision
+dboolean set_plpl_active = false;
+dboolean setup_select = false;     // changing an item
+dboolean setup_gather = false;     // gathering keys for value
+dboolean colorbox_active = false;  // color palette being shown
+dboolean default_verify = false;   // verify reset defaults decision
 dboolean set_general_active = false;
 dboolean set_compat_active = false;
 
@@ -1488,6 +1488,7 @@ enum {
   set_enemy,
   set_messages,
   set_chatstrings,
+  set_plusplus,
   set_setup_end
 } setup_e;
 
@@ -1510,6 +1511,7 @@ menuitem_t SetupMenu[] = {
     {1, "M_ENEM", M_Enemy, 'e', "ENEMIES"},
     {1, "M_MESS", M_Messages, 'm', "MESSAGES"},
     {1, "M_CHAT", M_ChatStrings, 'c', "CHAT STRINGS"},
+    {1, "M_PLPL", M_PlusPlus, ' ', "SETTINGS++"},
 };
 
 /////////////////////////////
@@ -1631,6 +1633,9 @@ menu_t CompatDef =  // killough 10/98
      34,
      5,  // skull drawn here
      0};
+
+menu_t PlusPlusDef = {
+    generic_setup_end, &SetupDef, Generic_Setup, M_DrawPlusPlus, 34, 5, 0};
 
 /////////////////////////////
 //
@@ -2724,6 +2729,22 @@ void M_DrawWeapons(void) {
 
   if (default_verify) M_DrawDefVerify();
 }
+
+#define PP_X 203
+#define PP_Y 31
+
+setup_menu_t plusplus_settings1[] = {
+    {"SAVES", S_SKIP | S_TITLE, m_null, PP_X, PP_Y},
+    {"ORGANIZE SAVES",
+     S_YESNO,
+     m_null,
+     PP_X,
+     PP_Y + 2 * 8,
+     {"organized_saves"}},
+    {0, S_SKIP | S_END, m_null},
+};
+
+setup_menu_t *plusplus_settings[] = {plusplus_settings1, NULL};
 
 /////////////////////////////
 //
@@ -5024,6 +5045,22 @@ void M_ChatStrings(int choice) {
   current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
 }
 
+void M_PlusPlus(int choice) {
+  M_SetupNextMenu(&PlusPlusDef);
+  setup_active = true;
+  setup_screen = ss_plusplus;
+  set_plpl_active = true;
+  setup_select = false;
+  default_verify = false;
+  setup_gather = false;
+  mult_screens_index = 0;
+  current_setup_menu = plusplus_settings[0];
+  set_menu_itemon = M_GetSetupMenuItemOn();
+  while (current_setup_menu[set_menu_itemon++].m_flags & S_SKIP) {
+  }
+  current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
+}
+
 // The drawing part of the Chat Strings Setup initialization. Draw the
 // background, title, instruction line, and items.
 
@@ -5040,6 +5077,15 @@ void M_DrawChatStrings(void) {
   // If the Reset Button has been selected, an "Are you sure?" message
   // is overlayed across everything else.
 
+  if (default_verify) M_DrawDefVerify();
+}
+
+void M_DrawPlusPlus(void) {
+  menuactive = mnact_full;
+  M_DrawBackground("FLOOR4_6", 0);
+  M_DrawTitle(83, 2, "M_PLPL", CR_DEFAULT, "SETTINGS++", CR_GOLD);
+  M_DrawInstructions();
+  M_DrawScreenItems(current_setup_menu);
   if (default_verify) M_DrawDefVerify();
 }
 
@@ -5068,10 +5114,10 @@ static void M_SelectDone(setup_menu_t *ptr) {
 // Array of setup screens used by M_ResetDefaults()
 
 static setup_menu_t **setup_screens[] = {
-    keys_settings, weap_settings, stat_settings, auto_settings,
-    enem_settings, mess_settings, chat_settings,
+    keys_settings, weap_settings,     stat_settings, auto_settings,
+    enem_settings, mess_settings,     chat_settings,
     gen_settings,  // killough 10/98
-    comp_settings,
+    comp_settings, plusplus_settings,
 };
 
 // phares 4/19/98:
@@ -6715,7 +6761,8 @@ dboolean M_Responder(event_t *ev) {
     // killough 10/98: consolidate handling into one place:
     if (setup_select && set_enemy_active | set_general_active |
                             set_chat_active | set_mess_active |
-                            set_status_active | set_compat_active) {
+                            set_status_active | set_compat_active |
+                            set_plpl_active) {
       if (ptr1->m_flags & S_STRING)  // creating/editing a string?
       {
         if (ch == key_menu_backspace)  // backspace and DEL
@@ -6878,6 +6925,7 @@ dboolean M_Responder(event_t *ev) {
       set_enemy_active = false;
       set_mess_active = false;
       set_chat_active = false;
+      set_plpl_active = false;
       colorbox_active = false;
       default_verify = false;      // phares 4/19/98
       set_general_active = false;  // killough 10/98

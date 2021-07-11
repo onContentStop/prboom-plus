@@ -34,10 +34,14 @@
 #ifndef __E6Y__
 #define __E6Y__
 
-#include <stdarg.h>
-
 #include "hu_lib.h"
 #include "r_demo.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdarg.h>
 
 #define HU_HUDADDX (HU_HUDX)
 #define HU_HUDADDY (HU_HUDY + (-1) * HU_GAPY)
@@ -358,6 +362,10 @@ dboolean SmoothEdges(unsigned char *buffer, int w, int h);
 #ifdef _WIN32
 extern int mus_extend_volume;
 void I_midiOutSetVolumes(int volume);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
