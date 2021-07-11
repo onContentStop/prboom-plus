@@ -33,11 +33,11 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <commctrl.h>
 #include <direct.h>
-#include <windows.h>
 
-#include ".\..\ICONS\resource.h"
+#include "../ICONS/resource.h"
 #include "d_main.h"
 #include "doomstat.h"
 #include "doomtype.h"

@@ -1192,7 +1192,7 @@ int GetFullPath(const char *FileName, const char *ext, char *Buffer,
 #endif
 
 #ifdef _WIN32
-#include <Mmsystem.h>
+#include <mmsystem.h>
 #ifndef __GNUC__
 #pragma comment(lib, "winmm.lib")
 #endif

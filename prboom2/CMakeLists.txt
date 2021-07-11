@@ -251,7 +251,7 @@ if(CMAKE_CROSSCOMPILING)
   set(IMPORT_EXECUTABLES
       "IMPORTFILE-NOTFOUND"
       CACHE FILEPATH "Export file from native build")
-  include(${IMPORT_EXECUTABLES})
+  #include(${IMPORT_EXECUTABLES})
 else()
   if(NOT CROSS_EXPORTS)
     set(CROSS_EXPORTS "")

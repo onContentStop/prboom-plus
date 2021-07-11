@@ -35,6 +35,7 @@
 #define _GL_INTERN_H
 
 #include <GL/gl.h>
+#include <SDL2/SDL_opengl_glext.h>
 
 #include "v_video.h"
 #include "xs_Float.h"
