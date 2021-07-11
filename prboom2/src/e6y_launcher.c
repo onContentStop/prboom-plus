@@ -33,9 +33,11 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+// clang-format off
 #include <windows.h>
 #include <commctrl.h>
 #include <direct.h>
+// clang-format on
 
 #include "../ICONS/resource.h"
 #include "d_main.h"
@@ -206,7 +208,7 @@ static void L_FilesOnChange(void) {
   int index;
   int i, start, end;
 
-  // блядь, как заебал этот винапи...
+  // пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ...
   start = (int)SendMessage(launcher.listPWAD, LB_GETANCHORINDEX, 0, 0);
   end = (int)SendMessage(launcher.listPWAD, LB_GETCARETINDEX, 0, 0);
 
