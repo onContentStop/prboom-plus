@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/mingw-w64-sdl2_image" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/prboom2/deps/PEGTL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/prboom2/deps/json" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/prboom2/deps/magic_enum" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/prboom2/deps/vec" vcs="Git" />
+  </component>
+</project>
