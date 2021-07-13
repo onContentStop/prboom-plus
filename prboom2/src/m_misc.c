@@ -4224,117 +4224,116 @@ void M_ScreenShot(void) {
     shot_dir = M_CheckWritableDir(I_DoomExeDir());
 #else
     shot_dir = (!access(SCREENSHOT_DIR, 2) ? SCREENSHOT_DIR : NULL);
-  }
 #endif
+  }
 
-    if (shot_dir) {
-      startshot = shot;  // CPhipps - prevent infinite loop
+  if (shot_dir) {
+    startshot = shot;  // CPhipps - prevent infinite loop
 
-      do {
-        int size = doom_snprintf(NULL, 0, "%s/doom%02d" SCREENSHOT_EXT,
-                                 shot_dir, shot);
-        lbmname = realloc(lbmname, size + 1);
-        doom_snprintf(lbmname, size + 1, "%s/doom%02d" SCREENSHOT_EXT, shot_dir,
-                      shot);
-        shot++;
-      } while (!access(lbmname, 0) && (shot != startshot) && (shot < 10000));
+    do {
+      int size =
+          doom_snprintf(NULL, 0, "%s/doom%02d" SCREENSHOT_EXT, shot_dir, shot);
+      lbmname = realloc(lbmname, size + 1);
+      doom_snprintf(lbmname, size + 1, "%s/doom%02d" SCREENSHOT_EXT, shot_dir,
+                    shot);
+      shot++;
+    } while (!access(lbmname, 0) && (shot != startshot) && (shot < 10000));
 
-      if (access(lbmname, 0)) {
-        S_StartSound(NULL, gamemode == commercial ? sfx_radio : sfx_tink);
-        M_DoScreenShot(lbmname);  // cph
-        success = 1;
-      }
-      free(lbmname);
-      if (success) {
-        return;
-      }
+    if (access(lbmname, 0)) {
+      S_StartSound(NULL, gamemode == commercial ? sfx_radio : sfx_tink);
+      M_DoScreenShot(lbmname);  // cph
+      success = 1;
     }
-
-    doom_printf("M_ScreenShot: Couldn't create screenshot");
-    return;
+    free(lbmname);
+    if (success) {
+      return;
+    }
   }
 
-  int M_StrToInt(const char *s, int *l) {
-    return ((sscanf(s, " 0x%x", l) == 1) || (sscanf(s, " 0X%x", l) == 1) ||
-            (sscanf(s, " 0%o", l) == 1) || (sscanf(s, " %d", l) == 1));
-  }
+  doom_printf("M_ScreenShot: Couldn't create screenshot");
+  return;
+}
 
-  int M_StrToFloat(const char *s, float *f) {
-    return ((sscanf(s, " %f", f) == 1));
-  }
+int M_StrToInt(const char *s, int *l) {
+  return ((sscanf(s, " 0x%x", l) == 1) || (sscanf(s, " 0X%x", l) == 1) ||
+          (sscanf(s, " 0%o", l) == 1) || (sscanf(s, " %d", l) == 1));
+}
 
-  int M_DoubleToInt(double x) {
+int M_StrToFloat(const char *s, float *f) {
+  return ((sscanf(s, " %f", f) == 1));
+}
+
+int M_DoubleToInt(double x) {
 #ifdef __GNUC__
-    double tmp = x;
-    return (int)tmp;
+  double tmp = x;
+  return (int)tmp;
 #else
   return (int)x;
 #endif
+}
+
+char *M_Strlwr(char *str) {
+  char *p;
+  for (p = str; *p; p++) {
+    *p = tolower(*p);
   }
+  return str;
+}
 
-  char *M_Strlwr(char *str) {
-    char *p;
-    for (p = str; *p; p++) {
-      *p = tolower(*p);
-    }
-    return str;
+char *M_Strupr(char *str) {
+  char *p;
+  for (p = str; *p; p++) {
+    *p = toupper(*p);
   }
+  return str;
+}
 
-  char *M_Strupr(char *str) {
-    char *p;
-    for (p = str; *p; p++) {
-      *p = toupper(*p);
-    }
-    return str;
-  }
+char *M_StrRTrim(char *str) {
+  char *end;
 
-  char *M_StrRTrim(char *str) {
-    char *end;
-
-    if (str) {
-      // Trim trailing space
-      end = str + strlen(str) - 1;
-      while (end > str && isspace(*end)) {
-        end--;
-      }
-
-      // Write new null terminator
-      *(end + 1) = 0;
+  if (str) {
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end > str && isspace(*end)) {
+      end--;
     }
 
-    return str;
+    // Write new null terminator
+    *(end + 1) = 0;
   }
 
-  void M_ArrayClear(array_t * data) { data->count = 0; }
+  return str;
+}
 
-  void M_ArrayFree(array_t * data) {
-    if (data->data) {
-      free(data->data);
-      data->data = NULL;
-    }
+void M_ArrayClear(array_t *data) { data->count = 0; }
 
-    data->capacity = 0;
-    data->count = 0;
+void M_ArrayFree(array_t *data) {
+  if (data->data) {
+    free(data->data);
+    data->data = NULL;
   }
 
-  void M_ArrayAddItem(array_t * data, void *item, int itemsize) {
-    if (data->count + 1 >= data->capacity) {
-      data->capacity = (data->capacity ? data->capacity * 2 : 128);
-      data->data = realloc(data->data, data->capacity * itemsize);
-    }
+  data->capacity = 0;
+  data->count = 0;
+}
 
-    memcpy((unsigned char *)data->data + data->count * itemsize, item,
-           itemsize);
-    data->count++;
+void M_ArrayAddItem(array_t *data, void *item, int itemsize) {
+  if (data->count + 1 >= data->capacity) {
+    data->capacity = (data->capacity ? data->capacity * 2 : 128);
+    data->data = realloc(data->data, data->capacity * itemsize);
   }
 
-  void *M_ArrayGetNewItem(array_t * data, int itemsize) {
-    if (data->count + 1 >= data->capacity) {
-      data->capacity = (data->capacity ? data->capacity * 2 : 128);
-      data->data = realloc(data->data, data->capacity * itemsize);
-    }
+  memcpy((unsigned char *)data->data + data->count * itemsize, item, itemsize);
+  data->count++;
+}
 
-    data->count++;
-
-    return (unsigned char *)data->data + (data->count - 1) * itemsize;
+void *M_ArrayGetNewItem(array_t *data, int itemsize) {
+  if (data->count + 1 >= data->capacity) {
+    data->capacity = (data->capacity ? data->capacity * 2 : 128);
+    data->data = realloc(data->data, data->capacity * itemsize);
   }
+
+  data->count++;
+
+  return (unsigned char *)data->data + (data->count - 1) * itemsize;
+}
