@@ -60,14 +60,13 @@ int using_FMI;
 //
 // F_StartFinale
 //
-extern dboolean secretexit;
-
 void FMI_StartFinale(void) {
   if (gamemapinfo->intertextsecret && secretexit &&
       gamemapinfo->intertextsecret[0] !=
           '-')  // '-' means that any default intermission was cleared.
   {
     finaletext = gamemapinfo->intertextsecret;
+
   } else if (gamemapinfo->intertext && !secretexit &&
              gamemapinfo->intertext[0] !=
                  '-')  // '-' means that any default intermission was cleared.
@@ -81,7 +80,7 @@ void FMI_StartFinale(void) {
   // the last map.
 
   if (gamemapinfo->interbackdrop[0]) {
-    finaleflat = gamemapinfo->interbackdrop[0];
+    finaleflat = gamemapinfo->interbackdrop;
   }
 
   if (!finaleflat) {
