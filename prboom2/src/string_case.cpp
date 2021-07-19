@@ -5,7 +5,7 @@
 #include "string_case.h"
 
 #include <cstring>
-#include <rest_my_case.hpp>
+#include <RestMyCase/rest_my_case.hpp>
 
 static MyWords ucwds{};
 static MyWords lcwds{"a",  "an", "the", "at",  "by", "for", "in",
@@ -22,6 +22,7 @@ static MyLowerCase myLowerCase{&lcwds, &ucwds};
 char* strToC(std::string_view str) {
   char* c = static_cast<char*>(malloc(str.size() + 1));
   strncpy(c, str.data(), str.size());
+  c[str.size()] = '\0';
   return c;
 }
 

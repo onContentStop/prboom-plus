@@ -11,6 +11,7 @@
 // V3.8
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <chrono>
 #include <cstdint>
@@ -47,135 +48,135 @@ struct isa {
   bool isadigit = false;
 };
 
-constexpr isa chars[std::numeric_limits<uint8_t>::max() + 1]{
-    {0, 0, 0, 0, 0},  //   0		 0	NUL
-    {0, 0, 0, 0, 0},  //   1		 1	SCH		CTRL A
-    {0, 0, 0, 0, 0},  //   2		 2	STX		CTRL B
-    {0, 0, 0, 0, 0},  //   3		 3	ETX		CTRL C
-    {0, 0, 0, 0, 0},  //   4		 4	BOT		CTRL D
-    {0, 0, 0, 0, 0},  //   5		 5	ENQ		CTRL E
-    {0, 0, 0, 0, 0},  //   6		 6	ACK		CTRL F
-    {0, 0, 0, 0, 0},  //   7		 7	BEL		CTRL G
-    {0, 0, 0, 0, 0},  //   8		 8	BS		CTRL H
-    {0, 1, 0, 0, 0},  //   9		 9	HT		CTRL I
-    {0, 1, 0, 0, 0},  //  10		0a	LF		CTRL J
-    {0, 1, 0, 0, 0},  //  11		0b	VT		CTRL K
-    {0, 1, 0, 0, 0},  //  12		0c	FF		CTRL L
-    {0, 1, 0, 0, 0},  //  13		0d	CR		CTRL M
-    {0, 0, 0, 0, 0},  //  14		0e	SO		CTRL N
-    {0, 0, 0, 0, 0},  //  15		0f	SI		CTRL O
-    {0, 0, 0, 0, 0},  //  16		10	DLE		CTRL P
-    {0, 0, 0, 0, 0},  //  17		11	DC1		CTRL Q
-    {0, 0, 0, 0, 0},  //  18		12	DC2		CTRL R
-    {0, 0, 0, 0, 0},  //  19		13	DC3		CTRL S
-    {0, 0, 0, 0, 0},  //  20		14	DC4		CTRL T
-    {0, 0, 0, 0, 0},  //  21		15	NAK		CTRL U
-    {0, 0, 0, 0, 0},  //  22		16	SYN		CTRL V
-    {0, 0, 0, 0, 0},  //  23		17	ETB		CTRL W
-    {0, 0, 0, 0, 0},  //  24		18	CAN		CTRL X
-    {0, 0, 0, 0, 0},  //  25		19	EM		CTRL Y
-    {0, 0, 0, 0, 0},  //  26		1a	SCB		CTRL Z
-    {0, 0, 0, 0, 0},  //  27		1b	ESC
-    {0, 0, 0, 0, 0},  //  28		1c	FS
-    {0, 0, 0, 0, 0},  //  29		1d	GS
-    {0, 0, 0, 0, 0},  //  30		1e	RS
-    {0, 0, 0, 0, 0},  //  31		1f	OS
-    {0, 1, 0, 0, 0},  //  32		20	<SPACE>
-    {1, 0, 0, 0, 0},  //  33		21	!
-    {1, 0, 0, 0, 0},  //  34		22	"
-    {1, 0, 0, 0, 0},  //  35		23	#
-    {1, 0, 0, 0, 0},  //  36		24	$
-    {1, 0, 0, 0, 0},  //  37		25	%
-    {1, 0, 0, 0, 0},  //  38		26	&
-    {1, 0, 0, 0, 0},  //  39		27	'
-    {1, 0, 0, 0, 0},  //  40		28	(
-    {1, 0, 0, 0, 0},  //  41		29	}
-    {1, 0, 0, 0, 0},  //  42		2a	*
-    {1, 0, 0, 0, 0},  //  43		2b	+
-    {1, 0, 0, 0, 0},  //  44		2c	,
-    {1, 0, 0, 0, 0},  //  45		2d	-
-    {1, 0, 0, 0, 0},  //  46		2e	.
-    {1, 0, 0, 0, 0},  //  47		2f	/
-    {0, 0, 0, 0, 1},  //  48		30	0
-    {0, 0, 0, 0, 1},  //  49		31	1
-    {0, 0, 0, 0, 1},  //  50		32	2
-    {0, 0, 0, 0, 1},  //  51		33	3
-    {0, 0, 0, 0, 1},  //  52		34	4
-    {0, 0, 0, 0, 1},  //  53		35	5
-    {0, 0, 0, 0, 1},  //  54		36	6
-    {0, 0, 0, 0, 1},  //  55		37	7
-    {0, 0, 0, 0, 1},  //  56		38	8
-    {0, 0, 0, 0, 1},  //  57		39	9
-    {1, 0, 0, 0, 0},  //  58		3a	:
-    {1, 0, 0, 0, 0},  //  59		3b	;
-    {1, 0, 0, 0, 0},  //  60		3c	<
-    {1, 0, 0, 0, 0},  //  61		3d	=
-    {1, 0, 0, 0, 0},  //  62		3e	>
-    {1, 0, 0, 0, 0},  //  63		3f	?
-    {1, 0, 0, 0, 0},  //  64		40	@
-    {0, 0, 1, 0, 0},  //  65		41	A
-    {0, 0, 1, 0, 0},  //  66		42	B
-    {0, 0, 1, 0, 0},  //  67		43	C
-    {0, 0, 1, 0, 0},  //  68		44	D
-    {0, 0, 1, 0, 0},  //  69		45	E
-    {0, 0, 1, 0, 0},  //  70		46	F
-    {0, 0, 1, 0, 0},  //  71		47	G
-    {0, 0, 1, 0, 0},  //  72		48	H
-    {0, 0, 1, 0, 0},  //  73		49	I
-    {0, 0, 1, 0, 0},  //  74		4a	J
-    {0, 0, 1, 0, 0},  //  75		4b	K
-    {0, 0, 1, 0, 0},  //  76		4c	L
-    {0, 0, 1, 0, 0},  //  77		4d	M
-    {0, 0, 1, 0, 0},  //  78		4e	N
-    {0, 0, 1, 0, 0},  //  79		4f	O
-    {0, 0, 1, 0, 0},  //  80		50	P
-    {0, 0, 1, 0, 0},  //  81		51	Q
-    {0, 0, 1, 0, 0},  //  82		52	R
-    {0, 0, 1, 0, 0},  //  83		53	S
-    {0, 0, 1, 0, 0},  //  84		54	T
-    {0, 0, 1, 0, 0},  //  85		55	U
-    {0, 0, 1, 0, 0},  //  86		56	V
-    {0, 0, 1, 0, 0},  //  87		57	W
-    {0, 0, 1, 0, 0},  //  88		58	X
-    {0, 0, 1, 0, 0},  //  89		59	Y
-    {0, 0, 1, 0, 0},  //  90		5a	Z
-    {1, 0, 0, 0, 0},  //  91		5b	[
-    {1, 0, 0, 0, 0},  //  92		5c	\ //
-    {1, 0, 0, 0, 0},  //  93		5d	]
-    {1, 0, 0, 0, 0},  //  94		5e	^
-    {1, 0, 0, 0, 0},  //  95		5f	_
-    {1, 0, 0, 0, 0},  //  96		60	`
-    {0, 0, 0, 1, 0},  //  97		61	a
-    {0, 0, 0, 1, 0},  //  98		62	b
-    {0, 0, 0, 1, 0},  //  99		63	c
-    {0, 0, 0, 1, 0},  // 100		64	d
-    {0, 0, 0, 1, 0},  // 101		65	e
-    {0, 0, 0, 1, 0},  // 102		66	f
-    {0, 0, 0, 1, 0},  // 103		67	g
-    {0, 0, 0, 1, 0},  // 104		68	h
-    {0, 0, 0, 1, 0},  // 105		69	i
-    {0, 0, 0, 1, 0},  // 106		6a	j
-    {0, 0, 0, 1, 0},  // 107		6b	k
-    {0, 0, 0, 1, 0},  // 108		6c	l
-    {0, 0, 0, 1, 0},  // 109		6d	m
-    {0, 0, 0, 1, 0},  // 110		6e	n
-    {0, 0, 0, 1, 0},  // 111		6f	o
-    {0, 0, 0, 1, 0},  // 112		70	p
-    {0, 0, 0, 1, 0},  // 113		71	q
-    {0, 0, 0, 1, 0},  // 114		72	r
-    {0, 0, 0, 1, 0},  // 115		73	s
-    {0, 0, 0, 1, 0},  // 116		74	t
-    {0, 0, 0, 1, 0},  // 117		75	u
-    {0, 0, 0, 1, 0},  // 118		76	v
-    {0, 0, 0, 1, 0},  // 119		77	w
-    {0, 0, 0, 1, 0},  // 120		78	x
-    {0, 0, 0, 1, 0},  // 121		79	y
-    {0, 0, 0, 1, 0},  // 122		7a	z
-    {1, 0, 0, 0, 0},  // 123		7b	{
-    {1, 0, 0, 0, 0},  // 124		7c	:
-    {1, 0, 0, 0, 0},  // 125		7d	}
-    {1, 0, 0, 0, 0},  // 126		7e	~
-    {0, 0, 0, 0, 0}   // 127		7f	DEL
+constexpr std::array<isa, std::numeric_limits<std::uint8_t>::max() + 1> chars{
+    isa{false, false, false, false, false},  //   0   0 NUL
+    {false, false, false, false, false},     //   1   1 SCH ^A
+    {false, false, false, false, false},     //   2   2 STX ^B
+    {false, false, false, false, false},     //   3   3 ETX ^C
+    {false, false, false, false, false},     //   4   4 BOT ^D
+    {false, false, false, false, false},     //   5   5 ENQ ^E
+    {false, false, false, false, false},     //   6   6 ACK ^F
+    {false, false, false, false, false},     //   7   7 BEL ^G
+    {false, false, false, false, false},     //   8   8 BS  ^H
+    {false, true, false, false, false},      //   9   9 HT  ^I
+    {false, true, false, false, false},      //  10  0a LF  ^J
+    {false, true, false, false, false},      //  11  0b VT  ^K
+    {false, true, false, false, false},      //  12  0c FF  ^L
+    {false, true, false, false, false},      //  13  0d CR  ^M
+    {false, false, false, false, false},     //  14  0e SO  ^N
+    {false, false, false, false, false},     //  15  0f SI  ^O
+    {false, false, false, false, false},     //  16  10 DLE ^P
+    {false, false, false, false, false},     //  17  11 DC1 ^Q
+    {false, false, false, false, false},     //  18  12 DC2 ^R
+    {false, false, false, false, false},     //  19  13 DC3 ^S
+    {false, false, false, false, false},     //  20  14 DC4 ^T
+    {false, false, false, false, false},     //  21  15 NAK ^U
+    {false, false, false, false, false},     //  22  16 SYN ^V
+    {false, false, false, false, false},     //  23  17 ETB ^W
+    {false, false, false, false, false},     //  24  18 CAN ^X
+    {false, false, false, false, false},     //  25  19 EM  ^Y
+    {false, false, false, false, false},     //  26  1a SCB ^Z
+    {false, false, false, false, false},     //  27  1b ESC
+    {false, false, false, false, false},     //  28  1c FS
+    {false, false, false, false, false},     //  29  1d GS
+    {false, false, false, false, false},     //  30  1e RS
+    {false, false, false, false, false},     //  31  1f OS
+    {false, true, false, false, false},      //  32  20 <SPACE>
+    {true, false, false, false, false},      //  33  21 !
+    {true, false, false, false, false},      //  34  22 "
+    {true, false, false, false, false},      //  35  23 #
+    {true, false, false, false, false},      //  36  24 $
+    {true, false, false, false, false},      //  37  25 %
+    {true, false, false, false, false},      //  38  26 &
+    {true, false, false, false, false},      //  39  27 '
+    {true, false, false, false, false},      //  40  28 (
+    {true, false, false, false, false},      //  41  29 }
+    {true, false, false, false, false},      //  42  2a *
+    {true, false, false, false, false},      //  43  2b +
+    {true, false, false, false, false},      //  44  2c ,
+    {true, false, false, false, false},      //  45  2d -
+    {true, false, false, false, false},      //  46  2e .
+    {true, false, false, false, false},      //  47  2f /
+    {false, false, false, false, true},      //  48  30 0
+    {false, false, false, false, true},      //  49  31 1
+    {false, false, false, false, true},      //  50  32 2
+    {false, false, false, false, true},      //  51  33 3
+    {false, false, false, false, true},      //  52  34 4
+    {false, false, false, false, true},      //  53  35 5
+    {false, false, false, false, true},      //  54  36 6
+    {false, false, false, false, true},      //  55  37 7
+    {false, false, false, false, true},      //  56  38 8
+    {false, false, false, false, true},      //  57  39 9
+    {true, false, false, false, false},      //  58  3a :
+    {true, false, false, false, false},      //  59  3b ;
+    {true, false, false, false, false},      //  60  3c <
+    {true, false, false, false, false},      //  61  3d =
+    {true, false, false, false, false},      //  62  3e >
+    {true, false, false, false, false},      //  63  3f ?
+    {true, false, false, false, false},      //  64  40 @
+    {false, false, true, false, false},      //  65  41 A
+    {false, false, true, false, false},      //  66  42 B
+    {false, false, true, false, false},      //  67  43 C
+    {false, false, true, false, false},      //  68  44 D
+    {false, false, true, false, false},      //  69  45 E
+    {false, false, true, false, false},      //  70  46 F
+    {false, false, true, false, false},      //  71  47 G
+    {false, false, true, false, false},      //  72  48 H
+    {false, false, true, false, false},      //  73  49 I
+    {false, false, true, false, false},      //  74  4a J
+    {false, false, true, false, false},      //  75  4b K
+    {false, false, true, false, false},      //  76  4c L
+    {false, false, true, false, false},      //  77  4d M
+    {false, false, true, false, false},      //  78  4e N
+    {false, false, true, false, false},      //  79  4f O
+    {false, false, true, false, false},      //  80  50 P
+    {false, false, true, false, false},      //  81  51 Q
+    {false, false, true, false, false},      //  82  52 R
+    {false, false, true, false, false},      //  83  53 S
+    {false, false, true, false, false},      //  84  54 T
+    {false, false, true, false, false},      //  85  55 U
+    {false, false, true, false, false},      //  86  56 V
+    {false, false, true, false, false},      //  87  57 W
+    {false, false, true, false, false},      //  88  58 X
+    {false, false, true, false, false},      //  89  59 Y
+    {false, false, true, false, false},      //  90  5a Z
+    {true, false, false, false, false},      //  91  5b [
+    {true, false, false, false, false},      //  92  5c \ //
+    {true, false, false, false, false},      //  93  5d ]
+    {true, false, false, false, false},      //  94  5e ^
+    {true, false, false, false, false},      //  95  5f _
+    {true, false, false, false, false},      //  96  60 `
+    {false, false, false, true, false},      //  97  61 a
+    {false, false, false, true, false},      //  98  62 b
+    {false, false, false, true, false},      //  99  63 c
+    {false, false, false, true, false},      // 100  64 d
+    {false, false, false, true, false},      // 101  65 e
+    {false, false, false, true, false},      // 102  66 f
+    {false, false, false, true, false},      // 103  67 g
+    {false, false, false, true, false},      // 104  68 h
+    {false, false, false, true, false},      // 105  69 i
+    {false, false, false, true, false},      // 106  6a j
+    {false, false, false, true, false},      // 107  6b k
+    {false, false, false, true, false},      // 108  6c l
+    {false, false, false, true, false},      // 109  6d m
+    {false, false, false, true, false},      // 110  6e n
+    {false, false, false, true, false},      // 111  6f o
+    {false, false, false, true, false},      // 112  70 p
+    {false, false, false, true, false},      // 113  71 q
+    {false, false, false, true, false},      // 114  72 r
+    {false, false, false, true, false},      // 115  73 s
+    {false, false, false, true, false},      // 116  74 t
+    {false, false, false, true, false},      // 117  75 u
+    {false, false, false, true, false},      // 118  76 v
+    {false, false, false, true, false},      // 119  77 w
+    {false, false, false, true, false},      // 120  78 x
+    {false, false, false, true, false},      // 121  79 y
+    {false, false, false, true, false},      // 122  7a z
+    {true, false, false, false, false},      // 123  7b {
+    {true, false, false, false, false},      // 124  7c :
+    {true, false, false, false, false},      // 125  7d }
+    {true, false, false, false, false},      // 126  7e ~
+    {false, false, false, false, false}      // 127  7f DEL
 };
 
 // string_view is read only class but this simple cut-down version allows
@@ -219,7 +220,7 @@ class StrAmd {
   }
 
   // Stream insertion for test purposes
-  friend inline std::ostream& operator<<(std::ostream&, StrAmd sv);
+  friend inline std::ostream& operator<<(std::ostream& os, StrAmd sv);
 
  private:
   uint8_t* str = nullptr;   // String start
@@ -415,7 +416,8 @@ using MyStartCase = RestMyCase<DummyCase::StartCase, ' ', MyWords>;
 
 // For testing, insertion of a StrAmd object into an output stream
 inline std::ostream& operator<<(std::ostream& os, StrAmd sv) {
-  return os << std::string_view((char*)sv.str, sv.send - sv.str);
+  return os << std::string_view(reinterpret_cast<char*>(sv.str),
+                                sv.send - sv.str);
 }
 
 // Compares the contents pointed to by the strings

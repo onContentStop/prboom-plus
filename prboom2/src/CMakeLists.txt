@@ -29,8 +29,8 @@ set(COMMON_SRC
     doomtype.h
     dstrings.c
     dstrings.h
-        data_manager.cpp
-        data_manager.h
+    data_manager.cpp
+    data_manager.h
     d_deh.c
     d_deh.h
     d_englsh.h
@@ -166,8 +166,8 @@ set(COMMON_SRC
     sounds.h
     statdump.c
     statdump.h
-        string_case.cpp
-        string_case.h
+    string_case.cpp
+    string_case.h
     st_lib.c
     st_lib.h
     st_stuff.c
@@ -392,8 +392,8 @@ endfunction()
 addgameexecutable(prboom-plus "${PRBOOM_PLUS_SOURCES}")
 
 target_include_directories(prboom-plus PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-target_include_directories(prboom-plus PRIVATE "../deps/RestMyCase/RestMyCase")
 
+target_link_libraries(prboom-plus PRIVATE RestMyCase)
 target_link_libraries(prboom-plus PRIVATE magic_enum::magic_enum)
 target_link_libraries(prboom-plus PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(prboom-plus PRIVATE vec)

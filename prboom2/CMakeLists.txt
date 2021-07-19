@@ -265,6 +265,7 @@ set(WAD_DATA_PATH "${PRBOOM_OUTPUT_PATH}/${WAD_DATA}")
 
 add_subdirectory("deps/json")
 add_subdirectory("deps/magic_enum")
+add_subdirectory("deps/RestMyCase")
 project(vec LANGUAGES C)
 add_library(vec "deps/vec/src/vec.c")
 target_include_directories(vec PUBLIC "deps/vec/src")
