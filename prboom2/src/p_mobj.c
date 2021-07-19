@@ -31,6 +31,8 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include "p_mobj.h"
+
 #include "doomdef.h"
 #include "doomstat.h"
 #include "e6y.h"  //e6y
@@ -44,6 +46,7 @@
 #include "p_inter.h"
 #include "p_map.h"
 #include "p_maputl.h"
+#include "p_spec.h"
 #include "p_tick.h"
 #include "r_demo.h"
 #include "r_main.h"
@@ -804,6 +807,18 @@ void P_MobjThinker(mobj_t* mobj) {
       P_ApplyTorque(mobj);                // Apply torque
     } else {
       mobj->intflags &= ~MIF_FALLING, mobj->gear = 0;  // Reset torque
+    }
+  }
+
+  if (mbf21) {
+    sector_t* sector = mobj->subsector->sector;
+    if (sector->special & KILL_MONSTERS_MASK && mobj->z == mobj->floorz &&
+        mobj->player == NULL && mobj->flags & MF_SHOOTABLE &&
+        !(mobj->flags & MF_FLOAT)) {
+      P_DamageMobj(mobj, NULL, NULL, 10000);
+      if (mobj->thinker.function != P_MobjThinker) {
+        return;
+      }
     }
   }
 
