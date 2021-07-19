@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "base64.hpp"
 #include "config.h"
 #include "d_deh.h"
 #include "e6y.h"
@@ -63,8 +64,8 @@ static void initWadDataDir() {
       }
 
       if (dirIndex >= 0) {
-        data_dir_strings.emplace_back(
-            string::lowerCase(start.substr(0, start.length() - 4)));
+        data_dir_strings.emplace_back(base64_of(std::string_view{
+            start.begin(), start.begin() + start.length() - 4}));
         if (dirIndex == pwadIndex) {
           ++pwadIndex;
         }

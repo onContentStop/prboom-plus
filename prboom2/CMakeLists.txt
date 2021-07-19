@@ -226,6 +226,8 @@ option(
 option(HEAPCHECK "Turn on continuous heap checking (very slow)" OFF)
 option(HEAPDUMP "Turn on dumping the heap state for debugging" OFF)
 
+string(TIMESTAMP CMAKE_BUILD_TIMESTAMP "%Y-%m-%dT%H:%M:%S")
+
 configure_file(cmake/config.h.cin config.h)
 
 add_definitions(-DHAVE_CONFIG_H)
@@ -251,7 +253,7 @@ if(CMAKE_CROSSCOMPILING)
   set(IMPORT_EXECUTABLES
       "IMPORTFILE-NOTFOUND"
       CACHE FILEPATH "Export file from native build")
-  #include(${IMPORT_EXECUTABLES})
+  # include(${IMPORT_EXECUTABLES})
 else()
   if(NOT CROSS_EXPORTS)
     set(CROSS_EXPORTS "")

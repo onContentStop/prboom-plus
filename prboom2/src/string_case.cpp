@@ -4,8 +4,8 @@
 
 #include "string_case.h"
 
-#include <cstring>
 #include <RestMyCase/rest_my_case.hpp>
+#include <cstring>
 
 static MyWords ucwds{};
 static MyWords lcwds{"a",  "an", "the", "at",  "by", "for", "in",

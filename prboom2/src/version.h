@@ -34,6 +34,18 @@
 #ifndef __DOOMVERSION__
 #define __DOOMVERSION__
 
-extern const char version_date[];
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef __cplusplus
+
+constexpr const char *version_date = CMAKE_BUILD_TIMESTAMP;
+
+#else
+
+#define version_date CMAKE_BUILD_TIMESTAMP
+
+#endif
 
 #endif

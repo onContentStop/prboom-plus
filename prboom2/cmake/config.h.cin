@@ -45,3 +45,5 @@
 #cmakedefine TIMEDIAG
 #cmakedefine HEAPCHECK
 #cmakedefine HEAPDUMP
+
+#cmakedefine CMAKE_BUILD_TIMESTAMP "@CMAKE_BUILD_TIMESTAMP@"

@@ -21,6 +21,8 @@ set(COMMON_SRC
     ${FLEX_SndinfoLexer_OUTPUTS}
     am_map.c
     am_map.h
+    base64.cpp
+    base64.hpp
     doomdata.h
     doomdef.c
     doomdef.h
@@ -180,7 +182,6 @@ set(COMMON_SRC
     tables.h
     umapinfo.cpp
     umapinfo.h
-    version.c
     version.h
     v_video.c
     v_video.h
@@ -393,9 +394,12 @@ addgameexecutable(prboom-plus "${PRBOOM_PLUS_SOURCES}")
 
 target_include_directories(prboom-plus PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
+find_package(fmt REQUIRED)
+
 target_link_libraries(prboom-plus PRIVATE RestMyCase)
 target_link_libraries(prboom-plus PRIVATE magic_enum::magic_enum)
 target_link_libraries(prboom-plus PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(prboom-plus PRIVATE fmt::fmt)
 target_link_libraries(prboom-plus PRIVATE vec)
 target_link_libraries(prboom-plus PRIVATE ${FLEX_LIBRARIES})
 
