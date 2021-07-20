@@ -29,7 +29,7 @@ set(COMMON_SRC
     doomstat.c
     doomstat.h
     doomtype.h
-    dstrings.c
+    dstrings.cpp
     dstrings.h
     data_manager.cpp
     data_manager.h

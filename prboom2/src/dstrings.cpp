@@ -32,13 +32,14 @@
  *-----------------------------------------------------------------------------
  */
 
+#include <array>
 #ifdef __GNUG__
 #pragma implementation "dstrings.h"
 #endif
 #include "dstrings.h"
 
 // killough 1/18/98: remove hardcoded limit, add const:
-const char *const endmsg[] = {
+constexpr std::array endmsg_ = {
     // DOOM1
     QUITMSG, "please don't leave, there's more\ndemons to toast!",
     "let's beat it -- this is turning\ninto a bloodbath!",
@@ -81,4 +82,6 @@ const char *const endmsg[] = {
 };
 
 // killough 1/18/98: remove hardcoded limit and replace with var (silly hack):
-const size_t NUM_QUITMESSAGES = sizeof(endmsg) / sizeof(*endmsg) - 1;
+const size_t NUM_QUITMESSAGES = endmsg_.size() - 1;
+
+extern const char *const *endmsg() { return endmsg_.data(); }
