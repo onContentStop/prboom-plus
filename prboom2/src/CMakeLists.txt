@@ -24,7 +24,7 @@ set(COMMON_SRC
     base64.cpp
     base64.hpp
     doomdata.h
-    doomdef.c
+    doomdef.cpp
     doomdef.h
     doomstat.c
     doomstat.h
@@ -86,7 +86,7 @@ set(COMMON_SRC
     md5.h
     m_argv.c
     m_argv.h
-    m_bbox.c
+    m_bbox.cpp
     m_bbox.h
     m_cheat.c
     m_cheat.h

@@ -38,6 +38,10 @@
 
 #include "m_fixed.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Bounding box coordinate storage. */
 enum { BOXTOP, BOXBOTTOM, BOXLEFT, BOXRIGHT }; /* bbox coordinates */
 
@@ -46,5 +50,9 @@ enum { BOXTOP, BOXBOTTOM, BOXLEFT, BOXRIGHT }; /* bbox coordinates */
 void M_ClearBox(fixed_t* box);
 
 void M_AddToBox(fixed_t* box, fixed_t x, fixed_t y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
